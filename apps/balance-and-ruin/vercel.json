@@ -1,5 +1,5 @@
 {
-  "buildCommand": "cd ../.. && npx turbo run build --filter=balance-and-ruin...",
+  "buildCommand": "cd ../.. && npx turbo run build --filter=@ff6wc/balance-and-ruin...",
   "installCommand": "pnpm install",
   "redirects": [
     {
