@@ -5,6 +5,7 @@ import { CardColumn } from "~/components/CardColumn/CardColumn";
 import { FlagLabel } from "~/components/FlagLabel/FlagLabel";
 import { setRawFlags } from "~/state/flagSlice";
 import { setRawObjectives } from "~/state/objectiveSlice";
+import { setRawStartingItems } from "~/state/itemSlice";
 
 export const FlagsCard = () => {
   const [flags, setFlags] = useState("");
@@ -12,6 +13,7 @@ export const FlagsCard = () => {
   const onClick = () => {
     dispatch(setRawFlags(flags));
     dispatch(setRawObjectives(flags));
+    dispatch(setRawStartingItems(flags));
   };
 
   return (

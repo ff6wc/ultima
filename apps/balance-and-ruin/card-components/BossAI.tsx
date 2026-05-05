@@ -1,5 +1,6 @@
 import { Card, Divider, HelperText } from "@ff6wc/ui";
 import { CardColumn } from "~/components/CardColumn/CardColumn";
+import { FlagRange } from "~/components/FlagRange/FlagRange";
 import { FlagSwitch } from "~/components/FlagSwitch/FlagSwitch";
 
 export const BossAI = () => {
@@ -44,6 +45,12 @@ export const BossAI = () => {
           invert
           helperText="Wrexsoul will cast Zinger throughout the battle"
           label="Wrexsoul Casts Zinger"
+        />
+
+        <FlagRange
+          flag={"-rt"}
+          helperText="Range for the number of seconds befor Rizopas will appear"
+          label={"Rizopas Timer"}
         />
       </CardColumn>
     </Card>
