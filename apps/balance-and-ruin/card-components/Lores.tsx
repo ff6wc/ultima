@@ -68,6 +68,7 @@ export const Lores = () => {
         />
 
         <FlagSwitch flag="-lel" label="Everyone Learns" />
+        <FlagSwitch flag="-llr" label="Randomize Level Lores" />
       </div>
     </Card>
   );

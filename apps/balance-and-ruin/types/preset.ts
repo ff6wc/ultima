@@ -1,6 +1,6 @@
 export type FlagPreset = {
   arguments: string;
-  creator: string;
+  creator_name: string;
   creator_id: number;
   description: string;
   /** flags */

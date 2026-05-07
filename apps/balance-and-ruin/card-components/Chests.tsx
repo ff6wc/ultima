@@ -58,11 +58,11 @@ export const Chests = () => {
           }}
         />
         <FlagSwitch flag="-cms" label="MIAB Shuffled" />
-        <DualFlagSlider 
-          flag="-chrm" 
+        <DualFlagSlider
+          flag="-chrm"
           label="Random Monsters"
           helperText="Chest contents will contain {{a}}% enemies and, of those, {{b}}% bosses"
-          aText="Enemies" 
+          aText="Enemies"
           bText="Bosses" />
       </CardColumn>
     </Card>

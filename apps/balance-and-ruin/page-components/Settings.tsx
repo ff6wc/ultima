@@ -14,17 +14,17 @@ export const Settings = ({ presets: rawPresets }: PresetsProps) => {
   const presets = useMemo(() => {
     const options = [];
     for (const rawPresetName in rawPresets) {
-      if(rawPresets[rawPresetName].official) {
+      if (rawPresets[rawPresetName].official) {
         options.push(rawPresets[rawPresetName]);
       }
     }
 
     return options.map<SelectOption>(
-      ({ creator, description, name, flags }) => {
+      ({ creator_name, description, name, flags }) => {
         return {
           label: startCase(name),
           value: flags,
-          helperText: [description, `Created by ${creator}`]
+          helperText: [description, `Created by ${creator_name}`]
             .filter((z) => !!z)
             .join(" "),
         };

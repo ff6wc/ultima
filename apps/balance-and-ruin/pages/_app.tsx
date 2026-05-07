@@ -8,13 +8,14 @@ import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { Provider } from "react-redux";
 import { Schema } from "~/state/schemaSlice";
-import { wrapper } from "~/state/store";
+import { makeStore, wrapper } from "~/state/store";
 import "~/styles/globals.css";
 
 export const montserrat = Montserrat();
 export const roboto = Roboto({ weight: ["500", "700", "400"] });
 export const robotoMono = Roboto_Mono({ weight: ["500"] });
 export const openSans = Open_Sans({ weight: ["300", "400", "500"] });
+export var singletonStore = makeStore()
 
 const client = new QueryClient({});
 
@@ -24,6 +25,7 @@ type Props = {
 
 const App: AppType<Props> = ({ Component, ...rest }: AppProps<Props>) => {
   const { store, props } = wrapper.useWrappedStore(rest);
+  singletonStore = store
 
   useDarkMode();
 
