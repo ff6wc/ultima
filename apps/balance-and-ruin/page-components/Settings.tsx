@@ -20,11 +20,11 @@ export const Settings = ({ presets: rawPresets }: PresetsProps) => {
     }
 
     return options.map<SelectOption>(
-      ({ creator, description, name, flags }) => {
+      ({ creator_name, description, name, flags }) => {
         return {
           label: startCase(name),
           value: flags,
-          helperText: [description, `Created by ${creator}`]
+          helperText: [description, `Created by ${creator_name}`]
             .filter((z) => !!z)
             .join(" "),
         };
