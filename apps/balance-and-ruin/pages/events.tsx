@@ -7,14 +7,35 @@ import { EventCard } from "~/components/EventCard/EventCard";
 import { EventData } from "~/types/events";
 import { openSans } from "~/pages/_app";
 
-const EVENTS_JSON_URL = "https://raw.githubusercontent.com/ff6wc/ff6wc_events/main/events.json";
+import { parseCSV } from "~/utils/csvParser";
+import { Disclosure, Transition } from "@headlessui/react";
+import { HiChevronDown } from "react-icons/hi2";
+
+const EVENTS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSSZFZgv3BKozWuZeoHmfWQMFdQAYU-4FlxTLwf6sXFxyQBQRoCsmygcjn_9ErYllzBOx7VrzmTs9Sf/pub?output=csv";
 
 export default function EventsPage() {
   const { data, isLoading, error } = useQuery<EventData[]>("events", async () => {
-    const res = await fetch(`${EVENTS_JSON_URL}?t=${Date.now()}`);
+    const res = await fetch(`${EVENTS_CSV_URL}&t=${Date.now()}`);
     if (!res.ok) throw new Error("Failed to fetch events");
-    return res.json();
+    const csvText = await res.text();
+    const rawData = parseCSV(csvText);
+    
+    // Map CSV strings to EventData interface
+    return rawData.map((row: any) => ({
+      ...row,
+      rules: row.rules ? row.rules.split("\n").filter((r: string) => r.trim()) : [],
+    })) as EventData[];
   });
+
+  const upcomingEvents = data?.filter((e) => e.status === "Upcoming") || [];
+  const currentEvents = data?.filter((e) => e.status === "Current") || [];
+  const archivedEvents = data?.filter((e) => e.status === "Archived") || [];
+
+  const sections = [
+    { title: "Upcoming Events", events: upcomingEvents, defaultOpen: true },
+    { title: "Current Events", events: currentEvents, defaultOpen: true },
+    { title: "Archived Events", events: archivedEvents, defaultOpen: false },
+  ];
 
   return (
     <>
@@ -60,17 +81,56 @@ export default function EventsPage() {
                   </div>
                 )}
 
-                {data && data.length === 0 && (
-                  <div className="text-center py-20 text-slate-500 border-2 border-dashed border-slate-800 rounded-lg">
-                    <p>No events found at the moment. Check back soon!</p>
-                  </div>
-                )}
+                {data && (
+                  <div className="flex flex-col gap-12">
+                    {sections.map(
+                      (section, idx) =>
+                        section.events.length > 0 && (
+                          <Disclosure key={idx} defaultOpen={section.defaultOpen}>
+                            {({ open }) => (
+                              <div className="flex flex-col gap-6">
+                                <Disclosure.Button className="flex items-center justify-between w-full pb-4 border-b border-slate-800 hover:text-blue-400 transition-colors text-left">
+                                  <h2 className="text-3xl font-header uppercase tracking-wider">
+                                    {section.title}
+                                    <span className="ml-4 text-sm font-mono text-slate-500 normal-case tracking-normal">
+                                      ({section.events.length})
+                                    </span>
+                                  </h2>
+                                  <HiChevronDown
+                                    className={cx(
+                                      "transition-transform duration-300",
+                                      open ? "rotate-180" : ""
+                                    )}
+                                    size={24}
+                                  />
+                                </Disclosure.Button>
 
-                {data && data.length > 0 && (
-                  <div className="flex flex-col gap-2">
-                    {data.map((event) => (
-                      <EventCard key={event.id} event={event} />
-                    ))}
+                                <Transition
+                                  show={open}
+                                  enter="transition duration-150 ease-out"
+                                  enterFrom="transform opacity-0 -translate-y-4"
+                                  enterTo="transform opacity-100 translate-y-0"
+                                  leave="transition duration-100 ease-out"
+                                  leaveFrom="transform opacity-100 translate-y-0"
+                                  leaveTo="transform opacity-0 -translate-y-4"
+                                >
+                                  <Disclosure.Panel className="flex flex-col gap-4">
+                                    {section.events.map((event) => (
+                                      <EventCard key={event.id} event={event} />
+                                    ))}
+                                  </Disclosure.Panel>
+                                </Transition>
+                              </div>
+                            )}
+                          </Disclosure>
+                        )
+                    )}
+
+                    {data.length === 0 && (
+                      <div className="text-center py-20 text-slate-500 border-2 border-dashed border-slate-800 rounded-lg">
+                        <p>No events found at the moment. Check back soon!</p>
+                      </div>
+                    )}
                   </div>
                 )}
               </>

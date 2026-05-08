@@ -29,8 +29,8 @@ export const EventCard = ({ event }: Props) => {
                   <span
                     className={cx(
                       "px-2 py-0.5 text-xs font-bold uppercase tracking-widest rounded",
-                      event.status === "active" ? "bg-green-600 text-white" : 
-                      event.status === "upcoming" ? "bg-blue-600 text-white" : 
+                      event.status === "Current" ? "bg-green-600 text-white" : 
+                      event.status === "Upcoming" ? "bg-blue-600 text-white" : 
                       "bg-slate-700 text-slate-300"
                     )}
                   >

@@ -1,7 +1,7 @@
 export interface EventData {
   id: string;
   title: string;
-  status: "upcoming" | "active" | "completed";
+  status: "Upcoming" | "Current" | "Archived";
   date: string;
   shortDescription: string;
   description: string;
