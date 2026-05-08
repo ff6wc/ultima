@@ -2,7 +2,7 @@ import { ButtonLink, DiscordButton } from "@ff6wc/ui";
 import { openSans } from "~/pages/_app";
 import { cva, cx } from "cva";
 import type { GetStaticPropsContext, NextPage } from "next";
-import { HiPencil } from "react-icons/hi2";
+import { HiPencil, HiFlag } from "react-icons/hi";
 import { WIKI_URL } from "@ff6wc/utils/constants";
 import { AppLandingGridItem } from "~/components/AppLandingGridItem/AppLandingGridItem";
 import { AppLandingSection } from "~/components/AppLandingSection/AppLandingSection";
@@ -200,6 +200,7 @@ export default function NewLandingPage() {
               Check out our ongoing community events and tournaments!
             </div>
             <ButtonLink className={button()} href="/events" variant="primary">
+              <HiFlag size="24" className="mr-2" />
               <div>View Events</div>
             </ButtonLink>
           </AppLandingGridItem>
