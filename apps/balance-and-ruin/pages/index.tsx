@@ -92,6 +92,28 @@ export default function NewLandingPage() {
         </header>
         <AppLandingSection title={"Getting Started"}>
           <AppLandingGridItem
+            className="lg:col-span-2"
+            title={
+              <>
+                <SpriteDrawAnimation
+                  delay={300}
+                  spriteId={0}
+                  paletteId={74}
+                  poses={[1, 0, 1, 2]}
+                />
+                <span className="px-4">Randomizer</span>
+              </>
+            }
+          >
+            <div className="text-center">
+              Generate a random seed and begin to play Worlds Collide
+            </div>
+            <ButtonLink className={button()} href="/create" variant="primary">
+              <div>Customize</div>
+            </ButtonLink>
+          </AppLandingGridItem>
+
+          <AppLandingGridItem
             title={
               <>
                 <SpriteDrawAnimation
@@ -112,6 +134,7 @@ export default function NewLandingPage() {
               <DiscordButton />
             </div>
           </AppLandingGridItem>
+
           <AppLandingGridItem
             title={
               <>
@@ -131,6 +154,7 @@ export default function NewLandingPage() {
             </div>
             <SotwButton />
           </AppLandingGridItem>
+
           <AppLandingGridItem
             title={
               <>
@@ -164,19 +188,19 @@ export default function NewLandingPage() {
               <>
                 <SpriteDrawAnimation
                   delay={300}
-                  spriteId={0}
-                  paletteId={74}
+                  spriteId={10}
+                  paletteId={0}
                   poses={[1, 0, 1, 2]}
                 />
-                <span className="px-4">Randomizer</span>
+                <span className="px-4">Events</span>
               </>
             }
           >
             <div className="text-center">
-              Generate a random seed and begin to play Worlds Collide
+              Check out our ongoing community events and tournaments!
             </div>
-            <ButtonLink className={button()} href="/create" variant="primary">
-              <div>Customize</div>
+            <ButtonLink className={button()} href="/events" variant="primary">
+              <div>View Events</div>
             </ButtonLink>
           </AppLandingGridItem>
         </AppLandingSection>

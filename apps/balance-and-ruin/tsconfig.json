@@ -12,7 +12,7 @@
     "declaration": false,
     "declarationMap": false,
     "importHelpers": true,
-    "jsx": "react",
+    "jsx": "preserve",
     "paths": {
       "~/*": [
         "./*"
