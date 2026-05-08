@@ -5,14 +5,14 @@ import { DISCORD_URL } from "@ff6wc/utils/constants";
 import { cva } from "cva";
 
 const button = cva(["max-w-[500px] min-h-[70px] inline-flex"]);
-export const DiscordButton = ({}: {}) => {
+export const DiscordButton = ({ href = DISCORD_URL }: { href?: string }) => {
   return (
     <Link
       className={buttonStyles({
         className: button(),
         variant: "discord",
       })}
-      href={DISCORD_URL}
+      href={href}
       target="_blank"
     >
       <Image

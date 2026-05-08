@@ -93,16 +93,19 @@ export const EventCard = ({ event }: Props) => {
 
                   <div className="flex flex-col gap-4">
                     <h3 className="text-white font-bold mb-1 text-lg">Quick Links</h3>
-                    {event.signupLink && (
+                    {event.signupLink ? (
                       <Link href={event.signupLink}>
-                        <Button className="w-full justify-center gap-2" variant="primary">
-                          <HiLink />
+                        <Button className="w-full justify-center font-bold h-12" variant="primary">
                           Sign Up Now
                         </Button>
                       </Link>
+                    ) : (
+                      <Button className="w-full justify-center font-bold h-12" variant="default" disabled={true}>
+                        Signups Closed
+                      </Button>
                     )}
                     {event.discordLink && (
-                      <DiscordButton />
+                      <DiscordButton href={event.discordLink} />
                     )}
                     
                     {event.image && (
