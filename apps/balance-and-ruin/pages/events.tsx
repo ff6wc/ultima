@@ -59,7 +59,7 @@ export default function EventsPage() {
               </h1>
               <div className="h-1 w-24 bg-blue-500 mx-auto mb-6"></div>
               <p className="text-xl md:text-2xl text-slate-300 max-w-2xl mx-auto">
-                Join the competition, test your skills, and participate in our upcoming races and challenges.
+                Test your mettle and pick up some new tricks along the way! Our events are a great place to sharpen your skills and meet the rest of the community.
               </p>
             </div>
           </section>
