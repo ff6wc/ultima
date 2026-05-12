@@ -1,4 +1,4 @@
-import { ButtonLink, DiscordButton } from "@ff6wc/ui";
+import { ButtonLink, DiscordButton, Header } from "@ff6wc/ui";
 import { openSans } from "~/pages/_app";
 import { cva, cx } from "cva";
 import type { GetStaticPropsContext, NextPage } from "next";
@@ -8,7 +8,10 @@ import { AppLandingGridItem } from "~/components/AppLandingGridItem/AppLandingGr
 import { AppLandingSection } from "~/components/AppLandingSection/AppLandingSection";
 import { HomeFooter } from "~/components/Footer/Footer";
 import { SotwButton } from "~/components/SotwButton/SotwButton";
+import { EventsButton } from "~/components/EventsButton/EventsButton";
+import { CreateButton } from "~/components/CreateButton/CreateButton";
 import { SpriteDrawAnimation } from "~/components/SpriteDrawAnimation/SpriteDrawAnimation";
+import { AppHeader } from "~/components/AppHeader/AppHeader";
 import Head from "next/head";
 
 export async function getStaticProps(context: GetStaticPropsContext) {
@@ -30,66 +33,20 @@ export default function NewLandingPage() {
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <div className="flex flex-col h-screen relative">
-        {/* <AppNavigation /> */}
-        <div className="WC-hero absolute top-0 bottom-0 left-0 right-0 bg-[url('/hero_main.png')] brightness-75 bg-no-repeat bg-cover bg-center z-[-1]"></div>
-        <header
-          className={cx(
-            openSans.className,
-            "relative w-full font-base splash-text py-4 px-8"
-          )}
-        >
-          <div
-            className={cx(
-              "w-full md:max-w-[720px] lg:max-w-[1140px] mx-auto z-10 "
-            )}
-          >
-            <div className="w-fit flex flex-col mt-2 mb-4 items-center">
-              <h1
-                className={cx(
-                  "font-header",
-                  "main-header-text",
-                  "text-7xl lg:text-9xl  tracking-wide uppercase"
-                )}
-              >
-                Worlds Collide
-              </h1>
-              <div className="min-h-[5px] w-full bg-white" />
-              <h2
-                className={cx(
-                  "font-ff3 text-2xl lg:text-4xl main-text",
-                  "text-white"
-                )}
-              >
-                Final Fantasy VI Randomizer
-              </h2>
-            </div>
-            <div
-              className={cx(
-                "main-header-text",
-                "shadow-blue-700",
-                "mb-4 text-sm lg:text-lg"
-              )}
-            >
-              Worlds Collide (WC) is an open-world randomizer for Final Fantasy
-              VI on the SNES. Players begin aboard the airship and can travel
-              freely between the World of Balance and the World of Ruin to
-              discover characters and espers. Once you&apos;ve gathered enough,
-              you can face off against Kefka
-            </div>
-            <div
-              className={cx(
-                "main-text",
-                "shadow-blue-700",
-                "mb-4 text-sm lg:text-lg"
-              )}
-            >
-              Options within WC include options to randomize characters,
-              commands, espers, treasure, shops and more with over 200 flags to
-              customize each playthrough
+      <div className="flex flex-col min-h-screen bg-slate-950 text-white relative">
+        <Header className="pb-16 pt-8 border-b border-white/10 shadow-2xl">
+          <div className={cx(openSans.className, "max-w-4xl mx-auto text-center flex flex-col items-center px-8 mt-4")}>
+            <div className="flex flex-col gap-6 text-lg lg:text-xl text-slate-100 max-w-3xl mx-auto font-medium" style={{ textShadow: "1px 1px 3px rgba(0,0,0,0.8)" }}>
+              <p>
+                Worlds Collide (WC) is an open-world randomizer for Final Fantasy VI on the SNES. Players begin aboard the airship and can travel freely between the World of Balance and the World of Ruin to discover characters and espers. Once you&apos;ve gathered enough, you can face off against Kefka.
+              </p>
+              <p>
+                Options within WC include options to randomize characters, commands, espers, treasure, shops and more with over 200 flags to customize each playthrough.
+              </p>
             </div>
           </div>
-        </header>
+        </Header>
+        <main className={cx(openSans.className, "flex-grow")}>
         <AppLandingSection title={"Getting Started"}>
           <AppLandingGridItem
             className="lg:col-span-2"
@@ -108,9 +65,7 @@ export default function NewLandingPage() {
             <div className="text-center">
               Generate a random seed and begin to play Worlds Collide
             </div>
-            <ButtonLink className={button()} href="/create" variant="primary">
-              <div>Customize</div>
-            </ButtonLink>
+            <CreateButton />
           </AppLandingGridItem>
 
           <AppLandingGridItem
@@ -174,12 +129,14 @@ export default function NewLandingPage() {
             </div>
 
             <ButtonLink
-              className="w-fit min-h-[70px]"
+              className="w-fit max-w-[500px] min-h-[50px] inline-flex items-center gap-3"
               href={WIKI_URL}
               variant="primary"
             >
-              <HiPencil size="36" />
-              Wiki
+              <HiPencil size={28} className="text-white" />
+              <div className="flex flex-col items-start">
+                <div className="font-bold">Wiki</div>
+              </div>
             </ButtonLink>
           </AppLandingGridItem>
 
@@ -199,12 +156,10 @@ export default function NewLandingPage() {
             <div className="text-center">
               Check out our ongoing community events and tournaments!
             </div>
-            <ButtonLink className={button()} href="/events" variant="primary">
-              <HiFlag size="24" className="mr-2" />
-              <div>View Events</div>
-            </ButtonLink>
+            <EventsButton />
           </AppLandingGridItem>
         </AppLandingSection>
+        </main>
         <HomeFooter />
       </div>
     </>

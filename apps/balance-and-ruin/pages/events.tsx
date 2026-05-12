@@ -49,18 +49,17 @@ export default function EventsPage() {
         
         <main className={cx(openSans.className, "flex-grow")}>
           {/* Hero Section */}
-          <section className="relative py-20 px-8 overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-full bg-[url('/hero_main.png')] bg-cover bg-center opacity-20 z-0"></div>
-            <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-slate-950/50 to-slate-950 z-1"></div>
-            
-            <div className="relative z-10 max-w-4xl mx-auto text-center">
-              <h1 className="text-5xl md:text-7xl font-header main-header-text mb-4 uppercase tracking-tighter">
+          <section className="relative py-12 px-8">
+            <div className="max-w-4xl mx-auto text-center flex flex-col items-center">
+              <h1 className="text-7xl lg:text-9xl font-header main-header-text mb-4 uppercase tracking-wide">
                 Community Events
               </h1>
-              <div className="h-1 w-24 bg-blue-500 mx-auto mb-6"></div>
-              <p className="text-xl md:text-2xl text-slate-300 max-w-2xl mx-auto">
-                Test your mettle and pick up some new tricks along the way! Our events are a great place to sharpen your skills and meet the rest of the community.
-              </p>
+              <div className="h-1 w-full max-w-[400px] bg-white mx-auto mb-8"></div>
+              <div className="flex flex-col gap-6 text-lg lg:text-xl text-slate-100 max-w-3xl mx-auto font-medium">
+                <p>
+                  Test your mettle and pick up some new tricks along the way! Our events are a great place to sharpen your skills and meet the rest of the community.
+                </p>
+              </div>
             </div>
           </section>
 

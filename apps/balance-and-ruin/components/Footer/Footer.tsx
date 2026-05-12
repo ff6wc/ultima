@@ -23,16 +23,9 @@ export const Footer = ({}: FooterProps) => {
 };
 
 export const MusicFooter = ({}: FooterProps) => {
-  const primaryText = (
-    <span>
-      Thanks to&nbsp;
-      <Link href="https://github.com/emberling">emberling</Link>&nbsp;for the
-      support!
-    </span>
-  );
-  return <BaseFooter messages={[primaryText, secondaryText]} />;
+  return <Footer />;
 };
 
 export const HomeFooter = () => {
-  return <BaseFooter messages={[secondaryText]} />;
+  return <Footer />;
 };

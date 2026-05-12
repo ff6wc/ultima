@@ -15,7 +15,7 @@ export const EventCard = ({ event }: Props) => {
         {({ open }) => (
           <div
             className={cx(
-              "flex flex-col border-2 transition-all duration-300 overflow-hidden",
+              "flex flex-col border-2 transition-all duration-300 overflow-hidden rounded-xl",
               "border-slate-700 bg-slate-900/50 backdrop-blur-sm",
               open ? "border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.3)]" : "hover:border-slate-500"
             )}
