@@ -23,7 +23,8 @@ export default function EventsPage() {
     // Map CSV strings to EventData interface
     return rawData.map((row: any) => ({
       ...row,
-      rules: row.rules ? row.rules.split("\n").filter((r: string) => r.trim()) : [],
+      rulesLink: row.rules || row.rulesLink,
+      participants: row.participants ? parseInt(row.participants, 10) : undefined,
     })) as EventData[];
   });
 

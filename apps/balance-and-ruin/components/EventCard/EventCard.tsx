@@ -1,7 +1,7 @@
 import { Disclosure, Transition } from "@headlessui/react";
 import { Button, DiscordButton, Link } from "@ff6wc/ui";
 import { cx } from "cva";
-import { HiChevronDown, HiCalendar, HiLink, HiInformationCircle } from "react-icons/hi2";
+import { HiChevronDown, HiCalendar, HiLink, HiInformationCircle, HiUserGroup } from "react-icons/hi2";
 import { EventData } from "~/types/events";
 
 type Props = {
@@ -37,9 +37,18 @@ export const EventCard = ({ event }: Props) => {
                     {event.status}
                   </span>
                 </div>
-                <div className="flex items-center gap-2 text-slate-400 text-sm font-mono">
-                  <HiCalendar className="text-blue-400" />
-                  <span>{event.date}</span>
+                <div className="flex items-center gap-4 text-slate-400 text-sm font-mono">
+                  <div className="flex items-center gap-2">
+                    <HiCalendar className="text-blue-400" />
+                    <span>{event.date}</span>
+                  </div>
+                  {event.participants !== undefined && event.participants > 0 && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-slate-600 mr-2">|</span>
+                      <HiUserGroup className="text-blue-400" />
+                      <span>{event.participants} Participants</span>
+                    </div>
+                  )}
                 </div>
                 <p className="text-slate-300 mt-1 line-clamp-2">
                   {event.shortDescription}
@@ -69,6 +78,12 @@ export const EventCard = ({ event }: Props) => {
               <Disclosure.Panel className="px-6 pb-6 text-slate-300 border-t border-slate-800 pt-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                   <div className="md:col-span-2 flex flex-col gap-6">
+                    {event.image && (
+                        <div className="rounded-lg overflow-hidden border border-slate-700 max-w-md w-3/4">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={event.image} alt={event.title} className="w-full h-auto object-cover" />
+                        </div>
+                    )}
                     <section>
                       <h3 className="flex items-center gap-2 text-white font-bold mb-3 text-lg">
                         <HiInformationCircle className="text-blue-400" />
@@ -79,16 +94,6 @@ export const EventCard = ({ event }: Props) => {
                       </p>
                     </section>
 
-                    {event.rules && event.rules.length > 0 && (
-                      <section>
-                        <h3 className="text-white font-bold mb-3 text-lg">Rules</h3>
-                        <ul className="list-disc list-inside space-y-2 text-slate-400">
-                          {event.rules.map((rule, index) => (
-                            <li key={index}>{rule}</li>
-                          ))}
-                        </ul>
-                      </section>
-                    )}
                   </div>
 
                   <div className="flex flex-col gap-4">
@@ -104,15 +109,16 @@ export const EventCard = ({ event }: Props) => {
                         Signups Closed
                       </Button>
                     )}
-                    {event.discordLink && (
-                      <DiscordButton href={event.discordLink} />
+                    {event.rulesLink && (
+                      <Link href={event.rulesLink}>
+                        <Button className="w-full justify-center font-bold h-12" variant="outline">
+                          Rules
+                        </Button>
+                      </Link>
                     )}
-                    
-                    {event.image && (
-                        <div className="mt-4 rounded-lg overflow-hidden border border-slate-700">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={event.image} alt={event.title} className="w-full h-auto object-cover" />
-                        </div>
+
+                    {event.discordLink && (
+                      <DiscordButton href={event.discordLink} className="!w-full" />
                     )}
                   </div>
                 </div>

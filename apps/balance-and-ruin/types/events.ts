@@ -5,7 +5,8 @@ export interface EventData {
   date: string;
   shortDescription: string;
   description: string;
-  rules?: string[];
+  rulesLink?: string;
+  participants?: number;
   signupLink?: string;
   discordLink?: string;
   image?: string;
