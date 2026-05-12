@@ -142,6 +142,7 @@ export const FlagSubflagSelect = ({
       instanceId={id}
       getOptionLabel={(option) => option.label}
       getOptionValue={(option) => option.flag + option.defaultValue}
+      menuPosition="fixed"
       options={options}
       onChange={(selected) => onChange(selected as SubflagOption)}
       value={selectedOption}

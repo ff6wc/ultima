@@ -129,6 +129,7 @@ export const ObjectiveResultSelect = ({
         instanceId={id}
         getOptionLabel={getOptionLabel}
         getOptionValue={(option) => option.id.toString()}
+        menuPosition="fixed"
         options={groupOptions}
         onChange={(val) => onChange(val)}
         value={selectedObjective}

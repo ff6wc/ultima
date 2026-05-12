@@ -188,6 +188,7 @@ export const CommandsList = () => {
                 getOptionValue={(option: CommandOption) =>
                   option.value.toString()
                 }
+                menuPosition="fixed"
                 options={constructOptions(unsortedOptions)}
                 onChange={(val) => onChange(val, idx)}
                 value={values[idx]}

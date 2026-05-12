@@ -79,6 +79,7 @@ export const ExcludeSelect = ({ flag }: ExcludeSelectProps) => {
       instanceId={id}
       getOptionLabel={(option) => option.label}
       getOptionValue={(option: CommandOption) => option.value.toString()}
+      menuPosition="fixed"
       options={options}
       onChange={(val) => onChange(val)}
       value={selectedOption}

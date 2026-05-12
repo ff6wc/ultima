@@ -165,6 +165,7 @@ export const ObjectiveConditionSelect = ({
         instanceId={id}
         getOptionLabel={(option) => option.label}
         getOptionValue={(option) => option.value}
+        menuPosition="fixed"
         options={options}
         onChange={(val) => onConditionChange(val)}
         value={selectedCondition}
@@ -177,6 +178,7 @@ export const ObjectiveConditionSelect = ({
           instanceId={id}
           getOptionLabel={(option) => option.label}
           getOptionValue={(option) => option.value}
+          menuPosition="fixed"
           options={selectOptions}
           onChange={(val) => onSelectValueChange(val)}
           value={getSelectedValueOption()}

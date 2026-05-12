@@ -13,7 +13,8 @@ export type CardProps = Omit<
 
 const containerStyles = cva([
   "bg-panel-background dark:bg-slate-900",
-  "rounded-none",
+  "rounded-xl",
+  "overflow-hidden",
   "shadow-[0px_0px_1px_0px_rgba(0,0,0,0.75)]",
   // gradient bg
   // ["relative", "bg-gradient-to-r from-green-400 to-blue-500"],
