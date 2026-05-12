@@ -130,6 +130,7 @@ export const StartingItemSelect = ({
         instanceId={id}
         getOptionLabel={(option) => option.label}
         getOptionValue={(option) => option.value}
+        menuPosition="fixed"
         options={selectOptions}
         onChange={(val) => onSelectValueChange(val)}
         value={getSelectedValueOption()}

@@ -98,6 +98,7 @@ export const Select = ({
         instanceId={id}
         getOptionLabel={(option) => option.label}
         getOptionValue={(option) => option.value}
+        menuPosition="fixed"
         options={options}
         onChange={(val) => {
           onChange(val as SelectOption);
