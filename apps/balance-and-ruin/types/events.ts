@@ -8,6 +8,8 @@ export interface EventData {
   rulesLink?: string;
   participants?: number;
   signupLink?: string;
+  signupButtonColor?: string;
   discordLink?: string;
   image?: string;
+  rulesButtonColor?: string;
 }
