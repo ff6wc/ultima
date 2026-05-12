@@ -100,7 +100,11 @@ export const EventCard = ({ event }: Props) => {
                     <h3 className="text-white font-bold mb-1 text-lg">Quick Links</h3>
                     {event.signupLink ? (
                       <Link href={event.signupLink}>
-                        <Button className="w-full justify-center font-bold h-12" variant="primary">
+                        <Button 
+                          className="w-full justify-center font-bold h-12 hover:brightness-110 active:brightness-90 transition-all" 
+                          variant="primary"
+                          style={event.signupButtonColor ? { backgroundColor: event.signupButtonColor, borderColor: event.signupButtonColor } : undefined}
+                        >
                           Sign Up Now
                         </Button>
                       </Link>
@@ -111,8 +115,12 @@ export const EventCard = ({ event }: Props) => {
                     )}
                     {event.rulesLink && (
                       <Link href={event.rulesLink}>
-                        <Button className="w-full justify-center font-bold h-12" variant="outline">
-                          Rules
+                        <Button 
+                          className="w-full justify-center font-bold h-12 hover:brightness-110 active:brightness-90 transition-all" 
+                          variant="primary"
+                          style={event.rulesButtonColor ? { backgroundColor: event.rulesButtonColor, borderColor: event.rulesButtonColor } : undefined}
+                        >
+                          Info &amp; Rules
                         </Button>
                       </Link>
                     )}

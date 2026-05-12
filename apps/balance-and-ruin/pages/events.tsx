@@ -25,6 +25,8 @@ export default function EventsPage() {
       ...row,
       rulesLink: row.rules || row.rulesLink,
       participants: row.participants ? parseInt(row.participants, 10) : undefined,
+      signupButtonColor: row.signupButtonColor || row.signupColor || row["Signup Color"],
+      rulesButtonColor: row.rulesButtonColor || row.rulesColor || row["Rules Color"],
     })) as EventData[];
   });
 
