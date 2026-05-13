@@ -3,14 +3,14 @@ import { cva } from "cva";
 
 const switchStyles = cva(
   [
-    "relative inline-flex h-3 w-8 items-center border-1",
+    "relative inline-flex h-4 w-8 items-center border-1 rounded-full",
     "focus-visible:shadow-switch-focus",
     "focus-visible:outline-1 outline-black",
   ],
   {
     variants: {
       checked: {
-        true: "bg-blue-600 border-blue-600 dark:border-gray-600",
+        true: "bg-blue-400 border-blue-400 dark:border-gray-600",
         false: "bg-inputs-background border-inputs-border",
       },
     },
@@ -18,11 +18,11 @@ const switchStyles = cva(
 );
 
 const buttonStyles = cva(
-  ["inline-block h-4 w-4 transform bg-black transition"],
+  ["inline-block h-5 w-5 transform bg-black transition rounded-full shadow-sm"],
   {
     variants: {
       checked: {
-        true: "translate-x-4 bg-black",
+        true: "translate-x-4 bg-white",
         false: "translate-x-0 bg-zinc-400",
       },
     },

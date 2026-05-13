@@ -18,11 +18,10 @@ import padStart from "lodash/padStart";
 import sample from "lodash/sample";
 import uniq from "lodash/uniq";
 import { useDispatch } from "react-redux";
-import BaseSelect from "react-select";
 import { CardColumn } from "~/components/CardColumn/CardColumn";
-import { FlagSelectOption } from "~/components/FlagSelectOption/FlagSelectOption";
 import { FlagSwitch } from "~/components/FlagSwitch/FlagSwitch";
 import { InputLabel } from "~/components/InputLabel/InputLabel";
+import { Select as CustomSelect, SelectOption } from "~/components/Select/Select";
 import { setFlag, useFlagValueSelector } from "~/state/flagSlice";
 
 const valToStr = (val: number) => padStart(val.toString(), 2, "0");
@@ -109,6 +108,7 @@ export const CommandsList = () => {
 
   const values = rawValues.map((val) => ALL_COMMANDS[Number.parseInt(val)]);
   const valueIds = values.map(({ value }) => value);
+  
   const setCommands = (value: string) => {
     dispatch(
       setFlag({
@@ -118,9 +118,9 @@ export const CommandsList = () => {
     );
   };
 
-  const onChange = (val: CommandOption | null, idx: number) => {
+  const onChange = (val: SelectOption | null, idx: number) => {
     const ids = values.map(({ value }) => valToStr(value));
-    ids[idx] = valToStr(val?.value ?? NONE);
+    ids[idx] = valToStr(val ? Number(val.value) : NONE);
     const newValue = ids.join("");
     setCommands(newValue);
   };
@@ -168,7 +168,7 @@ export const CommandsList = () => {
           Original
         </Button>
       </div>
-      <CardColumn>
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
         {LABELS.map((label, idx) => {
           const id = `${label}-select`;
           const unsortedOptions = getOptionsForCharacter(
@@ -176,31 +176,42 @@ export const CommandsList = () => {
             valueIds,
             idx
           );
+
+          const selectOptions = constructOptions(unsortedOptions).map(opt => ({
+            label: opt.label,
+            value: opt.value.toString(),
+          }));
+
+          const currentSelectValue = values[idx] 
+            ? selectOptions.find(opt => opt.value === values[idx].value.toString()) ?? null
+            : null;
+
+          const isGauLeap = label === "Gau (Leap)";
+
           return (
-            <div key={id}>
+            <div 
+              key={id}
+              className={isGauLeap ? "col-start-1 md:col-start-2 xl:col-start-4" : undefined}
+            >
               <InputLabel htmlFor={id}>{label}</InputLabel>
-              <BaseSelect
-                className="ff6wc-select-container"
-                classNamePrefix="ff6wc-select"
-                components={{ Option: FlagSelectOption }}
-                instanceId={id}
-                getOptionLabel={(option) => option.label}
-                getOptionValue={(option: CommandOption) =>
-                  option.value.toString()
-                }
-                options={constructOptions(unsortedOptions)}
+              <CustomSelect
+                options={selectOptions}
                 onChange={(val) => onChange(val, idx)}
-                value={values[idx]}
+                value={currentSelectValue}
               />
             </div>
           );
         })}
-        <FlagSwitch
-          flag="-scc"
-          label="Shuffle Commands"
-          helperText="Shuffle the commands selected above"
-        />
-      </CardColumn>
+
+        {/* Place Shuffle Commands directly into the same grid at the bottom left */}
+        <div className="col-start-1 xl:col-start-1 flex items-center pt-4 md:pt-6">
+          <FlagSwitch
+            flag="-scc"
+            label="Shuffle Commands"
+            helperText="Shuffle the commands selected above"
+          />
+        </div>
+      </div>
     </Card>
   );
 };

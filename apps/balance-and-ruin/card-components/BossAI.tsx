@@ -18,7 +18,6 @@ export const BossAI = () => {
           label="Restore Undead Bosses"
         />
 
-        <Divider />
         <FlagSwitch
           flag="-cmd"
           invert

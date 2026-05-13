@@ -143,7 +143,8 @@ const equipableOptions: SubflagOption[] = [
 export const Espers = () => {
   return (
     <Card title={"Espers"}>
-      <CardColumn>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
+        {/* Row 1: Spells & Learn Rates */}
         <FlagSubflagSelect
           options={spellOptions}
           label="Spells"
@@ -160,6 +161,8 @@ export const Espers = () => {
             label: "Original",
           }}
         />
+
+        {/* Row 2: Bonuses & MP */}
         <FlagSubflagSelect
           options={bonusOptions}
           label="Bonuses"
@@ -176,6 +179,8 @@ export const Espers = () => {
             label: "Original",
           }}
         />
+
+        {/* Row 3: Equipable & Starting Espers */}
         <FlagSubflagSelect
           options={equipableOptions}
           label="Equipable"
@@ -184,14 +189,22 @@ export const Espers = () => {
             label: "Original",
           }}
         />
-        <FlagRange
-          flag="-stesp"
-          helperText={"Begin the game with {{ . }} espers"}
-          label="Starting Espers"
-        />
-        <FlagSwitch flag="-ems" label="Multi Summon" />
-        <FlagSwitch flag="-emi" label="Esper Mastery Icon" />
-      </CardColumn>
+        <div className="flex flex-col justify-center pt-2">
+          <FlagRange
+            flag="-stesp"
+            helperText={"Begin the game with {{ . }} espers"}
+            label="Starting Espers"
+          />
+        </div>
+
+        {/* Row 4: Multi Summon & Esper Mastery Icon (Locked horizontally) */}
+        <div className="flex items-center h-full min-h-[44px]">
+          <FlagSwitch flag="-ems" label="Multi Summon" />
+        </div>
+        <div className="flex items-center h-full min-h-[44px]">
+          <FlagSwitch flag="-emi" label="Esper Mastery Icon" />
+        </div>
+      </div>
     </Card>
   );
 };

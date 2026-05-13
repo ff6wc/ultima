@@ -50,6 +50,7 @@ export const FlagSwitch = ({
         <Switch checked={checked} onChange={(val) => onChange(val)} />
         <InputLabel
           className={"cursor-pointer"}
+          flag={flag}
           htmlFor={flag}
           onClick={() => onChange(!checked)}
         >

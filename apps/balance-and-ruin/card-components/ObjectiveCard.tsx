@@ -3,6 +3,7 @@ import { Divider } from "@ff6wc/ui/Divider/Divider";
 import { useDispatch, useSelector } from "react-redux";
 import { SingleValue } from "react-select";
 import { ObjectiveAddConditionButton } from "~/components/ObjectiveAddConditionButton/ObjectiveAddConditionButton";
+import { ObjectiveRemoveConditionButton } from "~/components/ObjectiveRemoveConditionButton/ObjectiveRemoveConditionButton";
 import { ObjectiveCloneButton } from "~/components/ObjectiveCloneButton/ObjectiveCloneButton";
 import { ObjectiveConditionSelect } from "~/components/ObjectiveConditionSelect/ObjectiveConditionSelect";
 import { ObjectiveConditionsRequired } from "~/components/ObjectiveConditionsRequired/ObjectiveConditionsRequired";
@@ -89,18 +90,25 @@ export const ObjectiveCard = ({ objective }: ObjectiveCardProps) => {
   };
 
   const title = (
-    <div className={"flex flex-grow items-center justify-between "}>
-      <span className="flex items-center gap-4">
-        <span>Objective {letter.toUpperCase()}</span>
-      </span>
+    <div className="flex flex-row items-center justify-between w-full">
+      <span>Objective {letter.toUpperCase()}</span>
       <ObjectiveDeleteButton objective={objective} />
     </div>
   );
 
   const actions = (
-    <div className="flex flex-row flex-wrap gap-2 items-center justify-between p-2 bg-zinc-800 ">
-      <ObjectiveAddConditionButton objective={objective} />
-      <ObjectiveCloneButton objective={objective} />
+    <div 
+      className="flex flex-row items-center justify-between bg-slate-50 border-b border-slate-200 p-2"
+      style={{ paddingLeft: "1.5rem", paddingRight: "1.5rem" }}
+    >
+      <div className="flex flex-row items-center gap-2">
+        <ObjectiveAddConditionButton objective={objective} />
+        <ObjectiveRemoveConditionButton objective={objective} />
+      </div>
+      
+      <div className="flex flex-row items-center gap-2">
+        <ObjectiveCloneButton objective={objective} />
+      </div>
     </div>
   );
 

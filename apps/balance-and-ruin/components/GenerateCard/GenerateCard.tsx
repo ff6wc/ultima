@@ -1,13 +1,9 @@
 import {
-  Button,
-  Card,
   CodeBlock,
-  Divider,
   HelperText,
   Input,
   Link,
 } from "@ff6wc/ui";
-import { cva, cx } from "cva";
 import first from "lodash/first";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { MdClear, MdFileUpload } from "react-icons/md";
@@ -22,6 +18,9 @@ import { useRouter } from "next/router";
 import { selectSchema } from "~/state/schemaSlice";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { GenerateUpload } from "~/components/GenerateUpload/GenerateUpload";
+import { FlagTextInput } from "~/components/FlagInput/FlagInput";
+import { FlagSwitch } from "~/components/FlagSwitch/FlagSwitch";
+import styles from "./GenerateCard.module.css";
 
 export type FlagsCardProps = {
   className?: string;
@@ -47,29 +46,12 @@ const useOrderedFlags = () => {
   }, [flagValues, schema]);
 };
 
-const textareaStyles = cva([
-  "text-sm",
-  "max-h-[600px] bg-gray-200 dark:bg-gray-900 p-4",
-  "whitespace-normal font-mono break-words box-decoration-clone",
-  "overflow-auto",
-]);
-
-const needRomDataStyles = cva([], {
-  variants: {
-    hasRomData: {
-      true: ["hidden"],
-      false: ["block"],
-    },
-  },
-});
-
 export const GenerateCard = ({
   className,
   enableEditing = false,
   ...rest
 }: FlagsCardProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
-  // const flags = useSelector(selectRawFlags);
   const [romData, setRomData] = useState<string | null>(null);
   const [romName, setRomName] = useState("");
   const [romSelectError, setRomSelectError] = useState<string | null>(null);
@@ -118,13 +100,14 @@ export const GenerateCard = ({
 
       if (result.status !== 200) {
         const error = await result.text();
-        throw new Error(`Error creating seed ${error}`);
+        throw new Error(`Error creating seed: ${error}`);
       }
 
       const data = await result.json();
       return data as GenerateResponse;
     }
   );
+  
   const generate = async () => {
     if (isMutating) {
       return;
@@ -170,9 +153,6 @@ export const GenerateCard = ({
     setRomSelectError(null);
   };
 
-  const [editable, setEditable] = useState(false);
-  const textarearef = useRef<HTMLTextAreaElement>(null);
-
   const onRomSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = first(e.target.files);
     const reader = new FileReader();
@@ -214,7 +194,6 @@ export const GenerateCard = ({
   };
 
   const showDisabledText = !romData;
-
   const dispatch = useDispatch();
   const [inputFlags, setInputFlags] = useState("");
 
@@ -223,62 +202,68 @@ export const GenerateCard = ({
   }, [flags]);
 
   return (
-    <Card
-      {...rest}
-      className="max-w-[1260px]"
-      contentClassName={cx("p-0 gap-3", className)}
-      title="Generate"
-    >
-      <div className="flex flex-col gap-2 w-full h-full">
-        <h3 className={"font-medium text-base"}>
-          Step 1: Select your flags above
-        </h3>
+    <div className={styles.container}>
+      <h2 className={styles.title}>Generate Your ROM</h2>
+      
+      <div className={styles.stepContainer}>
+        <h3 className={styles.stepTitle}>Step 1: Review Flags</h3>
         <textarea
-          className={cx(
-            textareaStyles(),
-            "w-full p-4 min-h-[175px] h-fit text-xs"
-          )}
+          className={styles.textarea}
           onBlur={(e) => dispatch(setRawFlags(e.target.value))}
           onChange={(e) => setInputFlags(e.target.value)}
           value={inputFlags}
+          placeholder="Your selected flags will appear here..."
         />
       </div>
-      <Divider />
+      
+      <div className={styles.divider} />
 
-      <GenerateUpload
-        clearRomValues={clearRomValues}
-        hasRomData={hasRomData}
-        romName={romName}
-        shortRomName={displayRomName}
-        error={romSelectError}
-        inputRef={inputRef}
-        onRomSelect={onRomSelect}
-        success={success}
-      />
-      <Divider />
-
-      <div className="flex flex-col gap-2">
-        <h3 className={"font-medium text-lg"}>Step 3: Click Generate!</h3>
-        {showDisabledText ? (
-          <HelperText>
-            This button will be disabled until a valid ROM is selected
-          </HelperText>
-        ) : null}
+      <div className={styles.stepContainer}>
+        <h3 className={styles.stepTitle}>Step 2: Provide Base ROM</h3>
+        <GenerateUpload
+          clearRomValues={clearRomValues}
+          hasRomData={hasRomData}
+          romName={romName}
+          shortRomName={displayRomName}
+          error={romSelectError}
+          inputRef={inputRef}
+          onRomSelect={onRomSelect}
+          success={success}
+        />
       </div>
+      
+      <div className={styles.divider} />
 
-      <div className="pl-3 flex flex-col gap-4">
-        <Button
-          className={"w-fit p-8 text-xl"}
+      <div className={styles.stepContainer}>
+        <h3 className={styles.stepTitle}>Step 3: Generate Options</h3>
+        <div className="flex flex-col gap-4 mb-4">
+          <FlagTextInput
+            flag="-s"
+            description="Games generated with the same seed and flags will be identical. When empty, a random seed will be generated"
+            label="Seed"
+            placeholder="Use Random Seed"
+          />
+          <FlagSwitch flag="-sl" label="Spoiler Log" />
+        </div>
+        
+        {showDisabledText && (
+          <span className={styles.helperText}>
+            This button will be disabled until a valid ROM is selected.
+          </span>
+        )}
+        
+        <button
+          className={styles.generateButton}
           disabled={!hasRomData || isMutating}
           onClick={generate}
-          variant="primary"
         >
-          Generate
-        </Button>
-        {error ? (
-          <div className={"text-red-500 font-semibold"}>{error}</div>
-        ) : null}{" "}
+          {isMutating ? "Generating..." : "Generate ROM"}
+        </button>
+        
+        {error && (
+          <div className={styles.error}>{error.toString()}</div>
+        )}
       </div>
-    </Card>
+    </div>
   );
 };

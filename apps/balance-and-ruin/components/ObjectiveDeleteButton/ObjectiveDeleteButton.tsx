@@ -1,4 +1,5 @@
 import { Button } from "@ff6wc/ui";
+import { FaTrash } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { setFlag } from "~/state/flagSlice";
 import {
@@ -45,8 +46,14 @@ export const ObjectiveDeleteButton = ({ objective }: ObjectiveCardProps) => {
   };
 
   return (
-    <Button onClick={deleteObjective} size="small" variant="danger">
-      Delete
+    <Button
+      onClick={deleteObjective}
+      size="small"
+      variant="default"
+      title="Delete Objective"
+      style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "0.4rem" }}
+    >
+      <FaTrash size={13} />
     </Button>
   );
 };

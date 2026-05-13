@@ -10,7 +10,7 @@ export type FlagLabelProps = {
 export const FlagLabel = ({ helperText, flag, label }: FlagLabelProps) => {
   return (
     <div className="flex-grow wrap">
-      <InputLabel htmlFor={flag}>{label}</InputLabel>
+      <InputLabel flag={flag} htmlFor={flag}>{label}</InputLabel>
       <HelperText>{helperText}</HelperText>
     </div>
   );

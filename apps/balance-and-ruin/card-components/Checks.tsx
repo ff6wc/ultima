@@ -57,21 +57,27 @@ const irOptions: SubflagOption[] = [
 export const Checks = () => {
   return (
     <Card title={"Checks"}>
-      <CardColumn>
-        <FlagSwitch 
-          flag="-nfce" 
-          label="No Free Characters/Espers"
-          helperText={
-            <span>
-              Remove character/esper rewards from: Auction House, Collapsing House, Figaro Castle Throne, Gau's Father's House, Kohlingen Inn, Narshe Weapon Shop, Sealed Gate, South Figaro Basement, Mt. Zozo, and Lone Wolf
-            </span>
-          } />
-        <FlagSubflagSelect
-          defaultSelected={STANDARD_IR}
-          label={<>Item Rewards</>}
-          options={irOptions}
-        />
-      </CardColumn>
+      <div className="flex flex-col gap-6 w-full h-full">
+        <div className="flex flex-col gap-2">
+          <FlagSwitch 
+            flag="-nfce" 
+            label="No Free Characters/Espers"
+            helperText={
+              <span className="block mt-1 leading-relaxed opacity-90">
+                Remove character/esper rewards from: Auction House, Collapsing House, Figaro Castle Throne, Gau's Father's House, Kohlingen Inn, Narshe Weapon Shop, Sealed Gate, South Figaro Basement, Mt. Zozo, and Lone Wolf
+              </span>
+            } 
+          />
+        </div>
+        
+        <div className="border-t border-white/10 pt-4 flex-1">
+          <FlagSubflagSelect
+            defaultSelected={STANDARD_IR}
+            label={<>Item Rewards</>}
+            options={irOptions}
+          />
+        </div>
+      </div>
     </Card>
   );
 };

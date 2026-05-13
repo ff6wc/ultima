@@ -125,6 +125,18 @@ export const Spells = () => {
           }}
           options={ultimaOptions}
         />
+
+        <FlagSwitch
+          flag="-scan"
+          helperText="All characters start with the Scan spell learned. Scan costs 0 MP. All enemies are scannable"
+          label="Scan All"
+        />
+        
+        <FlagSwitch
+          flag="-warp"
+          helperText="All characters start with the Warp spell learned. Warp costs 0 MP."
+          label="Warp All"
+        />
       </CardColumn>
     </Card>
   );

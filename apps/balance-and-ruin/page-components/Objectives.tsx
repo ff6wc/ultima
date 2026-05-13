@@ -42,8 +42,8 @@ export const Objectives = () => {
   };
 
   return (
-    <PageContainer>
-      <div className={"flex flex-col gap-4"}>
+    <PageContainer columns={3}>
+      <div className="col-span-full flex flex-col gap-4 w-full">
         <Card title="Objectives">
           <span>
             <Button
@@ -55,7 +55,7 @@ export const Objectives = () => {
             </Button>
           </span>
         </Card>
-        <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {objectives.map((objective) => (
             <div key={objective.flag}>
               <ObjectiveCard key={objective.flag} objective={objective} />

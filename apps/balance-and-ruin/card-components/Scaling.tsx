@@ -372,7 +372,8 @@ const abilityScalingOptions: SubflagOption[] = [
 export const Scaling = () => {
   return (
     <Card title={"Scaling"}>
-      <CardColumn>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-12 gap-y-8">
+        {/* Row 1, Column 1: Level Scaling */}
         <FlagSubflagSelect
           label="Level Scaling"
           nullable={{
@@ -382,6 +383,7 @@ export const Scaling = () => {
           options={levelScalingOptions}
         />
 
+        {/* Row 1, Column 2: HP/MP Scaling */}
         <FlagSubflagSelect
           label="HP/MP Scaling"
           nullable={{
@@ -391,15 +393,7 @@ export const Scaling = () => {
           options={hpMpScalingOptions}
         />
 
-        <FlagSubflagSelect
-          label="Exp/GP Scaling"
-          nullable={{
-            description: "Enemy and boss exp/gp are not scaled",
-            label: "None",
-          }}
-          options={expGpScalingOptions}
-        />
-
+        {/* Row 2, Column 1: Ability Scaling */}
         <FlagSubflagSelect
           label="Ability Scaling"
           nullable={{
@@ -409,11 +403,27 @@ export const Scaling = () => {
           options={abilityScalingOptions}
         />
 
-        <FlagSlider flag={"-msl"} label={"Max Scale Level"} />
+        {/* Row 2, Column 2: Exp/GP Scaling */}
+        <FlagSubflagSelect
+          label="Exp/GP Scaling"
+          nullable={{
+            description: "Enemy and boss exp/gp are not scaled",
+            label: "None",
+          }}
+          options={expGpScalingOptions}
+        />
 
-        <FlagSwitch flag="-sed" label="Scale Eight Dragons" />
-        <FlagSwitch flag="-sfb" label="Scale Final Battles" />
-      </CardColumn>
+        {/* Row 3, Column 1: Max Scale Level */}
+        <div className="flex flex-col pt-2 border-t border-[var(--border-light)]/10 lg:border-0 lg:pt-0 justify-center">
+          <FlagSlider flag={"-msl"} label={"Max Scale Level"} />
+        </div>
+
+        {/* Row 3, Column 2: Paired Switches (aligned horizontally with Max Scale Level) */}
+        <div className="flex flex-col justify-center gap-3 pt-4 lg:pt-0 border-t border-[var(--border-light)]/10 lg:border-0 h-full min-h-[64px]">
+          <FlagSwitch flag="-sed" label="Scale Eight Dragons" />
+          <FlagSwitch flag="-sfb" label="Scale Final Battles" />
+        </div>
+      </div>
     </Card>
   );
 };

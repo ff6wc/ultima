@@ -3,7 +3,6 @@ import startCase from "lodash/startCase";
 import { useId, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FlagLabel } from "~/components/FlagLabel/FlagLabel";
-import { FlagSelectOption } from "~/components/FlagSelectOption/FlagSelectOption";
 import { Select, SelectOption } from "~/components/Select/Select";
 import { setFlag, useFlagValueSelector } from "~/state/flagSlice";
 import {
@@ -112,7 +111,6 @@ export const FlagSelect = ({
       <FlagLabel flag={flag} helperText={description} label={label} />
 
       <Select
-        components={{ Option: FlagSelectOption }}
         options={options}
         onChange={onChange}
         value={value ?? (defaultValue as FlagSelectOption)}

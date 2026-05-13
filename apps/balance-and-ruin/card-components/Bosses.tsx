@@ -116,35 +116,44 @@ export const Bosses = () => {
   }
   return (
     <Card title={"Bosses"}>
-      <CardColumn>
-        <span className="inline-flex gap-2 flex-wrap">
+      <div className="flex flex-col gap-6 h-full">
+        <div className="flex flex-wrap items-center justify-between gap-4">
           <Button
             onClick={restoreOriginal}
             variant="primary"
           >
             All Original
           </Button>
-        </span>
-        <FlagSubflagSelect
-          nullable={{
-            description: "Boss battles are unchanged",
-            label: "Original",
-          }}
-          label="Boss Battles"
-          options={battleOptions}
-        />
-        <FlagSubflagSelect
-          defaultSelected={MIX_STATUES}
-          label="Statue Battles"
-          options={statueOptions}
-        />
-        <FlagSubflagSelect
-          defaultSelected={SHUFFLE_DRAGONS}
-          label="Dragon Battles"
-          options={dragonOptions}
-        />
-        <FlagSwitch flag="-bmkl" label="Restore Marshal's Lobos" />
-      </CardColumn>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <FlagSubflagSelect
+            className="h-full justify-between"
+            nullable={{
+              description: "Boss battles are unchanged",
+              label: "Original",
+            }}
+            label="Boss Battles"
+            options={battleOptions}
+          />
+          <FlagSubflagSelect
+            className="h-full justify-between"
+            defaultSelected={MIX_STATUES}
+            label="Statue Battles"
+            options={statueOptions}
+          />
+          <FlagSubflagSelect
+            className="h-full justify-between"
+            defaultSelected={SHUFFLE_DRAGONS}
+            label="Dragon Battles"
+            options={dragonOptions}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-auto pt-4">
+          <FlagSwitch flag="-bmkl" label="Restore Marshal's Lobos" />
+        </div>
+      </div>
     </Card>
   );
 };
