@@ -17,7 +17,11 @@ const styles = cva(["m-auto grid grid-flow-dense gap-6 items-start w-full"], {
       // Two-column pages (Gameplay, Items, Commands…)
       2: ["grid-cols-1 lg:grid-cols-2", "max-w-[1100px]", "p-5"],
       // Three-column pages (Battle, Graphics…) — let them breathe.
-      3: ["grid-cols-1 md:grid-cols-2 xl:grid-cols-3", "max-w-full lg:max-w-[1400px]", "p-5"],
+      3: [
+        "grid-cols-1 md:grid-cols-2 xl:grid-cols-3",
+        "max-w-full lg:max-w-[1400px]",
+        "p-5",
+      ],
       null: [],
     },
   },

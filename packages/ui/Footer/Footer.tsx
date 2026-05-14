@@ -1,4 +1,4 @@
-import styles from './Footer.module.css';
+import styles from "./Footer.module.css";
 
 export type FooterProps = {
   messages: React.ReactNode[];

@@ -46,28 +46,35 @@ export const SotwTab = () => {
           </h1>
           <div className="h-1 w-[100px] bg-blue-500 mx-auto mb-4 rounded-full"></div>
           <p className="text-base md:text-lg text-[var(--text-sub)] max-w-xl mx-auto font-medium leading-relaxed">
-            A casual weekly race showcasing unique flagsets submitted by the community.
+            A casual weekly race showcasing unique flagsets submitted by the
+            community.
           </p>
         </div>
       </section>
 
-      <PageContainer columns={1} className="py-2 px-4 md:px-0 flex flex-col gap-6">
+      <PageContainer
+        columns={1}
+        className="py-2 px-4 md:px-0 flex flex-col gap-6"
+      >
         <>
           <Card title="About the Race">
             <div className="flex flex-col gap-4 text-[var(--text-sub)] leading-relaxed">
               <p>
-                Seed of the Week (SotW) is a great environment to test your skills, learn new tips from other community runners, and discover fun, exotic settings.
+                Seed of the Week (SotW) is a great environment to test your
+                skills, learn new tips from other community runners, and
+                discover fun, exotic settings.
               </p>
               <p>
                 Join the{" "}
-                <Link 
-                  href={DISCORD_URL} 
+                <Link
+                  href={DISCORD_URL}
                   target="_blank"
                   className="text-blue-500 hover:text-blue-400 underline transition-colors font-medium"
                 >
                   Discord server
                 </Link>{" "}
-                to play alongside other community members and submit your own ideas for upcoming weekly seeds!
+                to play alongside other community members and submit your own
+                ideas for upcoming weekly seeds!
               </p>
             </div>
           </Card>
@@ -75,12 +82,14 @@ export const SotwTab = () => {
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-16 gap-3">
               <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-              <p className="text-[var(--text-sub)] font-mono text-sm">Loading current seed data...</p>
+              <p className="text-[var(--text-sub)] font-mono text-sm">
+                Loading current seed data...
+              </p>
             </div>
           ) : (
             sotw && (
               <div className="flex flex-col gap-4">
-                <h2 className="text-lg font-header font-bold text-[var(--text-main)] tracking-wide uppercase ml-1">
+                <h2 className="text-xl font-outfit font-semibold text-[var(--text-main)] ml-1">
                   Active Showcase
                 </h2>
                 <SotwCard sotwId={sotwId} sotw={sotw} />

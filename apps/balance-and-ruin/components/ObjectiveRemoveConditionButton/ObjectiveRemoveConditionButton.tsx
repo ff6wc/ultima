@@ -40,7 +40,7 @@ export const ObjectiveRemoveConditionButton = ({
       setFlag({
         flag,
         value: objectiveToString(newObjective),
-      })
+      }),
     );
   };
 
@@ -52,7 +52,12 @@ export const ObjectiveRemoveConditionButton = ({
       size="small"
       variant="default"
       title="remove last condition"
-      style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "0.4rem" }}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "0.4rem",
+      }}
     >
       <FaMinus size={13} />
     </Button>

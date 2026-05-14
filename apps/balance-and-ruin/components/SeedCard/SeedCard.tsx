@@ -44,8 +44,8 @@ export const SeedCard = ({ className, seed, ...rest }: SeedCardProps) => {
   const displayRomName = !romName
     ? ""
     : romName.length > 20
-    ? romName.slice(0, 8).concat("...", ext)
-    : romName;
+      ? romName.slice(0, 8).concat("...", ext)
+      : romName;
 
   useEffect(() => {
     if (!inputRef.current) {
@@ -70,7 +70,7 @@ export const SeedCard = ({ className, seed, ...rest }: SeedCardProps) => {
 
     const patched = XDelta3Decoder.decode(
       base64ToByteArray(patch as string),
-      base64ToByteArray(rom)
+      base64ToByteArray(rom),
     );
 
     const jsz = new JSZip();

@@ -55,7 +55,7 @@ export const GenerateJohnnydmadCard = ({
 
       const data = await result.json();
       return data as GenerateResponse;
-    }
+    },
   );
   const generate = async () => {
     if (isMutating || !romData || !jsz || !romName) {
@@ -71,7 +71,7 @@ export const GenerateJohnnydmadCard = ({
 
     const patched = XDelta3Decoder.decode(
       base64ToByteArray(patch),
-      base64ToByteArray(romData)
+      base64ToByteArray(romData),
     );
 
     jsz.file(romName, patched, { binary: true });
@@ -114,12 +114,12 @@ export const GenerateJohnnydmadCard = ({
         const zip = await jszip.loadAsync(zip_data);
 
         const rom = Object.values(zip.files).find(({ name }) =>
-          ROM_FILE_EXTENSIONS.some((ext) => name.endsWith(ext))
+          ROM_FILE_EXTENSIONS.some((ext) => name.endsWith(ext)),
         );
 
         if (!rom) {
           setZipSelectError(
-            "Invalid file - No file ending in .smc or .sfc was found in the zip"
+            "Invalid file - No file ending in .smc or .sfc was found in the zip",
           );
           return;
         }
@@ -127,7 +127,7 @@ export const GenerateJohnnydmadCard = ({
         const data = await rom.async("base64");
 
         const others = Object.values(zip.files).filter(
-          ({ name }) => name !== rom?.name
+          ({ name }) => name !== rom?.name,
         );
 
         try {

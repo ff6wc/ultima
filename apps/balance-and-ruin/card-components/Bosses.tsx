@@ -2,6 +2,7 @@ import { Button, Card } from "@ff6wc/ui";
 import { CardColumn } from "~/components/CardColumn/CardColumn";
 import { FlagSubflagSelect } from "~/components/FlagSubflagSelect/FlagSubflagSelect";
 import { FlagSwitch } from "~/components/FlagSwitch/FlagSwitch";
+import { FlagRange } from "~/components/FlagRange/FlagRange";
 import { useDispatch } from "react-redux";
 import { setFlag } from "~/state/flagSlice";
 
@@ -84,44 +85,41 @@ export const Bosses = () => {
       setFlag({
         flag: "-bbs",
         value: null,
-      })
+      }),
     );
     dispatch(
       setFlag({
         flag: "-bbr",
         value: null,
-      })
+      }),
     );
     // Dragon location back to original
     dispatch(
       setFlag({
         flag: "-drloc",
         value: "original",
-      })
+      }),
     );
     // Statue location back to original
     dispatch(
       setFlag({
         flag: "-stloc",
         value: "original",
-      })
+      }),
     );
     // Marshal Keep Lobos back to true
     dispatch(
       setFlag({
         flag: "-bmkl",
         value: true,
-      })
-    )
-  }
+      }),
+    );
+  };
   return (
     <Card title={"Bosses"}>
       <div className="flex flex-col gap-6 h-full">
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <Button
-            onClick={restoreOriginal}
-            variant="primary"
-          >
+          <Button onClick={restoreOriginal} variant="primary">
             All Original
           </Button>
         </div>
@@ -150,9 +148,23 @@ export const Bosses = () => {
           />
         </div>
 
+        {/* 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-auto pt-4">
-          <FlagSwitch flag="-bmkl" label="Restore Marshal's Lobos" />
+          (LEGACY) Flag -bmbd hidden per user request
+          <FlagSwitch
+            flag="-bmbd"
+            label="Shuffle Bosses & Dragons Together"
+            helperText="Shuffle/randomize bosses and dragons together"
+          />
+          <FlagRange
+            flag="-rt"
+            label="Rizopas Timer"
+            helperText="Custom range for seconds before Rizopas will appear"
+            min={5}
+            max={60}
+          />
         </div>
+        */}
       </div>
     </Card>
   );

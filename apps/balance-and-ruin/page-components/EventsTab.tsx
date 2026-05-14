@@ -8,24 +8,32 @@ import { parseCSV } from "~/utils/csvParser";
 import { Disclosure, Transition } from "@headlessui/react";
 import { HiChevronDown } from "react-icons/hi2";
 
-const EVENTS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSSZFZgv3BKozWuZeoHmfWQMFdQAYU-4FlxTLwf6sXFxyQBQRoCsmygcjn_9ErYllzBOx7VrzmTs9Sf/pub?output=csv";
+const EVENTS_CSV_URL =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vSSZFZgv3BKozWuZeoHmfWQMFdQAYU-4FlxTLwf6sXFxyQBQRoCsmygcjn_9ErYllzBOx7VrzmTs9Sf/pub?output=csv";
 
 export const EventsTab = () => {
-  const { data, isLoading, error } = useQuery<EventData[]>("events", async () => {
-    const res = await fetch(`${EVENTS_CSV_URL}&t=${Date.now()}`);
-    if (!res.ok) throw new Error("Failed to fetch events");
-    const csvText = await res.text();
-    const rawData = parseCSV(csvText);
-    
-    // Map CSV strings to EventData interface
-    return rawData.map((row: any) => ({
-      ...row,
-      rulesLink: row.rules || row.rulesLink,
-      participants: row.participants ? parseInt(row.participants, 10) : undefined,
-      signupButtonColor: row.signupButtonColor || row.signupColor || row["Signup Color"],
-      rulesButtonColor: row.rulesButtonColor || row.rulesColor || row["Rules Color"],
-    })) as EventData[];
-  });
+  const { data, isLoading, error } = useQuery<EventData[]>(
+    "events",
+    async () => {
+      const res = await fetch(`${EVENTS_CSV_URL}&t=${Date.now()}`);
+      if (!res.ok) throw new Error("Failed to fetch events");
+      const csvText = await res.text();
+      const rawData = parseCSV(csvText);
+
+      // Map CSV strings to EventData interface
+      return rawData.map((row: any) => ({
+        ...row,
+        rulesLink: row.rules || row.rulesLink,
+        participants: row.participants
+          ? parseInt(row.participants, 10)
+          : undefined,
+        signupButtonColor:
+          row.signupButtonColor || row.signupColor || row["Signup Color"],
+        rulesButtonColor:
+          row.rulesButtonColor || row.rulesColor || row["Rules Color"],
+      })) as EventData[];
+    },
+  );
 
   const upcomingEvents = data?.filter((e) => e.status === "Upcoming") || [];
   const currentEvents = data?.filter((e) => e.status === "Current") || [];
@@ -47,7 +55,8 @@ export const EventsTab = () => {
           </h1>
           <div className="h-1 w-[100px] bg-blue-500 mx-auto mb-4 rounded-full"></div>
           <p className="text-base md:text-lg text-[var(--text-sub)] max-w-xl mx-auto font-medium leading-relaxed">
-            Test your mettle and pick up some new tricks! Our community events are a great place to sharpen your skills.
+            Test your mettle and pick up some new tricks! Our community events
+            are a great place to sharpen your skills.
           </p>
         </div>
       </section>
@@ -58,13 +67,17 @@ export const EventsTab = () => {
           {isLoading && (
             <div className="flex flex-col items-center justify-center py-20 gap-4">
               <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-              <p className="text-[var(--text-sub)] font-mono">Loading events...</p>
+              <p className="text-[var(--text-sub)] font-mono">
+                Loading events...
+              </p>
             </div>
           )}
 
           {error && (
             <div className="text-center py-12 border border-red-300/30 bg-red-500/5 rounded-xl">
-              <p className="text-red-500 font-medium">Error loading events. Please try again later.</p>
+              <p className="text-red-500 font-medium">
+                Error loading events. Please try again later.
+              </p>
             </div>
           )}
 
@@ -86,7 +99,7 @@ export const EventsTab = () => {
                             <HiChevronDown
                               className={cx(
                                 "transition-transform duration-300 text-[var(--text-sub)] group-hover:text-blue-500",
-                                open ? "rotate-180" : ""
+                                open ? "rotate-180" : "",
                               )}
                               size={22}
                             />
@@ -110,7 +123,7 @@ export const EventsTab = () => {
                         </div>
                       )}
                     </Disclosure>
-                  )
+                  ),
               )}
 
               {data.length === 0 && (

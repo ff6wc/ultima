@@ -22,7 +22,7 @@ export async function isValidROM(rom: BufferType) {
   }
 
   let romHashData = Array.from(
-    new Uint8Array(await crypto.subtle.digest("SHA-256", rom))
+    new Uint8Array(await crypto.subtle.digest("SHA-256", rom)),
   );
   let romHashHex = romHashData
     .map((value) => value.toString(16).padStart(2, "0"))

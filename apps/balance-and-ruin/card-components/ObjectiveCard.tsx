@@ -18,7 +18,11 @@ import {
   setObjective,
   setResultValue,
 } from "~/state/objectiveSlice";
-import { Objective, ObjectiveCondition, ObjectiveResult } from "~/types/objectives";
+import {
+  Objective,
+  ObjectiveCondition,
+  ObjectiveResult,
+} from "~/types/objectives";
 import { createObjective } from "~/utils/createObjective";
 import { objectiveToString } from "~/utils/objectiveToString";
 import { isValidCondition } from "~/utils/isValidCondition";
@@ -69,7 +73,7 @@ export const ObjectiveCard = ({ objective }: ObjectiveCardProps) => {
       setFlag({
         flag,
         value: objectiveToString(newObjective),
-      })
+      }),
     );
   };
 
@@ -78,19 +82,19 @@ export const ObjectiveCard = ({ objective }: ObjectiveCardProps) => {
     const conditions = [...objective.conditions];
     conditions.splice(idxToDelete, 1);
     newObjective.conditions = conditions;
-    
+
     const validCount = conditions.filter(isValidCondition).length;
     newObjective.requiredConditions = [
       Math.min(objective.requiredConditions[0], validCount),
-      Math.min(objective.requiredConditions[1], validCount)
+      Math.min(objective.requiredConditions[1], validCount),
     ];
-    
+
     dispatch(setObjective(newObjective));
     dispatch(
       setFlag({
         flag,
         value: objectiveToString(newObjective),
-      })
+      }),
     );
   };
 
@@ -99,7 +103,7 @@ export const ObjectiveCard = ({ objective }: ObjectiveCardProps) => {
       setFlag({
         flag,
         value: null,
-      })
+      }),
     );
   };
 
@@ -120,7 +124,7 @@ export const ObjectiveCard = ({ objective }: ObjectiveCardProps) => {
         setFlag({
           flag,
           value: newValue,
-        })
+        }),
       );
       dispatch(setObjective(newObjective));
     } else {
@@ -130,7 +134,7 @@ export const ObjectiveCard = ({ objective }: ObjectiveCardProps) => {
         setFlag({
           flag,
           value: newValue,
-        })
+        }),
       );
       dispatch(setObjective(newObjective));
     }
@@ -143,7 +147,7 @@ export const ObjectiveCard = ({ objective }: ObjectiveCardProps) => {
       setFlag({
         flag: obj.flag,
         value: ots(obj),
-      })
+      }),
     );
   };
 
@@ -157,8 +161,6 @@ export const ObjectiveCard = ({ objective }: ObjectiveCardProps) => {
     </div>
   );
 
-
-
   return (
     <Card title={title as unknown as any}>
       <ObjectiveResultSelect flag={flag} onChange={onResultChange} />
@@ -166,18 +168,21 @@ export const ObjectiveCard = ({ objective }: ObjectiveCardProps) => {
         <ObjectiveResultValue objective={objective} metadata={resultMetadata} />
       ) : null}
       {objective.conditions.map((c, idx) => (
-        <div key={idx} className="flex flex-col gap-1 w-full overflow-visible mb-1">
+        <div
+          key={idx}
+          className="flex flex-col gap-1 w-full overflow-visible mb-1"
+        >
           <div className="flex flex-row items-center justify-between w-full">
             <FlagLabel
               flag={objective.flag}
               helperText=""
               label={"Condition"}
             />
-            <button 
+            <button
               onClick={() => deleteConditionAtIndex(idx)}
               className="text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 p-1 rounded transition-all cursor-pointer flex items-center justify-center shrink-0"
               title="Delete this Condition"
-              style={{ width: '30px', height: '30px' }}
+              style={{ width: "30px", height: "30px" }}
             >
               <FaTrash size={13} />
             </button>
@@ -191,10 +196,10 @@ export const ObjectiveCard = ({ objective }: ObjectiveCardProps) => {
           </div>
         </div>
       ))}
-      
+
       {/* Horizontal Long Add Condition Button */}
       {objective.conditions.length < MAX_CONDITION_COUNT && (
-        <div 
+        <div
           onClick={addConditionDirectly}
           title="Add More Conditions"
           className="flex items-center justify-center w-full h-10 border-2 border-dashed border-slate-200 dark:border-slate-700/60 hover:border-blue-400 dark:hover:border-blue-500/50 bg-slate-50/40 dark:bg-slate-800/10 hover:bg-slate-100/60 dark:hover:bg-slate-800/30 transition-all duration-300 rounded-lg cursor-pointer group my-3 p-1"

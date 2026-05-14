@@ -12,7 +12,7 @@ export const Battle = () => {
       <div className="col-span-full h-full [&>*]:h-full">
         <Scaling />
       </div>
-      
+
       {/* Row 2: Bosses (Massive, make full-width!) */}
       <div className="col-span-full h-full [&>*]:h-full">
         <Bosses />
@@ -22,7 +22,7 @@ export const Battle = () => {
       <div className="h-full [&>*]:h-full">
         <Encounters />
       </div>
-      
+
       <div className="h-full [&>*]:h-full">
         <ExperienceMagicPointsGold />
       </div>

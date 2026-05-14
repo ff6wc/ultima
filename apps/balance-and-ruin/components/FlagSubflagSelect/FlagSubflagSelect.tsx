@@ -45,13 +45,13 @@ export const FlagSubflagSelect = ({
   const id = useId();
 
   const selectedFlag = useSelector(
-    selectActiveMutuallyExclusiveFlag(...baseOptions.map(({ flag }) => flag))
+    selectActiveMutuallyExclusiveFlag(...baseOptions.map(({ flag }) => flag)),
   );
 
   const allFlagValues = useSelector(selectFlagValues);
 
   const schemaDescription = useSelector(
-    selectedFlag ? selectDescription(selectedFlag) : () => null
+    selectedFlag ? selectDescription(selectedFlag) : () => null,
   );
 
   const empty = useMemo<SubflagOption>(
@@ -61,7 +61,7 @@ export const FlagSubflagSelect = ({
       defaultValue: null,
       helperText: nullable?.description ?? "",
     }),
-    [nullable]
+    [nullable],
   );
 
   const options: SubflagOption[] = useMemo(() => {
@@ -79,7 +79,7 @@ export const FlagSubflagSelect = ({
         setFlag({
           flag: selectedFlag,
           value: null,
-        })
+        }),
       );
     }
 
@@ -88,7 +88,7 @@ export const FlagSubflagSelect = ({
         setFlag({
           flag,
           value: defaultValue,
-        })
+        }),
       );
     }
   };
@@ -106,7 +106,7 @@ export const FlagSubflagSelect = ({
       }) ??
       defaultSelected ??
       empty,
-    [options, defaultSelected, empty, selectedFlag, selectedValue]
+    [options, defaultSelected, empty, selectedFlag, selectedValue],
   );
 
   let description: React.ReactNode;
@@ -126,13 +126,20 @@ export const FlagSubflagSelect = ({
     dynamicValue: allFlagValues[opt.flag] ?? opt.defaultValue,
   }));
 
-  const activeSelectValue = selectOptions.find(opt => opt.flag === selectedOption.flag && opt.defaultValue === selectedOption.defaultValue) ?? null;
+  const activeSelectValue =
+    selectOptions.find(
+      (opt) =>
+        opt.flag === selectedOption.flag &&
+        opt.defaultValue === selectedOption.defaultValue,
+    ) ?? null;
 
   const SelectWrapper = (
     <CustomSelect
       options={selectOptions}
       onChange={(selected) => {
-        const originalOpt = options.find(opt => (opt.flag + opt.defaultValue) === selected?.value);
+        const originalOpt = options.find(
+          (opt) => opt.flag + opt.defaultValue === selected?.value,
+        );
         if (originalOpt) {
           onChange(originalOpt);
         }
@@ -142,7 +149,7 @@ export const FlagSubflagSelect = ({
   );
 
   return (
-    <div className={`flex flex-col gap-1 ${className}`}>
+    <div className={`flex flex-col gap-2 ${className}`}>
       <>
         <FlagLabel
           flag={selectedOption.flag}
@@ -151,7 +158,11 @@ export const FlagSubflagSelect = ({
         />
 
         <FlagSubflagContext.Provider value={true}>
-          {Renderable ? <Renderable>{SelectWrapper}</Renderable> : SelectWrapper}
+          {Renderable ? (
+            <Renderable>{SelectWrapper}</Renderable>
+          ) : (
+            SelectWrapper
+          )}
         </FlagSubflagContext.Provider>
       </>
     </div>

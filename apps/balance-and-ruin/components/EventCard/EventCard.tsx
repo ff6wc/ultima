@@ -1,7 +1,13 @@
 import { Disclosure, Transition } from "@headlessui/react";
 import { Button, DiscordButton, Link } from "@ff6wc/ui";
 import { cx } from "cva";
-import { HiChevronDown, HiCalendar, HiLink, HiInformationCircle, HiUserGroup } from "react-icons/hi2";
+import {
+  HiChevronDown,
+  HiCalendar,
+  HiLink,
+  HiInformationCircle,
+  HiUserGroup,
+} from "react-icons/hi2";
 import { EventData } from "~/types/events";
 
 type Props = {
@@ -17,7 +23,9 @@ export const EventCard = ({ event }: Props) => {
             className={cx(
               "flex flex-col border transition-all duration-300 overflow-hidden rounded-xl shadow-sm",
               "border-[var(--border-light)] bg-[var(--bg-card)]",
-              open ? "border-blue-400 ring-1 ring-blue-400/50" : "hover:border-blue-300"
+              open
+                ? "border-blue-400 ring-1 ring-blue-400/50"
+                : "hover:border-blue-300",
             )}
           >
             <Disclosure.Button className="flex flex-col md:flex-row items-center justify-between p-6 text-left w-full gap-4 hover:bg-[var(--bg-card-header)]/50 transition-colors">
@@ -29,9 +37,11 @@ export const EventCard = ({ event }: Props) => {
                   <span
                     className={cx(
                       "px-2 py-0.5 text-xs font-bold uppercase tracking-widest rounded text-white",
-                      event.status === "Current" ? "bg-green-600" : 
-                      event.status === "Upcoming" ? "bg-blue-600" : 
-                      "bg-slate-500"
+                      event.status === "Current"
+                        ? "bg-green-600"
+                        : event.status === "Upcoming"
+                          ? "bg-blue-600"
+                          : "bg-slate-500",
                     )}
                   >
                     {event.status}
@@ -42,13 +52,14 @@ export const EventCard = ({ event }: Props) => {
                     <HiCalendar className="text-blue-500" />
                     <span>{event.date}</span>
                   </div>
-                  {event.participants !== undefined && event.participants > 0 && (
-                    <div className="flex items-center gap-2">
-                      <span className="opacity-40 mr-2">|</span>
-                      <HiUserGroup className="text-blue-500" />
-                      <span>{event.participants} Participants</span>
-                    </div>
-                  )}
+                  {event.participants !== undefined &&
+                    event.participants > 0 && (
+                      <div className="flex items-center gap-2">
+                        <span className="opacity-40 mr-2">|</span>
+                        <HiUserGroup className="text-blue-500" />
+                        <span>{event.participants} Participants</span>
+                      </div>
+                    )}
                 </div>
                 <p className="text-[var(--text-sub)] mt-1 line-clamp-2">
                   {event.shortDescription}
@@ -58,7 +69,7 @@ export const EventCard = ({ event }: Props) => {
                 <div
                   className={cx(
                     "transition-transform duration-300",
-                    open ? "rotate-180" : ""
+                    open ? "rotate-180" : "",
                   )}
                 >
                   <HiChevronDown size={28} className="text-[var(--text-sub)]" />
@@ -81,7 +92,11 @@ export const EventCard = ({ event }: Props) => {
                     {event.image && (
                       <div className="rounded-lg overflow-hidden border border-[var(--border-light)] max-w-md w-3/4 shadow-sm">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={event.image} alt={event.title} className="w-full h-auto object-cover" />
+                        <img
+                          src={event.image}
+                          alt={event.title}
+                          className="w-full h-auto object-cover"
+                        />
                       </div>
                     )}
                     <section>
@@ -96,28 +111,48 @@ export const EventCard = ({ event }: Props) => {
                   </div>
 
                   <div className="flex flex-col gap-4">
-                    <h3 className="text-[var(--text-main)] font-bold mb-1 text-lg">Quick Links</h3>
+                    <h3 className="text-[var(--text-main)] font-bold mb-1 text-lg">
+                      Quick Links
+                    </h3>
                     {event.signupLink ? (
                       <Link href={event.signupLink}>
-                        <Button 
-                          className="w-full justify-center font-bold h-12 hover:brightness-110 active:brightness-90 transition-all" 
+                        <Button
+                          className="w-full justify-center font-bold h-12 hover:brightness-110 active:brightness-90 transition-all"
                           variant="primary"
-                          style={event.signupButtonColor ? { backgroundColor: event.signupButtonColor, borderColor: event.signupButtonColor } : undefined}
+                          style={
+                            event.signupButtonColor
+                              ? {
+                                  backgroundColor: event.signupButtonColor,
+                                  borderColor: event.signupButtonColor,
+                                }
+                              : undefined
+                          }
                         >
                           Sign Up Now
                         </Button>
                       </Link>
                     ) : (
-                      <Button className="w-full justify-center font-bold h-12" variant="default" disabled={true}>
+                      <Button
+                        className="w-full justify-center font-bold h-12"
+                        variant="default"
+                        disabled={true}
+                      >
                         Signups Closed
                       </Button>
                     )}
                     {event.rulesLink && (
                       <Link href={event.rulesLink}>
-                        <Button 
-                          className="w-full justify-center font-bold h-12 hover:brightness-110 active:brightness-90 transition-all" 
+                        <Button
+                          className="w-full justify-center font-bold h-12 hover:brightness-110 active:brightness-90 transition-all"
                           variant="primary"
-                          style={event.rulesButtonColor ? { backgroundColor: event.rulesButtonColor, borderColor: event.rulesButtonColor } : undefined}
+                          style={
+                            event.rulesButtonColor
+                              ? {
+                                  backgroundColor: event.rulesButtonColor,
+                                  borderColor: event.rulesButtonColor,
+                                }
+                              : undefined
+                          }
                         >
                           Info &amp; Rules
                         </Button>
@@ -126,8 +161,8 @@ export const EventCard = ({ event }: Props) => {
 
                     {event.discordLink && (
                       <Link href={event.discordLink}>
-                        <Button 
-                          className="w-full justify-center font-bold h-12 bg-[#5865F2] text-white hover:bg-[#4752C4] transition-all" 
+                        <Button
+                          className="w-full justify-center font-bold h-12 bg-[#5865F2] text-white hover:bg-[#4752C4] transition-all"
                           variant="primary"
                         >
                           Join Event Discord

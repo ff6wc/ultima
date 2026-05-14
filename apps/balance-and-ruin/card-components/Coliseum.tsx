@@ -56,7 +56,8 @@ const visibleRewardsOptions: SubflagOption[] = [
   {
     defaultValue: [255, 255],
     flag: "-crvr",
-    helperText: "",
+    helperText:
+      "Percent of Coliseum rewards visible in the item selection menu",
     label: "Random",
     Renderable: ({ children }) => (
       <FlagRange flag="-crvr" label={children} helperText="" />
@@ -85,7 +86,11 @@ export const Coliseum = () => {
           <FlagSubflagSelect
             options={visibleRewardsOptions}
             label={"Visible Rewards"}
-            nullable={{ description: "", label: "Original" }}
+            nullable={{
+              description:
+                "Percent of Coliseum rewards visible in the item selection menu",
+              label: "Original",
+            }}
           />
         </div>
 

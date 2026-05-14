@@ -8,10 +8,17 @@ export type FlagLabelProps = {
   hideFlag?: boolean;
 };
 
-export const FlagLabel = ({ helperText, flag, label, hideFlag }: FlagLabelProps) => {
+export const FlagLabel = ({
+  helperText,
+  flag,
+  label,
+  hideFlag,
+}: FlagLabelProps) => {
   return (
     <div className="flex-grow wrap">
-      <InputLabel flag={flag} htmlFor={flag} hideFlag={hideFlag}>{label}</InputLabel>
+      <InputLabel flag={flag} htmlFor={flag} hideFlag={hideFlag}>
+        {label}
+      </InputLabel>
       <HelperText>{helperText}</HelperText>
     </div>
   );

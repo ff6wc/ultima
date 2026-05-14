@@ -9,16 +9,16 @@ export function parseCSV(csvText: string) {
     const nextChar = csvText[i + 1];
 
     if (inQuotes) {
-      if (char === "\"" && nextChar === "\"") {
-        currentField += "\"";
+      if (char === '"' && nextChar === '"') {
+        currentField += '"';
         i++;
-      } else if (char === "\"") {
+      } else if (char === '"') {
         inQuotes = false;
       } else {
         currentField += char;
       }
     } else {
-      if (char === "\"") {
+      if (char === '"') {
         inQuotes = true;
       } else if (char === ",") {
         currentLine.push(currentField.trim());

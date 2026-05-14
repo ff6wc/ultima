@@ -42,7 +42,7 @@ export const ObjectiveCloneButton = ({ objective }: ObjectiveCardProps) => {
       setFlag({
         flag,
         value: objectiveToString(newObjective),
-      })
+      }),
     );
   };
 
@@ -53,7 +53,12 @@ export const ObjectiveCloneButton = ({ objective }: ObjectiveCardProps) => {
       size="small"
       variant="default"
       title="Clone Objective"
-      style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "0.4rem" }}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "0.4rem",
+      }}
     >
       <FaCopy size={13} />
     </Button>

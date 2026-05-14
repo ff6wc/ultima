@@ -2,7 +2,11 @@ import groupBy from "lodash/groupBy";
 import { useId, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { FlagLabel } from "~/components/FlagLabel/FlagLabel";
-import { Select as CustomSelect, SelectOption, SelectGroup } from "~/components/Select/Select";
+import {
+  Select as CustomSelect,
+  SelectOption,
+  SelectGroup,
+} from "~/components/Select/Select";
 import { useFlagValueSelector } from "~/state/flagSlice";
 import { selectObjectiveResultMetadata } from "~/state/objectiveSlice";
 import { ObjectiveResult, RawObjectiveResult } from "~/types/objectives";
@@ -20,7 +24,7 @@ const useResultOptions = (results: RawObjectiveResult[]) => {
         id: id.toString(),
         label: format_string.replace("{{ . }}", ""),
       })),
-    [results]
+    [results],
   );
 };
 
@@ -37,13 +41,16 @@ export const ObjectiveResultSelect = ({
 
   const resultsById = useMemo(
     () =>
-      results.reduce((acc, result) => {
-        acc[result.id] = resultMetadata.find(
-          ({ id }) => id.toString() === result.id
-        );
-        return acc;
-      }, {} as Record<string | number, RawObjectiveResult | undefined>),
-    [resultMetadata, results]
+      results.reduce(
+        (acc, result) => {
+          acc[result.id] = resultMetadata.find(
+            ({ id }) => id.toString() === result.id,
+          );
+          return acc;
+        },
+        {} as Record<string | number, RawObjectiveResult | undefined>,
+      ),
+    [resultMetadata, results],
   );
 
   const id = useId();
@@ -62,18 +69,21 @@ export const ObjectiveResultSelect = ({
     return Object.entries(resultsByGroup).map(([groupName, groupResults]) => {
       return {
         label: groupName,
-        options: groupResults.map(res => ({
-          ...res,
-          value: res.id,
-          label: getOptionLabel(res),
-        } as SelectOption)),
+        options: groupResults.map(
+          (res) =>
+            ({
+              ...res,
+              value: res.id,
+              label: getOptionLabel(res),
+            }) as SelectOption,
+        ),
       };
     });
   }, [results, resultsById]);
 
   const activeSelectValue = useMemo(() => {
     for (const group of groupOptions) {
-      const found = group.options.find(opt => opt.value === resultId);
+      const found = group.options.find((opt) => opt.value === resultId);
       if (found) return found;
     }
     return null;
@@ -83,7 +93,7 @@ export const ObjectiveResultSelect = ({
   const filterOption = (opt: SelectOption, needle: string) => {
     const query = needle.trim().toLowerCase();
     if (!query) return true;
-    
+
     const label = opt.label.toLowerCase();
     const val = opt.value.toLowerCase();
     const grp = (opt.group || "").toLowerCase();
@@ -106,7 +116,7 @@ export const ObjectiveResultSelect = ({
             return;
           }
           // Return back legacy format
-          const original = results.find(r => r.id === selected.value);
+          const original = results.find((r) => r.id === selected.value);
           if (original) {
             onChange(original);
           }

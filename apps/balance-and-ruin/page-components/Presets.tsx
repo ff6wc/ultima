@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import {
@@ -11,10 +11,15 @@ import {
   FaSortAmountDown,
   FaSortAmountUp,
   FaTimes,
+  FaPlus,
 } from "react-icons/fa";
-import { setRawFlags } from "~/state/flagSlice";
+import { setRawFlags, selectRawFlags } from "~/state/flagSlice";
 import { setRawObjectives } from "~/state/objectiveSlice";
-import { setActivePreset, clearActivePreset, selectActivePresetName } from "~/state/presetSlice";
+import {
+  setActivePreset,
+  clearActivePreset,
+  selectActivePresetName,
+} from "~/state/presetSlice";
 import { FlagPreset } from "~/types/preset";
 import { PageContainer } from "~/components/PageContainer/PageContainer";
 
@@ -31,7 +36,10 @@ function recordDownload(userId: string, presetName: string) {
   }
 }
 
-function getLastDownloaded(userId: string, presetName: string): string | undefined {
+function getLastDownloaded(
+  userId: string,
+  presetName: string,
+): string | undefined {
   try {
     return localStorage.getItem(LS_KEY(userId, presetName)) ?? undefined;
   } catch {
@@ -54,7 +62,7 @@ const SORT_LABELS: Record<SortField, string> = {
 function sortPresets(
   presets: FlagPreset[],
   field: SortField,
-  dir: SortDir
+  dir: SortDir,
 ): FlagPreset[] {
   const sorted = [...presets].sort((a, b) => {
     let cmp = 0;
@@ -64,7 +72,7 @@ function sortPresets(
         break;
       case "author":
         cmp = (a.creator_name || a.creator || "").localeCompare(
-          b.creator_name || b.creator || ""
+          b.creator_name || b.creator || "",
         );
         break;
       case "created_at":
@@ -96,7 +104,12 @@ type SortBarProps = {
 };
 
 const SortBar = ({ field, dir, onChange }: SortBarProps) => {
-  const fields: SortField[] = ["name", "author", "created_at", "last_downloaded"];
+  const fields: SortField[] = [
+    "name",
+    "author",
+    "created_at",
+    "last_downloaded",
+  ];
 
   return (
     <div
@@ -185,8 +198,22 @@ const PresetCard = ({ preset, onSelect, selected }: PresetCardProps) => {
       }}
       onClick={() => onSelect(preset)}
     >
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.75rem" }}>
-        <div style={{ display: "flex", flexDirection: "column", flex: 1, minWidth: 0 }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: "0.75rem",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            flex: 1,
+            minWidth: 0,
+          }}
+        >
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
             {selected && (
               <span
@@ -212,7 +239,13 @@ const PresetCard = ({ preset, onSelect, selected }: PresetCardProps) => {
               {preset.name}
             </span>
           </div>
-          <span style={{ fontSize: "0.75rem", color: "var(--text-sub)", marginTop: "0.1rem" }}>
+          <span
+            style={{
+              fontSize: "0.75rem",
+              color: "var(--text-sub)",
+              marginTop: "0.1rem",
+            }}
+          >
             by {preset.creator_name || preset.creator}
             {preset.created_at && (
               <>
@@ -234,10 +267,13 @@ const PresetCard = ({ preset, onSelect, selected }: PresetCardProps) => {
                 }}
               >
                 Downloaded{" "}
-                {new Date(preset.last_downloaded).toLocaleDateString(undefined, {
-                  month: "short",
-                  day: "numeric",
-                })}
+                {new Date(preset.last_downloaded).toLocaleDateString(
+                  undefined,
+                  {
+                    month: "short",
+                    day: "numeric",
+                  },
+                )}
               </span>
             )}
           </span>
@@ -258,7 +294,11 @@ const PresetCard = ({ preset, onSelect, selected }: PresetCardProps) => {
               flexShrink: 0,
             }}
           >
-            {expanded ? <FaChevronDown size={12} /> : <FaChevronRight size={12} />}
+            {expanded ? (
+              <FaChevronDown size={12} />
+            ) : (
+              <FaChevronRight size={12} />
+            )}
           </button>
         )}
       </div>
@@ -318,7 +358,9 @@ const CategorySection = ({
         (p) =>
           p.name.toLowerCase().includes(search.toLowerCase()) ||
           (p.description || "").toLowerCase().includes(search.toLowerCase()) ||
-          ((p.creator_name || p.creator) || "").toLowerCase().includes(search.toLowerCase())
+          (p.creator_name || p.creator || "")
+            .toLowerCase()
+            .includes(search.toLowerCase()),
       )
     : presets;
 
@@ -389,7 +431,11 @@ const CategorySection = ({
               marginBottom: "0.75rem",
             }}
           >
-            <SortBar field={sortField} dir={sortDir} onChange={handleSortChange} />
+            <SortBar
+              field={sortField}
+              dir={sortDir}
+              onChange={handleSortChange}
+            />
 
             {/* Search within category — only shown when there are enough presets */}
             {presets.length > 5 && (
@@ -443,9 +489,17 @@ const CategorySection = ({
             )}
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+          <div
+            style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}
+          >
             {sorted.length === 0 ? (
-              <p style={{ color: "var(--text-sub)", fontSize: "0.85rem", padding: "0.5rem" }}>
+              <p
+                style={{
+                  color: "var(--text-sub)",
+                  fontSize: "0.85rem",
+                  padding: "0.5rem",
+                }}
+              >
                 No results found.
               </p>
             ) : (
@@ -474,18 +528,116 @@ type PresetsPageProps = {
 export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
   const dispatch = useDispatch();
 
+  const ENABLE_PRESET_CREATION = false;
 
   // Active preset name lives in Redux — persists across tab navigation
   const activePresetName = useSelector(selectActivePresetName);
 
   const [globalSearch, setGlobalSearch] = useState("");
+  const [customPresets, setCustomPresets] = useState<
+    Record<string, FlagPreset>
+  >({});
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [newPresetName, setNewPresetName] = useState("");
+  const [creatorName, setCreatorName] = useState("");
+  const [description, setDescription] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+
+  const activeFlags = useSelector(selectRawFlags);
 
   const currentUserId: string | undefined = undefined;
 
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("custom_presets");
+      if (stored) {
+        setCustomPresets(JSON.parse(stored));
+      }
+    } catch (e) {}
+  }, []);
+
+  const mergedPresets = useMemo(
+    () => ({
+      ...rawPresets,
+      ...customPresets,
+    }),
+    [rawPresets, customPresets],
+  );
+
+  const handleCreatePreset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newPresetName.trim() || !creatorName.trim()) {
+      setSubmitError("Preset Name and Creator Name are required.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmitError(null);
+    setSubmitSuccess(false);
+
+    const createdPreset: FlagPreset = {
+      name: newPresetName.trim(),
+      creator_name: creatorName.trim(),
+      creator: creatorName.trim(),
+      description: description.trim(),
+      flags: activeFlags,
+      creator_id: 0,
+      arguments: "",
+      official: false,
+      hidden: false,
+      created_at: new Date().toISOString(),
+    };
+
+    // 1. Store locally for immediate viewing & fallback
+    const updatedCustom = {
+      ...customPresets,
+      [createdPreset.name]: createdPreset,
+    };
+    setCustomPresets(updatedCustom);
+    try {
+      localStorage.setItem("custom_presets", JSON.stringify(updatedCustom));
+    } catch (e) {}
+
+    // 2. Post to the backend for bidirectional sync with seedbot
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/presets`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(createdPreset),
+        },
+      );
+
+      if (!response.ok) {
+        console.warn(`Server save returned ${response.statusText}`);
+      }
+    } catch (err) {
+      console.warn("Error posting preset to server:", err);
+    }
+
+    setSubmitSuccess(true);
+    setNewPresetName("");
+    setDescription("");
+    setTimeout(() => {
+      setShowCreateForm(false);
+      setSubmitSuccess(false);
+    }, 1500);
+    setIsSubmitting(false);
+  };
+
   // Annotate each preset with the user's last-downloaded timestamp from localStorage
-  const allPresets = Object.values(rawPresets)
+  const allPresets = Object.values(mergedPresets)
     .filter(
-      (p) => !p.hidden && p.flags && !p.flags.startsWith("<") && p.flags.trim() !== ""
+      (p) =>
+        !p.hidden &&
+        p.flags &&
+        !p.flags.startsWith("<") &&
+        p.flags.trim() !== "",
     )
     .map((p) => ({
       ...p,
@@ -494,16 +646,23 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
         : undefined,
     }));
 
+  const customPresetNames = new Set(Object.keys(customPresets));
+
   const eventPresets = allPresets.filter((p) => p.official);
-  const myPresets = currentUserId
-    ? allPresets.filter(
-        (p) => !p.official && String(p.creator_id) === String(currentUserId)
-      )
-    : [];
+
+  const myPresets = allPresets.filter(
+    (p) =>
+      customPresetNames.has(p.name) ||
+      (currentUserId &&
+        !p.official &&
+        String(p.creator_id) === String(currentUserId)),
+  );
+
   const communityPresets = allPresets.filter(
     (p) =>
       !p.official &&
-      !(currentUserId && String(p.creator_id) === String(currentUserId))
+      !customPresetNames.has(p.name) &&
+      !(currentUserId && String(p.creator_id) === String(currentUserId)),
   );
 
   const handleSelect = (preset: FlagPreset) => {
@@ -530,166 +689,456 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
     ? allPresets.filter(
         (p) =>
           p.name.toLowerCase().includes(globalSearch.toLowerCase()) ||
-          (p.description || "").toLowerCase().includes(globalSearch.toLowerCase()) ||
-          ((p.creator_name || p.creator) || "").toLowerCase().includes(globalSearch.toLowerCase())
+          (p.description || "")
+            .toLowerCase()
+            .includes(globalSearch.toLowerCase()) ||
+          (p.creator_name || p.creator || "")
+            .toLowerCase()
+            .includes(globalSearch.toLowerCase()),
       )
     : [];
 
   return (
     <PageContainer columns={1}>
       <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-      {/* Header */}
-      <div>
-        <h1 style={{ fontSize: "1.4rem", fontWeight: 800, color: "var(--text-main)", margin: "0 0 0.25rem" }}>
-          Presets
-        </h1>
-        <p style={{ color: "var(--text-sub)", fontSize: "0.9rem", margin: 0 }}>
-          Choose an event or community-created preset to load its flagset. You can customize it
-          further using the tabs on the left before generation, or go straight to &ldquo;Generate&rdquo; to
-          download a seed.
-        </p>
-      </div>
+        {/* Header */}
+        <div>
+          <h1
+            style={{
+              fontSize: "1.4rem",
+              fontWeight: 800,
+              color: "var(--text-main)",
+              margin: "0 0 0.25rem",
+            }}
+          >
+            Presets
+          </h1>
+          <p
+            style={{ color: "var(--text-sub)", fontSize: "0.9rem", margin: 0 }}
+          >
+            Choose an event or community-created preset to load its flagset. You
+            can customize it further using the tabs on the left before
+            generation, or go straight to &ldquo;Generate&rdquo; to download a
+            seed.
+          </p>
+        </div>
 
-      {/* Global search */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "0.75rem",
-          padding: "0.75rem 1rem",
-          background: "var(--bg-card)",
-          borderRadius: "10px",
-          border: "1px solid var(--border-light)",
-        }}
-      >
-        <FaSearch color="var(--text-sub)" />
-        <input
-          type="text"
-          placeholder="Search all presets..."
-          value={globalSearch}
-          onChange={(e) => setGlobalSearch(e.target.value)}
+        {/* Create Preset Form Section */}
+        {ENABLE_PRESET_CREATION && (
+          <div
+            style={{
+              background: "var(--bg-card)",
+              borderRadius: "12px",
+              border: "1px solid var(--border-light)",
+              overflow: "hidden",
+              transition: "all 0.3s ease",
+            }}
+          >
+            <button
+              onClick={() => setShowCreateForm(!showCreateForm)}
+              style={{
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "1rem 1.25rem",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: "var(--text-main)",
+                textAlign: "left",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.75rem",
+                }}
+              >
+                <span
+                  style={{
+                    color: "#3b82f6",
+                    fontSize: "1.1rem",
+                    display: "flex",
+                  }}
+                >
+                  <FaPlus />
+                </span>
+                <span style={{ fontWeight: 700, fontSize: "0.95rem" }}>
+                  Create Custom Preset
+                </span>
+              </div>
+              <FaChevronDown
+                size={14}
+                style={{
+                  color: "var(--text-sub)",
+                  transform: showCreateForm ? "rotate(0deg)" : "rotate(-90deg)",
+                  transition: "transform 0.2s",
+                }}
+              />
+            </button>
+
+            {showCreateForm && (
+              <form
+                onSubmit={handleCreatePreset}
+                style={{ padding: "0 1.25rem 1.25rem" }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "0.75rem",
+                    marginTop: "0.5rem",
+                  }}
+                >
+                  <p
+                    style={{
+                      color: "var(--text-sub)",
+                      fontSize: "0.8rem",
+                      margin: "0 0 0.25rem",
+                    }}
+                  >
+                    Save your currently selected flags as a custom preset. It
+                    will be saved locally and synced back.
+                  </p>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "0.25rem",
+                    }}
+                  >
+                    <label
+                      style={{
+                        fontSize: "0.75rem",
+                        fontWeight: 600,
+                        color: "var(--text-main)",
+                      }}
+                    >
+                      Preset Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={newPresetName}
+                      onChange={(e) => setNewPresetName(e.target.value)}
+                      placeholder="e.g. DoubleDown Blitz Race"
+                      style={{
+                        padding: "0.6rem",
+                        background: "var(--bg-app)",
+                        border: "1px solid var(--border-light)",
+                        borderRadius: "8px",
+                        color: "var(--text-main)",
+                        outline: "none",
+                        fontSize: "0.85rem",
+                      }}
+                    />
+                  </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "0.25rem",
+                    }}
+                  >
+                    <label
+                      style={{
+                        fontSize: "0.75rem",
+                        fontWeight: 600,
+                        color: "var(--text-main)",
+                      }}
+                    >
+                      Creator Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={creatorName}
+                      onChange={(e) => setCreatorName(e.target.value)}
+                      placeholder="Your handle"
+                      style={{
+                        padding: "0.6rem",
+                        background: "var(--bg-app)",
+                        border: "1px solid var(--border-light)",
+                        borderRadius: "8px",
+                        color: "var(--text-main)",
+                        outline: "none",
+                        fontSize: "0.85rem",
+                      }}
+                    />
+                  </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "0.25rem",
+                    }}
+                  >
+                    <label
+                      style={{
+                        fontSize: "0.75rem",
+                        fontWeight: 600,
+                        color: "var(--text-main)",
+                      }}
+                    >
+                      Description
+                    </label>
+                    <textarea
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      placeholder="Describe your preset..."
+                      rows={2}
+                      style={{
+                        padding: "0.6rem",
+                        background: "var(--bg-app)",
+                        border: "1px solid var(--border-light)",
+                        borderRadius: "8px",
+                        color: "var(--text-main)",
+                        outline: "none",
+                        resize: "none",
+                        fontSize: "0.85rem",
+                        fontFamily: "inherit",
+                      }}
+                    />
+                  </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "0.25rem",
+                    }}
+                  >
+                    <label
+                      style={{
+                        fontSize: "0.75rem",
+                        fontWeight: 600,
+                        color: "var(--text-main)",
+                      }}
+                    >
+                      Current Flags
+                    </label>
+                    <div
+                      style={{
+                        padding: "0.6rem",
+                        background: "rgba(0,0,0,0.1)",
+                        border: "1px solid var(--border-light)",
+                        borderRadius: "8px",
+                        color: "var(--text-sub)",
+                        fontSize: "0.75rem",
+                        wordBreak: "break-all",
+                        maxHeight: "60px",
+                        overflowY: "auto",
+                        fontFamily: "monospace",
+                      }}
+                    >
+                      {activeFlags || "No flags selected"}
+                    </div>
+                  </div>
+
+                  {submitError && (
+                    <div
+                      style={{
+                        color: "#ef4444",
+                        fontSize: "0.8rem",
+                        marginTop: "0.25rem",
+                      }}
+                    >
+                      {submitError}
+                    </div>
+                  )}
+
+                  {submitSuccess && (
+                    <div
+                      style={{
+                        color: "#10b981",
+                        fontSize: "0.8rem",
+                        marginTop: "0.25rem",
+                        fontWeight: 600,
+                      }}
+                    >
+                      ✓ Preset successfully created!
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={isSubmitting || !activeFlags}
+                    style={{
+                      marginTop: "0.5rem",
+                      padding: "0.6rem",
+                      background: "#3b82f6",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "8px",
+                      cursor: "pointer",
+                      fontWeight: 600,
+                      fontSize: "0.85rem",
+                      opacity: isSubmitting || !activeFlags ? 0.7 : 1,
+                    }}
+                  >
+                    {isSubmitting ? "Creating..." : "Save & Sync Preset"}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        )}
+
+        {/* Global search */}
+        <div
           style={{
-            background: "none",
-            border: "none",
-            outline: "none",
-            fontSize: "0.95rem",
-            color: "var(--text-main)",
-            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            gap: "0.75rem",
+            padding: "0.75rem 1rem",
+            background: "var(--bg-card)",
+            borderRadius: "10px",
+            border: "1px solid var(--border-light)",
           }}
-        />
-        {globalSearch && (
-          <button
-            onClick={() => setGlobalSearch("")}
+        >
+          <FaSearch color="var(--text-sub)" />
+          <input
+            type="text"
+            placeholder="Search all presets..."
+            value={globalSearch}
+            onChange={(e) => setGlobalSearch(e.target.value)}
             style={{
               background: "none",
               border: "none",
-              cursor: "pointer",
-              color: "var(--text-sub)",
-              fontSize: "0.8rem",
+              outline: "none",
+              fontSize: "0.95rem",
+              color: "var(--text-main)",
+              flex: 1,
             }}
-          >
-            ✕
-          </button>
-        )}
-      </div>
+          />
+          {globalSearch && (
+            <button
+              onClick={() => setGlobalSearch("")}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: "var(--text-sub)",
+                fontSize: "0.8rem",
+              }}
+            >
+              ✕
+            </button>
+          )}
+        </div>
 
-      {/* Active selection banner — shown whenever a preset is active */}
-      {activePresetName && (
-        <div
-          style={{
-            padding: "0.75rem 1rem",
-            background: "rgba(59,130,246,0.08)",
-            border: "1px solid rgba(59,130,246,0.3)",
-            borderRadius: "10px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            color: "#3b82f6",
-            fontSize: "0.9rem",
-            fontWeight: 600,
-          }}
-        >
-          <span>
-            ✓ Active preset: <strong>{activePresetName}</strong>
-          </span>
-          <button
-            onClick={handleClear}
+        {/* Active selection banner — shown whenever a preset is active */}
+        {activePresetName && (
+          <div
             style={{
+              padding: "0.75rem 1rem",
+              background: "rgba(59,130,246,0.08)",
+              border: "1px solid rgba(59,130,246,0.3)",
+              borderRadius: "10px",
               display: "flex",
               alignItems: "center",
-              gap: "0.35rem",
-              background: "none",
-              border: "1px solid rgba(59,130,246,0.4)",
-              borderRadius: "6px",
-              cursor: "pointer",
+              justifyContent: "space-between",
               color: "#3b82f6",
-              fontSize: "0.78rem",
+              fontSize: "0.9rem",
               fontWeight: 600,
-              padding: "0.2rem 0.55rem",
-              transition: "background 0.15s",
             }}
-            onMouseEnter={(e) =>
-              ((e.currentTarget as HTMLButtonElement).style.background =
-                "rgba(59,130,246,0.12)")
-            }
-            onMouseLeave={(e) =>
-              ((e.currentTarget as HTMLButtonElement).style.background = "none")
-            }
           >
-            <FaTimes size={10} />
-            Clear
-          </button>
-        </div>
-      )}
+            <span>
+              ✓ Active preset: <strong>{activePresetName}</strong>
+            </span>
+            <button
+              onClick={handleClear}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "0.35rem",
+                background: "none",
+                border: "1px solid rgba(59,130,246,0.4)",
+                borderRadius: "6px",
+                cursor: "pointer",
+                color: "#3b82f6",
+                fontSize: "0.78rem",
+                fontWeight: 600,
+                padding: "0.2rem 0.55rem",
+                transition: "background 0.15s",
+              }}
+              onMouseEnter={(e) =>
+                ((e.currentTarget as HTMLButtonElement).style.background =
+                  "rgba(59,130,246,0.12)")
+              }
+              onMouseLeave={(e) =>
+                ((e.currentTarget as HTMLButtonElement).style.background =
+                  "none")
+              }
+            >
+              <FaTimes size={10} />
+              Clear
+            </button>
+          </div>
+        )}
 
-      {/* Global search results */}
-      {searchActive ? (
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-          <p style={{ color: "var(--text-sub)", fontSize: "0.85rem", margin: 0 }}>
-            Found {searchResults.length} result{searchResults.length !== 1 ? "s" : ""}
-          </p>
-          {searchResults.map((p) => (
-            <PresetCard
-              key={p.name}
-              preset={p}
-              onSelect={handleSelect}
-              selected={activePresetName === p.name}
-            />
-          ))}
-        </div>
-      ) : (
-        <>
-          {myPresets.length > 0 && (
+        {/* Global search results */}
+        {searchActive ? (
+          <div
+            style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}
+          >
+            <p
+              style={{
+                color: "var(--text-sub)",
+                fontSize: "0.85rem",
+                margin: 0,
+              }}
+            >
+              Found {searchResults.length} result
+              {searchResults.length !== 1 ? "s" : ""}
+            </p>
+            {searchResults.map((p) => (
+              <PresetCard
+                key={p.name}
+                preset={p}
+                onSelect={handleSelect}
+                selected={activePresetName === p.name}
+              />
+            ))}
+          </div>
+        ) : (
+          <>
+            {myPresets.length > 0 && (
+              <CategorySection
+                icon={<FaUser />}
+                title="My Presets"
+                color="#8b5cf6"
+                presets={myPresets}
+                selectedName={activePresetName}
+                onSelect={handleSelect}
+                defaultOpen={true}
+              />
+            )}
             <CategorySection
-              icon={<FaUser />}
-              title="My Presets"
-              color="#8b5cf6"
-              presets={myPresets}
+              icon={<FaCalendarAlt />}
+              title="Event Presets"
+              color="#f59e0b"
+              presets={eventPresets}
               selectedName={activePresetName}
               onSelect={handleSelect}
               defaultOpen={true}
             />
-          )}
-          <CategorySection
-            icon={<FaCalendarAlt />}
-            title="Event Presets"
-            color="#f59e0b"
-            presets={eventPresets}
-            selectedName={activePresetName}
-            onSelect={handleSelect}
-            defaultOpen={true}
-          />
-          <CategorySection
-            icon={<FaUsers />}
-            title="Community Presets"
-            color="#10b981"
-            presets={communityPresets}
-            selectedName={activePresetName}
-            onSelect={handleSelect}
-            defaultOpen={false}
-          />
-        </>
-      )}
+            <CategorySection
+              icon={<FaUsers />}
+              title="Community Presets"
+              color="#10b981"
+              presets={communityPresets}
+              selectedName={activePresetName}
+              onSelect={handleSelect}
+              defaultOpen={false}
+            />
+          </>
+        )}
       </div>
     </PageContainer>
   );

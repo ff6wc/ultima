@@ -3,7 +3,10 @@ import { useSelector } from "react-redux";
 import first from "lodash/first";
 import last from "lodash/last";
 import { FlagLabel } from "~/components/FlagLabel/FlagLabel";
-import { Select as CustomSelect, SelectOption } from "~/components/Select/Select";
+import {
+  Select as CustomSelect,
+  SelectOption,
+} from "~/components/Select/Select";
 import { selectObjectiveConditionMetadataById } from "~/state/objectiveSlice";
 import { Objective, ObjectiveCondition } from "~/types/objectives";
 import { Slider } from "@ff6wc/ui";
@@ -33,16 +36,19 @@ export const ObjectiveConditionSelect = ({
         label: c.condition_type_name,
         value: c.id.toString(),
       })),
-    [meta]
+    [meta],
   );
 
   const optionsById = useMemo(
     () =>
-      options.reduce((acc, val) => {
-        acc[val.value] = val;
-        return acc;
-      }, {} as Record<string, SelectOption>),
-    [options]
+      options.reduce(
+        (acc, val) => {
+          acc[val.value] = val;
+          return acc;
+        },
+        {} as Record<string, SelectOption>,
+      ),
+    [options],
   );
 
   const selectedCondition = optionsById[id] ?? null;
@@ -57,7 +63,7 @@ export const ObjectiveConditionSelect = ({
       console.error(
         "condition not found within objective",
         objective,
-        condition
+        condition,
       );
       return;
     }
@@ -83,7 +89,7 @@ export const ObjectiveConditionSelect = ({
 
     const oldId = Number.parseInt(condition.id);
     const newId = Number.parseInt(newCondition.id);
-    
+
     if (oldId === 0 && newId > 0) {
       obj.requiredConditions = [
         Math.max(Math.min(obj.requiredConditions[0], validConditions) + 1, 0),
@@ -139,7 +145,7 @@ export const ObjectiveConditionSelect = ({
 
   const getSelectedValueOption = () =>
     selectOptions.find(
-      ({ value }) => value.toString() === condition.values?.[0]?.toString()
+      ({ value }) => value.toString() === condition.values?.[0]?.toString(),
     ) ?? null;
 
   const showSubselect = !["0", "1"].includes(id);
@@ -147,7 +153,6 @@ export const ObjectiveConditionSelect = ({
 
   return (
     <div className="flex flex-col gap-2">
-
       <CustomSelect
         isSearchable
         options={options}

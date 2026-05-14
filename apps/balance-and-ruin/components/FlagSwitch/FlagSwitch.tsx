@@ -37,7 +37,7 @@ export const FlagSwitch = ({
       setFlag({
         flag,
         value: invert ? !value : value,
-      })
+      }),
     );
   };
 

@@ -10,7 +10,6 @@ type AppLayoutProps = {
 };
 
 export const AppLayout = ({ children, title }: AppLayoutProps) => {
-
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [processedLogo, setProcessedLogo] = useState<string | null>(null);
 
@@ -39,7 +38,9 @@ export const AppLayout = ({ children, title }: AppLayoutProps) => {
 
   useEffect(() => {
     const saved = localStorage.getItem("app-theme") as "light" | "dark";
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const prefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)",
+    ).matches;
     const defaultTheme = saved || (prefersDark ? "dark" : "light");
     setTheme(defaultTheme);
     if (defaultTheme === "dark") document.documentElement.classList.add("dark");
@@ -59,8 +60,23 @@ export const AppLayout = ({ children, title }: AppLayoutProps) => {
       {/* Sidebar */}
       <aside className={styles.sidebar}>
         <div className={styles.sidebarHeader}>
-          <div className={styles.logo} style={{ padding: "10px 10px 0 10px", width: "100%", position: "relative" }}>
-            <div style={{ width: "100%", height: "auto", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div
+            className={styles.logo}
+            style={{
+              padding: "10px 10px 0 10px",
+              width: "100%",
+              position: "relative",
+            }}
+          >
+            <div
+              style={{
+                width: "100%",
+                height: "auto",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
               <img
                 src="/logo-transparent.png"
                 alt="Final Fantasy VI Randomizer"
@@ -68,7 +84,7 @@ export const AppLayout = ({ children, title }: AppLayoutProps) => {
                   objectFit: "contain",
                   width: "100%",
                   height: "auto",
-                  maxHeight: "80px"
+                  maxHeight: "80px",
                 }}
               />
             </div>
@@ -77,7 +93,10 @@ export const AppLayout = ({ children, title }: AppLayoutProps) => {
           {/* User profile */}
           <div style={{ width: "100%", marginTop: "0.75rem" }}>
             <div className={styles.userProfile}>
-              <div className={styles.avatar} style={{ backgroundColor: "#5865F2" }}>
+              <div
+                className={styles.avatar}
+                style={{ backgroundColor: "#5865F2" }}
+              >
                 <FaDiscord color="white" size={20} />
               </div>
               <span className={styles.userName}>Login with Discord</span>
@@ -86,7 +105,15 @@ export const AppLayout = ({ children, title }: AppLayoutProps) => {
         </div>
 
         {/* Nav links */}
-        <div style={{ padding: "1rem 0", flexGrow: 1, display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+        <div
+          style={{
+            padding: "1rem 0",
+            flexGrow: 1,
+            display: "flex",
+            flexDirection: "column",
+            gap: "0.25rem",
+          }}
+        >
           <a
             href="/create"
             className={styles.tabItem}
@@ -99,7 +126,13 @@ export const AppLayout = ({ children, title }: AppLayoutProps) => {
 
         {/* Bottom link */}
         <div style={{ padding: "1rem" }}>
-          <a href="https://discord.gg/5MPeng5" target="_blank" rel="noreferrer" className={styles.tabItem} style={{ textDecoration: "none" }}>
+          <a
+            href="https://discord.gg/5MPeng5"
+            target="_blank"
+            rel="noreferrer"
+            className={styles.tabItem}
+            style={{ textDecoration: "none" }}
+          >
             <FaDiscord size={16} />
             <span>Join Discord</span>
           </a>
@@ -114,22 +147,43 @@ export const AppLayout = ({ children, title }: AppLayoutProps) => {
             <button
               onClick={toggleTheme}
               className="p-2 rounded-full bg-neutral-100 dark:bg-slate-800 hover:bg-neutral-200 dark:hover:bg-slate-700 transition-all flex items-center justify-center text-neutral-600 dark:text-neutral-300 shadow-sm border border-slate-200 dark:border-slate-700"
-              title={theme === "light" ? "Enable Dark Mode" : "Enable Light Mode"}
+              title={
+                theme === "light" ? "Enable Dark Mode" : "Enable Light Mode"
+              }
             >
-              {theme === "light" ? <HiOutlineMoon size={22} /> : <HiOutlineSun size={22} className="text-yellow-400" />}
+              {theme === "light" ? (
+                <HiOutlineMoon size={22} />
+              ) : (
+                <HiOutlineSun size={22} className="text-yellow-400" />
+              )}
             </button>
           </div>
 
           <div className={styles.topBarLinks}>
-            <a href="https://ff6worldscollide.com/sotw/" target="_blank" rel="noreferrer" className={styles.topBarLink}>
+            <a
+              href="https://ff6worldscollide.com/sotw/"
+              target="_blank"
+              rel="noreferrer"
+              className={styles.topBarLink}
+            >
               <span style={{ fontSize: "20px" }}>🌱</span>
               <span>SEED OF THE WEEK</span>
             </a>
-            <a href="https://wiki.ff6worldscollide.com/wiki/Main_Page" target="_blank" rel="noreferrer" className={styles.topBarLink}>
+            <a
+              href="https://wiki.ff6worldscollide.com/wiki/Main_Page"
+              target="_blank"
+              rel="noreferrer"
+              className={styles.topBarLink}
+            >
               <FaBook size={20} />
               <span>WIKI</span>
             </a>
-            <a href="https://discord.gg/5MPeng5" target="_blank" rel="noreferrer" className={styles.topBarLink}>
+            <a
+              href="https://discord.gg/5MPeng5"
+              target="_blank"
+              rel="noreferrer"
+              className={styles.topBarLink}
+            >
               <FaDiscord size={20} />
               <span>DISCORD</span>
             </a>
@@ -137,7 +191,11 @@ export const AppLayout = ({ children, title }: AppLayoutProps) => {
 
           <div className={styles.searchBar}>
             <FaSearch color="#64748b" />
-            <input type="text" placeholder="Search" className={styles.searchInput} />
+            <input
+              type="text"
+              placeholder="Search"
+              className={styles.searchInput}
+            />
           </div>
         </div>
 

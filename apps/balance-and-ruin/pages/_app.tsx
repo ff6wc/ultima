@@ -36,7 +36,7 @@ const App: AppType<Props> = ({ Component, ...rest }: AppProps<Props>) => {
     <div
       className={cx(
         openSans.className,
-        "text-grey dark:text-white flex flex-col h-full"
+        "text-grey dark:text-white flex flex-col h-full",
       )}
     >
       <Provider store={store}>
@@ -44,7 +44,7 @@ const App: AppType<Props> = ({ Component, ...rest }: AppProps<Props>) => {
           <GoogleReCaptchaProvider
             reCaptchaKey={process.env.NEXT_PUBLIC_RECAPTCHA_KEY as string}
           >
-              <Component {...props.pageProps} />
+            <Component {...props.pageProps} />
           </GoogleReCaptchaProvider>
         </QueryClientProvider>
       </Provider>

@@ -1,9 +1,4 @@
-import {
-  CodeBlock,
-  HelperText,
-  Input,
-  Link,
-} from "@ff6wc/ui";
+import { CodeBlock, HelperText, Input, Link } from "@ff6wc/ui";
 import first from "lodash/first";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { MdClear, MdFileUpload } from "react-icons/md";
@@ -61,8 +56,8 @@ export const GenerateCard = ({
   const displayRomName = !romName
     ? ""
     : romName.length > 20
-    ? romName.slice(0, 8).concat("...", ext)
-    : romName;
+      ? romName.slice(0, 8).concat("...", ext)
+      : romName;
 
   const flags = useOrderedFlags();
   const router = useRouter();
@@ -92,11 +87,14 @@ export const GenerateCard = ({
     ["/api/generate", flags],
     async (key, { arg }) => {
       const { flags, reCAPTCHA } = arg;
-      const result = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/generate`, {
-        body: JSON.stringify({ reCAPTCHA, flags }),
-        headers: {},
-        method: "POST",
-      });
+      const result = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/generate`,
+        {
+          body: JSON.stringify({ reCAPTCHA, flags }),
+          headers: {},
+          method: "POST",
+        },
+      );
 
       if (result.status !== 200) {
         const error = await result.text();
@@ -105,9 +103,9 @@ export const GenerateCard = ({
 
       const data = await result.json();
       return data as GenerateResponse;
-    }
+    },
   );
-  
+
   const generate = async () => {
     if (isMutating) {
       return;
@@ -129,7 +127,7 @@ export const GenerateCard = ({
 
     const patched = XDelta3Decoder.decode(
       base64ToByteArray(patch as string),
-      base64ToByteArray(rom)
+      base64ToByteArray(rom),
     );
 
     const jsz = new JSZip();
@@ -204,7 +202,7 @@ export const GenerateCard = ({
   return (
     <div className={styles.container}>
       <h2 className={styles.title}>Generate Your ROM</h2>
-      
+
       <div className={styles.stepContainer}>
         <h3 className={styles.stepTitle}>Step 1: Review Flags</h3>
         <textarea
@@ -215,7 +213,7 @@ export const GenerateCard = ({
           placeholder="Your selected flags will appear here..."
         />
       </div>
-      
+
       <div className={styles.divider} />
 
       <div className={styles.stepContainer}>
@@ -231,7 +229,7 @@ export const GenerateCard = ({
           success={success}
         />
       </div>
-      
+
       <div className={styles.divider} />
 
       <div className={styles.stepContainer}>
@@ -245,13 +243,13 @@ export const GenerateCard = ({
           />
           <FlagSwitch flag="-sl" label="Spoiler Log" />
         </div>
-        
+
         {showDisabledText && (
           <span className={styles.helperText}>
             This button will be disabled until a valid ROM is selected.
           </span>
         )}
-        
+
         <button
           className={styles.generateButton}
           disabled={!hasRomData || isMutating}
@@ -259,10 +257,8 @@ export const GenerateCard = ({
         >
           {isMutating ? "Generating..." : "Generate ROM"}
         </button>
-        
-        {error && (
-          <div className={styles.error}>{error.toString()}</div>
-        )}
+
+        {error && <div className={styles.error}>{error.toString()}</div>}
       </div>
     </div>
   );

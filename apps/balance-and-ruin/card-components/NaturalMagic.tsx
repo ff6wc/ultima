@@ -14,7 +14,7 @@ const [random]: FlagSelectOption[] = [{ value: "random", label: "Random" }];
 
 const excluded = ["gogo", "umaro"];
 const naturalMagicCharacters = characterNames.filter(
-  (c) => !excluded.includes(c)
+  (c) => !excluded.includes(c),
 );
 
 const options: FlagSelectOption[] = [
@@ -24,7 +24,7 @@ const options: FlagSelectOption[] = [
       ({
         value: id,
         label: startCase(id),
-      } as FlagSelectOption)
+      }) as FlagSelectOption,
   ),
 ];
 

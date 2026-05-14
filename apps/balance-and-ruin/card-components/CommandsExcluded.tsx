@@ -14,7 +14,10 @@ import { useId, useMemo } from "react";
 import { useDispatch } from "react-redux";
 import { CardColumn } from "~/components/CardColumn/CardColumn";
 import { FlagLabel } from "~/components/FlagLabel/FlagLabel";
-import { Select as CustomSelect, SelectOption } from "~/components/Select/Select";
+import {
+  Select as CustomSelect,
+  SelectOption,
+} from "~/components/Select/Select";
 import { setFlag, useFlagValueSelector } from "~/state/flagSlice";
 
 const hoistedOptions = [RANDOM, RANDOM_UNIQUE, NONE];
@@ -22,7 +25,7 @@ const nonExcludable = [FIGHT, LEAP];
 
 const rawOptions = Object.values(ALL_COMMANDS).filter(
   ({ value }) =>
-    !hoistedOptions.includes(value) && !nonExcludable.includes(value)
+    !hoistedOptions.includes(value) && !nonExcludable.includes(value),
 );
 
 const allOptions: CommandOption[] = [
@@ -43,7 +46,7 @@ const useExcludedCommands = () => {
   const rec6 = useFlagValueSelector("-rec6");
   return useMemo(
     () => [rec1, rec2, rec3, rec4, rec5, rec6].filter((val) => val !== NONE),
-    [rec1, rec2, rec3, rec4, rec5, rec6]
+    [rec1, rec2, rec3, rec4, rec5, rec6],
   );
 };
 
@@ -52,11 +55,11 @@ export const ExcludeSelect = ({ flag }: ExcludeSelectProps) => {
   const dispatch = useDispatch();
   const id = useId();
   const value = useFlagValueSelector<number>(flag);
-  
+
   const selectOptions = useMemo(() => {
     return allOptions
       .filter(({ value: id }) => !excludedValues.includes(id))
-      .map(opt => ({
+      .map((opt) => ({
         label: opt.label,
         value: opt.value.toString(),
       }));
@@ -64,10 +67,12 @@ export const ExcludeSelect = ({ flag }: ExcludeSelectProps) => {
 
   const currentSelectValue = useMemo(() => {
     const activeVal = value ?? NONE;
-    return selectOptions.find(opt => opt.value === activeVal.toString()) ?? {
-      label: NONE_OPTION.label,
-      value: NONE_OPTION.value.toString()
-    };
+    return (
+      selectOptions.find((opt) => opt.value === activeVal.toString()) ?? {
+        label: NONE_OPTION.label,
+        value: NONE_OPTION.value.toString(),
+      }
+    );
   }, [selectOptions, value]);
 
   const onChange = (val: SelectOption | null) => {
@@ -75,7 +80,7 @@ export const ExcludeSelect = ({ flag }: ExcludeSelectProps) => {
       setFlag({
         flag,
         value: val ? Number(val.value) : null,
-      })
+      }),
     );
   };
 

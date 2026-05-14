@@ -54,7 +54,7 @@ export const ObjectiveAddConditionButton = ({
       setFlag({
         flag,
         value: objectiveToString(newObjective),
-      })
+      }),
     );
   };
 
@@ -66,7 +66,12 @@ export const ObjectiveAddConditionButton = ({
       size="small"
       variant="default"
       title="Add Condition"
-      style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "0.4rem" }}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "0.4rem",
+      }}
     >
       <FaPlus size={13} />
     </Button>
