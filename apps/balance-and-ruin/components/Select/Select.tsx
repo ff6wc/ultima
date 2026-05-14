@@ -9,6 +9,7 @@ export type SelectOption = {
   readonly value: string;
   readonly label: string;
   readonly defaultValue?: any;
+  readonly dynamicValue?: any;
   [key: string]: any;
 };
 
@@ -223,7 +224,7 @@ export const Select = ({
                                               active ? "text-blue-100" : "text-[var(--text-sub)]"
                                             )}
                                           >
-                                            {renderDescription(option.helperText, option.defaultValue ?? null)}
+                                            {renderDescription(option.helperText, option.dynamicValue ?? option.defaultValue ?? null)}
                                           </span>
                                         )}
                                       </>
@@ -269,7 +270,7 @@ export const Select = ({
                                         active ? "text-blue-100" : "text-[var(--text-sub)]"
                                       )}
                                     >
-                                      {renderDescription(option.helperText, option.defaultValue ?? null)}
+                                      {renderDescription(option.helperText, option.dynamicValue ?? option.defaultValue ?? null)}
                                     </span>
                                   )}
                                 </>

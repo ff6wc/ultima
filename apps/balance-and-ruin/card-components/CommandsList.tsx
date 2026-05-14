@@ -23,6 +23,8 @@ import { FlagSwitch } from "~/components/FlagSwitch/FlagSwitch";
 import { InputLabel } from "~/components/InputLabel/InputLabel";
 import { Select as CustomSelect, SelectOption } from "~/components/Select/Select";
 import { setFlag, useFlagValueSelector } from "~/state/flagSlice";
+import PortraitDrawLoad from "~/components/PortraitDrawLoad/PortraitDrawLoad";
+import { defaultCharacterNameString, defaultPortraitString } from "~/constants/graphicConstants";
 
 const valToStr = (val: number) => padStart(val.toString(), 2, "0");
 const strToVals = (val: string) => val.match(/.{1,2}/g) as string[];
@@ -50,6 +52,22 @@ const LABELS = [
   "Mog (Dance)",
   "Gau (Rage)",
   "Gau (Leap)",
+];
+
+const PARENTHETICALS = [
+  "(Morph)",
+  "(Steal)",
+  "(SwdTech)",
+  "(Throw)",
+  "(Tools)",
+  "( Blitz)",
+  "(Runic)",
+  "(Lore)",
+  "(Sketch)",
+  "(Slot)",
+  "(Dance)",
+  "(Rage)",
+  "(Leap)",
 ];
 
 const hoistedOptions = [RANDOM, RANDOM_UNIQUE, NONE];
@@ -103,6 +121,14 @@ export const CommandsList = () => {
   const dispatch = useDispatch();
   const commandValue =
     useFlagValueSelector<string>("-com") ?? originalCommandFlags;
+
+  const rawPortraitString =
+    useFlagValueSelector<string>("-cpor") ?? defaultPortraitString;
+  const portraitValues = rawPortraitString.split(".");
+
+  const rawCharacterNames =
+    useFlagValueSelector<string>("-name") ?? defaultCharacterNameString;
+  const characterNamesList = rawCharacterNames.split(".");
 
   const rawValues = strToVals(commandValue) ?? [];
 
@@ -187,13 +213,25 @@ export const CommandsList = () => {
             : null;
 
           const isGauLeap = label === "Gau (Leap)";
+          const charId = idx === 12 ? 11 : idx;
+          const dynamicName = characterNamesList[charId];
 
           return (
             <div 
               key={id}
               className={isGauLeap ? "col-start-1 md:col-start-2 xl:col-start-4" : undefined}
             >
-              <InputLabel htmlFor={id}>{label}</InputLabel>
+              <div className="flex items-center gap-2.5 mb-2.5">
+                <div className="flex-shrink-0 w-[32px] h-[32px] rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 overflow-hidden flex items-center justify-center shadow-sm select-none">
+                  <PortraitDrawLoad portraitId={portraitValues[charId]} scale={1} />
+                </div>
+                <InputLabel htmlFor={id} className="!mb-0 select-none flex items-baseline gap-1.5">
+                  <span className="font-semibold text-slate-900 dark:text-slate-100 tracking-wide">{dynamicName}</span>
+                  <span className="text-slate-400 dark:text-slate-500 font-normal text-sm tracking-normal whitespace-nowrap">
+                    {PARENTHETICALS[idx]}
+                  </span>
+                </InputLabel>
+              </div>
               <CustomSelect
                 options={selectOptions}
                 onChange={(val) => onChange(val, idx)}

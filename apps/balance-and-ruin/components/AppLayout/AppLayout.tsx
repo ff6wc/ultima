@@ -75,34 +75,14 @@ export const AppLayout = ({ children, title }: AppLayoutProps) => {
           </div>
 
           {/* User profile */}
-          {status === "authenticated" && session?.user ? (
-            <div style={{ width: "100%", marginTop: "0.75rem" }}>
-              <a href="/account" className={styles.userProfile} style={{ textDecoration: "none", color: "inherit" }}>
-                <div className={styles.avatar}>
-                  {session.user.image ? (
-                    <img src={session.user.image} alt="Avatar" style={{ width: "100%", height: "100%", borderRadius: "50%" }} />
-                  ) : (
-                    <span>{session.user.name?.charAt(0) || "?"}</span>
-                  )}
-                </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: "1px" }}>
-                  <span className={styles.userName}>{session.user.name}</span>
-                  <span style={{ fontSize: "0.7rem", opacity: 0.5 }}>View Account</span>
-                </div>
-              </a>
-            </div>
-          ) : (
-            <button
-              onClick={() => signIn("discord")}
-              className={styles.userProfile}
-              style={{ background: "transparent", border: "none", cursor: "pointer", textAlign: "left", width: "100%", marginTop: "0.75rem" }}
-            >
+          <div style={{ width: "100%", marginTop: "0.75rem" }}>
+            <div className={styles.userProfile}>
               <div className={styles.avatar} style={{ backgroundColor: "#5865F2" }}>
                 <FaDiscord color="white" size={20} />
               </div>
               <span className={styles.userName}>Login with Discord</span>
-            </button>
-          )}
+            </div>
+          </div>
         </div>
 
         {/* Nav links */}
@@ -115,16 +95,6 @@ export const AppLayout = ({ children, title }: AppLayoutProps) => {
             <FaBolt size={16} />
             <span>Generator</span>
           </a>
-          {status === "authenticated" && (
-            <a
-              href="/account"
-              className={styles.tabItem}
-              style={{ textDecoration: "none" }}
-            >
-              <FaDiscord size={16} />
-              <span>My Account</span>
-            </a>
-          )}
         </div>
 
         {/* Bottom link */}

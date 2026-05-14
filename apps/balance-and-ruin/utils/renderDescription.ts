@@ -10,7 +10,9 @@ export const renderDescription = (
     return template;
   }
   if (Array.isArray(value)) {
-    return Mustache.render(template, value.join("-"));
+    const isIdenticalRange = value.length > 0 && value.every((v) => v === value[0]);
+    const displayValue = isIdenticalRange ? value[0] : value.join("-");
+    return Mustache.render(template, displayValue);
   }
   return Mustache.render(template, value);
 };

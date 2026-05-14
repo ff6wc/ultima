@@ -18,7 +18,7 @@ const contentOptions: SubflagOption[] = [
       "Chests are shuffled, and each chest then has a {{ . }}% chance to be randomized",
     label: "Shuffle + Random",
     Renderable: ({ children }) => (
-      <FlagSlider helperText={""} flag="-ccsr" label={children} />
+      <FlagSlider helperText={""} flag="-ccsr" label={children} hideFlag />
     ),
   },
   {

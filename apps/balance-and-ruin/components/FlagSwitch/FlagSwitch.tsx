@@ -47,7 +47,9 @@ export const FlagSwitch = ({
         className={"flex items-center gap-4 flex-shrink cursor-pointer w-fit"}
         onClick={() => onChange(!checked)}
       >
-        <Switch checked={checked} onChange={(val) => onChange(val)} />
+        <div className="flex-shrink-0 flex items-center">
+          <Switch checked={checked} onChange={(val) => onChange(val)} />
+        </div>
         <InputLabel
           className={"cursor-pointer"}
           flag={flag}

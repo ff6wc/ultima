@@ -18,6 +18,7 @@ export const ObjectiveConditionsRequired = ({
   const { conditions, requiredConditions } = objective;
   const [minVal, maxVal] = requiredConditions;
   const max = conditions.filter(isValidCondition).length;
+  
   const onRequirementsChange = (newRequirement: number[]) => {
     onChange({
       ...objective,

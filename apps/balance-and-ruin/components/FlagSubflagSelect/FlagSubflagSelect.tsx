@@ -5,11 +5,13 @@ import { Select as CustomSelect } from "~/components/Select/Select";
 import {
   EMPTY_FLAG_VALUE,
   selectActiveMutuallyExclusiveFlag,
+  selectFlagValues,
   setFlag,
   useFlagValueSelector,
 } from "~/state/flagSlice";
 import { FlagValue, selectDescription } from "~/state/schemaSlice";
 import { renderDescription } from "~/utils/renderDescription";
+import { FlagSubflagContext } from "./FlagSubflagContext";
 
 export type SubflagOption = {
   defaultValue: FlagValue;
@@ -45,6 +47,8 @@ export const FlagSubflagSelect = ({
   const selectedFlag = useSelector(
     selectActiveMutuallyExclusiveFlag(...baseOptions.map(({ flag }) => flag))
   );
+
+  const allFlagValues = useSelector(selectFlagValues);
 
   const schemaDescription = useSelector(
     selectedFlag ? selectDescription(selectedFlag) : () => null
@@ -119,6 +123,7 @@ export const FlagSubflagSelect = ({
     ...opt,
     value: opt.flag + opt.defaultValue, // Use the unique selector key
     helperText: opt.helperText,
+    dynamicValue: allFlagValues[opt.flag] ?? opt.defaultValue,
   }));
 
   const activeSelectValue = selectOptions.find(opt => opt.flag === selectedOption.flag && opt.defaultValue === selectedOption.defaultValue) ?? null;
@@ -145,7 +150,9 @@ export const FlagSubflagSelect = ({
           label={label}
         />
 
-        {Renderable ? <Renderable>{SelectWrapper}</Renderable> : SelectWrapper}
+        <FlagSubflagContext.Provider value={true}>
+          {Renderable ? <Renderable>{SelectWrapper}</Renderable> : SelectWrapper}
+        </FlagSubflagContext.Provider>
       </>
     </div>
   );

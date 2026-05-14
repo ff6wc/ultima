@@ -21,6 +21,7 @@ export type FlagSliderProps = {
   flag: string;
   helperText?: React.ReactNode;
   label: React.ReactNode;
+  hideFlag?: boolean;
 } & SliderProps<number>;
 
 export const FlagSlider = ({
@@ -31,6 +32,7 @@ export const FlagSlider = ({
   min: hardMin,
   max: hardMax,
   step: hardStep,
+  hideFlag,
   ...rest
 }: FlagSliderProps) => {
   const ref = useRef<HTMLInputElement>(null);
@@ -83,6 +85,7 @@ export const FlagSlider = ({
           flag={flag}
           helperText={helperText ?? description}
           label={label}
+          hideFlag={hideFlag}
         />
         <div className={"flex items-center justify-center flex-shrink gap-1"}>
           <Input

@@ -392,25 +392,12 @@ export const FlagCreatePage = ({ objectives, presets, schema, version }: PagePro
                 />
               </div>
             </div>
-            {status === "authenticated" && session?.user ? (
-              <a href="/account" className={styles.userProfile}>
-                <div className={styles.avatar}>
-                  {session.user.image ? (
-                    <img src={session.user.image} alt="Avatar" style={{ width: '100%', height: '100%', borderRadius: '50%' }} />
-                  ) : (
-                    <span>{session.user.name?.charAt(0) || "?"}</span>
-                  )}
-                </div>
-                <span className={styles.userName}>{session.user.name}</span>
-              </a>
-            ) : (
-              <button onClick={() => signIn('discord')} className={styles.userProfile} style={{ background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
-                <div className={styles.avatar} style={{ backgroundColor: '#5865F2' }}>
-                  <FaDiscord color="white" />
-                </div>
-                <span className={styles.userName}>Login with Discord</span>
-              </button>
-            )}
+            <div className={styles.userProfile}>
+              <div className={styles.avatar} style={{ backgroundColor: '#5865F2' }}>
+                <FaDiscord color="white" />
+              </div>
+              <span className={styles.userName}>Login with Discord</span>
+            </div>
           </div>
           
           <Tab.List className={styles.tabList}>
