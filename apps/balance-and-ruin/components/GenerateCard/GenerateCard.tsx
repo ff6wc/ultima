@@ -91,7 +91,9 @@ export const GenerateCard = ({
         `${process.env.NEXT_PUBLIC_API_URL}/api/generate`,
         {
           body: JSON.stringify({ reCAPTCHA, flags }),
-          headers: {},
+          headers: {
+            "Content-Type": "application/json",
+          },
           method: "POST",
         },
       );

@@ -41,7 +41,9 @@ export const GenerateJohnnydmadCard = ({
     ["/api/music/generate", romData],
     async (key, { arg }) => {
       const result = await fetch("/api/music/generate", {
-        headers: {},
+        headers: {
+          "Content-Type": "application/json",
+        },
         method: "POST",
         body: JSON.stringify({
           key: "ff6wc",
