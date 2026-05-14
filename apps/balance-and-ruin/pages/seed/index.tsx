@@ -1,108 +1,93 @@
-import Head from "next/head";
 import { useEffect, useState } from "react";
-import { CardColumn } from "~/components/CardColumn/CardColumn";
-import { Footer } from "~/components/Footer/Footer";
-import { Button, Card, CodeBlock, Input } from "@ff6wc/ui";
-import { SeedCard, SeedData } from "~/components/SeedCard/SeedCard";
-import { AppHeader } from "~/components/AppHeader/AppHeader";
-import { HiClipboardCopy, HiCheck } from "react-icons/hi";
+import { FlagCreatePage } from "~/components/FlagCreatePage/FlagCreatePage";
+import { setObjectiveMetadata } from "~/state/objectiveSlice";
+import { setSchema } from "~/state/schemaSlice";
+import { makeStore } from "~/state/store";
 
-const REMOVE_FLAGS_FROM_LOG_REGEX = /\nFlags.+\n/g;
-
-const SeedId = () => {
-  const [seed, setSeed] = useState<SeedData | null>(null);
-  const [logWithFlags, setLogWithFlags] = useState("");
-  const [seedId, setSeedId] = useState("");
-  const [copied, setCopied] = useState(false);
-  const title = `FF6WC seed ${seedId}`;
-
-  const handleCopy = () => {
-    if (seed?.flags) {
-      navigator.clipboard.writeText(seed.flags);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
+const SeedDetailsPage = () => {
+  const [objectives, setObjectives] = useState(null);
+  const [presets, setPresets] = useState(null);
+  const [schema, setSchemaLocal] = useState(null);
+  const [version, setVersion] = useState(null);
+  const [seedId, setSeedId] = useState<string | null>(null);
 
   useEffect(() => {
     const queryParameters = new URLSearchParams(window.location.search);
     const seedIdParam = queryParameters.get("id");
     if (seedIdParam) {
       setSeedId(seedIdParam);
-      const url = `${process.env.NEXT_PUBLIC_API_URL}/api/seed/ff6wc/${seedIdParam}`;
-      fetch(url)
-        .then((res) => res.json())
-        .then(({ data: seed, errors }) => {
-          if (seed) {
-            setSeed(seed);
-            setLogWithFlags(seed.log);
-          } else {
-            setLogWithFlags(`Error retrieving seed: ${errors}`);
-          }
-        });
-    } else {
-      setLogWithFlags(
-        "No id given; access this page with ?id=XYZ (where XYZ is a generated seed id)",
-      );
     }
+
+    const store = makeStore();
+
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/presets`)
+      .then((res) => res.json())
+      .then((data) => {
+        setPresets(data);
+      })
+      .catch((err) => {
+        console.warn("Failed to fetch presets:", err);
+        setPresets({});
+      });
+
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/metadata/flag`)
+      .then((res) => res.json())
+      .then((data) => {
+        setSchemaLocal(data);
+        store.dispatch(setSchema(data));
+      })
+      .catch((err) => {
+        console.error("Failed to fetch flag metadata:", err);
+      });
+
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/metadata/objective`)
+      .then((res) => res.json())
+      .then((data) => {
+        setObjectives(data);
+        store.dispatch(setObjectiveMetadata(data));
+      })
+      .catch((err) => {
+        console.error("Failed to fetch objective metadata:", err);
+      });
+
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/wc`)
+      .then((res) => res.json())
+      .then((data) => {
+        const fetchedVersion = data["version"];
+        setVersion(fetchedVersion);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch version:", err);
+      });
   }, []);
 
-  return (
-    <>
-      <Head>
-        <title>{title}</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      <AppHeader />
-      <div className="flex flex-col gap-6 items-center px-12 py-6">
-        <Card className="max-w-[1260px] w-full shadow-lg" title={"Log"}>
-          <CardColumn>
-            <textarea
-              className="w-full min-h-[400px] max-h-[900px] p-6 bg-[var(--bg-input)] border border-[var(--border-input)] rounded-lg font-mono text-[0.9rem] text-[var(--text-input)] resize-y leading-relaxed focus:outline-none select-all col-span-full shadow-inner overflow-y-auto"
-              readOnly
-              value={logWithFlags ? logWithFlags : "Loading..."}
-            />
-
-            {seed && (
-              <div className="mt-8 pt-6 border-t border-neutral-200 dark:border-neutral-700 flex flex-col gap-3 w-full col-span-full">
-                <h3 className="text-xs font-bold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
-                  Flags Used
-                </h3>
-                <div className="flex flex-col gap-3 w-full">
-                  <textarea
-                    className="w-full min-h-[150px] max-h-[300px] p-4 bg-[var(--bg-input)] border border-[var(--border-input)] rounded-lg font-mono text-[0.9rem] text-[var(--text-input)] resize-y leading-relaxed focus:outline-none select-all shadow-inner"
-                    readOnly
-                    value={seed.flags}
-                  />
-                  <div className="flex justify-end mt-1">
-                    <Button
-                      onClick={handleCopy}
-                      variant="outline"
-                      className={`whitespace-nowrap flex items-center gap-2 transition-all duration-200 px-6 py-2 ${
-                        copied
-                          ? "border-green-500 text-green-600 dark:text-green-400 bg-green-500/10"
-                          : ""
-                      }`}
-                    >
-                      {copied ? (
-                        <HiCheck size={18} />
-                      ) : (
-                        <HiClipboardCopy size={18} />
-                      )}
-                      <span>{copied ? "Copied!" : "Copy Flags"}</span>
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </CardColumn>
-        </Card>
-
-        {seed && <SeedCard seed={seed} />}
+  if (objectives && presets && schema && version && seedId) {
+    return (
+      <FlagCreatePage
+        objectives={objectives}
+        presets={presets}
+        schema={schema}
+        version={version}
+        activeSeedId={seedId}
+      />
+    );
+  } else if (seedId === null) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-neutral-900 text-white">
+        <p className="p-6 bg-red-500/10 border border-red-500 text-red-400 rounded-lg font-medium">
+          No seed ID provided in the URL query parameters (?id=XYZ).
+        </p>
       </div>
-      <Footer />
-    </>
-  );
+    );
+  } else {
+    return (
+      <div className="flex h-screen items-center justify-center bg-neutral-900 text-slate-300">
+        <p className="text-lg font-medium animate-pulse">
+          Loading Seed Details Frame...
+        </p>
+      </div>
+    );
+  }
 };
 
-export default SeedId;
+export default SeedDetailsPage;
