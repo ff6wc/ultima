@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useSession } from "next-auth/react";
+
 import {
   FaCalendarAlt,
   FaUsers,
@@ -473,14 +473,14 @@ type PresetsPageProps = {
 
 export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
   const dispatch = useDispatch();
-  const { data: session } = useSession();
+
 
   // Active preset name lives in Redux — persists across tab navigation
   const activePresetName = useSelector(selectActivePresetName);
 
   const [globalSearch, setGlobalSearch] = useState("");
 
-  const currentUserId = (session?.user as any)?.id as string | undefined;
+  const currentUserId: string | undefined = undefined;
 
   // Annotate each preset with the user's last-downloaded timestamp from localStorage
   const allPresets = Object.values(rawPresets)

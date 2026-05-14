@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useSession, signIn, signOut } from "next-auth/react";
+
 import { FaDiscord, FaBook, FaSearch, FaBolt } from "react-icons/fa";
 import { HiOutlineMoon, HiOutlineSun } from "react-icons/hi";
 import styles from "~/components/FlagCreatePage/FlagCreatePage.module.css";
@@ -10,7 +10,7 @@ type AppLayoutProps = {
 };
 
 export const AppLayout = ({ children, title }: AppLayoutProps) => {
-  const { data: session, status } = useSession();
+
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [processedLogo, setProcessedLogo] = useState<string | null>(null);
 

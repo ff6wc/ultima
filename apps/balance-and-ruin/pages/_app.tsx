@@ -7,7 +7,7 @@ import { AppType } from "next/app";
 import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { Provider } from "react-redux";
-import { SessionProvider } from "next-auth/react";
+
 import { Schema } from "~/state/schemaSlice";
 import { wrapper } from "~/state/store";
 import "~/styles/globals.css";
@@ -44,9 +44,7 @@ const App: AppType<Props> = ({ Component, ...rest }: AppProps<Props>) => {
           <GoogleReCaptchaProvider
             reCaptchaKey={process.env.NEXT_PUBLIC_RECAPTCHA_KEY as string}
           >
-            <SessionProvider session={props.pageProps.session}>
               <Component {...props.pageProps} />
-            </SessionProvider>
           </GoogleReCaptchaProvider>
         </QueryClientProvider>
       </Provider>

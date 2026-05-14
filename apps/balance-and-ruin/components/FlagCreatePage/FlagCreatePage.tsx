@@ -2,7 +2,7 @@ import { Tab } from "@headlessui/react";
 import styles from "./FlagCreatePage.module.css";
 import Head from "next/head";
 import React, { useEffect, useMemo, useState, useRef } from "react";
-import { useSession, signIn } from "next-auth/react";
+
 import type { IconType } from "react-icons";
 import {
   GiBrokenWall,
@@ -277,7 +277,7 @@ export const FlagCreatePage = ({ objectives, presets, schema, version }: PagePro
     };
   }, [searchQuery, selectedIndex]);
 
-  const { data: session, status } = useSession();
+
   
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [processedLogo, setProcessedLogo] = useState<string | null>(null);
