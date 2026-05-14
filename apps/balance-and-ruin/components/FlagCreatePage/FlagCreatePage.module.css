@@ -232,6 +232,10 @@
   margin: 0 auto;
 }
 
+.mobileOnly {
+  display: none !important;
+}
+
 /* Hamburger menu is hidden by default on desktop */
 .hamburgerBtn {
   display: none;
@@ -308,6 +312,10 @@
   
   .topBarLinks {
     display: none; /* Hide navigation links from header on narrow screens */
+  }
+
+  .mobileOnly {
+    display: flex !important;
   }
   
   .searchBar {
