@@ -51,6 +51,7 @@ export const GenerateCard = ({
   const [romName, setRomName] = useState("");
   const [romSelectError, setRomSelectError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [clientError, setClientError] = useState<string | null>(null);
 
   const ext = romName.slice(romName.length - 7, romName.length);
   const displayRomName = !romName
@@ -112,36 +113,54 @@ export const GenerateCard = ({
     if (isMutating) {
       return;
     }
+    setClientError(null);
 
     let reCAPTCHA: string | null = null;
-    if (!executeRecaptcha) {
-      console.warn("recaptcha not available");
-    } else {
+    try {
+      if (!executeRecaptcha) {
+        throw new Error(
+          "reCAPTCHA security is not available. If you are using an ad-blocker or Brave Shields, please disable them and refresh.",
+        );
+      }
       reCAPTCHA = await executeRecaptcha("generate_seed");
+      if (!reCAPTCHA) {
+        throw new Error(
+          "Received empty validation token from security engine.",
+        );
+      }
+    } catch (e) {
+      setClientError(
+        `Validation Error: ${(e as Error).message || "Ensure you access the app via a whitelisted domain like http://dev.ff6worldscollide.com:3001 (see .env.local) instead of localhost."}`,
+      );
+      return;
     }
 
-    const generateResult = await trigger({ flags, reCAPTCHA });
-    if (!generateResult) {
-      throw new Error("There was an error generating the ROM");
+    try {
+      const generateResult = await trigger({ flags, reCAPTCHA });
+      if (!generateResult) {
+        throw new Error("There was an error generating the ROM");
+      }
+      const { filename, patch, seed_id, log } = generateResult;
+      const rom = romData as string;
+
+      const patched = XDelta3Decoder.decode(
+        base64ToByteArray(patch as string),
+        base64ToByteArray(rom),
+      );
+
+      const jsz = new JSZip();
+      let zip = jsz.file(`${filename}.smc`, patched, { binary: true });
+      zip = jsz.file(`${filename}.txt`, log);
+      zip.generateAsync({ type: "blob" }).then((content) => {
+        var link = document.createElement("a");
+        link.href = window.URL.createObjectURL(content);
+        link.download = `${filename}.zip`;
+        link.click();
+        router.push(`/seed/?id=${seed_id}`);
+      });
+    } catch (err) {
+      setClientError((err as Error).message);
     }
-    const { filename, patch, seed_id, log } = generateResult;
-    const rom = romData as string;
-
-    const patched = XDelta3Decoder.decode(
-      base64ToByteArray(patch as string),
-      base64ToByteArray(rom),
-    );
-
-    const jsz = new JSZip();
-    let zip = jsz.file(`${filename}.smc`, patched, { binary: true });
-    zip = jsz.file(`${filename}.txt`, log);
-    zip.generateAsync({ type: "blob" }).then((content) => {
-      var link = document.createElement("a");
-      link.href = window.URL.createObjectURL(content);
-      link.download = `${filename}.zip`;
-      link.click();
-      router.push(`/seed/?id=${seed_id}`);
-    });
   };
 
   const clearRomValues = () => {
@@ -260,7 +279,11 @@ export const GenerateCard = ({
           {isMutating ? "Generating..." : "Generate ROM"}
         </button>
 
-        {error && <div className={styles.error}>{error.toString()}</div>}
+        {(clientError || error) && (
+          <div className={styles.error}>
+            {(clientError || error)?.toString()}
+          </div>
+        )}
       </div>
     </div>
   );
