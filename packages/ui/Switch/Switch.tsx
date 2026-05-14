@@ -14,11 +14,13 @@ const switchStyles = cva(
         false: "bg-inputs-background border-inputs-border",
       },
     },
-  }
+  },
 );
 
 const buttonStyles = cva(
-  ["inline-block h-5 w-5 transform transition-transform transition-colors duration-200 rounded-full shadow-sm border-2"],
+  [
+    "inline-block h-5 w-5 transform transition-transform transition-colors duration-200 rounded-full shadow-sm border-2",
+  ],
   {
     variants: {
       checked: {
@@ -26,7 +28,7 @@ const buttonStyles = cva(
         false: "translate-x-0 bg-zinc-400 border-zinc-400",
       },
     },
-  }
+  },
 );
 
 export type SwitchProps = {

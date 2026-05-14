@@ -2,7 +2,9 @@ import { ButtonLink } from "@ff6wc/ui";
 import { cva } from "cva";
 import { HiFlag } from "react-icons/hi";
 
-const button = cva(["w-fit max-w-[500px] min-h-[70px] inline-flex items-center gap-3"]);
+const button = cva([
+  "w-fit max-w-[500px] min-h-[70px] inline-flex items-center gap-3",
+]);
 
 export const EventsButton = () => {
   return (

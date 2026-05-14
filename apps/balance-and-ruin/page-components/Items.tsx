@@ -9,21 +9,21 @@ import { PageContainer } from "~/components/PageContainer/PageContainer";
 export const Items = () => {
   return (
     <PageContainer columns={2} className="!items-stretch">
-      {/* Row 1: Shops (Massive - Full Width!) */}
+      {/* Row 1: Starting Gold/Items (Massive - Full Width!) */}
+      <div className="col-span-full h-full [&>*]:h-full">
+        <StartingGoldAndItems />
+      </div>
+
+      {/* Row 2: Shops (Massive - Full Width!) */}
       <div className="col-span-full h-full [&>*]:h-full">
         <Shops />
       </div>
-      
-      {/* Row 2: Equipment Permissions (Massive - Full Width!) */}
-      <div className="col-span-full h-full [&>*]:h-full">
+
+      {/* Row 3: Equipment Permissions (Short) & Chests (Short) */}
+      <div className="h-full [&>*]:h-full">
         <EquipmentPermissions />
       </div>
 
-      {/* Row 3: Starting Gold (Short) & Chests (Short) */}
-      <div className="h-full [&>*]:h-full">
-        <StartingGoldAndItems />
-      </div>
-      
       <div className="h-full [&>*]:h-full">
         <Chests />
       </div>
@@ -32,7 +32,7 @@ export const Items = () => {
       <div className="h-full [&>*]:h-full">
         <ItemRestrictions />
       </div>
-      
+
       <div className="h-full [&>*]:h-full">
         <OtherItems />
       </div>

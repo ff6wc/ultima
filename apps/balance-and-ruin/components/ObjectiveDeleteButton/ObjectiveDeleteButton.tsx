@@ -32,15 +32,15 @@ export const ObjectiveDeleteButton = ({ objective }: ObjectiveCardProps) => {
         setFlag({
           flag,
           value: null,
-        })
-      )
+        }),
+      ),
     );
     newObjectives.forEach((obj) => {
       dispatch(
         setFlag({
           flag: obj.flag,
           value: objectiveToString(obj),
-        })
+        }),
       );
     });
   };
@@ -51,7 +51,12 @@ export const ObjectiveDeleteButton = ({ objective }: ObjectiveCardProps) => {
       size="small"
       variant="default"
       title="Delete Objective"
-      style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "0.4rem" }}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "0.4rem",
+      }}
     >
       <FaTrash size={13} />
     </Button>

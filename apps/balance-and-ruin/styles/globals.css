@@ -23,7 +23,7 @@ div#__next > div {
   /* margin: 200px auto 0; */
   /* width: 400px; */
   /* height: 250px; */
-  background: linear-gradient(0deg, #000, #262626);
+  background: var(--bg-card);
 }
 .card-fancy-gradient:before,
 .card-fancy-gradient:after {

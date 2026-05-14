@@ -60,7 +60,7 @@ export const FlagSelect = ({
               value: val,
               label: startCase(val as string),
               isDisabled: false,
-            } as FlagSelectOption)
+            }) as FlagSelectOption,
         ) || [];
 
     if (nullable) {
@@ -82,7 +82,7 @@ export const FlagSelect = ({
         setFlag({
           flag,
           value: null,
-        })
+        }),
       );
       return;
     }
@@ -91,7 +91,7 @@ export const FlagSelect = ({
       setFlag({
         flag,
         value: option?.value ?? null,
-      })
+      }),
     );
   };
 
@@ -102,7 +102,7 @@ export const FlagSelect = ({
   } else {
     valueDescription = renderDescription(
       selectedOption?.helperText,
-      selectedOption?.value ?? null
+      selectedOption?.value ?? null,
     );
   }
 

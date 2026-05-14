@@ -30,6 +30,9 @@ export const FlagRange = ({
   label,
   type,
   hideFlag,
+  min: hardMin,
+  max: hardMax,
+  step: hardStep,
   ...rest
 }: FlagRangeProps) => {
   const minRef = useRef<HTMLInputElement>(null);
@@ -51,7 +54,7 @@ export const FlagRange = ({
       setFlag({
         flag: flag,
         value: val,
-      })
+      }),
     );
   };
 
@@ -60,13 +63,13 @@ export const FlagRange = ({
   };
 
   const [minVal, maxVal] = value || [];
-  const min = (
-    allowedValues.length ? allowedValues[0] : schemaMin ?? 0
-  ) as number;
-  const max = (
-    allowedValues.length ? last(allowedValues) : schemaMax ?? 100
-  ) as number;
-  const step = 1;
+  const min = (hardMin ??
+    (allowedValues.length ? allowedValues[0] : (schemaMin ?? 0))) as number;
+  const max = (hardMax ??
+    (allowedValues.length
+      ? last(allowedValues)
+      : (schemaMax ?? 100))) as number;
+  const step = hardStep ?? schemaStep ?? 1;
 
   const defaultValue = useSelector(selectDefaultValue(flag));
 

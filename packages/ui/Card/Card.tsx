@@ -23,8 +23,11 @@ export const Card = ({
 }: CardProps) => {
   return (
     <div className={cx(styles.card, className, "WC-Card")}>
-      <div 
-        className={cx(styles.heading, variant === "primary" ? styles.headingPrimary : undefined)}
+      <div
+        className={cx(
+          styles.heading,
+          variant === "primary" ? styles.headingPrimary : undefined,
+        )}
       >
         {title}
       </div>

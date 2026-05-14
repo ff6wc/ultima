@@ -53,6 +53,7 @@ export const settingsSlice = createSlice({
 export const { setSetting, setShowFlags } = settingsSlice.actions;
 
 export const selectSettings = (state: AppState) => state?.settings?.settings;
-export const selectShowFlags = (state: AppState) => !!state?.settings?.settings?.showFlags;
+export const selectShowFlags = (state: AppState) =>
+  !!state?.settings?.settings?.showFlags;
 
 export default settingsSlice.reducer;

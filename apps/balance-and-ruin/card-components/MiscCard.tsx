@@ -25,7 +25,8 @@ const timerOptions: SubflagOption[] = [
     isStatic: true,
   },
 ];
-const YNPC_HELPER = "Pressing the Y button while next to NPCs has various effects";
+const YNPC_HELPER =
+  "Pressing the Y button while next to NPCs has various effects";
 
 const yNpcOptions: SubflagOption[] = [
   {
@@ -98,7 +99,7 @@ const yNpcOptions: SubflagOption[] = [
     helperText: "",
     isStatic: true,
   },
-].map(opt => ({ ...opt, helperText: YNPC_HELPER }));
+].map((opt) => ({ ...opt, helperText: YNPC_HELPER }));
 
 export const MiscCard = () => {
   return (

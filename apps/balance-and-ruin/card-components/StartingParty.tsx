@@ -63,12 +63,15 @@ const useOptions = () => {
             value: characterName,
             poseId: 1,
             label: customCharacterNames[idx],
-          } as SelectOption)
+          }) as SelectOption,
       ),
     ];
-    const optionsById = options.reduce((acc, val) => {
-      return { ...acc, [val.value]: val };
-    }, {} as Record<string, SelectOption>);
+    const optionsById = options.reduce(
+      (acc, val) => {
+        return { ...acc, [val.value]: val };
+      },
+      {} as Record<string, SelectOption>,
+    );
 
     return { options, optionsById };
   }, [customCharacterNames]);
@@ -143,7 +146,7 @@ const SpriteCell = ({
   const rawSpriteId = useSpriteId(characterIdx);
   const spriteId = useMemo(
     () => (isNgu ? random(0, 11) : isRandom ? random(0, 13) : rawSpriteId),
-    [isNgu, isRandom, rawSpriteId]
+    [isNgu, isRandom, rawSpriteId],
   );
 
   const showSprite = spriteId !== -1;
@@ -153,12 +156,12 @@ const SpriteCell = ({
   if (!showSprite) {
     const isScale3 = scale === 3;
     return (
-      <div 
-        style={{ 
-          width: isScale3 ? 48 : 32, 
-          height: isScale3 ? 72 : 48 
-        }} 
-        className="flex-shrink-0 inline-block" 
+      <div
+        style={{
+          width: isScale3 ? 48 : 32,
+          height: isScale3 ? 72 : 48,
+        }}
+        className="flex-shrink-0 inline-block"
       />
     );
   }

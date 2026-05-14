@@ -28,17 +28,13 @@ export default function NewLandingPage() {
       </Head>
       <div className={styles.container}>
         <div className={styles.heroBackground}></div>
-        
+
         <header className={styles.header}>
           <div className={styles.headerContent}>
-            <h1 className={styles.mainTitle}>
-              Worlds Collide
-            </h1>
+            <h1 className={styles.mainTitle}>Worlds Collide</h1>
             <div className={styles.titleDivider} />
-            <h2 className={styles.subTitle}>
-              Final Fantasy VI Randomizer
-            </h2>
-            
+            <h2 className={styles.subTitle}>Final Fantasy VI Randomizer</h2>
+
             <p className={styles.description}>
               Worlds Collide (WC) is an open-world randomizer for Final Fantasy
               VI on the SNES. Players begin aboard the airship and can travel
@@ -56,7 +52,7 @@ export default function NewLandingPage() {
 
         <section className={styles.section}>
           <h3 className={styles.sectionTitle}>Getting Started</h3>
-          
+
           <div className={styles.grid}>
             {/* Discord Card */}
             <div className={styles.gridItem}>
@@ -70,8 +66,8 @@ export default function NewLandingPage() {
                 <span>Discord</span>
               </div>
               <div className={styles.gridItemContent}>
-                Join our Discord server to talk with the community and learn about
-                the latest news and events.
+                Join our Discord server to talk with the community and learn
+                about the latest news and events.
               </div>
               <div className={styles.actionArea}>
                 <DiscordButton />
@@ -110,8 +106,8 @@ export default function NewLandingPage() {
                 <span>Wiki</span>
               </div>
               <div className={styles.gridItemContent}>
-                Visit the wiki for guides, resources, and how to get the most out
-                of WC.
+                Visit the wiki for guides, resources, and how to get the most
+                out of WC.
               </div>
               <div className={styles.actionArea}>
                 <ButtonLink

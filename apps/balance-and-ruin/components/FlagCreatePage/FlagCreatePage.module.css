@@ -124,8 +124,8 @@
   gap: 0.75rem;
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
-  background-color: #3b82f6; /* Prominent blue */
-  color: white;
+  background-color: white; /* Inverted: White background */
+  color: #3b82f6; /* Inverted: Blue text */
   font-weight: 600;
   cursor: pointer;
   border: none;
@@ -134,14 +134,14 @@
 }
 
 .generateBtn:hover {
-  background-color: #2563eb;
+  background-color: #f3f4f6; /* Slightly off-white hover */
   transform: translateY(-1px);
 }
 
 .generateBtn[aria-selected="true"] {
-  background-color: white;
-  color: #3b82f6;
-  border: 1px solid #3b82f6;
+  background-color: #3b82f6; /* Highlights blue when clicked */
+  color: white; /* White text when active */
+  font-weight: 700;
 }
 
 .mainContent {

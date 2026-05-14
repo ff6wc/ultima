@@ -13,8 +13,7 @@ const spellOptions: SubflagOption[] = [
   {
     defaultValue: true,
     flag: "-esrr",
-    helperText:
-      "(DEPRECATED) Original esper spells with random learn rates",
+    helperText: "(DEPRECATED) Original esper spells with random learn rates",
     label: "Original (Random Rates)",
     isStatic: true,
   },
@@ -28,8 +27,7 @@ const spellOptions: SubflagOption[] = [
   {
     defaultValue: true,
     flag: "-essrr",
-    helperText:
-      "(DEPRECATED) Esper spells shuffled with random learn rates",
+    helperText: "(DEPRECATED) Esper spells shuffled with random learn rates",
     label: "Shuffle (Random Rates)",
     isStatic: true,
   },
@@ -56,8 +54,7 @@ const learnRateOptions: SubflagOption[] = [
   {
     defaultValue: true,
     flag: "-elr",
-    helperText:
-      "Esper learn rates randomized",
+    helperText: "Esper learn rates randomized",
     label: "Random",
     isStatic: true,
   },
@@ -68,7 +65,7 @@ const learnRateOptions: SubflagOption[] = [
     label: "Random Tiered",
     isStatic: true,
   },
-]
+];
 
 const bonusOptions: SubflagOption[] = [
   {

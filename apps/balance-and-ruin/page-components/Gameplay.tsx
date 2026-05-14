@@ -14,11 +14,11 @@ export const Gameplay = () => {
       <div className="h-full [&>*]:h-full">
         <GameModeCard />
       </div>
-      
+
       <div className="h-full [&>*]:h-full">
         <Movement />
       </div>
-      
+
       <div className="h-full [&>*]:h-full">
         <Challenges />
       </div>
@@ -32,11 +32,11 @@ export const Gameplay = () => {
       <div className="h-full [&>*]:h-full col-span-1 md:col-span-2">
         <Checks />
       </div>
-      
+
       <div className="h-full [&>*]:h-full col-span-1">
         <AuctionHouse />
       </div>
-      
+
       {/* Row 4: Other / MiscCard (Massive - Full Width!) */}
       <div className="col-span-full h-full [&>*]:h-full">
         <MiscCard />

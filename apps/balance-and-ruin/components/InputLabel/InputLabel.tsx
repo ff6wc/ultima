@@ -15,14 +15,24 @@ export type InputLabelProps = {
   HTMLLabelElement
 >;
 
-export const InputLabel = ({ children, htmlFor, flag, hideFlag = false, ...rest }: InputLabelProps) => {
+export const InputLabel = ({
+  children,
+  htmlFor,
+  flag,
+  hideFlag = false,
+  ...rest
+}: InputLabelProps) => {
   const showFlags = useSelector(selectShowFlags);
   const isInSubflagSelect = useContext(FlagSubflagContext);
   const hasValidFlag = flag && flag !== EMPTY_FLAG_VALUE;
 
   return (
     <h4 className="text-sm font-medium flex items-baseline w-full">
-      <label {...rest} className={`w-full ${rest.className ?? ""}`} htmlFor={htmlFor}>
+      <label
+        {...rest}
+        className={`w-full ${rest.className ?? ""}`}
+        htmlFor={htmlFor}
+      >
         {children}
         {showFlags && hasValidFlag && !hideFlag && !isInSubflagSelect && (
           <span className="text-xs text-slate-500 dark:text-slate-400 font-normal ml-1">

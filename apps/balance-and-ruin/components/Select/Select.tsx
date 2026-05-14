@@ -64,19 +64,24 @@ export const Select = ({
     return list;
   }, [options]);
 
-  const handleKeyDown = (e: KeyboardEvent<HTMLButtonElement>, open: boolean) => {
+  const handleKeyDown = (
+    e: KeyboardEvent<HTMLButtonElement>,
+    open: boolean,
+  ) => {
     if (nextOnArrowKeys && !open) {
       if (e.key === "ArrowDown" || e.key === "ArrowUp") {
         e.preventDefault();
-        const idx = flatOptions.findIndex((opt) => opt.value === activeOption?.value);
+        const idx = flatOptions.findIndex(
+          (opt) => opt.value === activeOption?.value,
+        );
         let nextIdx = idx;
-        
+
         if (e.key === "ArrowDown") {
           nextIdx = idx === -1 ? 0 : Math.min(idx + 1, flatOptions.length - 1);
         } else if (e.key === "ArrowUp") {
           nextIdx = idx === -1 ? 0 : Math.max(idx - 1, 0);
         }
-        
+
         if (nextIdx !== idx && flatOptions[nextIdx]) {
           onChange(flatOptions[nextIdx]);
         }
@@ -96,31 +101,39 @@ export const Select = ({
       return (
         opt.label.toLowerCase().includes(needle) ||
         opt.value.toLowerCase().includes(needle) ||
-        (typeof opt.helperText === "string" && opt.helperText.toLowerCase().includes(needle))
+        (typeof opt.helperText === "string" &&
+          opt.helperText.toLowerCase().includes(needle))
       );
     };
 
-    return options.map((item) => {
-      if ("options" in item) {
-        const matchingSubOptions = item.options.filter(matches);
-        if (matchingSubOptions.length > 0) {
-          return {
-            ...item,
-            options: matchingSubOptions,
-          };
+    return options
+      .map((item) => {
+        if ("options" in item) {
+          const matchingSubOptions = item.options.filter(matches);
+          if (matchingSubOptions.length > 0) {
+            return {
+              ...item,
+              options: matchingSubOptions,
+            };
+          }
+          return null;
         }
-        return null;
-      }
-      return matches(item) ? item : null;
-    }).filter(Boolean) as (SelectOption | SelectGroup)[];
+        return matches(item) ? item : null;
+      })
+      .filter(Boolean) as (SelectOption | SelectGroup)[];
   }, [options, searchQuery, filterOption]);
 
   return (
-    <div className={cx("relative w-full flex flex-col gap-1", containerClassName)}>
-      <Listbox value={activeOption} onChange={(val) => {
-        onChange(val);
-        setSearchQuery(""); // Reset search query on select
-      }}>
+    <div
+      className={cx("relative w-full flex flex-col gap-1", containerClassName)}
+    >
+      <Listbox
+        value={activeOption}
+        onChange={(val) => {
+          onChange(val);
+          setSearchQuery(""); // Reset search query on select
+        }}
+      >
         {({ open }) => (
           <div className="relative">
             <Listbox.Button
@@ -129,21 +142,21 @@ export const Select = ({
                 "relative w-full min-h-[42px] py-2 pl-3 pr-10 text-left transition-all duration-200 cursor-pointer",
                 "bg-[var(--bg-input)] border border-[var(--border-input)] rounded shadow-sm",
                 "hover:border-neutral-400 dark:hover:border-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500",
-                className
+                className,
               )}
             >
               <span className="flex items-center gap-2 truncate text-sm font-medium text-[var(--text-main)]">
-                {activeOption ? (
-                  renderValue ? renderValue(activeOption) : activeOption.label
-                ) : (
-                  placeholder ?? "Select option..."
-                )}
+                {activeOption
+                  ? renderValue
+                    ? renderValue(activeOption)
+                    : activeOption.label
+                  : (placeholder ?? "Select option...")}
               </span>
               <span className="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none">
                 <HiChevronDown
                   className={cx(
                     "w-5 h-5 text-[var(--text-sub)] transition-transform duration-200",
-                    open ? "rotate-180" : ""
+                    open ? "rotate-180" : "",
                   )}
                   aria-hidden="true"
                 />
@@ -160,10 +173,10 @@ export const Select = ({
               enterFrom="opacity-0 -translate-y-1 scale-95"
               enterTo="opacity-100 translate-y-0 scale-100"
             >
-              <Listbox.Options 
+              <Listbox.Options
                 className={cx(
                   "absolute w-full py-1 mt-1.5 overflow-auto text-base sm:text-sm rounded shadow-xl max-h-[400px] ring-1 ring-black/5 focus:outline-none z-[100]",
-                  "bg-[var(--bg-menu)] border border-[var(--border-light)] flex flex-col"
+                  "bg-[var(--bg-menu)] border border-[var(--border-light)] flex flex-col",
                 )}
               >
                 {isSearchable && (
@@ -180,16 +193,21 @@ export const Select = ({
                     />
                   </div>
                 )}
-                
+
                 <div className="overflow-y-auto flex-1">
                   {filteredItems.length === 0 ? (
-                    <div className="px-4 py-3 text-sm text-[var(--text-sub)] italic text-center">No options found</div>
+                    <div className="px-4 py-3 text-sm text-[var(--text-sub)] italic text-center">
+                      No options found
+                    </div>
                   ) : (
                     filteredItems.map((item, idx) => {
                       if ("options" in item) {
                         // Render Group Header & Sub-Options
                         return (
-                          <div key={`group-${item.label}-${idx}`} className="border-b border-[var(--border-light)]/20 last:border-0">
+                          <div
+                            key={`group-${item.label}-${idx}`}
+                            className="border-b border-[var(--border-light)]/20 last:border-0"
+                          >
                             <div className="sticky top-0 z-10 px-4 py-1.5 text-xs font-bold tracking-wider uppercase bg-slate-800/30 text-blue-400 select-none backdrop-blur-sm border-b border-t border-[var(--border-light)]/10">
                               {item.label}
                             </div>
@@ -199,11 +217,11 @@ export const Select = ({
                                 className={({ active, selected }) =>
                                   cx(
                                     "relative cursor-pointer select-none py-2.5 px-4 transition-all duration-100",
-                                    active 
-                                      ? "bg-blue-600 text-white" 
-                                      : selected 
-                                        ? "bg-[var(--border-light)]/40 text-[var(--text-main)] font-semibold" 
-                                        : "text-[var(--text-main)]"
+                                    active
+                                      ? "bg-blue-600 text-white"
+                                      : selected
+                                        ? "bg-[var(--border-light)]/40 text-[var(--text-main)] font-semibold"
+                                        : "text-[var(--text-main)]",
                                   )
                                 }
                                 value={option}
@@ -214,17 +232,31 @@ export const Select = ({
                                       renderOption(option)
                                     ) : (
                                       <>
-                                        <span className={cx("block truncate", selected ? "font-semibold" : "font-normal")}>
+                                        <span
+                                          className={cx(
+                                            "block truncate",
+                                            selected
+                                              ? "font-semibold"
+                                              : "font-normal",
+                                          )}
+                                        >
                                           {option.label}
                                         </span>
                                         {option.helperText && (
                                           <span
                                             className={cx(
                                               "block text-xs mt-0.5 font-normal break-words whitespace-normal leading-relaxed opacity-85",
-                                              active ? "text-blue-100" : "text-[var(--text-sub)]"
+                                              active
+                                                ? "text-blue-100"
+                                                : "text-[var(--text-sub)]",
                                             )}
                                           >
-                                            {renderDescription(option.helperText, option.dynamicValue ?? option.defaultValue ?? null)}
+                                            {renderDescription(
+                                              option.helperText,
+                                              option.dynamicValue ??
+                                                option.defaultValue ??
+                                                null,
+                                            )}
                                           </span>
                                         )}
                                       </>
@@ -245,11 +277,11 @@ export const Select = ({
                           className={({ active, selected }) =>
                             cx(
                               "relative cursor-pointer select-none py-2.5 px-4 transition-all duration-100",
-                              active 
-                                ? "bg-blue-600 text-white" 
-                                : selected 
-                                  ? "bg-[var(--border-light)]/40 text-[var(--text-main)] font-semibold" 
-                                  : "text-[var(--text-main)]"
+                              active
+                                ? "bg-blue-600 text-white"
+                                : selected
+                                  ? "bg-[var(--border-light)]/40 text-[var(--text-main)] font-semibold"
+                                  : "text-[var(--text-main)]",
                             )
                           }
                           value={option}
@@ -260,17 +292,31 @@ export const Select = ({
                                 renderOption(option)
                               ) : (
                                 <>
-                                  <span className={cx("block truncate", selected ? "font-semibold" : "font-normal")}>
+                                  <span
+                                    className={cx(
+                                      "block truncate",
+                                      selected
+                                        ? "font-semibold"
+                                        : "font-normal",
+                                    )}
+                                  >
                                     {option.label}
                                   </span>
                                   {option.helperText && (
                                     <span
                                       className={cx(
                                         "block text-xs mt-0.5 font-normal break-words whitespace-normal leading-relaxed opacity-85",
-                                        active ? "text-blue-100" : "text-[var(--text-sub)]"
+                                        active
+                                          ? "text-blue-100"
+                                          : "text-[var(--text-sub)]",
                                       )}
                                     >
-                                      {renderDescription(option.helperText, option.dynamicValue ?? option.defaultValue ?? null)}
+                                      {renderDescription(
+                                        option.helperText,
+                                        option.dynamicValue ??
+                                          option.defaultValue ??
+                                          null,
+                                      )}
                                     </span>
                                   )}
                                 </>
