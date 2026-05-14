@@ -161,7 +161,7 @@ export const Select = ({
             >
               <Listbox.Options 
                 className={cx(
-                  "absolute w-full py-1 mt-1.5 overflow-auto text-base sm:text-sm rounded shadow-xl max-h-80 ring-1 ring-black/5 focus:outline-none z-[100]",
+                  "absolute w-full py-1 mt-1.5 overflow-auto text-base sm:text-sm rounded shadow-xl max-h-[400px] ring-1 ring-black/5 focus:outline-none z-[100]",
                   "bg-[var(--bg-menu)] border border-[var(--border-light)] flex flex-col"
                 )}
               >

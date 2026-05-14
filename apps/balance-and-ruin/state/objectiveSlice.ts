@@ -256,7 +256,7 @@ export const objectiveSlice = createSlice({
       }
 
       const { format_string, group, id } = state.metadata.objectives[0];
-
+      
       state.objectivesByFlag[action.payload.flag] = {
         conditions: [],
         result: {

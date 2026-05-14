@@ -147,13 +147,6 @@ export const ObjectiveConditionSelect = ({
 
   return (
     <div className="flex flex-col gap-2">
-      <div>
-        <FlagLabel
-          flag={objective.flag}
-          helperText={description}
-          label={"Condition"}
-        />
-      </div>
 
       <CustomSelect
         isSearchable

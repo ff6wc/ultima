@@ -378,35 +378,18 @@ export const FlagCreatePage = ({ objectives, presets, schema, version }: PagePro
               ✕
             </button>
             <div className={styles.sidebarHeader}>
-            <div className={styles.logo} style={{ padding: '0 10px', position: 'relative' }}>
-              <div style={{ width: '100%', height: '60px', position: 'relative' }}>
+            <div className={styles.logo} style={{ padding: '10px 10px 0 10px', position: 'relative', width: '100%' }}>
+              <div style={{ width: '100%', height: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <img 
-                  src={processedLogo || '/logo.png'} 
-                  alt="Worlds Collide Logo" 
+                  src="/logo-transparent.png" 
+                  alt="Final Fantasy VI Randomizer" 
                   style={{ 
                     objectFit: 'contain', 
                     width: '100%', 
-                    height: '100%', 
-                    opacity: processedLogo ? 1 : 0,
-                    transition: 'opacity 0.2s ease'
+                    height: 'auto',
+                    maxHeight: '80px'
                   }} 
                 />
-              </div>
-              <div style={{ 
-                marginTop: '6px', 
-                width: '100%',
-                display: 'flex', 
-                justifyContent: 'space-between',
-                fontFamily: '"Final Fantasy 3/6 Font"',
-                fontSize: '13px',
-                color: 'var(--text-primary)',
-                textShadow: '1px 1px 0px #000'
-              }}>
-                {"FINAL FANTASY VI RANDOMIZER".split('').map((char, idx) => (
-                  <span key={idx} style={{ display: 'inline-block' }}>
-                    {char === ' ' ? '\u00A0' : char}
-                  </span>
-                ))}
               </div>
             </div>
             {status === "authenticated" && session?.user ? (
@@ -451,11 +434,6 @@ export const FlagCreatePage = ({ objectives, presets, schema, version }: PagePro
             })}
           </Tab.List>
             
-            {/* Tutorial Link */}
-            <div style={{padding: '1rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.9rem'}}>
-              <HiOutlineQuestionMarkCircle size={20} />
-              <span>Tutorial</span>
-            </div>
           </aside>
 
         {/* Main Content Area */}
