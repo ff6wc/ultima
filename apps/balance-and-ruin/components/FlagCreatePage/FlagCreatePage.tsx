@@ -571,16 +571,12 @@ export const FlagCreatePage = ({
             <Tab.List className={styles.tabList}>
               {tabs.map((tab) => {
                 const isSideNavHidden = ["events", "sotw"].includes(tab.id);
-                if (isSideNavHidden) {
-                  return <Tab key={tab.id} className="hidden" />;
-                }
-
                 const isHighlighted = matchesSearch(tab.id);
 
                 return (
                   <Tab
                     key={tab.id}
-                    className={`${tab.isAction ? styles.generateBtn : styles.tabItem} ${isHighlighted ? "bg-yellow-500/20 !text-yellow-400 border-l-4 border-yellow-400 font-bold" : ""}`}
+                    className={`${tab.isAction ? styles.generateBtn : styles.tabItem} ${isHighlighted ? "bg-yellow-500/20 !text-yellow-400 border-l-4 border-yellow-400 font-bold" : ""} ${isSideNavHidden ? styles.mobileOnly : ""}`}
                   >
                     {tab.Icon && <tab.Icon size={20} />}
                     <span>{tab.label}</span>
@@ -588,6 +584,31 @@ export const FlagCreatePage = ({
                 );
               })}
             </Tab.List>
+
+            <div
+              className={`${styles.mobileOnly} flex-col gap-1 border-t border-white/10 pt-4 mt-auto mb-4`}
+            >
+              <a
+                href="https://wiki.ff6worldscollide.com/wiki/Main_Page"
+                target="_blank"
+                rel="noreferrer"
+                className={styles.tabItem}
+                style={{ margin: "0 1rem" }}
+              >
+                <FaBook size={20} />
+                <span>WIKI</span>
+              </a>
+              <a
+                href="https://discord.gg/5MPeng5"
+                target="_blank"
+                rel="noreferrer"
+                className={styles.tabItem}
+                style={{ margin: "0 1rem" }}
+              >
+                <FaDiscord size={20} />
+                <span>DISCORD</span>
+              </a>
+            </div>
           </aside>
 
           {/* Main Content Area */}

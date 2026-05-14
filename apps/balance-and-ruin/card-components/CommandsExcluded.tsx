@@ -45,7 +45,10 @@ const useExcludedCommands = () => {
   const rec5 = useFlagValueSelector("-rec5");
   const rec6 = useFlagValueSelector("-rec6");
   return useMemo(
-    () => [rec1, rec2, rec3, rec4, rec5, rec6].filter((val) => val !== NONE),
+    () =>
+      [rec1, rec2, rec3, rec4, rec5, rec6]
+        .map(Number)
+        .filter((val) => val !== NONE),
     [rec1, rec2, rec3, rec4, rec5, rec6],
   );
 };
@@ -57,18 +60,19 @@ export const ExcludeSelect = ({ flag }: ExcludeSelectProps) => {
   const value = useFlagValueSelector<number>(flag);
 
   const selectOptions = useMemo(() => {
+    const currentValue = Number(value ?? NONE);
     return allOptions
-      .filter(({ value: id }) => !excludedValues.includes(id))
+      .filter(({ value: id }) => id === currentValue || !excludedValues.includes(id))
       .map((opt) => ({
         label: opt.label,
         value: opt.value.toString(),
       }));
-  }, [excludedValues]);
+  }, [excludedValues, value]);
 
   const currentSelectValue = useMemo(() => {
-    const activeVal = value ?? NONE;
+    const activeVal = Number(value ?? NONE);
     return (
-      selectOptions.find((opt) => opt.value === activeVal.toString()) ?? {
+      selectOptions.find((opt) => Number(opt.value) === activeVal) ?? {
         label: NONE_OPTION.label,
         value: NONE_OPTION.value.toString(),
       }
