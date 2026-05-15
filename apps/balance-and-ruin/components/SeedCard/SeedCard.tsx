@@ -1,15 +1,12 @@
-import { Button, Card, CodeBlock, Divider, HelperText, Input } from "@ff6wc/ui";
 import { cx } from "cva";
 import first from "lodash/first";
 import { useEffect, useRef, useState } from "react";
-import { MdClear, MdFileUpload } from "react-icons/md";
-import { useSelector } from "react-redux";
-import { selectRawFlags } from "~/state/flagSlice";
 import { base64ToByteArray } from "~/utils/base64ToByteArray";
 import { isValidROM, removeHeader } from "~/utils/romUtils";
 import { XDelta3Decoder } from "~/utils/xdelta3_decoder";
 import JSZip from "jszip";
 import { GenerateUpload } from "~/components/GenerateUpload/GenerateUpload";
+import styles from "~/components/GenerateCard/GenerateCard.module.css";
 
 export type SeedData = {
   created_at: number;
@@ -30,9 +27,8 @@ export type SeedCardProps = {
   seed: SeedData;
 };
 
-export const SeedCard = ({ className, seed, ...rest }: SeedCardProps) => {
+export const SeedCard = ({ className, seed }: SeedCardProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
-  const flags = useSelector(selectRawFlags);
   const [romData, setRomData] = useState<string | null>(null);
   const [romName, setRomName] = useState("");
   const [romSelectError, setRomSelectError] = useState<string | null>(null);
@@ -134,43 +130,57 @@ export const SeedCard = ({ className, seed, ...rest }: SeedCardProps) => {
   };
 
   return (
-    <Card
-      {...rest}
-      contentClassName={cx("p-0 gap-3", className)}
-      title="Generate"
-    >
-      <div className="flex flex-col gap-2">
-        <h3 className={"font-medium text-base"}>
+    <div className={cx(styles.container, className)}>
+      <h2 className={styles.title}>Generate Your ROM</h2>
+
+      <div className={styles.stepContainer}>
+        <h3 className={styles.stepTitle}>
           Step 1: Verify the following flags and seed above are correct
         </h3>
-      </div>
-      <Divider />
-      <GenerateUpload
-        clearRomValues={clearRomValues}
-        hasRomData={hasRomData}
-        romName={romName}
-        shortRomName={displayRomName}
-        error={romSelectError}
-        inputRef={inputRef}
-        onRomSelect={onRomSelect}
-        success={success}
-      />
-      <Divider />
-
-      <div className="flex flex-col gap-2">
-        <h3 className={"font-medium text-lg"}>Step 3: Click Generate!</h3>
-        {!romData ? (
-          <HelperText>
-            This button will be disabled until a valid ROM is selected
-          </HelperText>
-        ) : null}
+        <textarea
+          className={styles.textarea}
+          readOnly
+          value={seed.flags}
+          placeholder="Selected flags will appear here..."
+        />
       </div>
 
-      <div className="fle flex-col gap-2 pl-3">
-        <Button disabled={!hasRomData} onClick={generate} variant="primary">
-          Generate
-        </Button>
+      <div className={styles.divider} />
+
+      <div className={styles.stepContainer}>
+        <h3 className={styles.stepTitle}>Step 2: Provide Base ROM</h3>
+        <GenerateUpload
+          clearRomValues={clearRomValues}
+          hasRomData={hasRomData}
+          romName={romName}
+          shortRomName={displayRomName}
+          error={romSelectError}
+          inputRef={inputRef}
+          onRomSelect={onRomSelect}
+          success={success}
+        />
       </div>
-    </Card>
+
+      <div className={styles.divider} />
+
+      <div className={styles.stepContainer}>
+        <h3 className={styles.stepTitle}>Step 3: Click Generate!</h3>
+        
+        {!hasRomData && (
+          <span className={styles.helperText}>
+            This button will be disabled until a valid ROM is selected.
+          </span>
+        )}
+
+        <button
+          className={styles.generateButton}
+          disabled={!hasRomData}
+          onClick={generate}
+        >
+          Generate ROM
+        </button>
+      </div>
+    </div>
   );
 };
+
