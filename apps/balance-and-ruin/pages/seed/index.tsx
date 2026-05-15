@@ -95,7 +95,7 @@ const SeedDetailsPage = () => {
             <img
               src="/logo-transparent.png"
               alt="FF6WC Logo"
-              className="h-24 w-auto invert dark:invert-0 transition-all filter drop-shadow-md"
+              className="h-48 w-auto invert dark:invert-0 transition-all filter drop-shadow-md"
             />
             <h1 className="font-bold tracking-widest text-3xl md:text-4xl uppercase font-outfit text-[var(--text-main)] mt-2">
               Seed Details
