@@ -49,20 +49,10 @@ const SeedDetailsPage = () => {
       </Head>
 
       <div className="min-h-screen bg-[var(--bg-app)] flex flex-col text-[var(--text-main)] font-sans transition-colors duration-200">
-        {/* Modern Standalone Header */}
-        <header className="h-16 border-b border-[var(--border-light)] bg-[var(--bg-card)] flex items-center justify-between px-6 md:px-10 py-4 sticky top-0 z-50 backdrop-blur-md shadow-sm transition-colors duration-200">
-          <div className="flex items-center gap-3">
-            <img
-              src="/logo-transparent.png"
-              alt="FF6WC Logo"
-              className="h-8 w-auto hidden md:block invert dark:invert-0 transition-all filter drop-shadow-sm"
-            />
-            <h1 className="font-bold tracking-wider text-lg uppercase font-outfit text-[var(--text-main)] select-none">
-              Seed Details
-            </h1>
-          </div>
-
-          <div className="flex items-center gap-6">
+        {/* Modern Standalone Hero Header */}
+        <header className="py-12 px-6 md:px-10 border-b border-[var(--border-light)] bg-[var(--bg-card)] relative flex flex-col items-center justify-center transition-colors duration-200 shadow-sm">
+          {/* Floating utilities in the top-right corner */}
+          <div className="absolute top-4 right-6 md:right-10 flex items-center gap-6">
             {/* Universal Theme Switcher */}
             <button
               onClick={toggleTheme}
@@ -98,6 +88,18 @@ const SeedDetailsPage = () => {
                 DISCORD
               </span>
             </a>
+          </div>
+
+          {/* 3x Enlarged Centered Brand & Title Column */}
+          <div className="flex flex-col items-center gap-4 text-center py-4 select-none">
+            <img
+              src="/logo-transparent.png"
+              alt="FF6WC Logo"
+              className="h-24 w-auto invert dark:invert-0 transition-all filter drop-shadow-md"
+            />
+            <h1 className="font-bold tracking-widest text-3xl md:text-4xl uppercase font-outfit text-[var(--text-main)] mt-2">
+              Seed Details
+            </h1>
           </div>
         </header>
 
