@@ -5,7 +5,7 @@ import {
   InGameConfig,
   DEFAULT_IN_GAME_CONFIG,
   WINDOW_PALETTE_DEFAULTS,
-  FONT_PALETTE_DEFAULTS,
+  DEFAULT_FONT_COLOR,
 } from "~/types/inGameConfig";
 
 const toRGBString = ([r, g, b]: [number, number, number]) => {
@@ -59,18 +59,12 @@ export const InGameConfigCard = () => {
   };
 
   const handleRGBChange = (channel: 0 | 1 | 2, val: number) => {
-    const key = `window${config.wallpaper || 1}`;
-    
     if (colorTarget === "font") {
-      const palettes = { ...(config.fontPalettes || DEFAULT_IN_GAME_CONFIG.fontPalettes) };
-      const currentPalette = [...(palettes[key] || FONT_PALETTE_DEFAULTS[key] || FONT_PALETTE_DEFAULTS.window1)];
-      const nextColor = [...(currentPalette[activeColorIdx] || [0, 0, 0])] as [number, number, number];
-      
+      const nextColor = [...(config.fontColor || DEFAULT_FONT_COLOR)] as [number, number, number];
       nextColor[channel] = val;
-      currentPalette[activeColorIdx] = nextColor;
-      palettes[key] = currentPalette;
-      updateConfig({ fontPalettes: palettes });
+      updateConfig({ fontColor: nextColor });
     } else {
+      const key = `window${config.wallpaper || 1}`;
       const palettes = { ...(config.windowPalettes || DEFAULT_IN_GAME_CONFIG.windowPalettes) };
       const currentPalette = [...(palettes[key] || WINDOW_PALETTE_DEFAULTS[key] || WINDOW_PALETTE_DEFAULTS.window1)];
       const nextColor = [...(currentPalette[activeColorIdx] || [0, 0, 0])] as [number, number, number];
@@ -82,16 +76,12 @@ export const InGameConfigCard = () => {
     }
   };
 
-  const getActivePalette = (): [number, number, number][] => {
-    const key = `window${config.wallpaper || 1}`;
-    if (colorTarget === "font") {
-      return config.fontPalettes?.[key] || FONT_PALETTE_DEFAULTS[key] || FONT_PALETTE_DEFAULTS.window1;
-    }
-    return config.windowPalettes?.[key] || WINDOW_PALETTE_DEFAULTS[key] || WINDOW_PALETTE_DEFAULTS.window1;
-  };
-
   const getActiveRGB = (): [number, number, number] => {
-    const pal = getActivePalette();
+    if (colorTarget === "font") {
+      return config.fontColor || DEFAULT_FONT_COLOR;
+    }
+    const key = `window${config.wallpaper || 1}`;
+    const pal = config.windowPalettes?.[key] || WINDOW_PALETTE_DEFAULTS[key] || WINDOW_PALETTE_DEFAULTS.window1;
     return pal[activeColorIdx] || [0, 0, 0];
   };
 
@@ -156,8 +146,7 @@ export const InGameConfigCard = () => {
   const activeKey = `window${config.wallpaper || 1}`;
   
   const winPalette = config.windowPalettes?.[activeKey] || WINDOW_PALETTE_DEFAULTS[activeKey] || WINDOW_PALETTE_DEFAULTS.window1;
-  const fontPalette = config.fontPalettes?.[activeKey] || FONT_PALETTE_DEFAULTS[activeKey] || FONT_PALETTE_DEFAULTS.window1;
-  const activeGradient = colorTarget === "window" ? winPalette : fontPalette;
+  const activeGradient = winPalette;
 
   // High Fidelity CSS mapping based on discrete element indexes!
   // Index 5 & 6 are Background Top & Bottom
@@ -167,10 +156,10 @@ export const InGameConfigCard = () => {
   const frameHighlight = toRGBString(winPalette[1] || [20, 22, 22]);
   const frameShadow = toRGBString(winPalette[4] || [5, 6, 6]);
 
-  // Text mapping: Font Index 0 handles main headers, Index 3 handles body text!
-  const headerColor = toRGBString(fontPalette[0] || [0, 28, 27]);
-  const bodyTextColor = toRGBString(fontPalette[3] || [31, 31, 31]);
-  const subShadowColor = toRGBString(fontPalette[4] || [22, 22, 22]);
+  // Text mapping: Font mappings set in game by the python script affect ONLY the Cyan text color!
+  const headerColor = toRGBString(config.fontColor || DEFAULT_FONT_COLOR);
+  const bodyTextColor = "rgb(224, 224, 224)"; // Static clean white/grey console text
+  const subShadowColor = "rgba(255, 255, 255, 0.4)";
 
   // Labeling mappings for custom gradient bar selections
   const getIndexName = (idx: number) => {
@@ -186,16 +175,7 @@ export const InGameConfigCard = () => {
         default: return `Element ${idx}`;
       }
     } else {
-      switch(idx) {
-        case 0: return "Header Characters";
-        case 1: return "Header Light Tone";
-        case 2: return "Header Shadow Edge";
-        case 3: return "Body Characters";
-        case 4: return "Body Light Tone";
-        case 5: return "Backdrop Edge Top";
-        case 6: return "Backdrop Edge Bottom";
-        default: return `Font Slot ${idx}`;
-      }
+      return "Global Font Color";
     }
   };
 
@@ -345,16 +325,6 @@ export const InGameConfigCard = () => {
                   </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-8">
-                  <div className="w-48 flex-shrink-0 font-mono font-bold text-xl tracking-wider" style={{ color: headerColor, textShadow: "3px 3px 0px #000000" }}>
-                    Controller
-                  </div>
-                  <div className="flex gap-6 items-center flex-wrap">
-                    {renderOption("controller", "single", "Single", bodyTextColor)}
-                    {renderOption("controller", "multiple", "Multiple", bodyTextColor)}
-                  </div>
-                </div>
-
                 {/* Arrow Indicator down to Page 2 */}
                 <div className="w-full flex justify-center mt-2">
                   <button 
@@ -478,32 +448,34 @@ export const InGameConfigCard = () => {
                 </div>
 
                 {/* Gradient Palette Element Selection (Interactive square selector representing component elements!) */}
-                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-8 mt-1 animate-fadeIn">
-                  <div className="w-48 flex-shrink-0 font-mono font-bold text-lg tracking-wider" style={{ color: headerColor, textShadow: "2px 2px 0px #000000" }}>
-                    Gradient
+                {colorTarget === "window" && (
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-8 mt-1 animate-fadeIn">
+                    <div className="w-48 flex-shrink-0 font-mono font-bold text-lg tracking-wider" style={{ color: headerColor, textShadow: "2px 2px 0px #000000" }}>
+                      Gradient
+                    </div>
+                    <div className="flex gap-1 p-1.5 rounded-md select-none shadow-inner border border-black/20" style={{ backgroundColor: "rgba(0,0,0,0.4)" }}>
+                      {activeGradient.map((col, cIdx) => {
+                        const isSelected = activeColorIdx === cIdx;
+                        return (
+                          <button
+                            key={`gradient-swatch-${cIdx}`}
+                            type="button"
+                            onClick={() => setActiveColorIdx(cIdx)}
+                            className={`w-8 h-8 rounded transition-all duration-100 shadow-md focus:outline-none relative border border-black/30 ${
+                              isSelected ? "ring-2 ring-white scale-110 z-10 shadow-white/40" : "hover:scale-105"
+                            }`}
+                            style={{ backgroundColor: toRGBString(col) }}
+                            title={getIndexName(cIdx)}
+                          >
+                            {isSelected && (
+                              <div className="absolute inset-0 border border-black rounded opacity-50" />
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
-                  <div className="flex gap-1 p-1.5 rounded-md select-none shadow-inner border border-black/20" style={{ backgroundColor: "rgba(0,0,0,0.4)" }}>
-                    {activeGradient.map((col, cIdx) => {
-                      const isSelected = activeColorIdx === cIdx;
-                      return (
-                        <button
-                          key={`gradient-swatch-${cIdx}`}
-                          type="button"
-                          onClick={() => setActiveColorIdx(cIdx)}
-                          className={`w-8 h-8 rounded transition-all duration-100 shadow-md focus:outline-none relative border border-black/30 ${
-                            isSelected ? "ring-2 ring-white scale-110 z-10 shadow-white/40" : "hover:scale-105"
-                          }`}
-                          style={{ backgroundColor: toRGBString(col) }}
-                          title={getIndexName(cIdx)}
-                        >
-                          {isSelected && (
-                            <div className="absolute inset-0 border border-black rounded opacity-50" />
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
+                )}
 
                 {/* RGB Sliders Editor Block */}
                 <div className="pl-0 sm:pl-56 flex flex-col gap-3 mt-2 animate-fadeIn">

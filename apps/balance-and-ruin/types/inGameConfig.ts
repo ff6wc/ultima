@@ -8,15 +8,16 @@ export type InGameConfig = {
   sound: "stereo" | "mono";
   cursor: "reset" | "memory";
   reequip: "optimum" | "empty";
-  controller: "single" | "multiple";
 
   // Page 2
   spellOrder: number;
   wallpaper: number;
   
-  // Discrete multi-element palettes for each of the 8 styles!
+  // Discrete multi-element window palettes for each of the 8 styles!
   windowPalettes: Record<string, [number, number, number][]>;
-  fontPalettes: Record<string, [number, number, number][]>;
+  
+  // Global font color (single R,G,B triple mapped by the python CLI script)
+  fontColor: [number, number, number];
 };
 
 export const WINDOW_PALETTE_DEFAULTS: Record<string, [number, number, number][]> = {
@@ -30,21 +31,7 @@ export const WINDOW_PALETTE_DEFAULTS: Record<string, [number, number, number][]>
   window8: [[20, 12, 13], [25, 24, 22], [20, 19, 16], [26, 17, 0], [25, 13, 0], [20, 11, 0], [4, 4, 4]],
 };
 
-// Standard default Font Palettes (7 colors). 
-// In custom config systems, Font elements map broadly to specific index buckets:
-// Index 0 is often used for the primary menu titles/headers (e.g., Cyan).
-// Index 3/4 corresponds to the main body text (White).
-// Index 5/6 typically binds transparent backdrops matching the current theme background.
-export const FONT_PALETTE_DEFAULTS: Record<string, [number, number, number][]> = {
-  window1: [[0, 28, 27], [0, 20, 20], [0, 12, 12], [31, 31, 31], [22, 22, 22], [6, 6, 17], [5, 5, 16]],
-  window2: [[0, 28, 27], [0, 20, 20], [0, 12, 12], [31, 31, 31], [22, 22, 22], [4, 5, 5], [1, 2, 2]],
-  window3: [[0, 28, 27], [0, 20, 20], [0, 12, 12], [31, 31, 31], [22, 22, 22], [2, 3, 4], [10, 15, 19]],
-  window4: [[0, 28, 27], [0, 20, 20], [0, 12, 12], [31, 31, 31], [22, 22, 22], [7, 9, 8], [4, 6, 5]],
-  window5: [[0, 28, 27], [0, 20, 20], [0, 12, 12], [31, 31, 31], [22, 22, 22], [7, 7, 4], [2, 2, 2]],
-  window6: [[0, 28, 27], [0, 20, 20], [0, 12, 12], [31, 31, 31], [22, 22, 22], [4, 6, 5], [1, 3, 2]],
-  window7: [[0, 28, 27], [0, 20, 20], [0, 12, 12], [31, 31, 31], [22, 22, 22], [4, 7, 4], [2, 5, 3]],
-  window8: [[0, 28, 27], [0, 20, 20], [0, 12, 12], [31, 31, 31], [22, 22, 22], [20, 11, 0], [4, 4, 4]],
-};
+export const DEFAULT_FONT_COLOR: [number, number, number] = [0, 28, 27];
 
 export const DEFAULT_IN_GAME_CONFIG: InGameConfig = {
   batMode: "wait",
@@ -55,10 +42,9 @@ export const DEFAULT_IN_GAME_CONFIG: InGameConfig = {
   sound: "stereo",
   cursor: "reset",
   reequip: "optimum",
-  controller: "single",
 
   spellOrder: 1,
   wallpaper: 1,
   windowPalettes: { ...WINDOW_PALETTE_DEFAULTS },
-  fontPalettes: { ...FONT_PALETTE_DEFAULTS },
+  fontColor: [...DEFAULT_FONT_COLOR],
 };

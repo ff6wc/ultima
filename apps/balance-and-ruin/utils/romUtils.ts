@@ -61,7 +61,7 @@ export function applyInGameConfig(patched: Uint8Array) {
     } catch (e) {}
   }
 
-  // 1. Config 1 (Fixed location): c mmm w bbb
+  // 1. Config 1 (Fixed location $0370B9): c mmm w bbb
   const c = config.cmdSet === "short" ? 1 : 0;
   const mmm = Math.max(0, Math.min(5, config.msgSpeed - 1));
   const w = config.batMode === "wait" ? 1 : 0;
@@ -72,22 +72,23 @@ export function applyInGameConfig(patched: Uint8Array) {
     patched[0x0370b9] = config1Byte;
   }
 
-  // 2. Config 2 (Dynamic location from $0370C3): mbcccsss
+  // 2. Config 2 (Dynamic location from $0370C3 operand): mbcccsss
+  // Following python pack_config_byte specification:
+  // Controller2=0, CustomButtons=0, FontWindowPaletteSelect=0 (1 offset 1), SpellOrder=(spellOrder-1)
   if (0x0370c3 + 1 < patched.length) {
     const lowByte2 = patched[0x0370c3];
     const highByte2 = patched[0x0370c3 + 1];
     const config2Address = 0x030000 + (highByte2 * 256 + lowByte2) + 1;
 
-    const m = config.controller === "multiple" ? 1 : 0;
     const sss = Math.max(0, Math.min(5, (config.spellOrder || 1) - 1)); // 3 bits spell order
-    const config2Byte = (m << 7) | sss; // Custom buttons/font palette remain 0
+    const config2Byte = sss; // All other MSB bits remain zero according to the python specification
 
     if (config2Address < patched.length) {
       patched[config2Address] = config2Byte;
     }
   }
 
-  // 3. Config 3 (Dynamic location from $0370C6): gcsrwwww
+  // 3. Config 3 (Dynamic location from $0370C6 operand): gcsrwwww
   if (0x0370c6 + 1 < patched.length) {
     const lowByte3 = patched[0x0370c6];
     const highByte3 = patched[0x0370c6 + 1];
@@ -106,14 +107,11 @@ export function applyInGameConfig(patched: Uint8Array) {
     }
   }
 
-  // 4. Patch global fallback Font Color (2 bytes) to legacy addresses 0x18e806 and 0x03709F
-  const activeWindowKey = `window${config.wallpaper || 1}`;
-  const activeFontPal = config.fontPalettes?.[activeWindowKey] || FONT_PALETTE_DEFAULTS[activeWindowKey] || FONT_PALETTE_DEFAULTS.window1;
-  const activeFontBody = activeFontPal[3] || [31, 31, 31]; // Body Text Color
-  
-  const colorVal = (activeFontBody[2] << 10) | (activeFontBody[1] << 5) | activeFontBody[0];
-  const low = colorVal & 0xFF;
-  const high = (colorVal >> 8) & 0xFF;
+  // 4. Patch global Font Color (2 bytes) to legacy addresses 0x18e806 and 0x03709F
+  const fontColor = config.fontColor || [0, 28, 27];
+  const val = (fontColor[2] << 10) | (fontColor[1] << 5) | fontColor[0];
+  const low = val & 0xFF;
+  const high = (val >> 8) & 0xFF;
 
   if (0x18e806 + 1 < patched.length) {
     patched[0x18e806] = low;
@@ -124,33 +122,23 @@ export function applyInGameConfig(patched: Uint8Array) {
     patched[0x03709f + 1] = high;
   }
 
-  // 5. Patch discrete Window & Font Palette arrays for all 8 slots (0x2d1c02 offset by 0x20)
+  // 5. Patch discrete Window Palette arrays for all 8 slots (0x2d1c02 offset by 0x20)
+  // Following python specification, Window palettes consist of 7 colors (14 bytes) starting at the baseline.
   for (let i = 1; i <= 8; i++) {
     const key = `window${i}`;
     const startAddress = 0x2d1c02 + (i - 1) * 0x20;
-    if (startAddress + 31 >= patched.length) continue;
+    if (startAddress + 13 >= patched.length) continue;
 
     const winPalette = config.windowPalettes?.[key] || WINDOW_PALETTE_DEFAULTS[key] || WINDOW_PALETTE_DEFAULTS.window1;
-    const fontPalette = config.fontPalettes?.[key] || FONT_PALETTE_DEFAULTS[key] || FONT_PALETTE_DEFAULTS.window1;
 
     // Write Window Palette (7 colors / 14 bytes)
     for (let cIdx = 0; cIdx < 7; cIdx++) {
       const color = winPalette[cIdx] || [0, 0, 0];
-      const val = (color[2] << 10) | (color[1] << 5) | color[0];
-      patched[startAddress + cIdx * 2] = val & 0xFF;
-      patched[startAddress + cIdx * 2 + 1] = (val >> 8) & 0xFF;
+      const wVal = (color[2] << 10) | (color[1] << 5) | color[0];
+      patched[startAddress + cIdx * 2] = wVal & 0xFF;
+      patched[startAddress + cIdx * 2 + 1] = (wVal >> 8) & 0xFF;
     }
-
-    // Write Font Palette (7 colors / 14 bytes) starting at offset + 16 bytes
-    const fontAddress = startAddress + 16;
-    for (let cIdx = 0; cIdx < 7; cIdx++) {
-      const color = fontPalette[cIdx] || [0, 0, 0];
-      const val = (color[2] << 10) | (color[1] << 5) | color[0];
-      patched[fontAddress + cIdx * 2] = val & 0xFF;
-      patched[fontAddress + cIdx * 2 + 1] = (val >> 8) & 0xFF;
-    }
+    // Nested font palettes are not patched, adhering strictly to reference script.
   }
-
-
 }
 
