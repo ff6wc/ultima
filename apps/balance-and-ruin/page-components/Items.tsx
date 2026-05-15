@@ -18,7 +18,7 @@ export const Items = () => {
   const rawFlags = useSelector(selectRawFlags);
   useEffect(() => {
     dispatch(setRawStartingItems(rawFlags));
-  }, [dispatch]);
+  }, [dispatch, rawFlags]);
   return (
     <PageContainer columns={2}>
       <StartingGoldAndItems items={items} curateItems={true} />
