@@ -5,7 +5,6 @@ import { base64ToByteArray } from "~/utils/base64ToByteArray";
 import { isValidROM, removeHeader } from "~/utils/romUtils";
 import { XDelta3Decoder } from "~/utils/xdelta3_decoder";
 import JSZip from "jszip";
-import { GenerateUpload } from "~/components/GenerateUpload/GenerateUpload";
 import styles from "~/components/GenerateCard/GenerateCard.module.css";
 
 export type SeedData = {
@@ -32,7 +31,6 @@ export const SeedCard = ({ className, seed }: SeedCardProps) => {
   const [romData, setRomData] = useState<string | null>(null);
   const [romName, setRomName] = useState("");
   const [romSelectError, setRomSelectError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
 
   const hasRomData = Boolean(romData);
 
@@ -44,29 +42,24 @@ export const SeedCard = ({ className, seed }: SeedCardProps) => {
       : romName;
 
   useEffect(() => {
-    if (!inputRef.current) {
-      return;
-    }
     const savedRomData = localStorage.getItem("rom_data");
     const savedRomName = localStorage.getItem("rom_name");
 
     if (savedRomData) {
       setRomData(savedRomData);
-      setSuccess(true);
     }
 
     if (savedRomName) {
       setRomName(savedRomName);
     }
-  }, [inputRef]);
+  }, []);
 
-  const generate = async () => {
-    const { filename, patch, seed_id, log } = seed;
-    const rom = romData as string;
+  const executeGenerate = async (currentRomData: string) => {
+    const { filename, patch, log } = seed;
 
     const patched = XDelta3Decoder.decode(
       base64ToByteArray(patch as string),
-      base64ToByteArray(rom),
+      base64ToByteArray(currentRomData),
     );
 
     const jsz = new JSZip();
@@ -80,13 +73,12 @@ export const SeedCard = ({ className, seed }: SeedCardProps) => {
     });
   };
 
-  const clearRomValues = () => {
-    localStorage.removeItem("rom_name");
-    localStorage.removeItem("rom_data");
-    setRomName("");
-    setRomData(null);
-    setSuccess(false);
-    setRomSelectError(null);
+  const handleGenerateClick = () => {
+    if (romData) {
+      executeGenerate(romData);
+    } else {
+      inputRef.current?.click();
+    }
   };
 
   const onRomSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -112,7 +104,6 @@ export const SeedCard = ({ className, seed }: SeedCardProps) => {
 
         data_string = btoa(data_string);
 
-        setSuccess(true);
         setRomSelectError(null);
 
         try {
@@ -120,6 +111,9 @@ export const SeedCard = ({ className, seed }: SeedCardProps) => {
           localStorage.setItem("rom_name", file.name);
           setRomData(data_string);
           setRomName(file.name);
+          
+          // Immediately trigger generate upon selection
+          await executeGenerate(data_string);
         } catch (e) {
           return;
         }
@@ -131,56 +125,40 @@ export const SeedCard = ({ className, seed }: SeedCardProps) => {
 
   return (
     <div className={cx(styles.container, className)}>
-      <h2 className={styles.title}>Generate Your ROM</h2>
-
-      <div className={styles.stepContainer}>
-        <h3 className={styles.stepTitle}>
-          Step 1: Verify the following flags and seed above are correct
-        </h3>
-        <textarea
-          className={styles.textarea}
-          readOnly
-          value={seed.flags}
-          placeholder="Selected flags will appear here..."
-        />
-      </div>
-
-      <div className={styles.divider} />
-
-      <div className={styles.stepContainer}>
-        <h3 className={styles.stepTitle}>Step 2: Provide Base ROM</h3>
-        <GenerateUpload
-          clearRomValues={clearRomValues}
-          hasRomData={hasRomData}
-          romName={romName}
-          shortRomName={displayRomName}
-          error={romSelectError}
-          inputRef={inputRef}
-          onRomSelect={onRomSelect}
-          success={success}
-        />
-      </div>
-
-      <div className={styles.divider} />
-
-      <div className={styles.stepContainer}>
-        <h3 className={styles.stepTitle}>Step 3: Click Generate!</h3>
+      <div className="flex flex-col items-center text-center gap-6 py-6 w-full">
+        <h2 className={cx(styles.title, "w-full text-center pb-4")}>Generate Your ROM</h2>
         
-        {!hasRomData && (
-          <span className={styles.helperText}>
-            This button will be disabled until a valid ROM is selected.
-          </span>
-        )}
+        <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed max-w-md font-sans font-medium mt-2">
+          {hasRomData 
+            ? `Your base ROM (${displayRomName}) is loaded and ready.` 
+            : "Load your base ROM to patch and download this seed instantly."}
+        </p>
 
         <button
-          className={styles.generateButton}
-          disabled={!hasRomData}
-          onClick={generate}
+          className={cx(styles.generateButton, "w-full sm:w-auto min-w-[220px] justify-center flex items-center gap-2 px-8 py-3.5 font-bold text-base transition-all duration-200 shadow-md active:scale-95 hover:shadow-lg self-center mt-4")}
+          onClick={handleGenerateClick}
         >
           Generate ROM
         </button>
+
+        {romSelectError && (
+          <div className="text-red-500 dark:text-red-400 font-medium text-sm bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-2 mt-4 font-sans">
+            {romSelectError}
+          </div>
+        )}
+
+        <input
+          className="hidden"
+          id="rom_file_picker"
+          ref={inputRef}
+          name="rom"
+          onChange={onRomSelect}
+          type="file"
+          accept=".smc,.sfc"
+        />
       </div>
     </div>
   );
 };
+
 
