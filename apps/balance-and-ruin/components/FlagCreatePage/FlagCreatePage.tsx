@@ -342,6 +342,15 @@ export const FlagCreatePage = ({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
+  const mainContentRef = useRef<HTMLElement>(null);
+
+  // Reset scroll position to top of main container whenever active tab index changes
+  useEffect(() => {
+    if (mainContentRef.current) {
+      mainContentRef.current.scrollTop = 0;
+    }
+  }, [selectedIndex]);
+
   const dispatch = useDispatch();
   const showFlags = useSelector(selectShowFlags);
 
@@ -612,7 +621,7 @@ export const FlagCreatePage = ({
           </aside>
 
           {/* Main Content Area */}
-          <main className={styles.mainContent}>
+          <main ref={mainContentRef} className={styles.mainContent}>
             {/* Top Bar */}
             <div className={styles.topBar}>
               <div
