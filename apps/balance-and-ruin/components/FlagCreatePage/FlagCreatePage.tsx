@@ -59,14 +59,12 @@ import { ObjectiveMetadata } from "~/types/objectives";
 import { FlagPreset } from "~/types/preset";
 import { Switch } from "@ff6wc/ui";
 import Image from "next/image";
-import { SeedDetails } from "~/components/SeedDetails/SeedDetails";
 
 type PageProps = {
   objectives: ObjectiveMetadata;
   presets: Record<string, FlagPreset>;
   schema: Record<string, RawFlagMetadata>;
   version: string;
-  activeSeedId?: string;
 };
 
 type TabItem = {
@@ -240,7 +238,6 @@ export const FlagCreatePage = ({
   presets,
   schema,
   version,
-  activeSeedId,
 }: PageProps) => {
   const tabs: TabItem[] = useMemo(
     () =>
@@ -336,28 +333,11 @@ export const FlagCreatePage = ({
           Icon: GiSprout,
           content: <SotwTab />,
         },
-        ...(activeSeedId
-          ? [
-              {
-                label: "Seed Results",
-                id: "seed",
-                Icon: HiOutlineViewList,
-                content: (
-                  <PageContainer columns={1}>
-                    <SeedDetails seedId={activeSeedId} />
-                  </PageContainer>
-                ),
-              },
-            ]
-          : []),
       ].filter((z) => !!z) as TabItem[],
-    [presets, activeSeedId],
+    [presets],
   );
 
-  const [selectedIndex, setSelectedIndex] = useState(() => {
-    const seedIndex = tabs.findIndex((t) => t.id === "seed");
-    return seedIndex !== -1 ? seedIndex : 0;
-  });
+  const [selectedIndex, setSelectedIndex] = useState(0);
   const activeTabId = tabs[selectedIndex]?.id;
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
