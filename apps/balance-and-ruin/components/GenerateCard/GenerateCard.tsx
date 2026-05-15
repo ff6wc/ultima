@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import useSWRMutation from "swr/mutation";
 import { getFlagValue, selectFlagValues, setRawFlags } from "~/state/flagSlice";
 import { base64ToByteArray } from "~/utils/base64ToByteArray";
-import { isValidROM, removeHeader } from "~/utils/romUtils";
+import { isValidROM, removeHeader, applyInGameConfig } from "~/utils/romUtils";
 import { XDelta3Decoder } from "~/utils/xdelta3_decoder";
 import JSZip from "jszip";
 import { useRouter } from "next/router";
@@ -147,6 +147,8 @@ export const GenerateCard = ({
         base64ToByteArray(patch as string),
         base64ToByteArray(rom),
       );
+
+      applyInGameConfig(patched);
 
       const jsz = new JSZip();
       let zip = jsz.file(`${filename}.smc`, patched, { binary: true });

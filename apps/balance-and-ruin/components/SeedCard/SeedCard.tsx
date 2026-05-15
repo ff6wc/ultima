@@ -2,7 +2,7 @@ import { cx } from "cva";
 import first from "lodash/first";
 import { useEffect, useRef, useState } from "react";
 import { base64ToByteArray } from "~/utils/base64ToByteArray";
-import { isValidROM, removeHeader } from "~/utils/romUtils";
+import { isValidROM, removeHeader, applyInGameConfig } from "~/utils/romUtils";
 import { XDelta3Decoder } from "~/utils/xdelta3_decoder";
 import JSZip from "jszip";
 import styles from "~/components/GenerateCard/GenerateCard.module.css";
@@ -61,6 +61,8 @@ export const SeedCard = ({ className, seed }: SeedCardProps) => {
       base64ToByteArray(patch as string),
       base64ToByteArray(currentRomData),
     );
+
+    applyInGameConfig(patched);
 
     const jsz = new JSZip();
     let zip = jsz.file(`${filename}.smc`, patched, { binary: true });

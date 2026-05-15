@@ -8,6 +8,7 @@ import { SeedCardProps } from "~/components/SeedCard/SeedCard";
 import { ROM_FILE_EXTENSIONS } from "~/constants/romConstants";
 import { base64ToByteArray } from "~/utils/base64ToByteArray";
 import { XDelta3Decoder } from "~/utils/xdelta3_decoder";
+import { applyInGameConfig } from "~/utils/romUtils";
 
 export const MusicSeedCard = ({ className, seed, ...rest }: SeedCardProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -30,6 +31,8 @@ export const MusicSeedCard = ({ className, seed, ...rest }: SeedCardProps) => {
       base64ToByteArray(patch),
       base64ToByteArray(romData),
     );
+
+    applyInGameConfig(patched);
 
     jsz.file(romName, patched, { binary: true });
     jsz.file(`${filename}.txt`, spoiler_log);

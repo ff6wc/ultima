@@ -7,7 +7,7 @@ import first from "lodash/first";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import useSWRMutation from "swr/mutation";
 import { base64ToByteArray } from "~/utils/base64ToByteArray";
-import { isValidROM, removeHeader } from "~/utils/romUtils";
+import { isValidROM, removeHeader, applyInGameConfig } from "~/utils/romUtils";
 import { XDelta3Decoder } from "~/utils/xdelta3_decoder";
 import JSZip from "jszip";
 
@@ -135,6 +135,8 @@ export const SeedDetails = ({ seedId }: SeedDetailsProps) => {
         base64ToByteArray(patch),
         base64ToByteArray(currentRomData),
       );
+
+      applyInGameConfig(patched);
 
       // Zip the components and release as file attachment stream
       const jsz = new JSZip();
