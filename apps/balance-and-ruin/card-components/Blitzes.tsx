@@ -5,10 +5,10 @@ import { FlagSwitch } from "~/components/FlagSwitch/FlagSwitch";
 export const Blitzes = () => {
   return (
     <Card title={"Blitz"}>
-      <CardColumn>
+      <div className="flex flex-col gap-6">
         <FlagSwitch flag="-brl" label="Bum Rush Last" />
         <FlagSwitch flag="-bel" label="Everyone Learns" />
-      </CardColumn>
+      </div>
     </Card>
   );
 };

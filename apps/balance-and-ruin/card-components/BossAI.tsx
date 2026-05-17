@@ -1,4 +1,4 @@
-import { Card, Divider, HelperText } from "@ff6wc/ui";
+import { Card } from "@ff6wc/ui";
 import { CardColumn } from "~/components/CardColumn/CardColumn";
 import { FlagSwitch } from "~/components/FlagSwitch/FlagSwitch";
 
@@ -6,12 +6,6 @@ export const BossAI = () => {
   return (
     <Card title={"Boss Restoration"}>
       <CardColumn>
-        <HelperText>
-          Revert balance changes that have been made over time for Worlds
-          Collide
-        </HelperText>
-        <div className="hidden md:block" />
-
         <FlagSwitch
           flag="-bnu"
           helperText="Bosses that were undead in the original game are now undead"

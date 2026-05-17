@@ -24,6 +24,7 @@ import {
   HiOutlineSun,
   HiCode,
   HiFlag,
+  HiOutlineHome,
 } from "react-icons/hi";
 import { HiOutlineWrench } from "react-icons/hi2";
 import {
@@ -53,6 +54,7 @@ import { Magic } from "~/page-components/Magic";
 import { Settings } from "~/page-components/Settings";
 import { Objectives } from "~/page-components/Objectives";
 import { Party } from "~/page-components/Party";
+import { Home } from "~/page-components/Home";
 import { setObjectiveMetadata } from "~/state/objectiveSlice";
 import { RawFlagMetadata, setSchema } from "~/state/schemaSlice";
 import { ObjectiveMetadata } from "~/types/objectives";
@@ -76,6 +78,7 @@ type TabItem = {
 };
 
 const TAB_TITLES_MAP: Record<string, string[]> = {
+  home: ["Home", "Worlds Collide", "About"],
   presets: ["Presets", "Beta Presets", "Seed History"],
   objectives: ["Objectives", "Conditions", "Required Conditions", "Results"],
   party: ["Party Members", "Starting Party", "Starting Party Level"],
@@ -242,6 +245,12 @@ export const FlagCreatePage = ({
   const tabs: TabItem[] = useMemo(
     () =>
       [
+        {
+          label: "Home",
+          id: "home",
+          Icon: HiOutlineHome,
+          content: <Home />,
+        },
         {
           label: "Presets",
           id: "presets",
@@ -539,10 +548,15 @@ export const FlagCreatePage = ({
             <div className={styles.sidebarHeader}>
               <div
                 className={styles.logo}
+                onClick={() => {
+                  setSelectedIndex(0);
+                  setSidebarOpen(false);
+                }}
                 style={{
                   padding: "10px 10px 0 10px",
                   position: "relative",
                   width: "100%",
+                  cursor: "pointer",
                 }}
               >
                 <div
@@ -581,11 +595,12 @@ export const FlagCreatePage = ({
               {tabs.map((tab) => {
                 const isSideNavHidden = ["events", "sotw"].includes(tab.id);
                 const isHighlighted = matchesSearch(tab.id);
+                const isHome = tab.id === "home";
 
                 return (
                   <Tab
                     key={tab.id}
-                    className={`${tab.isAction ? styles.generateBtn : styles.tabItem} ${isHighlighted ? "bg-yellow-500/20 !text-yellow-400 border-l-4 border-yellow-400 font-bold" : ""} ${isSideNavHidden ? styles.mobileOnly : ""}`}
+                    className={`${isHome ? "hidden" : tab.isAction ? styles.generateBtn : styles.tabItem} ${isHighlighted ? "bg-yellow-500/20 !text-yellow-400 border-l-4 border-yellow-400 font-bold" : ""} ${isSideNavHidden ? styles.mobileOnly : ""}`}
                   >
                     {tab.Icon && <tab.Icon size={20} />}
                     <span>{tab.label}</span>

@@ -106,7 +106,7 @@ export const MiscCard = () => {
     <Card title={"Other"}>
       <div className="flex flex-col gap-6 h-full">
         {/* Row 1: The Dropdowns */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="flex flex-col gap-6">
           <FlagSubflagSelect
             nullable={{ description: YNPC_HELPER, label: "None" }}
             label="Y NPC"
@@ -128,7 +128,7 @@ export const MiscCard = () => {
         <div className="border-t border-white/10" />
 
         {/* Row 2: The Switches */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-auto">
+        <div className="flex flex-col gap-6 mt-auto">
           <FlagSwitch flag="-ond" label="Original Name Display" />
           <FlagSwitch flag="-npctips" label="NPC Tips" />
         </div>

@@ -21,7 +21,7 @@ const startingDances: SubflagOption[] = [
 export const Dances = () => {
   return (
     <Card title={"Dance"}>
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-6">
         <FlagSubflagSelect
           options={startingDances}
           nullable={{

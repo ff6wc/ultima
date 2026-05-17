@@ -32,6 +32,7 @@ export type FlagSubflagSelectProps = {
     label: string;
   };
   defaultSelected?: SubflagOption;
+  descriptionClassName?: string;
 };
 
 export const FlagSubflagSelect = ({
@@ -40,6 +41,7 @@ export const FlagSubflagSelect = ({
   nullable,
   options: baseOptions,
   defaultSelected,
+  descriptionClassName = "",
 }: FlagSubflagSelectProps) => {
   const dispatch = useDispatch();
   const id = useId();
@@ -116,6 +118,15 @@ export const FlagSubflagSelect = ({
     description = renderDescription(selectedOption.helperText, selectedValue);
   }
 
+  const ghosts = useMemo(() => {
+    return options.map((opt) => {
+      if (typeof opt.helperText === "function") {
+        return null;
+      }
+      return renderDescription(opt.helperText, opt.defaultValue);
+    });
+  }, [options]);
+
   const { Renderable } = selectedOption;
 
   // Create custom mapping to match CustomSelect schema safely
@@ -152,9 +163,11 @@ export const FlagSubflagSelect = ({
     <div className={`flex flex-col gap-2 ${className}`}>
       <>
         <FlagLabel
+          className={descriptionClassName}
           flag={selectedOption.flag}
           helperText={description}
           label={label}
+          ghosts={ghosts}
         />
 
         <FlagSubflagContext.Provider value={true}>

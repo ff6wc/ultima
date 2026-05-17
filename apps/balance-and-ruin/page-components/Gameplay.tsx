@@ -1,4 +1,7 @@
+import { AccessibilityCard } from "~/card-components/AccessibilityCard";
 import { AuctionHouse } from "~/card-components/AuctionHouse";
+import { BossAI } from "~/card-components/BossAI";
+import { BugFixes } from "~/card-components/BugFixes";
 import { Challenges } from "~/card-components/Challenges";
 import { Checks } from "~/card-components/Checks";
 import { Coliseum } from "~/card-components/Coliseum";
@@ -28,8 +31,8 @@ export const Gameplay = () => {
         <Coliseum />
       </div>
 
-      {/* Row 3: Checks (Double width for optimal space) & Auction House (Single width) */}
-      <div className="h-full [&>*]:h-full col-span-1 md:col-span-2">
+      {/* Row 3: Checks, Auction House, Other */}
+      <div className="h-full [&>*]:h-full col-span-1">
         <Checks />
       </div>
 
@@ -37,9 +40,21 @@ export const Gameplay = () => {
         <AuctionHouse />
       </div>
 
-      {/* Row 4: Other / MiscCard (Massive - Full Width!) */}
-      <div className="col-span-full h-full [&>*]:h-full">
+      <div className="h-full [&>*]:h-full col-span-1">
         <MiscCard />
+      </div>
+
+      {/* Row 5: Bug Fixes, Boss Restoration, Accessibility */}
+      <div className="h-full [&>*]:h-full">
+        <BugFixes />
+      </div>
+
+      <div className="h-full [&>*]:h-full">
+        <BossAI />
+      </div>
+
+      <div className="h-full [&>*]:h-full">
+        <AccessibilityCard />
       </div>
     </PageContainer>
   );

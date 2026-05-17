@@ -6,6 +6,8 @@ export type FlagLabelProps = {
   flag: string;
   label: React.ReactNode;
   hideFlag?: boolean;
+  className?: string;
+  ghosts?: React.ReactNode[];
 };
 
 export const FlagLabel = ({
@@ -13,13 +15,28 @@ export const FlagLabel = ({
   flag,
   label,
   hideFlag,
+  className = "",
+  ghosts = [],
 }: FlagLabelProps) => {
   return (
-    <div className="flex-grow wrap">
+    <div className={`flex-grow wrap ${className}`}>
       <InputLabel flag={flag} htmlFor={flag} hideFlag={hideFlag}>
         {label}
       </InputLabel>
-      <HelperText>{helperText}</HelperText>
+      <div className="grid">
+        {ghosts.map((ghost, idx) => (
+          <div
+            key={idx}
+            className="invisible row-start-1 col-start-1 pointer-events-none"
+            aria-hidden="true"
+          >
+            <HelperText>{ghost}</HelperText>
+          </div>
+        ))}
+        <div className="row-start-1 col-start-1">
+          <HelperText>{helperText}</HelperText>
+        </div>
+      </div>
     </div>
   );
 };

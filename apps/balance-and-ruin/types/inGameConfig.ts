@@ -1,20 +1,23 @@
 export type InGameConfig = {
   // Page 1
   batMode: "active" | "wait";
-  batSpeed: number; // 1 to 6
-  msgSpeed: number; // 1 to 6
+  batSpeed: number;
+  msgSpeed: number;
   cmdSet: "window" | "short";
   gauge: "on" | "off";
   sound: "stereo" | "mono";
   cursor: "reset" | "memory";
   reequip: "optimum" | "empty";
-  controller: "single" | "multiple";
 
   // Page 2
-  spellOrder: number; // 1 to 6
-  wallpaper: number; // 1 to 8
-  fontColor: [number, number, number]; // [R, G, B] (0-31)
-  windowPalettes: Record<string, [number, number, number][]>; // key is window1...window8
+  spellOrder: number;
+  wallpaper: number;
+  
+  // Discrete multi-element window palettes for each of the 8 styles!
+  windowPalettes: Record<string, [number, number, number][]>;
+  
+  // Global font color (single R,G,B triple mapped by the python CLI script)
+  fontColor: [number, number, number];
 };
 
 export const WINDOW_PALETTE_DEFAULTS: Record<string, [number, number, number][]> = {
@@ -28,6 +31,8 @@ export const WINDOW_PALETTE_DEFAULTS: Record<string, [number, number, number][]>
   window8: [[20, 12, 13], [25, 24, 22], [20, 19, 16], [26, 17, 0], [25, 13, 0], [20, 11, 0], [4, 4, 4]],
 };
 
+export const DEFAULT_FONT_COLOR: [number, number, number] = [0, 28, 27];
+
 export const DEFAULT_IN_GAME_CONFIG: InGameConfig = {
   batMode: "wait",
   batSpeed: 3,
@@ -37,10 +42,9 @@ export const DEFAULT_IN_GAME_CONFIG: InGameConfig = {
   sound: "stereo",
   cursor: "reset",
   reequip: "optimum",
-  controller: "single",
 
   spellOrder: 1,
   wallpaper: 1,
-  fontColor: [31, 31, 31], // Standard white
-  windowPalettes: WINDOW_PALETTE_DEFAULTS,
+  windowPalettes: { ...WINDOW_PALETTE_DEFAULTS },
+  fontColor: [...DEFAULT_FONT_COLOR],
 };

@@ -17,7 +17,8 @@ import orderBy from "lodash/orderBy";
 import padStart from "lodash/padStart";
 import sample from "lodash/sample";
 import uniq from "lodash/uniq";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { selectShowFlags } from "~/state/settingsSlice";
 import { CardColumn } from "~/components/CardColumn/CardColumn";
 import { FlagSwitch } from "~/components/FlagSwitch/FlagSwitch";
 import { InputLabel } from "~/components/InputLabel/InputLabel";
@@ -125,6 +126,7 @@ const getOptionsForCharacter = (
 
 export const CommandsList = () => {
   const dispatch = useDispatch();
+  const showFlags = useSelector(selectShowFlags);
   const commandValue =
     useFlagValueSelector<string>("-com") ?? originalCommandFlags;
 
@@ -186,19 +188,26 @@ export const CommandsList = () => {
 
   return (
     <Card contentClassName="gap-6" title={"Commands"}>
-      <div className="flex gap-3 justify-center flex-wrap">
-        <Button className="hidden" onClick={allRandomized} variant="primary">
-          Randomize
-        </Button>
-        <Button onClick={allRandom} variant="primary">
-          All Random
-        </Button>
-        <Button onClick={allRandomUnique} variant="primary">
-          All Random Unique
-        </Button>
-        <Button onClick={allOriginal} variant="primary">
-          Original
-        </Button>
+      <div className="relative flex items-center justify-center min-h-[40px] w-full">
+        {showFlags && (
+          <span className="absolute left-0 text-xs text-slate-500 dark:text-slate-400 font-normal lowercase select-none">
+            (-com)
+          </span>
+        )}
+        <div className="flex gap-3 justify-center flex-wrap">
+          <Button className="hidden" onClick={allRandomized} variant="primary">
+            Randomize
+          </Button>
+          <Button onClick={allRandom} variant="primary">
+            All Random
+          </Button>
+          <Button onClick={allRandomUnique} variant="primary">
+            All Random Unique
+          </Button>
+          <Button onClick={allOriginal} variant="primary">
+            Original
+          </Button>
+        </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 grid-flow-row-dense gap-6">
         {LABELS.map((label, idx) => {
