@@ -1,5 +1,6 @@
 import { Button, DiscordButton, Link } from "@ff6wc/ui";
 import { cx } from "cva";
+import { useEffect, useState } from "react";
 import { SeedOfTheWeek } from "~/types/sotw";
 
 type Props = {
@@ -8,6 +9,21 @@ type Props = {
 };
 export const SotwCard = ({ sotw, sotwId }: Props) => {
   const { seed_id, seed } = sotw;
+  const [href, setHref] = useState(seed_id ? `/seed/?id=${seed_id}` : seed);
+
+  useEffect(() => {
+    if (seed) {
+      try {
+        const seedUrl = new URL(seed);
+        if (seedUrl.hostname !== window.location.hostname) {
+          setHref(seed);
+        }
+      } catch (e) {
+        // Fallback or ignore invalid URL
+      }
+    }
+  }, [seed, seed_id]);
+
   return (
     <div
       className={cx(
@@ -19,7 +35,7 @@ export const SotwCard = ({ sotw, sotwId }: Props) => {
       <p className="text-sm px-4">Submitted by {sotw.submitter}</p>
       <p className="text-base px-2">{sotw.description}</p>
 
-      <Link href={seed_id ? `/seed/?id=${seed_id}` : seed}>
+      <Link href={href}>
         <Button
           className="w-fit uppercase font-mono font-semibold"
           variant="primary"
