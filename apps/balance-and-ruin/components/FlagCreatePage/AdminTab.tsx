@@ -778,7 +778,9 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                     <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginTop: "0.5rem", paddingLeft: "1.75rem", alignItems: "center" }}>
                       {/* Official tag toggle */}
                       <button
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
                           const isOfficial = Array.isArray(preset.tags) && preset.tags.includes("official");
                           const nextTags = isOfficial
                             ? (preset.tags || []).filter((t: string) => t !== "official")
@@ -809,7 +811,9 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                         return (
                           <button
                             key={tag}
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              e.preventDefault();
                               const nextTags = isActive
                                 ? (preset.tags || []).filter((t: string) => t !== tag)
                                 : [...(preset.tags || []), tag];

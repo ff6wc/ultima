@@ -26,36 +26,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   
   const username = token?.name as string | undefined || "Unknown User";
 
-  // Ensure file exists and perform automatic database scrub for legacy tags
-  if (!fs.existsSync(PRESETS_FILE)) {
-    fs.writeFileSync(PRESETS_FILE, JSON.stringify([]));
-  } else {
-    try {
-      let rawJson = fs.readFileSync(PRESETS_FILE, "utf-8");
-      let presetsData = JSON.parse(rawJson);
-      let isUpdated = false;
-      presetsData = presetsData.map((p: any) => {
-        if (Array.isArray(p.tags)) {
-          const originalLength = p.tags.length;
-          p.tags = p.tags.filter((t: string) => t.toLowerCase() !== "community");
-          if (p.tags.length !== originalLength) isUpdated = true;
-        }
-        return p;
-      });
-      if (isUpdated) {
-        fs.writeFileSync(PRESETS_FILE, JSON.stringify(presetsData, null, 2));
-      }
-    } catch (e) {
-      console.warn("Failed to scrub presets.json:", e);
-    }
-  }
-
-  const rawData = fs.readFileSync(PRESETS_FILE, "utf-8");
   let presets: any[] = [];
-  try {
-    presets = JSON.parse(rawData);
-  } catch (e) {
-    presets = [];
+  if (fs && PRESETS_FILE) {
+    if (!fs.existsSync(PRESETS_FILE)) {
+      try { fs.writeFileSync(PRESETS_FILE, JSON.stringify([])); } catch(e) {}
+    }
+
+    try {
+      const rawData = fs.readFileSync(PRESETS_FILE, "utf-8");
+      presets = JSON.parse(rawData);
+    } catch (e) {
+      presets = [];
+    }
   }
 
   // GET handler: allows anyone to sync public presets and overrides
