@@ -408,7 +408,6 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                   alignItems: "center",
                   justifyContent: "space-between",
                   padding: "0.75rem 1rem",
-                  backgroundColor: "rgba(15, 23, 42, 0.5)",
                   border: "1px solid rgba(239, 68, 68, 0.2)",
                   borderRadius: "4px",
                   fontSize: "0.85rem",
@@ -416,10 +415,10 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                   width: "100%",
                   textAlign: "left",
                 }}
-                className="text-slate-700 dark:text-slate-300 hover:bg-slate-800 transition-colors"
+                className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800/50 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 transition-colors"
               >
                 <span>Toggle Beta Features</span>
-                <span style={{ fontSize: "0.7rem", backgroundColor: "rgba(34, 197, 94, 0.2)", color: "#4ade80", border: "1px solid rgba(34, 197, 94, 0.3)", padding: "0.1rem 0.4rem", borderRadius: "4px", fontWeight: "bold" }}>
+                <span className="bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-400 border border-green-300 dark:border-green-900/50" style={{ fontSize: "0.7rem", padding: "0.1rem 0.4rem", borderRadius: "4px", fontWeight: "bold" }}>
                   ACTIVE
                 </span>
               </button>
@@ -432,13 +431,12 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                     alignItems: "center",
                     justifyContent: "space-between",
                     padding: "0.75rem 1rem",
-                    backgroundColor: "rgba(15, 23, 42, 0.5)",
                     border: "1px solid rgba(239, 68, 68, 0.6)",
                     borderRadius: "4px",
                     fontSize: "0.85rem",
                     width: "100%",
                   }}
-                  className="text-slate-700 dark:text-slate-300"
+                  className="bg-slate-100 dark:bg-slate-800/50 text-slate-800 dark:text-slate-200 border-red-500/40"
                 >
                   <span style={{ color: "#f87171", fontWeight: "bold" }}>Confirm Purge?</span>
                   <div style={{ display: "flex", gap: "0.5rem" }}>
@@ -465,14 +463,13 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                     <button
                       onClick={() => setShowConfirm((prev) => ({ ...prev, purge: false }))}
                       style={{
-                        backgroundColor: "rgba(255,255,255,0.1)",
                         border: "none",
-                        color: "white",
                         padding: "0.2rem 0.6rem",
                         borderRadius: "4px",
                         fontSize: "0.75rem",
                         cursor: "pointer",
                       }}
+                      className="bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200"
                     >
                       No
                     </button>
@@ -486,7 +483,6 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                     alignItems: "center",
                     justifyContent: "space-between",
                     padding: "0.75rem 1rem",
-                    backgroundColor: "rgba(15, 23, 42, 0.5)",
                     border: "1px solid rgba(239, 68, 68, 0.2)",
                     borderRadius: "4px",
                     fontSize: "0.85rem",
@@ -494,10 +490,10 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                     width: "100%",
                     textAlign: "left",
                   }}
-                  className="text-slate-700 dark:text-slate-300 hover:bg-slate-800 transition-colors"
+                  className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800/50 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 transition-colors"
                 >
                   <span>Purge Presets Cache</span>
-                  <FaDatabase style={{ color: "#94a3b8" }} />
+                  <FaDatabase className="text-slate-400 dark:text-slate-500" />
                 </button>
               )}
             </div>
@@ -526,7 +522,10 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
           </div>
 
           {/* Search Input */}
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.5rem 0.75rem", background: "rgba(0,0,0,0.3)", borderRadius: "6px", border: "1px solid rgba(239, 68, 68, 0.2)", marginBottom: "1rem" }}>
+          <div 
+            style={{ display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.5rem 0.75rem", borderRadius: "6px", border: "1px solid rgba(239, 68, 68, 0.2)", marginBottom: "1rem" }}
+            className="bg-slate-200/50 dark:bg-slate-950/60"
+          >
             <FaSearch size={12} color="#94a3b8" />
             <input
               type="text"
@@ -569,7 +568,7 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                     style={{
                       padding: "0.25rem 0.6rem",
                       borderRadius: "999px",
-                      border: active ? "1px solid #ef4444" : "1px solid rgba(255,255,255,0.1)",
+                      border: active ? "1px solid #ef4444" : "1px solid var(--border-light, rgba(255,255,255,0.1))",
                       background: active ? "rgba(239,68,68,0.15)" : "transparent",
                       color: active ? "#f87171" : "#94a3b8",
                       fontSize: "0.75rem",
@@ -589,15 +588,14 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
               <button
                 onClick={handleSelectAll}
                 style={{
-                  backgroundColor: "rgba(255, 255, 255, 0.05)",
-                  border: "1px solid rgba(255, 255, 255, 0.1)",
+                  border: "1px solid var(--border-light, rgba(255, 255, 255, 0.1))",
                   padding: "0.3rem 0.75rem",
                   borderRadius: "4px",
                   fontSize: "0.75rem",
                   cursor: "pointer",
                   fontWeight: "bold",
                 }}
-                className="text-slate-700 dark:text-slate-300 hover:bg-slate-700 transition-colors"
+                className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 transition-colors"
               >
                 {sortedPresets.every((p) => selectedIds[p.id]) ? "Deselect All" : "Select All"}
               </button>
@@ -647,11 +645,11 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                   <div
                     key={preset.id}
                     style={{
-                      backgroundColor: isSelected ? "rgba(239, 68, 68, 0.05)" : "rgba(30, 41, 59, 0.6)",
                       padding: "0.75rem 1rem",
                       borderRadius: "6px",
-                      border: isSelected ? "1px solid #ef4444" : "1px solid rgba(255, 255, 255, 0.08)",
+                      border: isSelected ? "1px solid #ef4444" : "1px solid var(--border-light, rgba(255, 255, 255, 0.08))",
                     }}
+                    className={isSelected ? "bg-red-500/5 dark:bg-red-500/10 text-slate-800 dark:text-slate-100" : "bg-slate-100 hover:bg-slate-200/50 dark:bg-slate-800/40 dark:hover:bg-slate-800/60 text-slate-800 dark:text-slate-100 transition-colors"}
                   >
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <div style={{ display: "flex", alignItems: "center", flex: 1, minWidth: 0, paddingRight: "1rem" }}>
@@ -721,7 +719,6 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                               }}
                               disabled={!!isDeleting[preset.id]}
                               style={{
-                                backgroundColor: "rgba(148, 163, 184, 0.2)",
                                 border: "1px solid #94a3b8",
                                 padding: "0.25rem 0.6rem",
                                 borderRadius: "4px",
@@ -729,7 +726,7 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                                 cursor: "pointer",
                                 fontWeight: "bold",
                               }}
-                              className="text-slate-700 dark:text-slate-300 hover:bg-slate-700 transition-colors"
+                              className="bg-slate-200 hover:bg-slate-300 dark:bg-slate-700/60 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 transition-colors"
                             >
                               No
                             </button>
@@ -786,9 +783,9 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                           alignItems: "center",
                           gap: "0.25rem",
                           fontSize: "0.7rem",
-                          backgroundColor: preset.official ? "rgba(245, 158, 11, 0.25)" : "rgba(255,255,255,0.05)",
-                          color: preset.official ? "#f59e0b" : "#64748b",
-                          border: `1px solid ${preset.official ? "#f59e0b" : "rgba(255,255,255,0.15)"}`,
+                          backgroundColor: preset.official ? "rgba(245, 158, 11, 0.25)" : "transparent",
+                          color: preset.official ? "#f59e0b" : "var(--text-sub, #64748b)",
+                          border: `1px solid ${preset.official ? "#f59e0b" : "var(--border-light, rgba(255,255,255,0.15))"}`,
                           padding: "0.15rem 0.4rem",
                           borderRadius: "3px",
                           cursor: "pointer",
@@ -815,9 +812,9 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                             }}
                             style={{
                               fontSize: "0.7rem",
-                              backgroundColor: isActive ? "rgba(59, 130, 246, 0.25)" : "rgba(255, 255, 255, 0.05)",
-                              color: isActive ? "#60a5fa" : "#64748b",
-                              border: `1px solid ${isActive ? "#60a5fa" : "rgba(255, 255, 255, 0.15)"}`,
+                              backgroundColor: isActive ? "rgba(59, 130, 246, 0.25)" : "transparent",
+                              color: isActive ? "#60a5fa" : "var(--text-sub, #64748b)",
+                              border: `1px solid ${isActive ? "#60a5fa" : "var(--border-light, rgba(255, 255, 255, 0.15))"}`,
                               padding: "0.15rem 0.4rem",
                               borderRadius: "3px",
                               cursor: "pointer",
@@ -839,7 +836,7 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                             {preset.description}
                           </p>
                         )}
-                        <div className="text-slate-700 dark:text-slate-300" style={{ backgroundColor: "rgba(0, 0, 0, 0.4)", padding: "0.75rem", borderRadius: "4px", fontSize: "0.8rem", fontFamily: "monospace", overflowX: "auto", whiteSpace: "pre-wrap", wordBreak: "break-all", border: "1px solid rgba(255,255,255,0.05)" }}>
+                        <div className="text-slate-800 dark:text-slate-300 bg-slate-200/50 dark:bg-slate-950/60" style={{ padding: "0.75rem", borderRadius: "4px", fontSize: "0.8rem", fontFamily: "monospace", overflowX: "auto", whiteSpace: "pre-wrap", wordBreak: "break-all", border: "1px solid var(--border-light, rgba(255,255,255,0.05))" }}>
                           {preset.flags || "(No flags provided in external API)"}
                         </div>
                         <div className="text-slate-500 dark:text-slate-400" style={{ display: "flex", gap: "1rem", marginTop: "0.75rem", fontSize: "0.75rem", fontWeight: "bold" }}>
@@ -904,7 +901,8 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
               value={newTagName} 
               onChange={e => setNewTagName(e.target.value)} 
               placeholder="Enter new tag name..." 
-              style={{ padding: "0.6rem 1rem", borderRadius: "4px", border: "1px solid rgba(139, 92, 246, 0.5)", background: "rgba(0,0,0,0.5)", color: "white", flexGrow: 1, outline: "none", fontSize: "0.9rem" }} 
+              style={{ padding: "0.6rem 1rem", borderRadius: "4px", border: "1px solid rgba(139, 92, 246, 0.5)", flexGrow: 1, outline: "none", fontSize: "0.9rem" }} 
+              className="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-600"
             />
             <button 
               onClick={async () => {
@@ -929,10 +927,26 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
             {cannedTags.length === 0 ? (
               <div style={{ color: "#94a3b8", fontStyle: "italic", fontSize: "0.9rem" }}>No custom tags created yet.</div>
             ) : cannedTags.map(tag => (
-              <div key={tag} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "rgba(30, 41, 59, 0.6)", padding: "0.75rem 1rem", borderRadius: "6px", border: "1px solid rgba(139, 92, 246, 0.2)" }}>
+              <div 
+                key={tag} 
+                style={{ 
+                  display: "flex", 
+                  justifyContent: "space-between", 
+                  alignItems: "center", 
+                  padding: "0.75rem 1rem", 
+                  borderRadius: "6px", 
+                }}
+                className="bg-slate-100 dark:bg-slate-800/40 text-slate-800 dark:text-slate-200 border border-purple-200 dark:border-purple-900/30"
+              >
                 {editingTag?.old === tag ? (
                   <div style={{ display: "flex", gap: "0.5rem", width: "100%" }}>
-                    <input type="text" value={editingTag.new} onChange={e => setEditingTag({ ...editingTag, new: e.target.value })} style={{ padding: "0.25rem", borderRadius: "3px", background: "rgba(0,0,0,0.5)", border: "1px solid white", color: "white", flexGrow: 1, minWidth: 0 }} />
+                    <input 
+                      type="text" 
+                      value={editingTag.new} 
+                      onChange={e => setEditingTag({ ...editingTag, new: e.target.value })} 
+                      style={{ padding: "0.25rem", borderRadius: "3px", flexGrow: 1, minWidth: 0 }} 
+                      className="bg-slate-100 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-800 dark:text-slate-100" 
+                    />
                     <button onClick={async () => {
                       if (!editingTag.new.trim()) return;
                       try {
@@ -949,7 +963,7 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                   </div>
                 ) : (
                   <>
-                    <span style={{ fontWeight: "bold", textTransform: "uppercase", color: "#ddd6fe", fontSize: "0.85rem" }}>{tag}</span>
+                    <span className="text-purple-700 dark:text-purple-200" style={{ fontWeight: "bold", textTransform: "uppercase", fontSize: "0.85rem" }}>{tag}</span>
                     <div style={{ display: "flex", gap: "0.75rem" }}>
                       <button onClick={() => setEditingTag({old: tag, new: tag})} style={{ background: "none", border: "none", color: "#60a5fa", cursor: "pointer", fontSize: "0.8rem", fontWeight: "bold" }} className="hover:text-blue-400">Edit</button>
                       <button onClick={async () => {
@@ -995,14 +1009,14 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.85rem", textAlign: "left" }}>
               <thead>
-                <tr style={{ backgroundColor: "rgba(0, 0, 0, 0.3)", borderBottom: "2px solid rgba(16, 185, 129, 0.2)" }}>
-                  <th style={{ padding: "0.75rem", color: "#6ee7b7" }}>User</th>
-                  <th style={{ padding: "0.75rem", color: "#6ee7b7" }}>Discord ID</th>
-                  <th style={{ padding: "0.75rem", color: "#6ee7b7" }}>Logins</th>
-                  <th style={{ padding: "0.75rem", color: "#6ee7b7" }}>First Login</th>
-                  <th style={{ padding: "0.75rem", color: "#6ee7b7" }}>Last Login</th>
-                  <th style={{ padding: "0.75rem", color: "#6ee7b7" }}>Presets Owned</th>
-                  {isSuperadmin && <th style={{ padding: "0.75rem", color: "#6ee7b7", textAlign: "center" }}>Role Control</th>}
+                <tr style={{ borderBottom: "2px solid rgba(16, 185, 129, 0.2)" }} className="bg-slate-200/60 dark:bg-slate-950/60">
+                  <th className="text-emerald-700 dark:text-emerald-300" style={{ padding: "0.75rem" }}>User</th>
+                  <th className="text-emerald-700 dark:text-emerald-300" style={{ padding: "0.75rem" }}>Discord ID</th>
+                  <th className="text-emerald-700 dark:text-emerald-300" style={{ padding: "0.75rem" }}>Logins</th>
+                  <th className="text-emerald-700 dark:text-emerald-300" style={{ padding: "0.75rem" }}>First Login</th>
+                  <th className="text-emerald-700 dark:text-emerald-300" style={{ padding: "0.75rem" }}>Last Login</th>
+                  <th className="text-emerald-700 dark:text-emerald-300" style={{ padding: "0.75rem" }}>Presets Owned</th>
+                  {isSuperadmin && <th className="text-emerald-700 dark:text-emerald-300" style={{ padding: "0.75rem", textAlign: "center" }}>Role Control</th>}
                 </tr>
               </thead>
               <tbody>
