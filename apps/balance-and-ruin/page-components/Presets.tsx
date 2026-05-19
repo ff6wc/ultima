@@ -589,19 +589,23 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
   }, [session]);
 
   const mappedDbPresets = useMemo<FlagPreset[]>(() => {
-    return dbPresets.map((p) => ({
-      name: p.name,
-      creator_name: p.creator_name || "You",
-      creator: p.creator_name || "You",
-      description: p.description || "",
-      flags: p.flags,
-      creator_id: p.creator_id,
-      arguments: "",
-      official: false,
-      hidden: false,
-      created_at: p.created_timestamp,
-      last_downloaded: p.download_timestamp || undefined,
-    }));
+    return dbPresets
+      .filter((p) => p.creator_id !== "override" && !p.deleted)
+      .map((p) => ({
+        name: p.name,
+        creator_name: p.creator_name || "You",
+        creator: p.creator_name || "You",
+        description: p.description || "",
+        flags: p.flags,
+        creator_id: p.creator_id,
+        arguments: "",
+        official: !!p.official || (Array.isArray(p.tags) && p.tags.includes("official")),
+        hidden: false,
+        created_at: p.created_timestamp,
+        last_downloaded: p.download_timestamp || undefined,
+        id: p.id,
+        tags: p.tags || [],
+      }));
   }, [dbPresets]);
 
   const mergedPresets = useMemo(
@@ -678,6 +682,13 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
 
   // Annotate each preset with the user's last-downloaded timestamp from localStorage
   const allPresets = useMemo<FlagPreset[]>(() => {
+    const overridesMap = new Map<string, any>();
+    for (const p of dbPresets) {
+      if (p.creator_id === "override") {
+        overridesMap.set(p.name.toLowerCase(), p);
+      }
+    }
+
     const apiPresets = Object.values(mergedPresets)
       .filter(
         (p) =>
@@ -686,12 +697,23 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
           !p.flags.startsWith("<") &&
           p.flags.trim() !== "",
       )
-      .map((p): FlagPreset => ({
-        ...p,
-        last_downloaded: currentUserId
-          ? getLastDownloaded(currentUserId, p.name)
-          : undefined,
-      }));
+      .map((p): FlagPreset => {
+        const override = overridesMap.get(p.name.toLowerCase());
+        const isDeleted = override?.deleted === true;
+        const officialVal = override ? !!override.official : !!p.official;
+        const tagsVal = override?.tags ? override.tags : (p.tags || []);
+
+        return {
+          ...p,
+          official: officialVal,
+          tags: tagsVal,
+          hidden: isDeleted,
+          last_downloaded: currentUserId
+            ? getLastDownloaded(currentUserId, p.name)
+            : undefined,
+        };
+      })
+      .filter((p) => !p.hidden);
 
     const combined: FlagPreset[] = [...apiPresets];
     const existingNames = new Set(apiPresets.map((p) => p.name.toLowerCase()));
@@ -702,8 +724,30 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
       }
     }
 
-    return combined;
-  }, [mergedPresets, currentUserId, mappedDbPresets]);
+    return combined
+      .map((p) => {
+        const isDoubleDownRaceStandard =
+          p.name.toLowerCase() === "race standard" &&
+          (p.creator_name || p.creator || "").toLowerCase().includes("doubledown");
+        if (isDoubleDownRaceStandard) {
+          return { ...p, official: false };
+        }
+        return p;
+      })
+      .filter((p) => {
+        const isOfficial = p.official;
+        const isUserOwned =
+          currentUserId &&
+          (String(p.creator_id) === String(currentUserId) ||
+           String(p.creator_name).toLowerCase() === String(session?.user?.name).toLowerCase());
+        const isLocalCustom = customPresets[p.name] !== undefined;
+        const isUserDbPreset = mappedDbPresets.some(
+          (dbP) => dbP.name.toLowerCase() === p.name.toLowerCase(),
+        );
+
+        return isOfficial || isUserOwned || isLocalCustom || isUserDbPreset;
+      });
+  }, [mergedPresets, currentUserId, mappedDbPresets, dbPresets, customPresets, session?.user?.name]);
 
   const customPresetNames = new Set(Object.keys(customPresets));
 
@@ -712,9 +756,9 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
   }, [allPresets]);
 
   const myPresets = useMemo(() => {
-    // 1. Start with all database saved presets (mappedDbPresets)
-    const combined = [...mappedDbPresets];
-    const existingNames = new Set(mappedDbPresets.map((p) => p.name.toLowerCase()));
+    // 1. Start with all database saved presets authored by current user
+    const combined = mappedDbPresets.filter(p => currentUserId && String(p.creator_id) === String(currentUserId));
+    const existingNames = new Set(combined.map((p) => p.name.toLowerCase()));
 
     // 2. Add local storage custom presets if they aren't duplicates
     const customList = Object.values(customPresets);
@@ -741,14 +785,6 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
     return combined;
   }, [mappedDbPresets, customPresets, allPresets, currentUserId]);
 
-  const communityPresets = useMemo(() => {
-    const myPresetNames = new Set(myPresets.map((p) => p.name.toLowerCase()));
-    return allPresets.filter(
-      (p) =>
-        !p.official &&
-        !myPresetNames.has(p.name.toLowerCase())
-    );
-  }, [allPresets, myPresets]);
 
   const handleSelect = (preset: FlagPreset) => {
     // Dispatch setActivePreset BEFORE setRawFlags so the preset name is set
@@ -1194,15 +1230,6 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
         ) : (
           <>
             <CategorySection
-              icon={<FaUser />}
-              title="My Presets"
-              color="#8b5cf6"
-              presets={myPresets}
-              selectedName={activePresetName}
-              onSelect={handleSelect}
-              defaultOpen={true}
-            />
-            <CategorySection
               icon={<FaCalendarAlt />}
               title="Event Presets"
               color="#f59e0b"
@@ -1212,13 +1239,13 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
               defaultOpen={true}
             />
             <CategorySection
-              icon={<FaUsers />}
-              title="Community Presets"
-              color="#10b981"
-              presets={communityPresets}
+              icon={<FaUser />}
+              title="My Presets"
+              color="#8b5cf6"
+              presets={myPresets}
               selectedName={activePresetName}
               onSelect={handleSelect}
-              defaultOpen={false}
+              defaultOpen={true}
             />
           </>
         )}

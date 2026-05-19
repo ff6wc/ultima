@@ -169,12 +169,12 @@ export const InGameConfigCard = () => {
         className={`relative flex items-center gap-2 px-2 py-1 font-mono font-bold text-lg tracking-widest uppercase select-none cursor-pointer outline-none group ${
           isSelected ? "scale-100" : "hover:scale-105"
         }`}
-        style={{ color: isSelected ? textColorStyle : "rgba(255, 255, 255, 0.65)" }}
+        style={{ color: isSelected ? textColorStyle : "rgba(255, 255, 255, 0.75)" }}
       >
         <div className={`w-6 flex justify-center items-center transition-transform duration-100 ${isSelected ? "scale-100 opacity-100" : "scale-50 opacity-0 group-hover:opacity-30 group-hover:scale-75"}`}>
           <FaHandPointRight style={{ color: isSelected ? textColorStyle : "#dcdcdc" }} size={20} />
         </div>
-        <span style={{ textShadow: isSelected ? "2px 2px 0px #000000" : "none", fontFamily: "'Final Fantasy 3/6 Font', monospace" }}>
+        <span style={{ textShadow: "2px 2px 0px #000000", fontFamily: "'Final Fantasy 3/6 Font', monospace" }}>
           {label}
         </span>
       </button>
@@ -225,8 +225,8 @@ export const InGameConfigCard = () => {
 
   // Text mapping: Font mappings set in game by the python script affect ONLY the Cyan text color!
   const headerColor = toRGBString(config.fontColor || DEFAULT_FONT_COLOR);
-  const bodyTextColor = "rgb(224, 224, 224)"; // Static clean white/grey console text
-  const subShadowColor = "rgba(255, 255, 255, 0.4)";
+  const bodyTextColor = "rgb(255, 255, 255)"; // Pure white console text for maximum contrast
+  const subShadowColor = "rgba(255, 255, 255, 0.5)";
 
   // Labeling mappings for custom gradient bar selections
   const getIndexName = (idx: number) => {
@@ -313,10 +313,10 @@ export const InGameConfigCard = () => {
                           onClick={() => updateConfig({ batSpeed: val })}
                           className={`w-10 h-10 flex justify-center items-center font-bold text-xl select-none cursor-pointer rounded-sm transition-colors`}
                           style={{ 
-                            color: config.batSpeed === val ? bodyTextColor : "rgba(255,255,255,0.65)", 
-                            backgroundColor: config.batSpeed === val ? "rgba(255,255,255,0.1)" : "transparent",
+                            color: config.batSpeed === val ? bodyTextColor : "rgba(255,255,255,0.75)", 
+                            backgroundColor: config.batSpeed === val ? "rgba(255,255,255,0.15)" : "transparent",
                             boxShadow: config.batSpeed === val ? `0 0 0 2px ${bodyTextColor}` : "none",
-                            textShadow: config.batSpeed === val ? "2px 2px 0px #000000" : "none",
+                            textShadow: "2px 2px 0px #000000",
                             fontFamily: "'Final Fantasy 3/6 Font', monospace"
                           }}
                         >
@@ -344,10 +344,10 @@ export const InGameConfigCard = () => {
                           onClick={() => updateConfig({ msgSpeed: val })}
                           className={`w-10 h-10 flex justify-center items-center font-bold text-xl select-none cursor-pointer rounded-sm transition-colors`}
                           style={{ 
-                            color: config.msgSpeed === val ? bodyTextColor : "rgba(255,255,255,0.65)", 
-                            backgroundColor: config.msgSpeed === val ? "rgba(255,255,255,0.1)" : "transparent",
+                            color: config.msgSpeed === val ? bodyTextColor : "rgba(255,255,255,0.75)", 
+                            backgroundColor: config.msgSpeed === val ? "rgba(255,255,255,0.15)" : "transparent",
                             boxShadow: config.msgSpeed === val ? `0 0 0 2px ${bodyTextColor}` : "none",
-                            textShadow: config.msgSpeed === val ? "2px 2px 0px #000000" : "none",
+                            textShadow: "2px 2px 0px #000000",
                             fontFamily: "'Final Fantasy 3/6 Font', monospace"
                           }}
                         >
@@ -417,9 +417,12 @@ export const InGameConfigCard = () => {
                   <button 
                     type="button"
                     onClick={() => setPage(2)}
-                    className="animate-bounce cursor-pointer opacity-80 hover:opacity-100 focus:outline-none p-2 group"
+                    className="animate-bounce cursor-pointer focus:outline-none p-2 group"
                   >
-                    <div className="w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-t-[14px] border-t-[#dcdcdc] group-hover:border-t-white transition-colors" />
+                    <div 
+                      className="w-0 h-0 border-l-[14px] border-l-transparent border-r-[14px] border-r-transparent border-t-[16px] border-t-white transition-all duration-150 group-hover:scale-110" 
+                      style={{ filter: "drop-shadow(2px 2px 0px #000000)" }}
+                    />
                   </button>
                 </div>
               </div>
@@ -433,9 +436,12 @@ export const InGameConfigCard = () => {
                   <button 
                     type="button"
                     onClick={() => setPage(1)}
-                    className="animate-pulse cursor-pointer opacity-80 hover:opacity-100 focus:outline-none p-2 group"
+                    className="animate-bounce cursor-pointer focus:outline-none p-2 group"
                   >
-                    <div className="w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-b-[14px] border-b-[#dcdcdc] group-hover:border-b-white transition-colors" />
+                    <div 
+                      className="w-0 h-0 border-l-[14px] border-l-transparent border-r-[14px] border-r-transparent border-b-[16px] border-b-white transition-all duration-150 group-hover:scale-110" 
+                      style={{ filter: "drop-shadow(2px 2px 0px #000000)" }}
+                    />
                   </button>
                 </div>
 
@@ -453,10 +459,10 @@ export const InGameConfigCard = () => {
                           onClick={() => updateConfig({ spellOrder: val })}
                           className={`w-10 h-10 flex justify-center items-center font-bold text-xl select-none cursor-pointer rounded-sm transition-colors`}
                           style={{ 
-                            color: (config.spellOrder || 1) === val ? bodyTextColor : "rgba(255,255,255,0.65)", 
-                            backgroundColor: (config.spellOrder || 1) === val ? "rgba(255,255,255,0.1)" : "transparent",
+                            color: (config.spellOrder || 1) === val ? bodyTextColor : "rgba(255,255,255,0.75)", 
+                            backgroundColor: (config.spellOrder || 1) === val ? "rgba(255,255,255,0.15)" : "transparent",
                             boxShadow: (config.spellOrder || 1) === val ? `0 0 0 2px ${bodyTextColor}` : "none",
-                            textShadow: (config.spellOrder || 1) === val ? "2px 2px 0px #000000" : "none",
+                            textShadow: "2px 2px 0px #000000",
                             fontFamily: "'Final Fantasy 3/6 Font', monospace"
                           }}
                         >
@@ -491,10 +497,10 @@ export const InGameConfigCard = () => {
                         onClick={() => updateConfig({ wallpaper: val })}
                         className={`w-10 h-10 flex justify-center items-center font-bold text-xl select-none cursor-pointer rounded-sm transition-colors`}
                         style={{ 
-                          color: (config.wallpaper || 1) === val ? bodyTextColor : "rgba(255,255,255,0.65)", 
-                          backgroundColor: (config.wallpaper || 1) === val ? "rgba(255,255,255,0.1)" : "transparent",
+                          color: (config.wallpaper || 1) === val ? bodyTextColor : "rgba(255,255,255,0.75)", 
+                          backgroundColor: (config.wallpaper || 1) === val ? "rgba(255,255,255,0.15)" : "transparent",
                           boxShadow: (config.wallpaper || 1) === val ? `0 0 0 2px ${bodyTextColor}` : "none",
-                          textShadow: (config.wallpaper || 1) === val ? "2px 2px 0px #000000" : "none",
+                          textShadow: "2px 2px 0px #000000",
                           fontFamily: "'Final Fantasy 3/6 Font', monospace"
                         }}
                       >
@@ -514,24 +520,24 @@ export const InGameConfigCard = () => {
                       type="button"
                       onClick={() => setColorTarget("font")}
                       className={`relative flex items-center gap-2 px-2 py-1 font-mono font-bold text-lg tracking-widest uppercase cursor-pointer outline-none group`}
-                      style={{ color: colorTarget === "font" ? bodyTextColor : "rgba(255,255,255,0.65)" }}
+                      style={{ color: colorTarget === "font" ? bodyTextColor : "rgba(255,255,255,0.75)" }}
                     >
                       <div className={`w-6 flex justify-center items-center transition-opacity ${colorTarget === "font" ? "opacity-100" : "opacity-0 group-hover:opacity-30"}`}>
                         <FaHandPointRight style={{ color: bodyTextColor }} size={20} />
                       </div>
-                      <span style={{ textShadow: colorTarget === "font" ? "2px 2px 0px #000000" : "none", fontFamily: "'Final Fantasy 3/6 Font', monospace" }}>Font</span>
+                      <span style={{ textShadow: "2px 2px 0px #000000", fontFamily: "'Final Fantasy 3/6 Font', monospace" }}>Font</span>
                     </button>
 
                     <button
                       type="button"
                       onClick={() => setColorTarget("window")}
                       className={`relative flex items-center gap-2 px-2 py-1 font-mono font-bold text-lg tracking-widest uppercase cursor-pointer outline-none group`}
-                      style={{ color: colorTarget === "window" ? bodyTextColor : "rgba(255,255,255,0.65)" }}
+                      style={{ color: colorTarget === "window" ? bodyTextColor : "rgba(255,255,255,0.75)" }}
                     >
                       <div className={`w-6 flex justify-center items-center transition-opacity ${colorTarget === "window" ? "opacity-100" : "opacity-0 group-hover:opacity-30"}`}>
                         <FaHandPointRight style={{ color: bodyTextColor }} size={20} />
                       </div>
-                      <span style={{ textShadow: colorTarget === "window" ? "2px 2px 0px #000000" : "none", fontFamily: "'Final Fantasy 3/6 Font', monospace" }}>Window</span>
+                      <span style={{ textShadow: "2px 2px 0px #000000", fontFamily: "'Final Fantasy 3/6 Font', monospace" }}>Window</span>
                     </button>
                   </div>
                 </div>

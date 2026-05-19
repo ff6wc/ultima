@@ -326,7 +326,7 @@ export const FlagCreatePage = ({
               label: "Admin",
               id: "admin",
               Icon: FaShieldAlt,
-              content: <AdminTab />,
+              content: <AdminTab apiPresets={presets} />,
             }
           : null,
         {

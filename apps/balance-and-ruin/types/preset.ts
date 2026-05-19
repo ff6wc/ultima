@@ -13,8 +13,8 @@ export type FlagPreset = {
   /** ISO date string from the API */
   created_at?: string;
   /**
-   * ISO date string — tracked client-side in localStorage, keyed per user.
-   * Populated at runtime before rendering, not stored on the preset object itself.
-   */
+  /** ISO date string — tracked client-side in localStorage, keyed per user. */
   last_downloaded?: string;
+  id?: string;
+  tags?: string[];
 };

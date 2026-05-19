@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useSession, signOut, signIn } from "next-auth/react";
-import { FaDiscord, FaShieldAlt, FaSignOutAlt } from "react-icons/fa";
+import { FaDiscord, FaShieldAlt, FaSignOutAlt, FaSearch, FaTrash, FaCheck, FaTimes } from "react-icons/fa";
 import { PageContainer } from "../PageContainer/PageContainer";
 
 export const ProfileTab = () => {
@@ -11,16 +11,24 @@ export const ProfileTab = () => {
   const [isDeleting, setIsDeleting] = useState<Record<string, boolean>>({});
   const [showConfirm, setShowConfirm] = useState<Record<string, boolean>>({});
 
+  const isAdmin = !!(session?.user as any)?.isAdmin;
+
+
+
 
 
   const togglePreset = (id: string) => setExpandedPresets((p) => ({ ...p, [id]: !p[id] }));
 
   useEffect(() => {
     if (session?.user) {
-      fetch("/api/user-presets")
+      const userDiscordId = (session.user as any)?.discordId;
+      fetch("/api/user-presets?mine=true")
         .then((res) => res.json())
         .then((data) => {
-          if (Array.isArray(data)) setUserPresets(data);
+          if (Array.isArray(data)) {
+            const mine = data.filter((p) => p.creator_id && String(p.creator_id) === String(userDiscordId));
+            setUserPresets(mine);
+          }
         })
         .catch((err) => console.error("Error fetching user presets:", err))
         .finally(() => setLoadingPresets(false));
@@ -87,7 +95,6 @@ export const ProfileTab = () => {
   }
 
   const userDiscordId = (session.user as any)?.discordId;
-  const isAdmin = !!(session.user as any)?.isAdmin;
 
   return (
     <PageContainer columns={1}>
@@ -363,6 +370,8 @@ export const ProfileTab = () => {
             </div>
           )}
         </div>
+
+
 
       </div>
     </PageContainer>
