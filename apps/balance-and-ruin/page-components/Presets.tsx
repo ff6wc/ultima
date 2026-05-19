@@ -1,5 +1,6 @@
 import { useCallback, useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useSession } from "next-auth/react";
 
 import {
   FaCalendarAlt,
@@ -546,8 +547,8 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
   const activeFlags = useSelector(selectRawFlags);
-
-  const currentUserId: string | undefined = undefined;
+  const { data: session } = useSession();
+  const currentUserId = (session?.user as any)?.discordId || undefined;
 
   useEffect(() => {
     try {
