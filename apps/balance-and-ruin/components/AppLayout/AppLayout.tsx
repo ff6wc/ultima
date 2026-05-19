@@ -108,7 +108,7 @@ export const AppLayout = ({ children, title }: AppLayoutProps) => {
                 className={`${styles.userProfile} cursor-pointer hover:bg-slate-700/30 transition-all rounded p-1`}
                 onClick={() => {
                   if (confirm("Are you sure you want to sign out?")) {
-                    signOut();
+                    signOut({ callbackUrl: "/" });
                   }
                 }}
                 onMouseEnter={() => setProfileHovered(true)}
