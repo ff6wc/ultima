@@ -356,13 +356,12 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
           <div 
             style={{
               border: "2px double #ef4444",
-              backgroundColor: "rgba(30, 41, 59, 0.95)",
               borderRadius: "8px",
               padding: "1.5rem",
-              color: "#f8fafc",
             }}
+            className="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100"
           >
-            <h3 style={{ margin: "0 0 1rem 0", color: "#f8fafc", fontSize: "1.1rem", fontWeight: "bold", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            <h3 className="text-slate-800 dark:text-slate-100" style={{ margin: "0 0 1rem 0", fontSize: "1.1rem", fontWeight: "bold", display: "flex", alignItems: "center", gap: "0.5rem" }}>
               <span>👑</span> Active Admin Session
             </h3>
             
@@ -375,13 +374,13 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                 />
               )}
               <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
-                <div style={{ fontWeight: "bold", color: "#f8fafc" }}>
+                <div className="text-slate-800 dark:text-slate-100" style={{ fontWeight: "bold" }}>
                   {session.user.name}
                 </div>
-                <div style={{ color: "#94a3b8", fontSize: "0.75rem", fontFamily: "monospace" }}>
+                <div className="text-slate-500 dark:text-slate-400" style={{ fontSize: "0.75rem", fontFamily: "monospace" }}>
                   Discord ID: {(session.user as any).discordId || "N/A"}
                 </div>
-                <div style={{ color: "#94a3b8", fontSize: "0.75rem" }}>
+                <div className="text-slate-500 dark:text-slate-400" style={{ fontSize: "0.75rem" }}>
                   Email: {session.user.email}
                 </div>
               </div>
@@ -392,13 +391,12 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
           <div 
             style={{
               border: "2px double #ef4444",
-              backgroundColor: "rgba(30, 41, 59, 0.95)",
               borderRadius: "8px",
               padding: "1.5rem",
-              color: "#f8fafc",
             }}
+            className="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100"
           >
-            <h3 style={{ margin: "0 0 1rem 0", color: "#f8fafc", fontSize: "1.1rem", fontWeight: "bold", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            <h3 className="text-slate-800 dark:text-slate-100" style={{ margin: "0 0 1rem 0", fontSize: "1.1rem", fontWeight: "bold", display: "flex", alignItems: "center", gap: "0.5rem" }}>
               <FaTools style={{ color: "#ef4444" }} /> System Control
             </h3>
             
@@ -413,13 +411,12 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                   backgroundColor: "rgba(15, 23, 42, 0.5)",
                   border: "1px solid rgba(239, 68, 68, 0.2)",
                   borderRadius: "4px",
-                  color: "#cbd5e1",
                   fontSize: "0.85rem",
                   cursor: "pointer",
                   width: "100%",
                   textAlign: "left",
                 }}
-                className="hover:bg-slate-800 transition-colors"
+                className="text-slate-700 dark:text-slate-300 hover:bg-slate-800 transition-colors"
               >
                 <span>Toggle Beta Features</span>
                 <span style={{ fontSize: "0.7rem", backgroundColor: "rgba(34, 197, 94, 0.2)", color: "#4ade80", border: "1px solid rgba(34, 197, 94, 0.3)", padding: "0.1rem 0.4rem", borderRadius: "4px", fontWeight: "bold" }}>
@@ -438,10 +435,10 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                     backgroundColor: "rgba(15, 23, 42, 0.5)",
                     border: "1px solid rgba(239, 68, 68, 0.6)",
                     borderRadius: "4px",
-                    color: "#cbd5e1",
                     fontSize: "0.85rem",
                     width: "100%",
                   }}
+                  className="text-slate-700 dark:text-slate-300"
                 >
                   <span style={{ color: "#f87171", fontWeight: "bold" }}>Confirm Purge?</span>
                   <div style={{ display: "flex", gap: "0.5rem" }}>
@@ -492,13 +489,12 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                     backgroundColor: "rgba(15, 23, 42, 0.5)",
                     border: "1px solid rgba(239, 68, 68, 0.2)",
                     borderRadius: "4px",
-                    color: "#cbd5e1",
                     fontSize: "0.85rem",
                     cursor: "pointer",
                     width: "100%",
                     textAlign: "left",
                   }}
-                  className="hover:bg-slate-800 transition-colors"
+                  className="text-slate-700 dark:text-slate-300 hover:bg-slate-800 transition-colors"
                 >
                   <span>Purge Presets Cache</span>
                   <FaDatabase style={{ color: "#94a3b8" }} />
@@ -512,20 +508,19 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
         {/* Global Preset Management */}
         <div
           style={{
-            backgroundColor: "rgba(15, 23, 42, 0.95)",
             border: "4px double #ef4444",
             borderRadius: "8px",
             boxShadow: "0 8px 30px rgba(0, 0, 0, 0.4)",
             padding: "2rem",
-            color: "#f8fafc",
             fontFamily: "var(--font-runic, monospace)",
           }}
+          className="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100"
         >
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", borderBottom: "2px solid rgba(239, 68, 68, 0.4)", paddingBottom: "1rem", marginBottom: "1.5rem" }}>
             <h2 style={{ margin: 0, fontSize: "1.5rem", fontWeight: "bold", letterSpacing: "1px", color: "#f87171" }}>
               PRESETS - ADMIN
             </h2>
-            <span style={{ fontSize: "1rem", fontWeight: "bold", color: "#94a3b8" }}>
+            <span className="text-slate-500 dark:text-slate-400" style={{ fontSize: "1rem", fontWeight: "bold" }}>
               Total: {mergedPresets.length} (Filtered: {sortedPresets.length})
             </span>
           </div>
@@ -541,7 +536,8 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                 setAdminSearch(e.target.value);
                 setVisibleCount(50); // Reset visible count on search
               }}
-              style={{ background: "none", border: "none", outline: "none", fontSize: "0.85rem", color: "#f8fafc", flex: 1, width: "100%" }}
+              style={{ background: "none", border: "none", outline: "none", fontSize: "0.85rem", flex: 1, width: "100%" }}
+              className="text-slate-800 dark:text-slate-100 placeholder:text-slate-500"
             />
             {adminSearch && (
               <button
@@ -559,7 +555,7 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
           {/* Sort Controls & Select All */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem", marginBottom: "1.5rem" }}>
             <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "0.5rem" }}>
-              <span style={{ fontSize: "0.75rem", fontWeight: "bold", color: "#94a3b8", textTransform: "uppercase" }}>Sort:</span>
+              <span className="text-slate-500 dark:text-slate-400" style={{ fontSize: "0.75rem", fontWeight: "bold", textTransform: "uppercase" }}>Sort:</span>
               {(["name", "author", "created_at"] as const).map((f) => {
                 const active = adminSortField === f;
                 const label = f === "name" ? "Name" : f === "author" ? "Author" : "Creation Date";
@@ -595,14 +591,13 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                 style={{
                   backgroundColor: "rgba(255, 255, 255, 0.05)",
                   border: "1px solid rgba(255, 255, 255, 0.1)",
-                  color: "#cbd5e1",
                   padding: "0.3rem 0.75rem",
                   borderRadius: "4px",
                   fontSize: "0.75rem",
                   cursor: "pointer",
                   fontWeight: "bold",
                 }}
-                className="hover:bg-slate-700 transition-colors"
+                className="text-slate-700 dark:text-slate-300 hover:bg-slate-700 transition-colors"
               >
                 {sortedPresets.every((p) => selectedIds[p.id]) ? "Deselect All" : "Select All"}
               </button>
@@ -640,9 +635,9 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
           </div>
 
           {loadingPresets && allPresets.length === 0 ? (
-            <div className="animate-pulse" style={{ color: "#94a3b8", fontSize: "0.9rem" }}>Loading database presets...</div>
+            <div className="animate-pulse text-slate-500 dark:text-slate-400" style={{ fontSize: "0.9rem" }}>Loading database presets...</div>
           ) : sortedPresets.length === 0 ? (
-            <div style={{ color: "#94a3b8", fontSize: "0.9rem", fontStyle: "italic" }}>No matching presets found in system.</div>
+            <div className="text-slate-500 dark:text-slate-400" style={{ fontSize: "0.9rem", fontStyle: "italic" }}>No matching presets found in system.</div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
               {visiblePresets.map((preset) => {
@@ -678,14 +673,14 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                         />
 
                         <div style={{ display: "flex", alignItems: "baseline", gap: "0.75rem", overflow: "hidden", flex: 1, minWidth: 0 }}>
-                          <h4 style={{ margin: 0, color: "#f8fafc", fontSize: "1rem", fontWeight: "bold", whiteSpace: "nowrap", flexShrink: 0 }}>
+                          <h4 className="text-slate-800 dark:text-slate-100" style={{ margin: 0, fontSize: "1rem", fontWeight: "bold", whiteSpace: "nowrap", flexShrink: 0 }}>
                             {preset.name}
                           </h4>
-                          <span style={{ color: "#94a3b8", fontSize: "0.8rem", whiteSpace: "nowrap", flexShrink: 0 }}>
+                          <span className="text-slate-500 dark:text-slate-400" style={{ fontSize: "0.8rem", whiteSpace: "nowrap", flexShrink: 0 }}>
                             by {preset.creator_name || preset.creator || "Unknown"}
                           </span>
                           {preset.description && !isExpanded && (
-                            <span style={{ color: "#64748b", fontSize: "0.85rem", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", flex: 1, minWidth: 0 }}>
+                            <span className="text-slate-500 dark:text-slate-400" style={{ fontSize: "0.85rem", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", flex: 1, minWidth: 0 }}>
                               - {preset.description}
                             </span>
                           )}
@@ -728,14 +723,13 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                               style={{
                                 backgroundColor: "rgba(148, 163, 184, 0.2)",
                                 border: "1px solid #94a3b8",
-                                color: "#cbd5e1",
                                 padding: "0.25rem 0.6rem",
                                 borderRadius: "4px",
                                 fontSize: "0.75rem",
                                 cursor: "pointer",
                                 fontWeight: "bold",
                               }}
-                              className="hover:bg-slate-700 transition-colors"
+                              className="text-slate-700 dark:text-slate-300 hover:bg-slate-700 transition-colors"
                             >
                               No
                             </button>
@@ -841,14 +835,14 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                     {isExpanded && (
                       <div style={{ marginTop: "0.75rem", borderTop: "1px dashed rgba(148, 163, 184, 0.2)", paddingTop: "0.75rem", paddingLeft: "1.75rem" }}>
                         {preset.description && (
-                          <p style={{ color: "#cbd5e1", fontSize: "0.9rem", marginTop: 0, marginBottom: "0.75rem", lineHeight: "1.4", whiteSpace: "pre-wrap" }}>
+                          <p className="text-slate-700 dark:text-slate-300" style={{ fontSize: "0.9rem", marginTop: 0, marginBottom: "0.75rem", lineHeight: "1.4", whiteSpace: "pre-wrap" }}>
                             {preset.description}
                           </p>
                         )}
-                        <div style={{ backgroundColor: "rgba(0, 0, 0, 0.4)", padding: "0.75rem", borderRadius: "4px", fontSize: "0.8rem", color: "#cbd5e1", fontFamily: "monospace", overflowX: "auto", whiteSpace: "pre-wrap", wordBreak: "break-all", border: "1px solid rgba(255,255,255,0.05)" }}>
+                        <div className="text-slate-700 dark:text-slate-300" style={{ backgroundColor: "rgba(0, 0, 0, 0.4)", padding: "0.75rem", borderRadius: "4px", fontSize: "0.8rem", fontFamily: "monospace", overflowX: "auto", whiteSpace: "pre-wrap", wordBreak: "break-all", border: "1px solid rgba(255,255,255,0.05)" }}>
                           {preset.flags || "(No flags provided in external API)"}
                         </div>
-                        <div style={{ display: "flex", gap: "1rem", marginTop: "0.75rem", fontSize: "0.75rem", color: "#64748b", fontWeight: "bold" }}>
+                        <div className="text-slate-500 dark:text-slate-400" style={{ display: "flex", gap: "1rem", marginTop: "0.75rem", fontSize: "0.75rem", fontWeight: "bold" }}>
                           <span>Created: {new Date(preset.created_timestamp).toLocaleDateString()}</span>
                           {preset.download_timestamp && <span>Downloaded: {new Date(preset.download_timestamp).toLocaleDateString()}</span>}
                         </div>
@@ -887,20 +881,19 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
         {/* TAGS ADMINISTRATION */}
         <div
           style={{
-            backgroundColor: "rgba(15, 23, 42, 0.95)",
             border: "4px double #8b5cf6",
             borderRadius: "8px",
             boxShadow: "0 8px 30px rgba(0, 0, 0, 0.4)",
             padding: "2rem",
-            color: "#f8fafc",
             fontFamily: "var(--font-runic, monospace)",
           }}
+          className="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100"
         >
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", borderBottom: "2px solid rgba(139, 92, 246, 0.4)", paddingBottom: "1rem", marginBottom: "1.5rem" }}>
             <h2 style={{ margin: 0, fontSize: "1.5rem", fontWeight: "bold", letterSpacing: "1px", color: "#a78bfa" }}>
               TAGS ADMINISTRATION
             </h2>
-            <span style={{ fontSize: "1rem", fontWeight: "bold", color: "#94a3b8" }}>
+            <span className="text-slate-500 dark:text-slate-400" style={{ fontSize: "1rem", fontWeight: "bold" }}>
               {cannedTags.length} Active Tags
             </span>
           </div>
@@ -982,20 +975,19 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
         {/* USER ADMINISTRATION */}
         <div
           style={{
-            backgroundColor: "rgba(15, 23, 42, 0.95)",
             border: "4px double #10b981",
             borderRadius: "8px",
             boxShadow: "0 8px 30px rgba(0, 0, 0, 0.4)",
             padding: "2rem",
-            color: "#f8fafc",
             fontFamily: "var(--font-runic, monospace)",
           }}
+          className="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100"
         >
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", borderBottom: "2px solid rgba(16, 185, 129, 0.4)", paddingBottom: "1rem", marginBottom: "1.5rem" }}>
             <h2 style={{ margin: 0, fontSize: "1.5rem", fontWeight: "bold", letterSpacing: "1px", color: "#34d399" }}>
               USER ADMINISTRATION
             </h2>
-            <span style={{ fontSize: "1rem", fontWeight: "bold", color: "#94a3b8" }}>
+            <span className="text-slate-500 dark:text-slate-400" style={{ fontSize: "1rem", fontWeight: "bold" }}>
               {usersDb.length} Registered Users
             </span>
           </div>
@@ -1019,13 +1011,13 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                   const isUserSuperadmin = ["451050854934511647", "197757429948219392"].includes(String(user.discordId));
                   
                   return (
-                    <tr key={user.discordId} style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }} className="hover:bg-slate-800 transition-colors">
-                      <td style={{ padding: "0.75rem", fontWeight: "bold", color: "#f8fafc" }}>{user.name}</td>
-                      <td style={{ padding: "0.75rem", color: "#94a3b8", fontFamily: "monospace" }}>{user.discordId}</td>
-                      <td style={{ padding: "0.75rem", color: "#cbd5e1" }}>{user.loginCount || 1}</td>
-                      <td style={{ padding: "0.75rem", color: "#94a3b8" }}>{new Date(user.firstLogin).toLocaleDateString()}</td>
-                      <td style={{ padding: "0.75rem", color: "#94a3b8" }}>{new Date(user.lastLogin).toLocaleDateString()}</td>
-                      <td style={{ padding: "0.75rem", color: "#cbd5e1" }}>{ownedPresets}</td>
+                    <tr key={user.discordId} style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }} className="hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                      <td className="text-slate-800 dark:text-slate-100" style={{ padding: "0.75rem", fontWeight: "bold" }}>{user.name}</td>
+                      <td className="text-slate-500 dark:text-slate-400" style={{ padding: "0.75rem", fontFamily: "monospace" }}>{user.discordId}</td>
+                      <td className="text-slate-700 dark:text-slate-300" style={{ padding: "0.75rem" }}>{user.loginCount || 1}</td>
+                      <td className="text-slate-500 dark:text-slate-400" style={{ padding: "0.75rem" }}>{new Date(user.firstLogin).toLocaleDateString()}</td>
+                      <td className="text-slate-500 dark:text-slate-400" style={{ padding: "0.75rem" }}>{new Date(user.lastLogin).toLocaleDateString()}</td>
+                      <td className="text-slate-700 dark:text-slate-300" style={{ padding: "0.75rem" }}>{ownedPresets}</td>
                       {isSuperadmin && (
                         <td style={{ padding: "0.75rem", textAlign: "center" }}>
                           {isUserSuperadmin ? (
