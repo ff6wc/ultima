@@ -92,59 +92,6 @@ export const AppLayout = ({ children, title }: AppLayoutProps) => {
               />
             </div>
           </div>
-
-          {/* User profile */}
-          <div style={{ width: "100%", marginTop: "0.75rem" }}>
-            {status === "loading" ? (
-              <div 
-                className={`${styles.userProfile} animate-pulse`} 
-                style={{ opacity: 0.6, cursor: "wait" }}
-              >
-                <div className={styles.avatar} style={{ backgroundColor: "#334155" }} />
-                <div className="h-4 bg-slate-500 rounded w-24" />
-              </div>
-            ) : session?.user ? (
-              <div 
-                className={`${styles.userProfile} cursor-pointer hover:bg-slate-700/30 transition-all rounded p-1`}
-                onClick={() => {
-                  if (confirm("Are you sure you want to sign out?")) {
-                    signOut({ callbackUrl: "/" });
-                  }
-                }}
-                onMouseEnter={() => setProfileHovered(true)}
-                onMouseLeave={() => setProfileHovered(false)}
-                title="Click to Sign Out"
-              >
-                <div className={styles.avatar} style={{ backgroundColor: "transparent", overflow: "hidden" }}>
-                  {session.user.image ? (
-                    <img 
-                      src={session.user.image} 
-                      alt={session.user.name || "Profile"} 
-                      className="w-full h-full object-cover rounded-full"
-                    />
-                  ) : (
-                    <FaDiscord color="white" size={20} />
-                  )}
-                </div>
-                <span className={styles.userName}>
-                  {profileHovered ? "Sign Out" : (session.user.name || "Logged In")}
-                </span>
-              </div>
-            ) : (
-              <div 
-                className={`${styles.userProfile} cursor-pointer hover:bg-[#5865F2]/20 transition-all rounded p-1`}
-                onClick={() => signIn("discord")}
-              >
-                <div
-                  className={styles.avatar}
-                  style={{ backgroundColor: "#5865F2" }}
-                >
-                  <FaDiscord color="white" size={20} />
-                </div>
-                <span className={styles.userName}>Login with Discord</span>
-              </div>
-            )}
-          </div>
         </div>
 
         {/* Nav links */}
@@ -165,14 +112,32 @@ export const AppLayout = ({ children, title }: AppLayoutProps) => {
             <FaBolt size={16} />
             <span>Generator</span>
           </a>
-          <a
-            href="/admin"
-            className={styles.tabItem}
-            style={{ textDecoration: "none" }}
-          >
-            <FaSlidersH size={16} />
-            <span>Admin Panel</span>
-          </a>
+
+          {session?.user ? (
+            <a
+              href="/create?tab=profile"
+              className={styles.tabItem}
+              style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "0.5rem" }}
+            >
+              <div style={{ width: "20px", height: "20px", borderRadius: "50%", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "#334155", flexShrink: 0 }}>
+                {session.user.image ? (
+                  <img src={session.user.image} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                ) : (
+                  <FaDiscord size={12} color="white" />
+                )}
+              </div>
+              <span>Profile</span>
+            </a>
+          ) : (
+            <button
+              onClick={() => signIn("discord")}
+              className={styles.tabItem}
+              style={{ background: "none", border: "none", width: "100%", textAlign: "left", cursor: "pointer", display: "flex", alignItems: "center", gap: "0.5rem", color: "inherit", padding: 0 }}
+            >
+              <FaDiscord size={16} />
+              <span>Login with Discord</span>
+            </button>
+          )}
         </div>
 
         {/* Bottom link */}
@@ -197,7 +162,7 @@ export const AppLayout = ({ children, title }: AppLayoutProps) => {
           <div className={styles.topBarLeft}>
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-full bg-neutral-100 dark:bg-slate-800 hover:bg-neutral-200 dark:hover:bg-slate-700 transition-all flex items-center justify-center text-neutral-600 dark:text-neutral-300 shadow-sm border border-slate-200 dark:border-slate-700"
+              className="p-2 rounded-full bg-neutral-100 dark:bg-slate-800 hover:bg-neutral-200 dark:hover:bg-slate-700 transition-all flex items-center justify-center text-neutral-600 dark:text-neutral-300 shadow-sm border border-slate-200 dark:border-slate-700 cursor-pointer"
               title={
                 theme === "light" ? "Enable Dark Mode" : "Enable Light Mode"
               }

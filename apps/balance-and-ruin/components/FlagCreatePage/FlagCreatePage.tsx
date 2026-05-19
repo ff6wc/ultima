@@ -1,4 +1,5 @@
 import { Tab } from "@headlessui/react";
+import { useRouter } from "next/router";
 import { useSession, signIn, signOut } from "next-auth/react";
 import styles from "./FlagCreatePage.module.css";
 import Head from "next/head";
@@ -36,6 +37,7 @@ import {
   FaBolt,
   FaBars,
   FaTimes,
+  FaShieldAlt,
 } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { selectShowFlags, setShowFlags } from "~/state/settingsSlice";
@@ -56,6 +58,9 @@ import { Settings } from "~/page-components/Settings";
 import { Objectives } from "~/page-components/Objectives";
 import { Party } from "~/page-components/Party";
 import { Home } from "~/page-components/Home";
+import { useAdmin } from "~/hooks/useAdmin";
+import { AdminTab } from "./AdminTab";
+import { ProfileTab } from "./ProfileTab";
 import { setObjectiveMetadata } from "~/state/objectiveSlice";
 import { RawFlagMetadata, setSchema } from "~/state/schemaSlice";
 import { ObjectiveMetadata } from "~/types/objectives";
@@ -243,7 +248,9 @@ export const FlagCreatePage = ({
   schema,
   version,
 }: PageProps) => {
+  const router = useRouter();
   const { data: session, status } = useSession();
+  const { isAdmin } = useAdmin();
   const [profileHovered, setProfileHovered] = useState(false);
   const tabs: TabItem[] = useMemo(
     () =>
@@ -314,6 +321,20 @@ export const FlagCreatePage = ({
           Icon: FaSlidersH,
           content: <Settings presets={presets} />,
         },
+        isAdmin
+          ? {
+              label: "Admin",
+              id: "admin",
+              Icon: FaShieldAlt,
+              content: <AdminTab />,
+            }
+          : null,
+        {
+          label: "Profile",
+          id: "profile",
+          Icon: null,
+          content: <ProfileTab />,
+        },
         /* process.env.NEXT_PUBLIC_ENABLE_BETA === "true"
           ? {
               label: "Beta",
@@ -346,7 +367,7 @@ export const FlagCreatePage = ({
           content: <SotwTab />,
         },
       ].filter((z) => !!z) as TabItem[],
-    [presets],
+    [presets, isAdmin],
   );
 
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -507,6 +528,15 @@ export const FlagCreatePage = ({
     dispatch(setObjectiveMetadata(objectives));
   }, [dispatch, objectives, schema]);
 
+  useEffect(() => {
+    if (router.query.tab) {
+      const idx = tabs.findIndex((t) => t.id === router.query.tab);
+      if (idx !== -1) {
+        setSelectedIndex(idx);
+      }
+    }
+  }, [router.query.tab, tabs]);
+
   return (
     <>
       <Head>
@@ -595,13 +625,13 @@ export const FlagCreatePage = ({
                 <div 
                   className={`${styles.userProfile} cursor-pointer hover:bg-slate-700/30 transition-all rounded p-1`}
                   onClick={() => {
-                    if (confirm("Are you sure you want to sign out?")) {
-                      signOut({ callbackUrl: "/" });
+                    const idx = tabs.findIndex((t) => t.id === "profile");
+                    if (idx !== -1) {
+                      setSelectedIndex(idx);
+                      setSidebarOpen(false);
                     }
                   }}
-                  onMouseEnter={() => setProfileHovered(true)}
-                  onMouseLeave={() => setProfileHovered(false)}
-                  title="Click to Sign Out"
+                  title="View Profile"
                 >
                   <div className={styles.avatar} style={{ backgroundColor: "transparent", overflow: "hidden" }}>
                     {session.user.image ? (
@@ -615,7 +645,7 @@ export const FlagCreatePage = ({
                     )}
                   </div>
                   <span className={styles.userName}>
-                    {profileHovered ? "Sign Out" : (session.user.name || "Logged In")}
+                    {session.user.name || "Profile"}
                   </span>
                 </div>
               ) : (
@@ -638,12 +668,12 @@ export const FlagCreatePage = ({
               {tabs.map((tab) => {
                 const isSideNavHidden = ["events", "sotw"].includes(tab.id);
                 const isHighlighted = matchesSearch(tab.id);
-                const isHome = tab.id === "home";
+                const isHidden = ["home", "profile"].includes(tab.id);
 
                 return (
                   <Tab
                     key={tab.id}
-                    className={`${isHome ? "hidden" : tab.isAction ? styles.generateBtn : styles.tabItem} ${isHighlighted ? "bg-yellow-500/20 !text-yellow-400 border-l-4 border-yellow-400 font-bold" : ""} ${isSideNavHidden ? styles.mobileOnly : ""}`}
+                    className={`${isHidden ? "hidden" : tab.isAction ? styles.generateBtn : styles.tabItem} ${isHighlighted ? "bg-yellow-500/20 !text-yellow-400 border-l-4 border-yellow-400 font-bold" : ""} ${isSideNavHidden ? styles.mobileOnly : ""}`}
                   >
                     {tab.Icon && <tab.Icon size={20} />}
                     <span>{tab.label}</span>

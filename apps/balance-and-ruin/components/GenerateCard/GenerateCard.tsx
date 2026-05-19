@@ -12,6 +12,7 @@ import JSZip from "jszip";
 import { useRouter } from "next/router";
 import { selectSchema } from "~/state/schemaSlice";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
+import { useSession } from "next-auth/react";
 import { GenerateUpload } from "~/components/GenerateUpload/GenerateUpload";
 import { FlagTextInput } from "~/components/FlagInput/FlagInput";
 import { FlagSwitch } from "~/components/FlagSwitch/FlagSwitch";
@@ -62,6 +63,40 @@ export const GenerateCard = ({
 
   const flags = useOrderedFlags();
   const router = useRouter();
+  const { data: session } = useSession();
+
+  const [isSavingPreset, setIsSavingPreset] = useState(false);
+  const [presetName, setPresetName] = useState("");
+  const [presetDescription, setPresetDescription] = useState("");
+  const [isSubmittingPreset, setIsSubmittingPreset] = useState(false);
+  const [presetError, setPresetError] = useState<string | null>(null);
+  const [lastSavedFlags, setLastSavedFlags] = useState<string | null>(null);
+
+  const handleSavePreset = async () => {
+    setIsSubmittingPreset(true);
+    setPresetError(null);
+    try {
+      const res = await fetch("/api/user-presets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: presetName, description: presetDescription, flags }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to save preset");
+      }
+      setLastSavedFlags(flags);
+      setIsSavingPreset(false);
+      setPresetName("");
+      setPresetDescription("");
+    } catch (e) {
+      setPresetError((e as Error).message);
+    } finally {
+      setIsSubmittingPreset(false);
+    }
+  };
+
+  const isSaved = lastSavedFlags === flags;
 
   const { executeRecaptcha } = useGoogleReCaptcha();
 
@@ -160,6 +195,13 @@ export const GenerateCard = ({
         link.click();
         window.open(`/seed/?id=${seed_id}`, "_blank");
       });
+
+      // Update preset download timestamp in the background
+      fetch("/api/user-presets", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ flags })
+      }).catch(console.error);
     } catch (err) {
       setClientError((err as Error).message);
     }
@@ -235,6 +277,66 @@ export const GenerateCard = ({
           value={inputFlags}
           placeholder="Your selected flags will appear here..."
         />
+        
+        {session?.user ? (
+          <div className="mt-3">
+            {!isSavingPreset ? (
+              <button
+                className={`text-sm font-bold py-1.5 px-4 rounded shadow transition-colors ${
+                  isSaved 
+                    ? "bg-emerald-600 text-white cursor-default opacity-80" 
+                    : "bg-blue-600 hover:bg-blue-700 text-white"
+                }`}
+                onClick={() => !isSaved && setIsSavingPreset(true)}
+                disabled={isSaved}
+              >
+                {isSaved ? "✓ Preset Saved" : "Save as Preset"}
+              </button>
+            ) : (
+              <div className="p-4 bg-slate-800 border border-slate-700 rounded-md mt-2 flex flex-col gap-3 shadow-inner">
+                <h4 className="text-sm font-bold text-blue-400 m-0">Save New Preset</h4>
+                <input
+                  type="text"
+                  value={presetName}
+                  onChange={(e) => setPresetName(e.target.value)}
+                  placeholder="Preset Name"
+                  className="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded text-sm text-white focus:outline-none focus:border-blue-500"
+                />
+                <textarea
+                  value={presetDescription}
+                  onChange={(e) => setPresetDescription(e.target.value)}
+                  placeholder="Description (Optional)"
+                  rows={2}
+                  className="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded text-sm text-white focus:outline-none focus:border-blue-500"
+                />
+                <div className="flex gap-2 justify-end mt-1">
+                  <button
+                    className="text-sm bg-slate-600 hover:bg-slate-500 text-white font-bold py-1.5 px-4 rounded transition-colors"
+                    onClick={() => {
+                      setIsSavingPreset(false);
+                      setPresetName("");
+                      setPresetDescription("");
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="text-sm bg-blue-600 hover:bg-blue-700 text-white font-bold py-1.5 px-4 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={!presetName.trim() || isSubmittingPreset}
+                    onClick={handleSavePreset}
+                  >
+                    {isSubmittingPreset ? "Saving..." : "Save Preset"}
+                  </button>
+                </div>
+                {presetError && <span className="text-xs text-red-400">{presetError}</span>}
+              </div>
+            )}
+          </div>
+        ) : (
+          <span className="text-xs text-slate-400 mt-2 block italic">
+            Log in to save these flags as a preset.
+          </span>
+        )}
       </div>
 
       <div className={styles.divider} />

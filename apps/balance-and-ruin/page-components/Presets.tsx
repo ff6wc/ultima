@@ -344,6 +344,7 @@ const CategorySection = ({
   onSelect,
   defaultOpen = false,
 }: CategorySectionProps) => {
+  const { data: session } = useSession();
   const [open, setOpen] = useState(defaultOpen);
   const [search, setSearch] = useState("");
   const [sortField, setSortField] = useState<SortField>("name");
@@ -367,7 +368,7 @@ const CategorySection = ({
 
   const sorted = sortPresets(filtered, sortField, sortDir);
 
-  if (presets.length === 0) return null;
+  if (presets.length === 0 && title !== "My Presets") return null;
 
   return (
     <div
@@ -501,7 +502,15 @@ const CategorySection = ({
                   padding: "0.5rem",
                 }}
               >
-                No results found.
+                {title === "My Presets" ? (
+                  session?.user ? (
+                    "No saved presets. Save your current flags as a preset on the Generate page to see them here!"
+                  ) : (
+                    "Please connect your Discord account in the Profile tab to view your saved presets."
+                  )
+                ) : (
+                  "No results found."
+                )}
               </p>
             ) : (
               sorted.map((preset) => (
@@ -550,6 +559,8 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
   const { data: session } = useSession();
   const currentUserId = (session?.user as any)?.discordId || undefined;
 
+  const [dbPresets, setDbPresets] = useState<any[]>([]);
+
   useEffect(() => {
     try {
       const stored = localStorage.getItem("custom_presets");
@@ -558,6 +569,40 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
       }
     } catch (e) {}
   }, []);
+
+  useEffect(() => {
+    if (session?.user) {
+      fetch("/api/user-presets")
+        .then((res) => {
+          if (res.ok) return res.json();
+          return [];
+        })
+        .then((data) => {
+          setDbPresets(data);
+        })
+        .catch((err) => {
+          console.warn("Failed to fetch database presets under Presets tab:", err);
+        });
+    } else {
+      setDbPresets([]);
+    }
+  }, [session]);
+
+  const mappedDbPresets = useMemo<FlagPreset[]>(() => {
+    return dbPresets.map((p) => ({
+      name: p.name,
+      creator_name: p.creator_name || "You",
+      creator: p.creator_name || "You",
+      description: p.description || "",
+      flags: p.flags,
+      creator_id: p.creator_id,
+      arguments: "",
+      official: false,
+      hidden: false,
+      created_at: p.created_timestamp,
+      last_downloaded: p.download_timestamp || undefined,
+    }));
+  }, [dbPresets]);
 
   const mergedPresets = useMemo(
     () => ({
@@ -632,39 +677,78 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
   };
 
   // Annotate each preset with the user's last-downloaded timestamp from localStorage
-  const allPresets = Object.values(mergedPresets)
-    .filter(
-      (p) =>
-        !p.hidden &&
-        p.flags &&
-        !p.flags.startsWith("<") &&
-        p.flags.trim() !== "",
-    )
-    .map((p) => ({
-      ...p,
-      last_downloaded: currentUserId
-        ? getLastDownloaded(currentUserId, p.name)
-        : undefined,
-    }));
+  const allPresets = useMemo<FlagPreset[]>(() => {
+    const apiPresets = Object.values(mergedPresets)
+      .filter(
+        (p) =>
+          !p.hidden &&
+          p.flags &&
+          !p.flags.startsWith("<") &&
+          p.flags.trim() !== "",
+      )
+      .map((p): FlagPreset => ({
+        ...p,
+        last_downloaded: currentUserId
+          ? getLastDownloaded(currentUserId, p.name)
+          : undefined,
+      }));
+
+    const combined: FlagPreset[] = [...apiPresets];
+    const existingNames = new Set(apiPresets.map((p) => p.name.toLowerCase()));
+
+    for (const dbP of mappedDbPresets) {
+      if (!existingNames.has(dbP.name.toLowerCase())) {
+        combined.push(dbP);
+      }
+    }
+
+    return combined;
+  }, [mergedPresets, currentUserId, mappedDbPresets]);
 
   const customPresetNames = new Set(Object.keys(customPresets));
 
-  const eventPresets = allPresets.filter((p) => p.official);
+  const eventPresets = useMemo(() => {
+    return allPresets.filter((p) => p.official);
+  }, [allPresets]);
 
-  const myPresets = allPresets.filter(
-    (p) =>
-      customPresetNames.has(p.name) ||
-      (currentUserId &&
+  const myPresets = useMemo(() => {
+    // 1. Start with all database saved presets (mappedDbPresets)
+    const combined = [...mappedDbPresets];
+    const existingNames = new Set(mappedDbPresets.map((p) => p.name.toLowerCase()));
+
+    // 2. Add local storage custom presets if they aren't duplicates
+    const customList = Object.values(customPresets);
+    for (const cp of customList) {
+      if (!existingNames.has(cp.name.toLowerCase())) {
+        combined.push(cp);
+      }
+    }
+
+    // 3. Add any presets from the API that have matching creator_id
+    const apiMyPresets = allPresets.filter(
+      (p) =>
+        currentUserId &&
         !p.official &&
-        String(p.creator_id) === String(currentUserId)),
-  );
+        String(p.creator_id) === String(currentUserId)
+    );
 
-  const communityPresets = allPresets.filter(
-    (p) =>
-      !p.official &&
-      !customPresetNames.has(p.name) &&
-      !(currentUserId && String(p.creator_id) === String(currentUserId)),
-  );
+    for (const ap of apiMyPresets) {
+      if (!existingNames.has(ap.name.toLowerCase())) {
+        combined.push(ap);
+      }
+    }
+
+    return combined;
+  }, [mappedDbPresets, customPresets, allPresets, currentUserId]);
+
+  const communityPresets = useMemo(() => {
+    const myPresetNames = new Set(myPresets.map((p) => p.name.toLowerCase()));
+    return allPresets.filter(
+      (p) =>
+        !p.official &&
+        !myPresetNames.has(p.name.toLowerCase())
+    );
+  }, [allPresets, myPresets]);
 
   const handleSelect = (preset: FlagPreset) => {
     // Dispatch setActivePreset BEFORE setRawFlags so the preset name is set
@@ -1109,17 +1193,15 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
           </div>
         ) : (
           <>
-            {myPresets.length > 0 && (
-              <CategorySection
-                icon={<FaUser />}
-                title="My Presets"
-                color="#8b5cf6"
-                presets={myPresets}
-                selectedName={activePresetName}
-                onSelect={handleSelect}
-                defaultOpen={true}
-              />
-            )}
+            <CategorySection
+              icon={<FaUser />}
+              title="My Presets"
+              color="#8b5cf6"
+              presets={myPresets}
+              selectedName={activePresetName}
+              onSelect={handleSelect}
+              defaultOpen={true}
+            />
             <CategorySection
               icon={<FaCalendarAlt />}
               title="Event Presets"
