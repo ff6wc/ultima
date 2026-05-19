@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useSession, signIn, signOut } from "next-auth/react";
 
 import { FaDiscord, FaBook, FaSearch, FaBolt } from "react-icons/fa";
 import { HiOutlineMoon, HiOutlineSun } from "react-icons/hi";
@@ -12,6 +12,8 @@ type AppLayoutProps = {
 export const AppLayout = ({ children, title }: AppLayoutProps) => {
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [processedLogo, setProcessedLogo] = useState<string | null>(null);
+  const { data: session, status } = useSession();
+  const [profileHovered, setProfileHovered] = useState(false);
 
   useEffect(() => {
     const img = new window.Image();
@@ -92,15 +94,55 @@ export const AppLayout = ({ children, title }: AppLayoutProps) => {
 
           {/* User profile */}
           <div style={{ width: "100%", marginTop: "0.75rem" }}>
-            <div className={styles.userProfile}>
-              <div
-                className={styles.avatar}
-                style={{ backgroundColor: "#5865F2" }}
+            {status === "loading" ? (
+              <div 
+                className={`${styles.userProfile} animate-pulse`} 
+                style={{ opacity: 0.6, cursor: "wait" }}
               >
-                <FaDiscord color="white" size={20} />
+                <div className={styles.avatar} style={{ backgroundColor: "#334155" }} />
+                <div className="h-4 bg-slate-500 rounded w-24" />
               </div>
-              <span className={styles.userName}>Login with Discord</span>
-            </div>
+            ) : session?.user ? (
+              <div 
+                className={`${styles.userProfile} cursor-pointer hover:bg-slate-700/30 transition-all rounded p-1`}
+                onClick={() => {
+                  if (confirm("Are you sure you want to sign out?")) {
+                    signOut();
+                  }
+                }}
+                onMouseEnter={() => setProfileHovered(true)}
+                onMouseLeave={() => setProfileHovered(false)}
+                title="Click to Sign Out"
+              >
+                <div className={styles.avatar} style={{ backgroundColor: "transparent", overflow: "hidden" }}>
+                  {session.user.image ? (
+                    <img 
+                      src={session.user.image} 
+                      alt={session.user.name || "Profile"} 
+                      className="w-full h-full object-cover rounded-full"
+                    />
+                  ) : (
+                    <FaDiscord color="white" size={20} />
+                  )}
+                </div>
+                <span className={styles.userName}>
+                  {profileHovered ? "Sign Out" : (session.user.name || "Logged In")}
+                </span>
+              </div>
+            ) : (
+              <div 
+                className={`${styles.userProfile} cursor-pointer hover:bg-[#5865F2]/20 transition-all rounded p-1`}
+                onClick={() => signIn("discord")}
+              >
+                <div
+                  className={styles.avatar}
+                  style={{ backgroundColor: "#5865F2" }}
+                >
+                  <FaDiscord color="white" size={20} />
+                </div>
+                <span className={styles.userName}>Login with Discord</span>
+              </div>
+            )}
           </div>
         </div>
 
