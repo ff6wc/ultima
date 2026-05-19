@@ -355,7 +355,7 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
           {/* Active Admin Session Card */}
           <div 
             style={{
-              border: "2px double #ef4444",
+              border: "2px double #3b82f6",
               borderRadius: "8px",
               padding: "1.5rem",
             }}
@@ -390,7 +390,7 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
           {/* System Control Card */}
           <div 
             style={{
-              border: "2px double #ef4444",
+              border: "2px double #3b82f6",
               borderRadius: "8px",
               padding: "1.5rem",
             }}
