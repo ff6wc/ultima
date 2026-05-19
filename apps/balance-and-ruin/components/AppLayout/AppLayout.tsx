@@ -1,6 +1,7 @@
+import React, { useEffect, useState } from "react";
 import { useSession, signIn, signOut } from "next-auth/react";
 
-import { FaDiscord, FaBook, FaSearch, FaBolt } from "react-icons/fa";
+import { FaDiscord, FaBook, FaSearch, FaBolt, FaSlidersH } from "react-icons/fa";
 import { HiOutlineMoon, HiOutlineSun } from "react-icons/hi";
 import styles from "~/components/FlagCreatePage/FlagCreatePage.module.css";
 
@@ -163,6 +164,14 @@ export const AppLayout = ({ children, title }: AppLayoutProps) => {
           >
             <FaBolt size={16} />
             <span>Generator</span>
+          </a>
+          <a
+            href="/admin"
+            className={styles.tabItem}
+            style={{ textDecoration: "none" }}
+          >
+            <FaSlidersH size={16} />
+            <span>Admin Panel</span>
           </a>
         </div>
 
