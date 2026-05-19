@@ -356,7 +356,7 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
           <div 
             style={{
               border: "2px double #ef4444",
-              backgroundColor: "rgba(30, 41, 59, 0.4)",
+              backgroundColor: "rgba(30, 41, 59, 0.95)",
               borderRadius: "8px",
               padding: "1.5rem",
               color: "#f8fafc",
@@ -392,7 +392,7 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
           <div 
             style={{
               border: "2px double #ef4444",
-              backgroundColor: "rgba(30, 41, 59, 0.4)",
+              backgroundColor: "rgba(30, 41, 59, 0.95)",
               borderRadius: "8px",
               padding: "1.5rem",
               color: "#f8fafc",
