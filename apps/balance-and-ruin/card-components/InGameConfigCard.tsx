@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Card } from "@ff6wc/ui";
 import {
   DEFAULT_IN_GAME_CONFIG,
@@ -101,6 +101,10 @@ type WindowAsset = {
   defaultA: HTMLImageElement | null;
   defaultB: HTMLImageElement | null;
   correction: number[][] | null;
+  baselineDataA: ImageData | null;
+  slotsDataA: (ImageData | null)[];
+  fontDataA: ImageData | null;
+  correctionA: number[][] | null;
 };
 
 type AssetCache = {
@@ -275,6 +279,59 @@ const buildCursorSprite = (): HTMLCanvasElement => {
   return c;
 };
 
+const ARROW_X0 = 121;
+const ARROW_DOWN_Y0 = 205;
+const ARROW_UP_Y0 = 28;
+const ARROW_W = 13;
+const ARROW_H = 7;
+
+const buildArrowDownSprite = (): HTMLCanvasElement => {
+  const H: [number, number, number] = [24, 24, 41];
+  const A: [number, number, number] = [123, 156, 156];
+  const B: [number, number, number] = [165, 198, 198];
+  const C: [number, number, number] = [247, 255, 255];
+  const rows: ([number, number, number] | null)[][] = [
+    [H, H, H, H, H, H, H, H, H, H, H, H, H],
+    [null, H, A, B, B, B, B, B, B, B, A, H, null],
+    [null, null, H, A, B, C, C, C, B, A, H, null, null],
+    [null, null, null, H, A, B, C, B, A, H, null, null, null],
+    [null, null, null, null, H, A, B, A, H, null, null, null, null],
+    [null, null, null, null, null, H, A, H, null, null, null, null, null],
+    [null, null, null, null, null, null, H, null, null, null, null, null, null],
+  ];
+  const c = document.createElement("canvas");
+  c.width = ARROW_W;
+  c.height = ARROW_H;
+  const cx = c.getContext("2d");
+  if (!cx) return c;
+  const im = cx.createImageData(ARROW_W, ARROW_H);
+  for (let y = 0; y < ARROW_H; y++)
+    for (let x = 0; x < ARROW_W; x++) {
+      const px = rows[y][x];
+      const i = (y * ARROW_W + x) * 4;
+      if (px) {
+        im.data[i] = px[0];
+        im.data[i + 1] = px[1];
+        im.data[i + 2] = px[2];
+        im.data[i + 3] = 255;
+      }
+    }
+  cx.putImageData(im, 0, 0);
+  return c;
+};
+
+const buildArrowUpSprite = (down: HTMLCanvasElement): HTMLCanvasElement => {
+  const c = document.createElement("canvas");
+  c.width = ARROW_W;
+  c.height = ARROW_H;
+  const cx = c.getContext("2d");
+  if (!cx) return c;
+  cx.translate(0, ARROW_H);
+  cx.scale(1, -1);
+  cx.drawImage(down, 0, 0);
+  return c;
+};
+
 const getOptionsForPage = (page: "A" | "B") => (page === "A" ? PAGE_A_OPTIONS : PAGE_B_OPTIONS);
 
 const valuePos = (row: OptionRow, item: ValueItem): { x: number; y: number } => {
@@ -311,6 +368,8 @@ const approxValueWidth = (row: OptionRow, v: string | number): number => {
 export const InGameConfigCard = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const cursorSpriteRef = useRef<HTMLCanvasElement | null>(null);
+  const arrowDownRef = useRef<HTMLCanvasElement | null>(null);
+  const arrowUpRef = useRef<HTMLCanvasElement | null>(null);
   const assetsRef = useRef<AssetCache>({
     manifest: null,
     windowAssets: {},
@@ -346,6 +405,8 @@ export const InGameConfigCard = () => {
         const manifest = await fetch(`${ASSET_BASE}/manifest.json${CB}`).then((r) => r.json());
         assetsRef.current.manifest = manifest;
         cursorSpriteRef.current = buildCursorSprite();
+        arrowDownRef.current = buildArrowDownSprite();
+        arrowUpRef.current = buildArrowUpSprite(arrowDownRef.current);
 
         // Preload active window first.
         const activeWin = stateRef.current.Wallpaper;
@@ -373,7 +434,14 @@ export const InGameConfigCard = () => {
   // Re-render canvas whenever state changes.
   useEffect(() => {
     if (!ready) return;
-    renderCanvas(canvasRef.current, cursorSpriteRef.current, assetsRef.current, state);
+    renderCanvas(
+      canvasRef.current,
+      cursorSpriteRef.current,
+      arrowDownRef.current,
+      arrowUpRef.current,
+      assetsRef.current,
+      state
+    );
   }, [state, ready]);
 
   // Keyboard handling — attach to canvas (focused element).
@@ -464,6 +532,23 @@ export const InGameConfigCard = () => {
     });
   }, [setState]);
 
+  const handleSliderClick = (
+    e: React.MouseEvent<HTMLButtonElement>,
+    rowIdx: number,
+    channel: 0 | 1 | 2
+  ) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const xCanvas = (e.clientX - rect.left) / 2 + (SLIDER_BAR_X0 - 4);
+    const t = (xCanvas - SLIDER_BAR_X0) / SLIDER_BAR_W31;
+    const v = Math.round(Math.max(0, Math.min(1, t)) * 31);
+    setState((s) => {
+      const rgb = [...editedRgb(s)] as RGB;
+      rgb[channel] = v;
+      return { ...writeEditedRgb(s, rgb), cursor: rowIdx };
+    });
+    canvasRef.current?.focus();
+  };
+
   const handleHitClick = (rowIdx: number, val: string | number) => {
     setState((s) => {
       const opts = getOptionsForPage(s.page);
@@ -537,7 +622,26 @@ export const InGameConfigCard = () => {
               style={{ inset: 2, width: 256 * CANVAS_SCALE - 4, height: 224 * CANVAS_SCALE - 4 }}
             >
               {opts.map((row, rIdx) => {
-                if (row.kind === "slider") return null;
+                if (row.kind === "slider") {
+                  return (
+                    <button
+                      key={`slider-${rIdx}`}
+                      type="button"
+                      onClick={(e) => handleSliderClick(e, rIdx, row.channel)}
+                      title={`${row.key}: click to set`}
+                      className="absolute pointer-events-auto cursor-pointer hover:outline hover:outline-1 hover:outline-dashed hover:outline-white/40"
+                      style={{
+                        left: (SLIDER_BAR_X0 - 4) * CANVAS_SCALE,
+                        top: (row.y + 3) * CANVAS_SCALE,
+                        width: (SLIDER_BAR_W31 + 8) * CANVAS_SCALE,
+                        height: 7 * CANVAS_SCALE,
+                        background: "transparent",
+                        border: "none",
+                        padding: 0,
+                      }}
+                    />
+                  );
+                }
                 return row.values.map((item, vIdx) => {
                   const val = item[0];
                   const { x, y } = valuePos(row, item);
@@ -562,6 +666,23 @@ export const InGameConfigCard = () => {
                   );
                 });
               })}
+              <button
+                type="button"
+                onClick={() =>
+                  setState((s) => ({ ...s, page: s.page === "A" ? "B" : "A", cursor: 0 }))
+                }
+                title={state.page === "A" ? "Go to Page B" : "Go to Page A"}
+                className="absolute pointer-events-auto cursor-pointer hover:outline hover:outline-1 hover:outline-dashed hover:outline-white/40"
+                style={{
+                  left: (ARROW_X0 - 3) * CANVAS_SCALE,
+                  top: ((state.page === "A" ? ARROW_DOWN_Y0 : ARROW_UP_Y0) - 2) * CANVAS_SCALE,
+                  width: (ARROW_W + 6) * CANVAS_SCALE,
+                  height: (ARROW_H + 4) * CANVAS_SCALE,
+                  background: "transparent",
+                  border: "none",
+                  padding: 0,
+                }}
+              />
             </div>
           </div>
 
@@ -609,16 +730,32 @@ async function loadWindowAssetsInto(cache: AssetCache, n: number) {
   const info = cache.manifest?.windows?.[String(n)];
   if (!info) return;
   const base = `${ASSET_BASE}/W${n}/`;
-  const promises: Promise<any>[] = [loadImage(base + "baseline.png")];
-  for (let s = 1; s <= 7; s++) {
-    promises.push(info.slots.includes(s) ? loadImage(base + `slot${s}.png`) : Promise.resolve(null));
-  }
-  promises.push(info.font ? loadImage(base + "font.png") : Promise.resolve(null));
-  promises.push(info.hasDefaultA ? loadImage(base + "defaultA.png") : Promise.resolve(null));
-  promises.push(info.hasDefaultB ? loadImage(base + "defaultB.png") : Promise.resolve(null));
-  promises.push(
-    info.hasCorrection ? fetch(base + "correction.json" + CB).then((r) => r.json()) : Promise.resolve(null)
-  );
+  const pageA = info.pageA || null;
+  const slotPaths = (suffix: string, present: number[] | null) => {
+    const out: Promise<HTMLImageElement | null>[] = [];
+    for (let s = 1; s <= 7; s++) {
+      out.push(
+        present && present.includes(s)
+          ? loadImage(`${base}slot${s}${suffix}.png`)
+          : Promise.resolve(null)
+      );
+    }
+    return out;
+  };
+  const promises: Promise<any>[] = [
+    loadImage(base + "baseline.png"),
+    ...slotPaths("", info.slots),
+    info.font ? loadImage(base + "font.png") : Promise.resolve(null),
+    info.hasDefaultA ? loadImage(base + "defaultA.png") : Promise.resolve(null),
+    info.hasDefaultB ? loadImage(base + "defaultB.png") : Promise.resolve(null),
+    info.hasCorrection ? fetch(base + "correction.json" + CB).then((r) => r.json()) : Promise.resolve(null),
+    pageA ? loadImage(base + "baselineA.png") : Promise.resolve(null),
+    ...slotPaths("A", pageA ? pageA.slots : null),
+    pageA && pageA.font ? loadImage(base + "fontA.png") : Promise.resolve(null),
+    pageA && pageA.hasCorrection
+      ? fetch(base + "correctionA.json" + CB).then((r) => r.json())
+      : Promise.resolve(null),
+  ];
 
   const imgs = await Promise.all(promises);
   const asset: WindowAsset = {
@@ -628,6 +765,10 @@ async function loadWindowAssetsInto(cache: AssetCache, n: number) {
     defaultA: imgs[9],
     defaultB: imgs[10],
     correction: imgs[11],
+    baselineDataA: toImageData(imgs[12]),
+    slotsDataA: imgs.slice(13, 20).map(toImageData),
+    fontDataA: toImageData(imgs[20]),
+    correctionA: imgs[21],
   };
   if (!asset.fontData) {
     for (const k of Object.keys(cache.manifest.windows || {})) {
@@ -670,6 +811,8 @@ async function loadMagOrderOverlays(cache: AssetCache) {
 function renderCanvas(
   canvas: HTMLCanvasElement | null,
   cursorSprite: HTMLCanvasElement | null,
+  arrowDown: HTMLCanvasElement | null,
+  arrowUp: HTMLCanvasElement | null,
   cache: AssetCache,
   state: State
 ) {
@@ -681,7 +824,7 @@ function renderCanvas(
   if (asset) {
     const data = recolor(ctx, asset, state);
     if (data) ctx.putImageData(data, 0, 0);
-    if (state.page === "A" && asset.defaultA) {
+    if (state.page === "A" && !asset.baselineDataA && asset.defaultA) {
       ctx.drawImage(asset.defaultA, 0, 0);
       drawPaletteHintBar(ctx);
     }
@@ -693,6 +836,7 @@ function renderCanvas(
     drawMagOrderText(ctx, cache, state);
     drawColorEditValues(ctx, state);
   }
+  drawPageSwitchArrow(ctx, arrowDown, arrowUp, state);
   highlightValueText(ctx, state);
   drawCursorOverlay(ctx, cursorSprite, state);
   drawSelectionOverlay(ctx, state);
@@ -700,11 +844,17 @@ function renderCanvas(
 
 function recolor(ctx: CanvasRenderingContext2D, asset: WindowAsset, state: State): ImageData | null {
   if (!asset.baselineData) return null;
+  const useA = state.page === "A" && !!asset.baselineDataA;
+  const baselineData = useA ? asset.baselineDataA! : asset.baselineData;
+  const slotsData = useA ? asset.slotsDataA : asset.slotsData;
+  const fontData = useA ? asset.fontDataA : asset.fontData;
+  const correction = useA ? asset.correctionA : asset.correction;
+
   const W = 256,
     H = 224;
   const out = ctx.createImageData(W, H);
   const N = W * H * 4;
-  const base = asset.baselineData.data;
+  const base = baselineData.data;
 
   const slotColors = state.windows[state.Wallpaper];
   const fontColor = state.font;
@@ -713,13 +863,13 @@ function recolor(ctx: CanvasRenderingContext2D, asset: WindowAsset, state: State
     wBaseG = 1,
     wBaseB = 1;
   for (let s = 0; s < 7; s++) {
-    if (!asset.slotsData[s]) continue;
+    if (!slotsData[s]) continue;
     const c = slotColors[s];
     wBaseR -= c[0] / 31;
     wBaseG -= c[1] / 31;
     wBaseB -= c[2] / 31;
   }
-  if (asset.fontData) {
+  if (fontData) {
     wBaseR -= fontColor[0] / 31;
     wBaseG -= fontColor[1] / 31;
     wBaseB -= fontColor[2] / 31;
@@ -732,7 +882,7 @@ function recolor(ctx: CanvasRenderingContext2D, asset: WindowAsset, state: State
     acc[i + 2] = base[i + 2] * wBaseB;
   }
   for (let s = 0; s < 7; s++) {
-    const sd = asset.slotsData[s];
+    const sd = slotsData[s];
     if (!sd) continue;
     const c = slotColors[s];
     const rs = c[0] / 31,
@@ -746,20 +896,20 @@ function recolor(ctx: CanvasRenderingContext2D, asset: WindowAsset, state: State
       acc[i + 2] += d[i + 2] * bs;
     }
   }
-  if (asset.fontData) {
+  if (fontData) {
     const c = fontColor;
     const rs = c[0] / 31,
       gs = c[1] / 31,
       bs = c[2] / 31;
-    const d = asset.fontData.data;
+    const d = fontData.data;
     for (let i = 0; i < N; i += 4) {
       acc[i] += d[i] * rs;
       acc[i + 1] += d[i + 1] * gs;
       acc[i + 2] += d[i + 2] * bs;
     }
   }
-  if (asset.correction) {
-    const corr = asset.correction;
+  if (correction) {
+    const corr = correction;
     for (let y = 0; y < H; y++) {
       const cr = corr[y][0],
         cg = corr[y][1],
@@ -831,6 +981,9 @@ function drawMagOrderText(ctx: CanvasRenderingContext2D, cache: AssetCache, stat
 
   const TEXT_THRESHOLD = 70;
   const DARK_THRESHOLD = 10;
+  const fr = (state.font[0] * 255) / 31;
+  const fg = (state.font[1] * 255) / 31;
+  const fb = (state.font[2] * 255) / 31;
   const region = ctx.getImageData(x0, y0, w, h);
   const rd = region.data,
     md = img.data;
@@ -858,9 +1011,10 @@ function drawMagOrderText(ctx: CanvasRenderingContext2D, cache: AssetCache, stat
   for (let i = 0; i < rd.length; i += 4) {
     const mx = Math.max(md[i], md[i + 1], md[i + 2]);
     if (mx > TEXT_THRESHOLD) {
-      rd[i] = md[i];
-      rd[i + 1] = md[i + 1];
-      rd[i + 2] = md[i + 2];
+      const t = mx / 255;
+      rd[i] = Math.round(fr * t);
+      rd[i + 1] = Math.round(fg * t);
+      rd[i + 2] = Math.round(fb * t);
     }
   }
   ctx.putImageData(region, x0, y0);
@@ -1048,6 +1202,19 @@ function highlightValueText(ctx: CanvasRenderingContext2D, state: State) {
     }
   }
   ctx.putImageData(data, 0, 0);
+}
+
+function drawPageSwitchArrow(
+  ctx: CanvasRenderingContext2D,
+  arrowDown: HTMLCanvasElement | null,
+  arrowUp: HTMLCanvasElement | null,
+  state: State
+) {
+  if (state.page === "A") {
+    if (arrowDown) ctx.drawImage(arrowDown, ARROW_X0, ARROW_DOWN_Y0);
+  } else {
+    if (arrowUp) ctx.drawImage(arrowUp, ARROW_X0, ARROW_UP_Y0);
+  }
 }
 
 function drawCursorOverlay(
