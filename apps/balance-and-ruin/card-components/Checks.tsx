@@ -63,7 +63,7 @@ export const Checks = () => {
           label="No Free Characters/Espers"
           helperText={
             <span>
-              Remove character/esper rewards from: Auction House, Collapsing House, Figaro Castle Throne, Gau's Father's House, Kohlingen Inn, Narshe Weapon Shop, Sealed Gate, South Figaro Basement, Mt. Zozo, and Lone Wolf
+              Remove character/esper rewards from: Auction House, Collapsing House, Figaro Castle Throne, Gau's Father's House, Kohlingen Inn, Narshe Weapon Shop, Sealed Gate, South Figaro Basement, and Lone Wolf
             </span>
           } />
         <FlagSubflagSelect
