@@ -3,6 +3,8 @@ import { useRouter } from "next/router";
 import { useSession, signIn, signOut } from "next-auth/react";
 import styles from "./FlagCreatePage.module.css";
 import Head from "next/head";
+
+const AUTH_ENABLED = process.env.NEXT_PUBLIC_AUTH_ENABLED === "true";
 import React, { useEffect, useMemo, useState, useRef } from "react";
 
 import type { IconType } from "react-icons";
@@ -249,7 +251,11 @@ export const FlagCreatePage = ({
   version,
 }: PageProps) => {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  /* eslint-disable react-hooks/rules-of-hooks */
+  const { data: session, status } = AUTH_ENABLED
+    ? useSession()
+    : { data: null, status: "unauthenticated" as const };
+  /* eslint-enable react-hooks/rules-of-hooks */
   const { isAdmin } = useAdmin();
   const [profileHovered, setProfileHovered] = useState(false);
   const tabs: TabItem[] = useMemo(
@@ -321,12 +327,14 @@ export const FlagCreatePage = ({
           Icon: FaSlidersH,
           content: <Settings presets={presets} />,
         },
-        {
-          label: "Profile",
-          id: "profile",
-          Icon: null,
-          content: <ProfileTab />,
-        },
+        AUTH_ENABLED
+          ? {
+              label: "Profile",
+              id: "profile",
+              Icon: null,
+              content: <ProfileTab />,
+            }
+          : null,
         /* process.env.NEXT_PUBLIC_ENABLE_BETA === "true"
           ? {
               label: "Beta",
@@ -613,7 +621,7 @@ export const FlagCreatePage = ({
                   />
                 </div>
               </div>
-              {status === "loading" ? (
+              {!AUTH_ENABLED ? null : status === "loading" ? (
                 <div 
                   className={`${styles.userProfile} animate-pulse`} 
                   style={{ opacity: 0.6, cursor: "wait" }}

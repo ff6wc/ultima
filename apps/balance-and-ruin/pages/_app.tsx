@@ -22,6 +22,11 @@ export const openSans = Open_Sans({ weight: ["300", "400", "500"] });
 
 const client = new QueryClient({});
 
+/** Auth is only available when running with a Node.js server (local dev).
+ *  On static exports (Cloudflare Pages) the /api/auth/* routes don't exist,
+ *  so we disable the entire NextAuth SessionProvider to prevent 404 cascades. */
+const AUTH_ENABLED = process.env.NEXT_PUBLIC_AUTH_ENABLED === "true";
+
 type Props = {
   schema: Schema;
 };
@@ -65,6 +70,21 @@ const FetchInterceptor = () => {
   return null;
 };
 
+/** Wraps children in SessionProvider only when auth is enabled.
+ *  On static deployments this renders children directly, avoiding
+ *  NextAuth's /api/auth/session fetch that would 404. */
+const AuthWrapper = ({ children, session }: { children: React.ReactNode; session?: any }) => {
+  if (!AUTH_ENABLED) {
+    return <>{children}</>;
+  }
+  return (
+    <SessionProvider session={session}>
+      <FetchInterceptor />
+      {children}
+    </SessionProvider>
+  );
+};
+
 const App: AppType<Props> = ({ Component, ...rest }: AppProps<Props>) => {
   const { store, props } = wrapper.useWrappedStore(rest);
 
@@ -86,10 +106,9 @@ const App: AppType<Props> = ({ Component, ...rest }: AppProps<Props>) => {
           <GoogleReCaptchaProvider
             reCaptchaKey={process.env.NEXT_PUBLIC_RECAPTCHA_KEY as string}
           >
-            <SessionProvider session={props.pageProps.session}>
-              <FetchInterceptor />
+            <AuthWrapper session={props.pageProps.session}>
               <Component {...props.pageProps} />
-            </SessionProvider>
+            </AuthWrapper>
           </GoogleReCaptchaProvider>
         </QueryClientProvider>
       </Provider>
@@ -98,3 +117,4 @@ const App: AppType<Props> = ({ Component, ...rest }: AppProps<Props>) => {
 };
 
 export default App;
+

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useSession, signIn, signOut } from "next-auth/react";
 
+const AUTH_ENABLED = process.env.NEXT_PUBLIC_AUTH_ENABLED === "true";
+
 import { FaDiscord, FaBook, FaSearch, FaBolt, FaSlidersH } from "react-icons/fa";
 import { HiOutlineMoon, HiOutlineSun } from "react-icons/hi";
 import styles from "~/components/FlagCreatePage/FlagCreatePage.module.css";
@@ -13,7 +15,11 @@ type AppLayoutProps = {
 export const AppLayout = ({ children, title }: AppLayoutProps) => {
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [processedLogo, setProcessedLogo] = useState<string | null>(null);
-  const { data: session, status } = useSession();
+  /* eslint-disable react-hooks/rules-of-hooks */
+  const { data: session, status } = AUTH_ENABLED
+    ? useSession()
+    : { data: null, status: "unauthenticated" as const };
+  /* eslint-enable react-hooks/rules-of-hooks */
   const [profileHovered, setProfileHovered] = useState(false);
 
   useEffect(() => {
@@ -113,7 +119,7 @@ export const AppLayout = ({ children, title }: AppLayoutProps) => {
             <span>Generator</span>
           </a>
 
-          {session?.user ? (
+          {AUTH_ENABLED && session?.user ? (
             <a
               href="/create?tab=profile"
               className={styles.tabItem}
@@ -128,7 +134,7 @@ export const AppLayout = ({ children, title }: AppLayoutProps) => {
               </div>
               <span>Profile</span>
             </a>
-          ) : (
+          ) : AUTH_ENABLED ? (
             <button
               onClick={() => signIn("discord")}
               className={styles.tabItem}
@@ -137,7 +143,7 @@ export const AppLayout = ({ children, title }: AppLayoutProps) => {
               <FaDiscord size={16} />
               <span>Login with Discord</span>
             </button>
-          )}
+          ) : null}
         </div>
 
         {/* Bottom link */}
