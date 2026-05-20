@@ -17,6 +17,7 @@ import { GenerateUpload } from "~/components/GenerateUpload/GenerateUpload";
 import { FlagTextInput } from "~/components/FlagInput/FlagInput";
 import { FlagSwitch } from "~/components/FlagSwitch/FlagSwitch";
 import styles from "./GenerateCard.module.css";
+import { selectActivePresetName } from "~/state/presetSlice";
 
 export type FlagsCardProps = {
   className?: string;
@@ -64,6 +65,7 @@ export const GenerateCard = ({
   const flags = useOrderedFlags();
   const router = useRouter();
   const { data: session } = useSession();
+  const activePresetName = useSelector(selectActivePresetName);
 
   const [isSavingPreset, setIsSavingPreset] = useState(false);
   const [presetName, setPresetName] = useState("");
@@ -196,12 +198,26 @@ export const GenerateCard = ({
         window.open(`/seed/?id=${seed_id}`, "_blank");
       });
 
-      // Update preset download timestamp in the background
-      fetch("/api/user-presets", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ flags })
-      }).catch(console.error);
+      // Update preset download timestamp when generating a seed using a selected preset
+      if (activePresetName) {
+        fetch("/api/user-presets", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ flags, presetName: activePresetName })
+        }).catch(console.error);
+
+        // Record download time for official/custom presets in local storage
+        if (session?.user) {
+          const discordId = (session.user as any).discordId;
+          if (discordId) {
+            try {
+              localStorage.setItem(`preset_real_dl:${discordId}:${activePresetName}`, new Date().toISOString());
+            } catch (e) {
+              console.error("Failed to write preset download to localStorage:", e);
+            }
+          }
+        }
+      }
     } catch (err) {
       setClientError((err as Error).message);
     }

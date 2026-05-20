@@ -127,6 +127,7 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
           creator_name: apiPreset.creator_name || apiPreset.creator || "Community",
           creator_id: apiPreset.creator_id || "community",
           created_timestamp: apiPreset.created_at || new Date().toISOString(),
+          download_timestamp: dbOverride.download_timestamp,
           isApiPreset: true,
           dbRecord: dbOverride
         });
@@ -840,8 +841,16 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                           {preset.flags || "(No flags provided in external API)"}
                         </div>
                         <div className="text-slate-500 dark:text-slate-400" style={{ display: "flex", gap: "1rem", marginTop: "0.75rem", fontSize: "0.75rem", fontWeight: "bold" }}>
-                          <span>Created: {new Date(preset.created_timestamp).toLocaleDateString()}</span>
-                          {preset.download_timestamp && <span>Downloaded: {new Date(preset.download_timestamp).toLocaleDateString()}</span>}
+                          <span>Created: {new Date(preset.created_timestamp).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })}</span>
+                          {preset.download_timestamp && (
+                            <span>
+                              Last Downloaded:{" "}
+                              {new Date(preset.download_timestamp).toLocaleDateString(undefined, {
+                                month: "short",
+                                day: "numeric",
+                              })}
+                            </span>
+                          )}
                         </div>
                       </div>
                     )}

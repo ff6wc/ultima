@@ -27,7 +27,7 @@ import { PageContainer } from "~/components/PageContainer/PageContainer";
 // ─── LocalStorage helpers ──────────────────────────────────────────────────────
 
 const LS_KEY = (userId: string, presetName: string) =>
-  `preset_last_dl:${userId}:${presetName}`;
+  `preset_real_dl:${userId}:${presetName}`;
 
 function recordDownload(userId: string, presetName: string) {
   try {
@@ -267,7 +267,7 @@ const PresetCard = ({ preset, onSelect, selected }: PresetCardProps) => {
                   opacity: 0.7,
                 }}
               >
-                Downloaded{" "}
+                Last Downloaded{" "}
                 {new Date(preset.last_downloaded).toLocaleDateString(
                   undefined,
                   {
@@ -793,11 +793,6 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
     dispatch(setActivePreset(preset.name));
     dispatch(setRawFlags(preset.flags));
     dispatch(setRawObjectives(preset.flags));
-
-    // Record download time for the logged-in user
-    if (currentUserId) {
-      recordDownload(currentUserId, preset.name);
-    }
   };
 
   const handleClear = () => {

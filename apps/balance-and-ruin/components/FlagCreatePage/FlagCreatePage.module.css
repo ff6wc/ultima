@@ -101,7 +101,7 @@
   font-weight: 500;
   color: white;
   background: transparent;
-  border: none;
+  border: 1px solid transparent;
   text-align: left;
 }
 
@@ -147,6 +147,40 @@
   color: white; /* White text when active */
   font-weight: 700;
   border: 1px solid #5c3d1d;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.adminBtn {
+  margin: 0 1rem 1rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%); /* Solid premium red, matches generateBtn design */
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid #b91c1c; /* Deep rich red border */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  transition: all 0.2s ease;
+  font-size: 1rem;
+  text-align: left;
+}
+
+.adminBtn:hover {
+  background: linear-gradient(180deg, #f87171 0%, #b91c1c 100%);
+  border-color: #991b1b;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3), 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.adminBtn[aria-selected="true"] {
+  background: linear-gradient(180deg, #b91c1c 0%, #7f1d1d 100%);
+  color: white;
+  font-weight: 700;
+  border: 1px solid #7f1d1d;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 

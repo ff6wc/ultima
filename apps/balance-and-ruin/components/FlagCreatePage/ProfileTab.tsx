@@ -359,8 +359,16 @@ export const ProfileTab = () => {
                           {preset.flags}
                         </div>
                         <div style={{ display: "flex", gap: "1rem", marginTop: "0.75rem", fontSize: "0.75rem", color: "#64748b", fontWeight: "bold" }}>
-                          <span>Created: {new Date(preset.created_timestamp).toLocaleDateString()}</span>
-                          {preset.download_timestamp && <span>Downloaded: {new Date(preset.download_timestamp).toLocaleDateString()}</span>}
+                          <span>Created: {new Date(preset.created_timestamp).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })}</span>
+                          {preset.download_timestamp && (
+                            <span>
+                              Last Downloaded:{" "}
+                              {new Date(preset.download_timestamp).toLocaleDateString(undefined, {
+                                month: "short",
+                                day: "numeric",
+                              })}
+                            </span>
+                          )}
                         </div>
                       </div>
                     )}

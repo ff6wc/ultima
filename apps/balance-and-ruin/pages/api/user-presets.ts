@@ -146,16 +146,27 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     }
 
-    // Update download timestamp when a seed is downloaded using these flags
-    const { flags } = req.body;
-    if (!flags) return res.status(400).json({ error: "Missing flags" });
+    // Update download timestamp when a seed is downloaded using these flags/preset name
+    const { flags, presetName } = req.body;
 
     let updated = false;
-    for (let i = 0; i < presets.length; i++) {
-      if (presets[i].flags === flags) {
-        presets[i].download_timestamp = new Date().toISOString();
-        updated = true;
+    if (presetName) {
+      for (let i = 0; i < presets.length; i++) {
+        if (presets[i].name && presets[i].name.toLowerCase() === presetName.toLowerCase()) {
+          presets[i].download_timestamp = new Date().toISOString();
+          updated = true;
+          break;
+        }
       }
+    } else if (flags) {
+      for (let i = 0; i < presets.length; i++) {
+        if (presets[i].flags === flags) {
+          presets[i].download_timestamp = new Date().toISOString();
+          updated = true;
+        }
+      }
+    } else {
+      return res.status(400).json({ error: "Missing flags or presetName" });
     }
 
     if (updated) {

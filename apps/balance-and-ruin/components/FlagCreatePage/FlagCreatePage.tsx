@@ -321,14 +321,6 @@ export const FlagCreatePage = ({
           Icon: FaSlidersH,
           content: <Settings presets={presets} />,
         },
-        isAdmin
-          ? {
-              label: "Admin",
-              id: "admin",
-              Icon: FaShieldAlt,
-              content: <AdminTab apiPresets={presets} />,
-            }
-          : null,
         {
           label: "Profile",
           id: "profile",
@@ -354,6 +346,14 @@ export const FlagCreatePage = ({
           ),
           isAction: true,
         },
+        isAdmin
+          ? {
+              label: "Admin",
+              id: "admin",
+              Icon: FaShieldAlt,
+              content: <AdminTab apiPresets={presets} />,
+            }
+          : null,
         {
           label: "Events",
           id: "events",
@@ -673,7 +673,7 @@ export const FlagCreatePage = ({
                 return (
                   <Tab
                     key={tab.id}
-                    className={`${isHidden ? "hidden" : tab.isAction ? styles.generateBtn : styles.tabItem} ${isHighlighted ? "bg-yellow-500/20 !text-yellow-400 border-l-4 border-yellow-400 font-bold" : ""} ${isSideNavHidden ? styles.mobileOnly : ""}`}
+                    className={`${isHidden ? "hidden" : tab.id === "admin" ? styles.adminBtn : tab.isAction ? styles.generateBtn : styles.tabItem} ${isHighlighted ? "bg-yellow-500/20 !text-yellow-400 border-l-4 border-yellow-400 font-bold" : ""} ${isSideNavHidden ? styles.mobileOnly : ""}`}
                   >
                     {tab.Icon && <tab.Icon size={20} />}
                     <span>{tab.label}</span>

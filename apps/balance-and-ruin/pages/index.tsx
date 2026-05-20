@@ -7,6 +7,7 @@ import { RawFlagMetadata, setSchema } from "~/state/schemaSlice";
 import { makeStore } from "~/state/store";
 import { ObjectiveMetadata } from "~/types/objectives";
 import { FlagPreset } from "~/types/preset";
+import { fetchWithTimeout } from "~/utils/fetchWithTimeout";
 
 const HomeLandingPage = () => {
   const [objectives, setObjectives] = useState(null);
@@ -17,7 +18,7 @@ const HomeLandingPage = () => {
   useEffect(() => {
     const store = makeStore();
 
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/presets`)
+    fetchWithTimeout(`${process.env.NEXT_PUBLIC_API_URL}/presets`, {}, 2500)
       .then((res) => res.json())
       .then((data) => {
         setPresets(data);
@@ -27,38 +28,77 @@ const HomeLandingPage = () => {
         }
       })
       .catch((err) => {
-        console.warn("Failed to fetch presets from API:", err);
-        setPresets({});
+        console.warn("Failed to fetch presets from API, trying fallback:", err);
+        fetch("/metadata-fallback/presets.json")
+          .then((res) => res.json())
+          .then((data) => {
+            setPresets(data);
+            const preset = data["ultros league"];
+            if (preset) {
+              store.dispatch(setRawFlags(preset.flags));
+            }
+          })
+          .catch((fallbackErr) => {
+            console.error("Failed to fetch fallback presets:", fallbackErr);
+            setPresets({});
+          });
       });
 
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/metadata/flag`)
+    fetchWithTimeout(`${process.env.NEXT_PUBLIC_API_URL}/api/metadata/flag`, {}, 2500)
       .then((res) => res.json())
       .then((data) => {
         setSchemaLocal(data);
         store.dispatch(setSchema(data));
       })
       .catch((err) => {
-        console.error("Failed to fetch flag metadata:", err);
+        console.warn("Failed to fetch flag metadata from API, trying fallback:", err);
+        fetch("/metadata-fallback/flag.json")
+          .then((res) => res.json())
+          .then((data) => {
+            setSchemaLocal(data);
+            store.dispatch(setSchema(data));
+          })
+          .catch((fallbackErr) => {
+            console.error("Failed to fetch fallback flag metadata:", fallbackErr);
+          });
       });
 
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/metadata/objective`)
+    fetchWithTimeout(`${process.env.NEXT_PUBLIC_API_URL}/api/metadata/objective`, {}, 2500)
       .then((res) => res.json())
       .then((data) => {
         setObjectives(data);
         store.dispatch(setObjectiveMetadata(data));
       })
       .catch((err) => {
-        console.error("Failed to fetch objective metadata:", err);
+        console.warn("Failed to fetch objective metadata from API, trying fallback:", err);
+        fetch("/metadata-fallback/objective.json")
+          .then((res) => res.json())
+          .then((data) => {
+            setObjectives(data);
+            store.dispatch(setObjectiveMetadata(data));
+          })
+          .catch((fallbackErr) => {
+            console.error("Failed to fetch fallback objective metadata:", fallbackErr);
+          });
       });
 
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/wc`)
+    fetchWithTimeout(`${process.env.NEXT_PUBLIC_API_URL}/api/wc`, {}, 2500)
       .then((res) => res.json())
       .then((data) => {
         const fetchedVersion = data["version"];
         setVersion(fetchedVersion);
       })
       .catch((err) => {
-        console.error("Failed to fetch version:", err);
+        console.warn("Failed to fetch version from API, trying fallback:", err);
+        fetch("/metadata-fallback/wc.json")
+          .then((res) => res.json())
+          .then((data) => {
+            const fetchedVersion = data["version"];
+            setVersion(fetchedVersion);
+          })
+          .catch((fallbackErr) => {
+            console.error("Failed to fetch fallback version:", fallbackErr);
+          });
       });
   }, []);
 
