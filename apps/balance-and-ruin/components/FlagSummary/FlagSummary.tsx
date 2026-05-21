@@ -368,16 +368,13 @@ function buildInfoRows(fv: Record<string, any>, objectives: Record<string, any>)
   }
 
   // Bug Fixes — only if not all on
-  const fixFlags = ["-fs", "-fe", "-fvd", "-fr", "-fj", "-fbs", "-fedc", "-fc"];
+  const fixFlags = ["-fedc", "-fe", "-fbs", "-fvd", "-fj"];
   const BUG_FIX_LABELS: Record<string, string> = {
-    "-fs": "Sketch",
-    "-fe": "Evade",
-    "-fvd": "Vanish/Doom",
-    "-fr": "Retarget/Retort",
-    "-fj": "Jump",
-    "-fbs": "Boss Skip",
     "-fedc": "Enemy Damage Counter",
-    "-fc": "Capture",
+    "-fe": "Evade",
+    "-fbs": "Boss Skip",
+    "-fvd": "Vanish/Doom",
+    "-fj": "Jump",
   };
   const missingFixes = fixFlags.filter((f) => !hasFlag(fv, f));
   if (missingFixes.length === fixFlags.length) {
