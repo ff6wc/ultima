@@ -19,11 +19,37 @@ const COND_CHECKS = "10";
 
 // Command ID → name
 const COMMAND_NAMES: Record<number, string> = {
-  97: "None", 10: "Fight", 6: "Magic", 14: "Morph", 19: "Revert",
-  24: "Steal", 26: "Capture", 22: "Slot", 12: "Lore", 29: "SwdTech",
-  3: "Throw", 28: "Tools", 16: "Blitz", 11: "Rage", 27: "Sketch",
-  13: "Control", 15: "Runic", 5: "Jump", 7: "Mimic", 8: "Dance",
-  9: "Row", 23: "Defend",
+  97: "None",
+  0: "Fight",
+  1: "Item",
+  2: "Magic",
+  3: "Morph",
+  4: "Revert",
+  5: "Steal",
+  6: "Capture",
+  7: "SwdTech",
+  8: "Throw",
+  9: "Tools",
+  10: "Blitz",
+  11: "Runic",
+  12: "Lore",
+  13: "Sketch",
+  14: "Control",
+  15: "Slot",
+  16: "Rage",
+  17: "Leap",
+  18: "Mimic",
+  19: "Dance",
+  20: "Row",
+  21: "Defend",
+  22: "Jump",
+  23: "X-Magic",
+  24: "GP Rain",
+  25: "Summon",
+  26: "Health",
+  27: "Shock",
+  28: "Possess",
+  29: "Magitek",
 };
 
 // ─── Standard Atma Series baseline values ────────────────────────────────────
@@ -31,7 +57,7 @@ const COMMAND_NAMES: Record<number, string> = {
 // A seed matching all these values should score in "Standard" range.
 //   lsced 2×, hmced 2×, xpm 3, mpm 5, gpm 5, nxppd (full XP)
 //   bbs (boss shuffle), escr 100, esr 2–5, elrt
-//   ccsr 20, sisr 20, rec1=28(Runic) rec2=27(Sketch)
+//   ccsr 20, sisr 20, rec1=28(Possess) rec2=27(Shock)
 //   gp 5000, csrp 80–125, msl 40
 
 type BulletSeverity = "hard" | "medium" | "easy" | "info";
@@ -183,14 +209,14 @@ function buildInfoRows(fv: Record<string, any>, objectives: Record<string, any>)
     });
   }
 
-  // Excluded Commands — only show if different from standard (Runic=28, Sketch=27)
+  // Excluded Commands — only show if different from standard (Possess=28, Shock=27)
   const recFlags = ["-rec1", "-rec2", "-rec3", "-rec4", "-rec5", "-rec6"];
   const excludedCmds = recFlags
     .map((f) => flagNum(fv, f))
     .filter((v) => v !== null && v !== 97)
     .map((v) => COMMAND_NAMES[v as number] ?? `#${v}`);
   const sortedExcluded = [...excludedCmds].sort().join(", ");
-  const stdExcluded = ["Runic", "Sketch"].sort().join(", "); // rec1=28, rec2=27
+  const stdExcluded = ["Possess", "Shock"].sort().join(", "); // rec1=28, rec2=27
   if (sortedExcluded !== stdExcluded) {
     rows.push({
       label: "Excluded Commands",
