@@ -1,4 +1,6 @@
+import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
+import { HiChevronDown, HiChevronUp } from "react-icons/hi2";
 import { selectFlagValues } from "~/state/flagSlice";
 import { selectObjectives } from "~/state/objectiveSlice";
 import styles from "./FlagSummary.module.css";
@@ -709,6 +711,21 @@ export const FlagSummary = () => {
   const flagValues = useSelector(selectFlagValues) as Record<string, any>;
   const objectives = useSelector(selectObjectives) as Record<string, any>;
 
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
+  useEffect(() => {
+    const stored = localStorage.getItem("flag_summary_collapsed");
+    if (stored === "true") {
+      setIsCollapsed(true);
+    }
+  }, []);
+
+  const toggleCollapse = () => {
+    const nextState = !isCollapsed;
+    setIsCollapsed(nextState);
+    localStorage.setItem("flag_summary_collapsed", String(nextState));
+  };
+
   const infoRows = buildInfoRows(flagValues, objectives);
   const { score, label, color, bullets } = analyzeDifficulty(flagValues, objectives);
 
@@ -721,65 +738,104 @@ export const FlagSummary = () => {
 
   return (
     <div className={styles.container}>
-      {/* ── Info Panel ── */}
-      <h3 className={styles.title}>Flag Set Summary</h3>
-
-      <div className={styles.infoGrid}>
-        {infoRows.map((row, i) => (
-          <div key={i} className={styles.infoRow}>
-            <span className={styles.infoLabel}>{row.label}</span>
-            <span className={`${styles.infoValue} ${row.highlight ? styles.infoValueHighlight : ""}`}>
-              {row.value}
-            </span>
-          </div>
-        ))}
-      </div>
-
-      {/* ── Divider ── */}
-      <div className={styles.sectionDivider} />
-
-      {/* ── Difficulty ── */}
-      <div className={styles.header}>
-        <span className={styles.difficultyTitle}>Difficulty</span>
-        <div className={styles.difficultyBadge} style={{ borderColor: color, color }}>
-          <span className={styles.difficultyLabel}>{label}</span>
-          <span className={styles.difficultyScore} style={{ backgroundColor: color }}>
-            {score} pts
-          </span>
-        </div>
-      </div>
-
-      <div className={styles.meterBar}>
-        <div
-          className={styles.meterFill}
-          style={{ width: `${Math.min(100, (score / 80) * 100)}%`, backgroundColor: color }}
-        />
-      </div>
-      <div className={styles.meterLabels}>
-        <span>Casual</span>
-        <span>Standard</span>
-        <span>Challenging</span>
-        <span>Hard</span>
-        <span>Brutal</span>
-      </div>
-
-      {bullets.length === 0 ? (
-        <p className={styles.noBullets}>No significant difficulty modifiers detected.</p>
-      ) : (
-        <ul className={styles.bulletList}>
-          {bullets.map((b, i) => (
-            <li key={i} className={styles.bulletItem}>
-              <span
-                className={styles.bulletIcon}
-                style={{ color: severityColor[b.severity] }}
-                title={b.severity}
-              >
-                {severityIcon[b.severity]}
+      {/* ── Collapsible Header ── */}
+      <div 
+        className={styles.cardHeader} 
+        onClick={toggleCollapse} 
+        role="button" 
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            toggleCollapse();
+          }
+        }}
+      >
+        <div className={styles.headerTitleGroup}>
+          <h3 className={styles.title}>Flag Set Summary</h3>
+          {isCollapsed && (
+            <div className={styles.difficultyBadgeCompact} style={{ borderColor: color, color }}>
+              <span className={styles.difficultyLabelCompact}>{label}</span>
+              <span className={styles.difficultyScoreCompact} style={{ backgroundColor: color }}>
+                {score} pts
               </span>
-              <span className={styles.bulletText}>{b.text}</span>
-            </li>
-          ))}
-        </ul>
+            </div>
+          )}
+        </div>
+        <button 
+          className={styles.collapseBtn} 
+          aria-label={isCollapsed ? "Expand Flag Set Summary" : "Collapse Flag Set Summary"}
+          onClick={(e) => {
+            // Prevent event bubbling so double clicking/triggering is avoided
+            e.stopPropagation();
+            toggleCollapse();
+          }}
+        >
+          {isCollapsed ? <HiChevronDown size={18} /> : <HiChevronUp size={18} />}
+        </button>
+      </div>
+
+      {!isCollapsed && (
+        <div className={styles.collapsibleContent}>
+          {/* ── Info Panel ── */}
+          <div className={styles.infoGrid}>
+            {infoRows.map((row, i) => (
+              <div key={i} className={styles.infoRow}>
+                <span className={styles.infoLabel}>{row.label}</span>
+                <span className={`${styles.infoValue} ${row.highlight ? styles.infoValueHighlight : ""}`}>
+                  {row.value}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          {/* ── Divider ── */}
+          <div className={styles.sectionDivider} />
+
+          {/* ── Difficulty ── */}
+          <div className={styles.header}>
+            <span className={styles.difficultyTitle}>Difficulty</span>
+            <div className={styles.difficultyBadge} style={{ borderColor: color, color }}>
+              <span className={styles.difficultyLabel}>{label}</span>
+              <span className={styles.difficultyScore} style={{ backgroundColor: color }}>
+                {score} pts
+              </span>
+            </div>
+          </div>
+
+          <div className={styles.meterBar}>
+            <div
+              className={styles.meterFill}
+              style={{ width: `${Math.min(100, (score / 80) * 100)}%`, backgroundColor: color }}
+            />
+          </div>
+          <div className={styles.meterLabels}>
+            <span>Casual</span>
+            <span>Standard</span>
+            <span>Challenging</span>
+            <span>Hard</span>
+            <span>Brutal</span>
+          </div>
+
+          {bullets.length === 0 ? (
+            <p className={styles.noBullets}>No significant difficulty modifiers detected.</p>
+          ) : (
+            <ul className={styles.bulletList}>
+              {bullets.map((b, i) => (
+                <li key={i} className={styles.bulletItem}>
+                  <span
+                    className={styles.bulletIcon}
+                    style={{ color: severityColor[b.severity] }}
+                    title={b.severity}
+                  >
+                    {severityIcon[b.severity]}
+                  </span>
+                  <span className={styles.bulletText}>{b.text}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       )}
     </div>
   );
