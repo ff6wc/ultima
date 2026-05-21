@@ -440,8 +440,8 @@ function analyzeDifficulty(
     // Calculate detailed objective difficulty points
     let kefkaDelta = 0;
     if (kefkaRequired > 0) {
-      // 3.5 points per required condition as baseline
-      kefkaDelta += kefkaRequired * 3.5;
+      // 3.5 points per required condition as baseline deviation from standard (2 conditions)
+      kefkaDelta += (kefkaRequired - 2) * 3.5;
 
       if (kefkaObjRaw[0]?.obj?.conditions) {
         for (const cond of kefkaObjRaw[0].obj.conditions) {
@@ -473,10 +473,10 @@ function analyzeDifficulty(
       }
     }
 
-    // KT Skip gets less weight (e.g. 1.5 points per required condition, compared to Kefka's 3.5 baseline + condition scaling)
+    // KT Skip gets less weight (e.g. 1.5 points per required condition baseline deviation from standard (1 condition), compared to Kefka's 3.5 baseline + condition scaling)
     let ktDelta = 0;
     if (ktRequired > 0) {
-      ktDelta += ktRequired * 1.5;
+      ktDelta += (ktRequired - 1) * 1.5;
     }
 
     const objTotalDelta = kefkaDelta + ktDelta;
