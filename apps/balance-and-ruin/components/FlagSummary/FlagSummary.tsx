@@ -426,10 +426,54 @@ function analyzeDifficulty(
           : ` · KT Skip: ${ktRequired} condition(s)`
         : "";
 
-    const total = kefkaRequired + ktRequired;
-    const sev: BulletSeverity = total >= 6 ? "hard" : total >= 3 ? "medium" : "info";
+    // Calculate detailed objective difficulty points
+    let kefkaDelta = 0;
+    if (kefkaRequired > 0) {
+      // 3.5 points per required condition as baseline
+      kefkaDelta += kefkaRequired * 3.5;
+
+      if (kefkaObjRaw[0]?.obj?.conditions) {
+        for (const cond of kefkaObjRaw[0].obj.conditions) {
+          const val = cond.values?.[0];
+          const valNum = val !== undefined ? parseInt(String(val), 10) : NaN;
+          if (!isNaN(valNum)) {
+            if (cond.id === COND_CHARACTERS || cond.id === "2") {
+              const diff = valNum - 6; // 6 is standard
+              if (diff > 0) {
+                kefkaDelta += diff * 4.5; // More is harder
+              } else {
+                kefkaDelta += diff * 2.0; // Less is easier
+              }
+            } else if (cond.id === COND_ESPERS || cond.id === "4") {
+              const diff = valNum - 9; // 9 is standard
+              if (diff > 0) {
+                kefkaDelta += diff * 2.5; // More is harder
+              } else {
+                kefkaDelta += diff * 1.0; // Less is easier
+              }
+            } else if (cond.id === COND_DRAGONS || cond.id === "6") {
+              const diff = valNum - 0; // 0 is standard
+              if (diff > 0) {
+                kefkaDelta += diff * 6.0; // More is harder
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // KT Skip gets less weight (e.g. 1.5 points per required condition, compared to Kefka's 3.5 baseline + condition scaling)
+    let ktDelta = 0;
+    if (ktRequired > 0) {
+      ktDelta += ktRequired * 1.5;
+    }
+
+    const objTotalDelta = kefkaDelta + ktDelta;
+    const sev: BulletSeverity =
+      objTotalDelta >= 20 ? "hard" : objTotalDelta >= 8 ? "medium" : objTotalDelta >= 0 ? "info" : "easy";
+
     bullets.push({ text: kefkaText + ktText, severity: sev });
-    delta += total >= 6 ? 10 : total >= 3 ? 4 : 0;
+    delta += objTotalDelta;
   } else if (Object.keys(objectives).length > 0) {
     bullets.push({ text: "Final Kefka: no conditions set — open access to endgame", severity: "info" });
   }
