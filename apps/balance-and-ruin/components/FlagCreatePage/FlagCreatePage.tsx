@@ -1,11 +1,11 @@
 import { Tab } from "@headlessui/react";
 import { useRouter } from "next/router";
-import { signIn, signOut } from "next-auth/react";
+import { signIn, signOut } from "~/hooks/useAppSession";
 import { useAppSession } from "~/hooks/useAppSession";
 import styles from "./FlagCreatePage.module.css";
 import Head from "next/head";
 
-const AUTH_ENABLED = process.env.NEXT_PUBLIC_AUTH_ENABLED === "true";
+const AUTH_ENABLED = process.env.NEXT_PUBLIC_AUTH_ENABLED !== "false";
 import React, { useEffect, useMemo, useState, useRef } from "react";
 
 import type { IconType } from "react-icons";
@@ -634,17 +634,21 @@ export const FlagCreatePage = ({
                   />
                 </div>
               </div>
+            </div>
+
+            <Tab.List className={styles.tabList}>
               {!AUTH_ENABLED ? null : status === "loading" ? (
                 <div 
-                  className={`${styles.userProfile} animate-pulse`} 
+                  className={`${styles.tabItem} animate-pulse`} 
                   style={{ opacity: 0.6, cursor: "wait" }}
                 >
-                  <div className={styles.avatar} style={{ backgroundColor: "#334155" }} />
+                  <div className="w-5 h-5 rounded-full bg-slate-500 animate-pulse" />
                   <div className="h-4 bg-slate-500 rounded w-24" />
                 </div>
               ) : session?.user ? (
-                <div 
-                  className={`${styles.userProfile} cursor-pointer hover:bg-slate-700/30 transition-all rounded p-1`}
+                <button
+                  type="button"
+                  className={`${styles.tabItem} ${activeTabId === "profile" ? styles.profileTabActive : ""}`}
                   onClick={() => {
                     const idx = tabs.findIndex((t) => t.id === "profile");
                     if (idx !== -1) {
@@ -654,7 +658,7 @@ export const FlagCreatePage = ({
                   }}
                   title="View Profile"
                 >
-                  <div className={styles.avatar} style={{ backgroundColor: "transparent", overflow: "hidden" }}>
+                  <div className="w-5 h-5 rounded-full overflow-hidden flex items-center justify-center bg-slate-700">
                     {session.user.image ? (
                       <img 
                         src={session.user.image} 
@@ -662,30 +666,21 @@ export const FlagCreatePage = ({
                         className="w-full h-full object-cover rounded-full"
                       />
                     ) : (
-                      <FaDiscord color="white" size={20} />
+                      <FaDiscord color="white" size={12} />
                     )}
                   </div>
-                  <span className={styles.userName}>
-                    {session.user.name || "Profile"}
-                  </span>
-                </div>
+                  <span>{session.user.name || "Profile"}</span>
+                </button>
               ) : (
-                <div 
-                  className={`${styles.userProfile} cursor-pointer hover:bg-[#5865F2]/20 transition-all rounded p-1`}
+                <button
+                  type="button"
+                  className={styles.discordLoginBtn}
                   onClick={() => signIn("discord")}
                 >
-                  <div
-                    className={styles.avatar}
-                    style={{ backgroundColor: "#5865F2" }}
-                  >
-                    <FaDiscord color="white" />
-                  </div>
-                  <span className={styles.userName}>Login with Discord</span>
-                </div>
+                  <FaDiscord size={20} />
+                  <span>Login</span>
+                </button>
               )}
-            </div>
-
-            <Tab.List className={styles.tabList}>
               {tabs.map((tab) => {
                 const isSideNavHidden = ["events", "sotw"].includes(tab.id);
                 const isHighlighted = matchesSearch(tab.id);

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Head from "next/head";
+import Link from "next/link";
 import { SeedDetails } from "~/components/SeedDetails/SeedDetails";
 import { HiOutlineMoon, HiOutlineSun } from "react-icons/hi";
 import { FaBook, FaDiscord } from "react-icons/fa";
@@ -92,11 +93,13 @@ const SeedDetailsPage = () => {
 
           {/* 3x Enlarged Centered Brand & Title Column */}
           <div className="flex flex-col items-center gap-4 text-center py-4 select-none">
-            <img
-              src="/logo-transparent.png"
-              alt="FF6WC Logo"
-              className="h-48 w-auto invert dark:invert-0 transition-all filter drop-shadow-md"
-            />
+            <Link href="/" className="cursor-pointer hover:opacity-80 transition-opacity">
+              <img
+                src="/logo-transparent.png"
+                alt="FF6WC Logo"
+                className="h-48 w-auto invert dark:invert-0 transition-all filter drop-shadow-md"
+              />
+            </Link>
             <h1 className="font-bold tracking-widest text-3xl md:text-4xl uppercase font-outfit text-[var(--text-main)] mt-2">
               Seed Details
             </h1>

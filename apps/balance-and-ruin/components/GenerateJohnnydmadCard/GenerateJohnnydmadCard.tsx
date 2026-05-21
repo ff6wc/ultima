@@ -41,7 +41,8 @@ export const GenerateJohnnydmadCard = ({
   const { error, trigger, isMutating } = useSWRMutation(
     ["/api/music/generate", romData],
     async (key, { arg }) => {
-      const result = await fetch("/api/music/generate", {
+      const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+      const result = await fetch(`${BACKEND_URL}/api/music/generate`, {
         headers: {
           "Content-Type": "application/json",
         },

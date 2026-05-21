@@ -638,7 +638,13 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
 
   useEffect(() => {
     if (session?.user) {
-      fetch("/api/user-presets")
+      const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
+      const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+      fetch(`${BACKEND_URL}/api/v1/user-presets`, {
+        headers: {
+          ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+        }
+      })
         .then((res) => {
           if (res.ok) return res.json();
           return [];
@@ -656,22 +662,33 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
 
   const mappedDbPresets = useMemo<FlagPreset[]>(() => {
     return dbPresets
-      .filter((p) => p.creator_id !== "override" && !p.deleted)
-      .map((p) => ({
-        name: p.name,
-        creator_name: p.creator_name || "You",
-        creator: p.creator_name || "You",
-        description: p.description || "",
-        flags: p.flags,
-        creator_id: p.creator_id,
-        arguments: "",
-        official: !!p.official || (Array.isArray(p.tags) && p.tags.includes("official")),
-        hidden: false,
-        created_at: p.created_timestamp,
-        last_downloaded: p.download_timestamp || undefined,
-        id: p.id,
-        tags: p.tags || [],
-      }));
+      .filter((p) => {
+        const creatorId = p.owner_id || p.creator_id;
+        return creatorId !== "override" && !p.deleted;
+      })
+      .map((p) => {
+        const creatorId = p.owner_id || p.creator_id;
+        const officialVal = p.is_official !== undefined
+          ? p.is_official
+          : (!!p.official || (Array.isArray(p.tags) && p.tags.includes("official")));
+        const createdAt = p.created_at || p.created_timestamp;
+
+        return {
+          name: p.name,
+          creator_name: p.creator_name || (creatorId === "seedbot" ? "Seedbot" : "You"),
+          creator: p.creator_name || (creatorId === "seedbot" ? "Seedbot" : "You"),
+          description: p.description || "",
+          flags: p.flags,
+          creator_id: creatorId,
+          arguments: "",
+          official: officialVal,
+          hidden: false,
+          created_at: createdAt,
+          last_downloaded: p.download_timestamp || undefined,
+          id: p.id,
+          tags: p.tags || [],
+        };
+      });
   }, [dbPresets]);
 
   const mergedPresets = useMemo(
@@ -750,7 +767,8 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
   const allPresets = useMemo<FlagPreset[]>(() => {
     const overridesMap = new Map<string, any>();
     for (const p of dbPresets) {
-      if (p.creator_id === "override") {
+      const creatorId = p.owner_id || p.creator_id;
+      if (creatorId === "override") {
         overridesMap.set(p.name.toLowerCase(), p);
       }
     }
@@ -766,11 +784,22 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
       .map((p): FlagPreset => {
         const override = overridesMap.get(p.name.toLowerCase());
         const isDeleted = override?.deleted === true;
-        const officialVal = override ? !!override.official : !!p.official;
+        
+        let officialVal = p.is_official !== undefined ? !!p.is_official : !!p.official;
+        if (override) {
+          if (override.is_official !== undefined) {
+            officialVal = !!override.is_official;
+          } else if (override.official !== undefined) {
+            officialVal = !!override.official;
+          } else if (Array.isArray(override.tags) && override.tags.includes("official")) {
+            officialVal = true;
+          }
+        }
         const tagsVal = override?.tags ? override.tags : (p.tags || []);
 
         return {
           ...p,
+          creator_id: p.owner_id || p.creator_id,
           official: officialVal,
           tags: tagsVal,
           hidden: isDeleted,

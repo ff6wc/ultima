@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { signOut, signIn } from "next-auth/react";
+import { signOut, signIn } from "~/hooks/useAppSession";
 import { useAppSession } from "~/hooks/useAppSession";
 import { FaDiscord, FaShieldAlt, FaSignOutAlt, FaDice, FaBookmark, FaStar } from "react-icons/fa";
 import { PageContainer } from "../PageContainer/PageContainer";
@@ -43,11 +43,20 @@ export const ProfileTab = () => {
   useEffect(() => {
     if (session?.user) {
       const userDiscordId = (session.user as any)?.discordId;
-      fetch("/api/user-presets?mine=true")
+      const token = localStorage.getItem("auth_token");
+      const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+      fetch(`${backendUrl}/api/v1/user-presets?mine=true`, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+      })
         .then((res) => res.json())
         .then((data) => {
           if (Array.isArray(data)) {
-            const mine = data.filter((p) => p.creator_id && String(p.creator_id) === String(userDiscordId));
+            const mine = data.filter((p) => {
+              const creatorId = p.owner_id || p.creator_id;
+              return creatorId && String(creatorId) === String(userDiscordId);
+            });
             setUserPresets(mine);
           }
         })
@@ -67,7 +76,14 @@ export const ProfileTab = () => {
 
     setIsDeleting((prev) => ({ ...prev, [id]: true }));
     try {
-      const res = await fetch(`/api/user-presets?id=${id}`, { method: "DELETE" });
+      const token = localStorage.getItem("auth_token");
+      const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+      const res = await fetch(`${backendUrl}/api/v1/user-presets?id=${id}`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+      });
       if (res.ok) {
         setUserPresets((prev) => prev.filter((p) => String(p.id) !== String(id)));
         setShowConfirm((prev) => ({ ...prev, [id]: false }));
@@ -95,20 +111,23 @@ export const ProfileTab = () => {
             style={{
               display: "flex",
               alignItems: "center",
-              gap: "0.5rem",
-              backgroundColor: "#5865F2",
-              border: "none",
-              borderRadius: "4px",
+              justifyContent: "center",
+              gap: "0.75rem",
+              padding: "0.75rem 2rem",
+              borderRadius: "8px",
+              background: "linear-gradient(180deg, #5865F2 0%, #404eed 100%)",
               color: "white",
-              fontSize: "0.95rem",
-              fontWeight: "bold",
-              padding: "0.75rem 1.5rem",
+              fontWeight: "600",
               cursor: "pointer",
+              border: "1px solid #3b46c4",
+              boxShadow: "0 2px 4px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.15)",
+              transition: "all 0.2s ease",
+              fontSize: "1rem",
             }}
-            className="hover:bg-[#4752C4] transition-colors"
+            className="hover:translate-y-[-1px] hover:shadow-[0_4px_12px_rgba(88,101,242,0.35),0_2px_4px_rgba(0,0,0,0.1)] active:translate-y-[0px] active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.2)]"
           >
-            <FaDiscord size={18} />
-            <span>Login with Discord</span>
+            <FaDiscord size={20} />
+            <span>Login</span>
           </button>
         </div>
       </PageContainer>
@@ -479,7 +498,7 @@ export const ProfileTab = () => {
                           {preset.flags}
                         </div>
                         <div style={{ display: "flex", gap: "1rem", marginTop: "0.75rem", fontSize: "0.75rem", color: "#64748b", fontWeight: "bold" }}>
-                          <span>Created: {new Date(preset.created_timestamp).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })}</span>
+                          <span>Created: {new Date(preset.created_at || preset.created_timestamp).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })}</span>
                           {preset.download_timestamp && (
                             <span>
                               Last Downloaded:{" "}

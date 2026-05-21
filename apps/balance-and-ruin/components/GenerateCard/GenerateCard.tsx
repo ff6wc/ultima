@@ -13,7 +13,7 @@ import { useRouter } from "next/router";
 import { selectSchema } from "~/state/schemaSlice";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { useAppSession } from "~/hooks/useAppSession";
-const AUTH_ENABLED = process.env.NEXT_PUBLIC_AUTH_ENABLED === "true";
+const AUTH_ENABLED = process.env.NEXT_PUBLIC_AUTH_ENABLED !== "false";
 import { GenerateUpload } from "~/components/GenerateUpload/GenerateUpload";
 import { FlagTextInput } from "~/components/FlagInput/FlagInput";
 import { FlagSwitch } from "~/components/FlagSwitch/FlagSwitch";
@@ -80,9 +80,14 @@ export const GenerateCard = ({
     setIsSubmittingPreset(true);
     setPresetError(null);
     try {
-      const res = await fetch("/api/user-presets", {
+      const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
+      const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+      const res = await fetch(`${BACKEND_URL}/api/v1/user-presets`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({ name: presetName, description: presetDescription, flags }),
       });
       if (!res.ok) {
@@ -218,9 +223,14 @@ export const GenerateCard = ({
 
       // Update preset download timestamp when generating a seed using a selected preset
       if (activePresetName) {
-        fetch("/api/user-presets", {
+        const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
+        const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+        fetch(`${BACKEND_URL}/api/v1/user-presets`, {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+          },
           body: JSON.stringify({ flags, presetName: activePresetName })
         }).catch(console.error);
 

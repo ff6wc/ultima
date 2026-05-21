@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { signIn, signOut } from "next-auth/react";
+import { signIn, signOut } from "~/hooks/useAppSession";
 import { useAppSession } from "~/hooks/useAppSession";
 
-const AUTH_ENABLED = process.env.NEXT_PUBLIC_AUTH_ENABLED === "true";
+const AUTH_ENABLED = process.env.NEXT_PUBLIC_AUTH_ENABLED !== "false";
 
 import { FaDiscord, FaBook, FaSearch, FaBolt, FaSlidersH } from "react-icons/fa";
 import { HiOutlineMoon, HiOutlineSun } from "react-icons/hi";
@@ -133,12 +133,13 @@ export const AppLayout = ({ children, title }: AppLayoutProps) => {
             </a>
           ) : AUTH_ENABLED ? (
             <button
+              type="button"
               onClick={() => signIn("discord")}
-              className={styles.tabItem}
-              style={{ background: "none", border: "none", width: "100%", textAlign: "left", cursor: "pointer", display: "flex", alignItems: "center", gap: "0.5rem", color: "inherit", padding: 0 }}
+              className={styles.discordLoginBtn}
+              style={{ width: "calc(100% - 2rem)" }}
             >
-              <FaDiscord size={16} />
-              <span>Login with Discord</span>
+              <FaDiscord size={20} />
+              <span>Login</span>
             </button>
           ) : null}
         </div>

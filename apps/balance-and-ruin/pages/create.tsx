@@ -1,10 +1,10 @@
 import type { NextPage } from "next";
 import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 import { FlagCreatePage } from "~/components/FlagCreatePage/FlagCreatePage";
 import { setRawFlags } from "~/state/flagSlice";
 import { setObjectiveMetadata } from "~/state/objectiveSlice";
 import { RawFlagMetadata, setSchema } from "~/state/schemaSlice";
-import { makeStore } from "~/state/store";
 import { ObjectiveMetadata } from "~/types/objectives";
 import { FlagPreset } from "~/types/preset";
 import { fetchWithTimeout } from "~/utils/fetchWithTimeout";
@@ -16,22 +16,54 @@ export type PageProps = {
 };
 
 const Create = () => {
+  const dispatch = useDispatch();
   const [objectives, setObjectives] = useState(null);
   const [presets, setPresets] = useState(null);
   const [schema, setSchemaLocal] = useState(null);
   const [version, setVersion] = useState(null);
 
   useEffect(() => {
-    const store = makeStore();
+    // 1. Try to load initial values from localStorage cache for instant load
+    try {
+      const cachedObjectives = localStorage.getItem("cached_objectives");
+      const cachedPresets = localStorage.getItem("cached_presets");
+      const cachedSchema = localStorage.getItem("cached_schema");
+      const cachedVersion = localStorage.getItem("cached_version");
 
+      if (cachedObjectives) {
+        const parsed = JSON.parse(cachedObjectives);
+        setObjectives(parsed);
+        dispatch(setObjectiveMetadata(parsed));
+      }
+      if (cachedPresets) {
+        const parsed = JSON.parse(cachedPresets);
+        setPresets(parsed);
+        const preset = parsed["ultros league"];
+        if (preset) {
+          dispatch(setRawFlags(preset.flags));
+        }
+      }
+      if (cachedSchema) {
+        const parsed = JSON.parse(cachedSchema);
+        setSchemaLocal(parsed);
+        dispatch(setSchema(parsed));
+      }
+      if (cachedVersion) {
+        setVersion(JSON.parse(cachedVersion));
+      }
+    } catch (e) {
+      console.warn("Failed to parse cached metadata:", e);
+    }
+
+    // 2. Fetch fresh data in the background (Stale-While-Revalidate)
     fetchWithTimeout(`${process.env.NEXT_PUBLIC_API_URL}/presets`, {}, 2500)
       .then((res) => res.json())
       .then((data) => {
         setPresets(data);
-        // TODO: figure out why this isn't having the desired effect -- it's defaulting to the startingFlags in flagSlice.ts -- a race condition?
+        localStorage.setItem("cached_presets", JSON.stringify(data));
         const preset = data["ultros league"];
         if (preset) {
-          store.dispatch(setRawFlags(preset.flags));
+          dispatch(setRawFlags(preset.flags));
         }
       })
       .catch((err) => {
@@ -40,14 +72,15 @@ const Create = () => {
           .then((res) => res.json())
           .then((data) => {
             setPresets(data);
+            localStorage.setItem("cached_presets", JSON.stringify(data));
             const preset = data["ultros league"];
             if (preset) {
-              store.dispatch(setRawFlags(preset.flags));
+              dispatch(setRawFlags(preset.flags));
             }
           })
           .catch((fallbackErr) => {
             console.error("Failed to fetch fallback presets:", fallbackErr);
-            setPresets({});
+            if (!presets) setPresets({});
           });
       });
 
@@ -55,7 +88,8 @@ const Create = () => {
       .then((res) => res.json())
       .then((data) => {
         setSchemaLocal(data);
-        store.dispatch(setSchema(data));
+        localStorage.setItem("cached_schema", JSON.stringify(data));
+        dispatch(setSchema(data));
       })
       .catch((err) => {
         console.warn("Failed to fetch flag metadata from API, trying fallback:", err);
@@ -63,7 +97,8 @@ const Create = () => {
           .then((res) => res.json())
           .then((data) => {
             setSchemaLocal(data);
-            store.dispatch(setSchema(data));
+            localStorage.setItem("cached_schema", JSON.stringify(data));
+            dispatch(setSchema(data));
           })
           .catch((fallbackErr) => {
             console.error("Failed to fetch fallback flag metadata:", fallbackErr);
@@ -74,7 +109,8 @@ const Create = () => {
       .then((res) => res.json())
       .then((data) => {
         setObjectives(data);
-        store.dispatch(setObjectiveMetadata(data));
+        localStorage.setItem("cached_objectives", JSON.stringify(data));
+        dispatch(setObjectiveMetadata(data));
       })
       .catch((err) => {
         console.warn("Failed to fetch objective metadata from API, trying fallback:", err);
@@ -82,7 +118,8 @@ const Create = () => {
           .then((res) => res.json())
           .then((data) => {
             setObjectives(data);
-            store.dispatch(setObjectiveMetadata(data));
+            localStorage.setItem("cached_objectives", JSON.stringify(data));
+            dispatch(setObjectiveMetadata(data));
           })
           .catch((fallbackErr) => {
             console.error("Failed to fetch fallback objective metadata:", fallbackErr);
@@ -94,6 +131,7 @@ const Create = () => {
       .then((data) => {
         const fetchedVersion = data["version"];
         setVersion(fetchedVersion);
+        localStorage.setItem("cached_version", JSON.stringify(fetchedVersion));
       })
       .catch((err) => {
         console.warn("Failed to fetch version from API, trying fallback:", err);
@@ -102,12 +140,13 @@ const Create = () => {
           .then((data) => {
             const fetchedVersion = data["version"];
             setVersion(fetchedVersion);
+            localStorage.setItem("cached_version", JSON.stringify(fetchedVersion));
           })
           .catch((fallbackErr) => {
             console.error("Failed to fetch fallback version:", fallbackErr);
           });
       });
-  }, []);
+  }, [dispatch]);
 
   if (objectives && presets && schema && version) {
     return (
@@ -119,7 +158,14 @@ const Create = () => {
       />
     );
   } else {
-    return <p>Loading...</p>;
+    return (
+      <div className="flex h-screen w-screen items-center justify-center bg-slate-950 text-white font-outfit text-xl">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+          <p className="animate-pulse">Loading Worlds Collide...</p>
+        </div>
+      </div>
+    );
   }
 };
 

@@ -1,7 +1,6 @@
-import React, { createContext, useContext } from "react";
-import { SessionProvider, useSession as useNextAuthSession } from "next-auth/react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 
-const AUTH_ENABLED = process.env.NEXT_PUBLIC_AUTH_ENABLED === "true";
+const AUTH_ENABLED = process.env.NEXT_PUBLIC_AUTH_ENABLED !== "false";
 
 export type AppSession = {
   user: {
@@ -21,40 +20,86 @@ export type AppSessionContextType = {
 
 const AppSessionContext = createContext<AppSessionContextType>({
   data: null,
-  status: "unauthenticated",
+  status: "loading",
 });
 
-const NextAuthAppSessionBridge = ({ children }: { children: React.ReactNode }) => {
-  const { data: session, status } = useNextAuthSession();
-  return (
-    <AppSessionContext.Provider value={{ data: session as AppSession | null, status }}>
-      {children}
-    </AppSessionContext.Provider>
-  );
+export const signIn = (provider?: string) => {
+  const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+  window.location.href = `${BACKEND_URL}/api/v1/auth/login`;
 };
 
-const DummySessionProvider = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <AppSessionContext.Provider value={{ data: null, status: "unauthenticated" }}>
-      {children}
-    </AppSessionContext.Provider>
-  );
+export const signOut = (options?: { callbackUrl?: string }) => {
+  localStorage.removeItem("auth_token");
+  if (typeof window !== "undefined") {
+    window.location.href = options?.callbackUrl || "/";
+  }
 };
 
 export const AppSessionProvider = ({
   children,
-  session,
 }: {
   children: React.ReactNode;
   session?: any;
 }) => {
-  if (!AUTH_ENABLED) {
-    return <DummySessionProvider>{children}</DummySessionProvider>;
-  }
+  const [data, setData] = useState<AppSession | null>(null);
+  const [status, setStatus] = useState<"authenticated" | "unauthenticated" | "loading">("loading");
+
+  useEffect(() => {
+    if (!AUTH_ENABLED) {
+      setData(null);
+      setStatus("unauthenticated");
+      return;
+    }
+
+    const token = localStorage.getItem("auth_token");
+    if (token) {
+      try {
+        const base64Url = token.split(".")[1];
+        const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+        const jsonPayload = decodeURIComponent(
+          atob(base64)
+            .split("")
+            .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+            .join("")
+        );
+        const payload = JSON.parse(jsonPayload);
+        
+        const discordId = payload.sub || payload.discordId;
+        const name = payload.username || payload.name || "Discord User";
+        let image = payload.avatar || payload.image || null;
+        if (image && !image.startsWith("http") && discordId) {
+          image = `https://cdn.discordapp.com/avatars/${discordId}/${image}.png`;
+        }
+
+        const isAdmin = !!(payload.isAdmin || payload.is_admin || payload.isSuperadmin);
+
+        setData({
+          user: {
+            name,
+            email: payload.email || null,
+            image,
+            discordId,
+            accessToken: token,
+            isAdmin,
+          },
+        });
+        setStatus("authenticated");
+      } catch (e) {
+        console.error("Invalid token parsing state:", e);
+        localStorage.removeItem("auth_token");
+        setData(null);
+        setStatus("unauthenticated");
+      }
+    } else {
+      setData(null);
+      setStatus("unauthenticated");
+    }
+  }, []);
+
   return (
-    <SessionProvider session={session}>
-      <NextAuthAppSessionBridge>{children}</NextAuthAppSessionBridge>
-    </SessionProvider>
+    <AppSessionContext.Provider value={{ data, status }}>
+      {children}
+    </AppSessionContext.Provider>
   );
 };
 

@@ -15,6 +15,18 @@ import {
 import { PageContainer } from "../PageContainer/PageContainer";
 import { FlagPreset } from "~/types/preset";
 
+const narsheFetch = (path: string, options: RequestInit = {}) => {
+  const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
+  const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+  const url = `${backendUrl}/api/v1${path}`;
+  const headers = {
+    "Content-Type": "application/json",
+    ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+    ...(options.headers || {}),
+  };
+  return fetch(url, { ...options, headers });
+};
+
 type AdminTabProps = {
   apiPresets?: Record<string, FlagPreset>;
 };
@@ -55,7 +67,7 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
 
   const fetchPresets = () => {
     setLoadingPresets(true);
-    fetch(`/api/user-presets?all=true&t=${Date.now()}`, { cache: "no-store" })
+    narsheFetch(`/user-presets?all=true&t=${Date.now()}`, { cache: "no-store" })
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) setAllPresets(data);
@@ -65,7 +77,7 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
   };
 
   const fetchTags = () => {
-    fetch("/api/tags")
+    narsheFetch("/tags")
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) setCannedTags(data);
@@ -74,7 +86,7 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
   };
 
   const fetchUsers = () => {
-    fetch("/api/users")
+    narsheFetch("/users")
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) setUsersDb(data);
@@ -97,7 +109,7 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
     // Create a map of db overrides by lowercase name for easy lookup
     const dbMap = new Map<string, any>();
     allPresets.forEach((p) => {
-      if (p.name && p.creator_id === "override") {
+      if (p.name && (p.owner_id === "override" || p.creator_id === "override")) {
         dbMap.set(p.name.toLowerCase(), p);
       }
     });
@@ -121,9 +133,11 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
           ...apiPreset,
           id: dbOverride.id || apiPreset.name, // Use database id if it exists, else name
           tags: dbOverride.tags || apiPreset.tags || [],
-          official: dbOverride.official !== undefined 
-            ? dbOverride.official 
-            : (apiPreset.official || (dbOverride.tags && dbOverride.tags.includes("official"))),
+          official: dbOverride.is_official !== undefined
+            ? dbOverride.is_official
+            : (dbOverride.official !== undefined 
+                ? dbOverride.official 
+                : (apiPreset.official || (dbOverride.tags && dbOverride.tags.includes("official")))),
           creator_name: apiPreset.creator_name || apiPreset.creator || "Community",
           creator_id: apiPreset.creator_id || "community",
           created_timestamp: apiPreset.created_at || new Date().toISOString(),
@@ -158,10 +172,12 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
           description: dbPreset.description || "",
           flags: dbPreset.flags || "",
           tags: dbPreset.tags || [],
-          official: !!dbPreset.official || (Array.isArray(dbPreset.tags) && dbPreset.tags.includes("official")),
-          creator_name: dbPreset.creator_name || "Unknown",
-          creator_id: dbPreset.creator_id || "unknown",
-          created_timestamp: dbPreset.created_timestamp || new Date().toISOString(),
+          official: dbPreset.is_official !== undefined
+            ? dbPreset.is_official
+            : (!!dbPreset.official || (Array.isArray(dbPreset.tags) && dbPreset.tags.includes("official"))),
+          creator_name: dbPreset.creator_name || dbPreset.owner_id || "Unknown",
+          creator_id: dbPreset.owner_id || dbPreset.creator_id || "unknown",
+          created_timestamp: dbPreset.created_at || dbPreset.created_timestamp || new Date().toISOString(),
           download_timestamp: dbPreset.download_timestamp,
           isApiPreset: false
         });
@@ -213,9 +229,8 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
     const identifier = preset.isApiPreset ? { name: preset.name } : { id: preset.id };
     
     try {
-      const res = await fetch("/api/user-presets", {
+      const res = await narsheFetch("/user-presets", {
         method: "DELETE",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(identifier)
       });
       if (res.ok) {
@@ -237,9 +252,8 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
 
   const handleSaveTags = async (preset: any, tagsArray: string[]) => {
     try {
-      const res = await fetch("/api/user-presets", {
+      const res = await narsheFetch("/user-presets", {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           id: preset.isApiPreset ? undefined : preset.id,
           name: preset.name,
@@ -272,9 +286,8 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
       const ids = selectedPresets.filter((p) => !p.isApiPreset).map((p) => String(p.id));
       const names = selectedPresets.filter((p) => p.isApiPreset).map((p) => String(p.name));
       
-      const res = await fetch("/api/user-presets", {
+      const res = await narsheFetch("/user-presets", {
         method: "DELETE",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ids, names })
       });
       
@@ -934,7 +947,7 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
               onClick={async () => {
                 if(!newTagName.trim()) return;
                 try {
-                  const res = await fetch("/api/tags", { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({tag: newTagName}) });
+                  const res = await narsheFetch("/tags", { method: "POST", body: JSON.stringify({tag: newTagName}) });
                   if (!res.ok) throw new Error(await res.text());
                   setNewTagName("");
                   fetchTags();
@@ -976,7 +989,7 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                     <button onClick={async () => {
                       if (!editingTag.new.trim()) return;
                       try {
-                        const res = await fetch("/api/tags", { method: "PUT", headers: {"Content-Type": "application/json"}, body: JSON.stringify({ oldTag: editingTag.old, newTag: editingTag.new }) });
+                        const res = await narsheFetch("/tags", { method: "PUT", body: JSON.stringify({ oldTag: editingTag.old, newTag: editingTag.new }) });
                         if (!res.ok) throw new Error(await res.text());
                         setEditingTag(null);
                         fetchTags();
@@ -991,11 +1004,11 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                   <>
                     <span className="text-purple-700 dark:text-purple-200" style={{ fontWeight: "bold", textTransform: "uppercase", fontSize: "0.85rem" }}>{tag}</span>
                     <div style={{ display: "flex", gap: "0.75rem" }}>
-                      <button onClick={() => setEditingTag({old: tag, new: tag})} style={{ background: "none", border: "none", color: "#60a5fa", cursor: "pointer", fontSize: "0.8rem", fontWeight: "bold" }} className="hover:text-blue-400">Edit</button>
+                      <button onClick={() => setEditingTag({old: tag, new: tag})} style={{ background: "none", border: "none", color: "#60a5fa", cursor: "pointer", fontSize: "0.85rem", fontWeight: "bold" }} className="hover:text-blue-400">Edit</button>
                       <button onClick={async () => {
                         if(confirm(`Are you sure you want to delete the tag "${tag}"? It will be removed from all presets.`)) {
                           try {
-                            const res = await fetch("/api/tags", { method: "DELETE", headers: {"Content-Type": "application/json"}, body: JSON.stringify({tag}) });
+                            const res = await narsheFetch("/tags", { method: "DELETE", body: JSON.stringify({tag}) });
                             if (!res.ok) throw new Error(await res.text());
                             fetchTags();
                             fetchPresets();
@@ -1003,7 +1016,7 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                             alert(`Failed to delete tag: ${e.message}`);
                           }
                         }
-                      }} style={{ background: "none", border: "none", color: "#f87171", cursor: "pointer", fontSize: "0.8rem", fontWeight: "bold" }} className="hover:text-red-400">Delete</button>
+                      }} style={{ background: "none", border: "none", color: "#f87171", cursor: "pointer", fontSize: "0.85rem", fontWeight: "bold" }} className="hover:text-red-400">Delete</button>
                     </div>
                   </>
                 )}
@@ -1068,9 +1081,8 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                                 const newStatus = !user.isAdmin;
                                 if(confirm(`Change ${user.name}'s role to ${newStatus ? 'Admin' : 'User'}?`)) {
                                   try {
-                                    const res = await fetch("/api/users", {
+                                    const res = await narsheFetch("/users", {
                                       method: "PUT",
-                                      headers: { "Content-Type": "application/json" },
                                       body: JSON.stringify({ discordId: user.discordId, isAdmin: newStatus })
                                     });
                                     if (!res.ok) throw new Error(await res.text());
