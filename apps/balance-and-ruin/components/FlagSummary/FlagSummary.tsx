@@ -393,11 +393,11 @@ function buildInfoRows(fv: Record<string, any>, objectives: Record<string, any>)
 
 // ─── Difficulty analysis ──────────────────────────────────────────────────────
 // Scoring philosophy:
-//   A seed matching ALL Atma Series standard settings should score ~15 → "Standard"
-//   BASE_SCORE = 15 represents the "you are playing a randomizer with objectives and
+//   A seed matching ALL Atma Series standard settings should score ~20 → "Standard"
+//   BASE_SCORE = 20 represents the "you are playing a randomizer with objectives and
 //   boss shuffle and enemy scaling" starting point. Deviations add or subtract from it.
 
-const BASE_SCORE = 15;
+const BASE_SCORE = 20;
 
 function analyzeDifficulty(
   fv: Record<string, any>,
@@ -772,7 +772,7 @@ function analyzeDifficulty(
 
   let label: string;
   let color: string;
-  // Thresholds relative to BASE_SCORE=15:
+  // Thresholds relative to BASE_SCORE=20:
   //   ≤8  = Casual    (significantly easier than standard)
   //   9–22 = Standard  (close to Atma baseline)
   //   23–42 = Challenging
