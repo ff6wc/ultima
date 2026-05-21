@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { useSession, signIn, signOut } from "next-auth/react";
+import { signIn, signOut } from "next-auth/react";
+import { useAppSession } from "~/hooks/useAppSession";
 
 const AUTH_ENABLED = process.env.NEXT_PUBLIC_AUTH_ENABLED === "true";
 
@@ -15,11 +16,7 @@ type AppLayoutProps = {
 export const AppLayout = ({ children, title }: AppLayoutProps) => {
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [processedLogo, setProcessedLogo] = useState<string | null>(null);
-  /* eslint-disable react-hooks/rules-of-hooks */
-  const { data: session, status } = AUTH_ENABLED
-    ? useSession()
-    : { data: null, status: "unauthenticated" as const };
-  /* eslint-enable react-hooks/rules-of-hooks */
+  const { data: session, status } = useAppSession();
   const [profileHovered, setProfileHovered] = useState(false);
 
   useEffect(() => {

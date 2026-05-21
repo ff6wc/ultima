@@ -1,21 +1,42 @@
 import React, { useState, useEffect } from "react";
-import { useSession, signOut, signIn } from "next-auth/react";
-import { FaDiscord, FaShieldAlt, FaSignOutAlt, FaSearch, FaTrash, FaCheck, FaTimes } from "react-icons/fa";
+import { signOut, signIn } from "next-auth/react";
+import { useAppSession } from "~/hooks/useAppSession";
+import { FaDiscord, FaShieldAlt, FaSignOutAlt, FaDice, FaBookmark, FaStar } from "react-icons/fa";
 import { PageContainer } from "../PageContainer/PageContainer";
 
 export const ProfileTab = () => {
-  const { data: session, status } = useSession();
+  const { data: session, status } = useAppSession();
   const [userPresets, setUserPresets] = useState<any[]>([]);
   const [loadingPresets, setLoadingPresets] = useState(true);
   const [expandedPresets, setExpandedPresets] = useState<Record<string, boolean>>({});
   const [isDeleting, setIsDeleting] = useState<Record<string, boolean>>({});
   const [showConfirm, setShowConfirm] = useState<Record<string, boolean>>({});
 
+  // Usage stats from localStorage
+  const [seedsGenerated, setSeedsGenerated] = useState(0);
+  const [mostPlayedPreset, setMostPlayedPreset] = useState<string | null>(null);
+  const [mostPlayedCount, setMostPlayedCount] = useState(0);
+
   const isAdmin = !!(session?.user as any)?.isAdmin;
 
+  useEffect(() => {
+    try {
+      const count = parseInt(localStorage.getItem("seeds_generated") || "0", 10);
+      setSeedsGenerated(isNaN(count) ? 0 : count);
 
-
-
+      const playCounts: Record<string, number> = JSON.parse(
+        localStorage.getItem("preset_play_counts") || "{}"
+      );
+      const entries = Object.entries(playCounts);
+      if (entries.length > 0) {
+        const [topName, topCount] = entries.reduce((best, curr) =>
+          curr[1] > best[1] ? curr : best
+        );
+        setMostPlayedPreset(topName);
+        setMostPlayedCount(topCount);
+      }
+    } catch (e) {}
+  }, []);
 
   const togglePreset = (id: string) => setExpandedPresets((p) => ({ ...p, [id]: !p[id] }));
 
@@ -221,6 +242,105 @@ export const ProfileTab = () => {
                 <FaSignOutAlt />
                 <span>SIGN OUT</span>
               </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Usage Statistics Card */}
+        <div
+          style={{
+            backgroundColor: "rgba(15, 23, 42, 0.95)",
+            border: "4px double #3b82f6",
+            borderRadius: "8px",
+            boxShadow: "0 8px 30px rgba(0, 0, 0, 0.4)",
+            padding: "2rem",
+            color: "#f8fafc",
+            fontFamily: "var(--font-runic, monospace)",
+          }}
+        >
+          <div style={{ borderBottom: "2px solid rgba(59, 130, 246, 0.4)", paddingBottom: "1rem", marginBottom: "1.5rem" }}>
+            <h2 style={{ margin: 0, fontSize: "1.5rem", fontWeight: "bold", letterSpacing: "1px", color: "#60a5fa" }}>
+              USAGE STATISTICS
+            </h2>
+            <p style={{ margin: "0.35rem 0 0", fontSize: "0.78rem", color: "#64748b" }}>
+              Tracked locally in your browser
+            </p>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "1rem" }}>
+            {/* Seeds Generated */}
+            <div
+              style={{
+                backgroundColor: "rgba(59, 130, 246, 0.1)",
+                border: "1px solid rgba(59, 130, 246, 0.3)",
+                borderRadius: "8px",
+                padding: "1rem 1.25rem",
+                display: "flex",
+                flexDirection: "column",
+                gap: "0.5rem",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "#60a5fa", fontSize: "0.8rem", fontWeight: "bold", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                <FaDice size={14} />
+                Seeds Generated
+              </div>
+              <div style={{ fontSize: "2.25rem", fontWeight: "bold", color: "#f1f5f9", lineHeight: 1 }}>
+                {seedsGenerated.toLocaleString()}
+              </div>
+              <div style={{ fontSize: "0.72rem", color: "#64748b" }}>total ROMs created</div>
+            </div>
+
+            {/* Presets Saved */}
+            <div
+              style={{
+                backgroundColor: "rgba(59, 130, 246, 0.1)",
+                border: "1px solid rgba(59, 130, 246, 0.3)",
+                borderRadius: "8px",
+                padding: "1rem 1.25rem",
+                display: "flex",
+                flexDirection: "column",
+                gap: "0.5rem",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "#60a5fa", fontSize: "0.8rem", fontWeight: "bold", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                <FaBookmark size={14} />
+                Presets Saved
+              </div>
+              <div style={{ fontSize: "2.25rem", fontWeight: "bold", color: "#f1f5f9", lineHeight: 1 }}>
+                {loadingPresets ? "…" : userPresets.length}
+                <span style={{ fontSize: "1rem", color: "#64748b" }}> / 50</span>
+              </div>
+              <div style={{ fontSize: "0.72rem", color: "#64748b" }}>flag configurations saved</div>
+            </div>
+
+            {/* Most Played Preset */}
+            <div
+              style={{
+                backgroundColor: "rgba(59, 130, 246, 0.1)",
+                border: "1px solid rgba(59, 130, 246, 0.3)",
+                borderRadius: "8px",
+                padding: "1rem 1.25rem",
+                display: "flex",
+                flexDirection: "column",
+                gap: "0.5rem",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "#60a5fa", fontSize: "0.8rem", fontWeight: "bold", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                <FaStar size={14} />
+                Most Played Preset
+              </div>
+              {mostPlayedPreset ? (
+                <>
+                  <div style={{ fontSize: "1.1rem", fontWeight: "bold", color: "#f1f5f9", lineHeight: 1.2, wordBreak: "break-word" }}>
+                    {mostPlayedPreset}
+                  </div>
+                  <div style={{ fontSize: "0.72rem", color: "#64748b" }}>{mostPlayedCount} seed{mostPlayedCount !== 1 ? "s" : ""} generated</div>
+                </>
+              ) : (
+                <div style={{ fontSize: "0.85rem", color: "#64748b", fontStyle: "italic", lineHeight: 1.4 }}>
+                  Generate seeds with a preset selected to track this
+                </div>
+              )}
             </div>
           </div>
         </div>

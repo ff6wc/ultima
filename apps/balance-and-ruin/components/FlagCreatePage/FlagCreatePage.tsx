@@ -1,6 +1,7 @@
 import { Tab } from "@headlessui/react";
 import { useRouter } from "next/router";
-import { useSession, signIn, signOut } from "next-auth/react";
+import { signIn, signOut } from "next-auth/react";
+import { useAppSession } from "~/hooks/useAppSession";
 import styles from "./FlagCreatePage.module.css";
 import Head from "next/head";
 
@@ -251,11 +252,7 @@ export const FlagCreatePage = ({
   version,
 }: PageProps) => {
   const router = useRouter();
-  /* eslint-disable react-hooks/rules-of-hooks */
-  const { data: session, status } = AUTH_ENABLED
-    ? useSession()
-    : { data: null, status: "unauthenticated" as const };
-  /* eslint-enable react-hooks/rules-of-hooks */
+  const { data: session, status } = useAppSession();
   const { isAdmin } = useAdmin();
   const [profileHovered, setProfileHovered] = useState(false);
   const tabs: TabItem[] = useMemo(

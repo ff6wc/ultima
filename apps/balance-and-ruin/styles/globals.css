@@ -120,7 +120,7 @@ body {
   color: var(--text-main);
 }
 
-input:not([type="range"]), select, textarea {
+input:not([type="range"]):not([type="checkbox"]):not([type="radio"]), select, textarea {
   background-color: var(--bg-input) !important;
   color: var(--text-input) !important;
   border-color: var(--border-input) !important;

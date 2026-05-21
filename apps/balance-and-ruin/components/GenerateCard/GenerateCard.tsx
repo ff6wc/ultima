@@ -12,12 +12,14 @@ import JSZip from "jszip";
 import { useRouter } from "next/router";
 import { selectSchema } from "~/state/schemaSlice";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
-import { useSession } from "next-auth/react";
+import { useAppSession } from "~/hooks/useAppSession";
+const AUTH_ENABLED = process.env.NEXT_PUBLIC_AUTH_ENABLED === "true";
 import { GenerateUpload } from "~/components/GenerateUpload/GenerateUpload";
 import { FlagTextInput } from "~/components/FlagInput/FlagInput";
 import { FlagSwitch } from "~/components/FlagSwitch/FlagSwitch";
 import styles from "./GenerateCard.module.css";
 import { selectActivePresetName } from "~/state/presetSlice";
+import { FlagSummary } from "~/components/FlagSummary/FlagSummary";
 
 export type FlagsCardProps = {
   className?: string;
@@ -64,7 +66,7 @@ export const GenerateCard = ({
 
   const flags = useOrderedFlags();
   const router = useRouter();
-  const { data: session } = useSession();
+  const { data: session } = useAppSession();
   const activePresetName = useSelector(selectActivePresetName);
 
   const [isSavingPreset, setIsSavingPreset] = useState(false);
@@ -197,6 +199,22 @@ export const GenerateCard = ({
         link.click();
         window.open(`/seed/?id=${seed_id}`, "_blank");
       });
+
+      // Track seed generation count in localStorage
+      try {
+        const currentCount = parseInt(localStorage.getItem("seeds_generated") || "0", 10);
+        localStorage.setItem("seeds_generated", String(currentCount + 1));
+
+        // Track most-played preset per user
+        if (activePresetName) {
+          const presetCountKey = "preset_play_counts";
+          const existingCounts = JSON.parse(localStorage.getItem(presetCountKey) || "{}");
+          existingCounts[activePresetName] = (existingCounts[activePresetName] || 0) + 1;
+          localStorage.setItem(presetCountKey, JSON.stringify(existingCounts));
+        }
+      } catch (e) {
+        console.error("Failed to track generation stats:", e);
+      }
 
       // Update preset download timestamp when generating a seed using a selected preset
       if (activePresetName) {
@@ -353,12 +371,13 @@ export const GenerateCard = ({
             Log in to save these flags as a preset.
           </span>
         )}
+        <FlagSummary />
       </div>
 
       <div className={styles.divider} />
 
       <div className={styles.stepContainer}>
-        <h3 className={styles.stepTitle}>Step 2: Provide Base ROM</h3>
+        <h3 className={styles.stepTitle}>Step 2: Select your v1.0 US ROM</h3>
         <GenerateUpload
           clearRomValues={clearRomValues}
           hasRomData={hasRomData}

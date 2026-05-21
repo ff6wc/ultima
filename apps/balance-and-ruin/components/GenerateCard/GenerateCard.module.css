@@ -37,8 +37,7 @@
 
 .textarea {
   width: 100%;
-  min-height: 150px;
-  max-height: 300px;
+  min-height: 200px;
   padding: 1rem;
   background-color: var(--bg-input);
   border: 1px solid var(--border-input);

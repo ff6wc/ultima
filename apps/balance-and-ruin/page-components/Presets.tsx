@@ -1,6 +1,6 @@
 import { useCallback, useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useSession } from "next-auth/react";
+import { useAppSession } from "~/hooks/useAppSession";
 
 import {
   FaCalendarAlt,
@@ -344,7 +344,7 @@ const CategorySection = ({
   onSelect,
   defaultOpen = false,
 }: CategorySectionProps) => {
-  const { data: session } = useSession();
+  const { data: session } = useAppSession();
   const [open, setOpen] = useState(defaultOpen);
   const [search, setSearch] = useState("");
   const [sortField, setSortField] = useState<SortField>("name");
@@ -556,7 +556,7 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
   const activeFlags = useSelector(selectRawFlags);
-  const { data: session } = useSession();
+  const { data: session } = useAppSession();
   const currentUserId = (session?.user as any)?.discordId || undefined;
 
   const [dbPresets, setDbPresets] = useState<any[]>([]);

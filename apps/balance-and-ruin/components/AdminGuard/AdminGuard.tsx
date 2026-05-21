@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { useSession } from "next-auth/react";
+import { useAppSession } from "~/hooks/useAppSession";
 import { useRouter } from "next/router";
 
 type AdminGuardProps = {
@@ -7,7 +7,7 @@ type AdminGuardProps = {
 };
 
 export const AdminGuard = ({ children }: AdminGuardProps) => {
-  const { data: session, status } = useSession();
+  const { data: session, status } = useAppSession();
   const router = useRouter();
 
   const isAdmin = (session?.user as any)?.isAdmin;

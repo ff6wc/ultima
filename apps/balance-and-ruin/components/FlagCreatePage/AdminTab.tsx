@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { useSession } from "next-auth/react";
+import { useAppSession } from "~/hooks/useAppSession";
 import {
   FaShieldAlt,
   FaTools,
@@ -20,7 +20,7 @@ type AdminTabProps = {
 };
 
 export const AdminTab = ({ apiPresets }: AdminTabProps) => {
-  const { data: session } = useSession();
+  const { data: session } = useAppSession();
   
   // Local state for all database records
   const [allPresets, setAllPresets] = useState<any[]>([]);
@@ -38,7 +38,7 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
   
   // Pagination / Page Limit for performance with ~400 presets
-  const [visibleCount, setVisibleCount] = useState(50);
+  const [visibleCount, setVisibleCount] = useState(10);
   
   const [adminExpandedPresets, setAdminExpandedPresets] = useState<Record<string, boolean>>({});
   
@@ -524,28 +524,29 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
 
           {/* Search Input */}
           <div 
-            style={{ display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.5rem 0.75rem", borderRadius: "6px", border: "1px solid rgba(239, 68, 68, 0.2)", marginBottom: "1rem" }}
-            className="bg-slate-200/50 dark:bg-slate-950/60"
+            style={{ display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.5rem 0.75rem", borderRadius: "6px", border: "1px solid rgba(239, 68, 68, 0.25)", marginBottom: "1rem" }}
+            className="bg-white dark:bg-slate-950/80"
           >
-            <FaSearch size={12} color="#94a3b8" />
+            <FaSearch size={12} className="text-slate-400 dark:text-slate-500 flex-shrink-0" />
             <input
               type="text"
               placeholder="Search presets by name, author, tags, or description..."
               value={adminSearch}
               onChange={(e) => {
                 setAdminSearch(e.target.value);
-                setVisibleCount(50); // Reset visible count on search
+                setVisibleCount(10); // Reset visible count on search
               }}
-              style={{ background: "none", border: "none", outline: "none", fontSize: "0.85rem", flex: 1, width: "100%" }}
-              className="text-slate-800 dark:text-slate-100 placeholder:text-slate-500"
+              style={{ background: "transparent", border: "none", outline: "none", fontSize: "0.85rem", flex: 1, width: "100%", boxShadow: "none", color: "inherit" }}
+              className="text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
             />
             {adminSearch && (
               <button
                 onClick={() => {
                   setAdminSearch("");
-                  setVisibleCount(50);
+                  setVisibleCount(10);
                 }}
-                style={{ background: "none", border: "none", cursor: "pointer", color: "#94a3b8", fontSize: "0.85rem" }}
+                style={{ background: "none", border: "none", cursor: "pointer", fontSize: "0.85rem", lineHeight: 1 }}
+                className="text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 transition-colors"
               >
                 ✕
               </button>
@@ -654,7 +655,6 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                   >
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <div style={{ display: "flex", alignItems: "center", flex: 1, minWidth: 0, paddingRight: "1rem" }}>
-                        {/* Bulk checkbox */}
                         <input
                           type="checkbox"
                           checked={isSelected}
@@ -668,7 +668,7 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                             }
                           }}
                           onClick={(e) => e.stopPropagation()}
-                          style={{ marginRight: "0.75rem", cursor: "pointer", width: "16px", height: "16px" }}
+                          style={{ marginRight: "0.75rem", cursor: "pointer", width: "16px", height: "16px", accentColor: "#dc2626", flexShrink: 0 }}
                         />
 
                         <div style={{ display: "flex", alignItems: "baseline", gap: "0.75rem", overflow: "hidden", flex: 1, minWidth: 0 }}>
@@ -862,7 +862,7 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
 
           {/* Load More Button for Pagination */}
           {sortedPresets.length > visibleCount && (
-            <div style={{ display: "flex", justifyContent: "center", marginTop: "1rem" }}>
+            <div style={{ display: "flex", justifyContent: "center", gap: "1rem", flexWrap: "wrap", marginTop: "1rem" }}>
               <button
                 onClick={handleLoadMore}
                 style={{
@@ -879,6 +879,23 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                 className="hover:bg-red-500 hover:text-white"
               >
                 Load More Presets (+50)
+              </button>
+              <button
+                onClick={() => setVisibleCount(sortedPresets.length)}
+                style={{
+                  backgroundColor: "rgba(59, 130, 246, 0.15)",
+                  border: "1px solid #3b82f6",
+                  color: "#60a5fa",
+                  padding: "0.6rem 1.5rem",
+                  borderRadius: "6px",
+                  fontSize: "0.85rem",
+                  fontWeight: "bold",
+                  cursor: "pointer",
+                  transition: "all 0.2s"
+                }}
+                className="hover:bg-blue-600 hover:text-white"
+              >
+                Show All ({sortedPresets.length})
               </button>
             </div>
           )}
