@@ -369,12 +369,26 @@ function buildInfoRows(fv: Record<string, any>, objectives: Record<string, any>)
 
   // Bug Fixes — only if not all on
   const fixFlags = ["-fs", "-fe", "-fvd", "-fr", "-fj", "-fbs", "-fedc", "-fc"];
-  const activeFixes = fixFlags.filter((f) => hasFlag(fv, f));
+  const BUG_FIX_LABELS: Record<string, string> = {
+    "-fs": "Sketch",
+    "-fe": "Evade",
+    "-fvd": "Vanish/Doom",
+    "-fr": "Retarget/Retort",
+    "-fj": "Jump",
+    "-fbs": "Boss Skip",
+    "-fedc": "Enemy Damage Counter",
+    "-fc": "Capture",
+  };
   const missingFixes = fixFlags.filter((f) => !hasFlag(fv, f));
-  if (missingFixes.length > 0 && missingFixes.length < fixFlags.length) {
-    rows.push({ label: "Bug Fixes", value: `${activeFixes.length}/${fixFlags.length} enabled`, highlight: missingFixes.length > 2 });
-  } else if (missingFixes.length === fixFlags.length) {
-    rows.push({ label: "Bug Fixes", value: "None enabled", highlight: true });
+  if (missingFixes.length === fixFlags.length) {
+    rows.push({ label: "Bug Fixes", value: "All disabled", highlight: true });
+  } else if (missingFixes.length > 0) {
+    const disabledNames = missingFixes.map((f) => BUG_FIX_LABELS[f] ?? f);
+    rows.push({
+      label: "Bug Fixes",
+      value: `${disabledNames.join(", ")} disabled`,
+      highlight: missingFixes.length > 2,
+    });
   }
 
   return rows;
