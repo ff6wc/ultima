@@ -8,5 +8,19 @@ module.exports = {
   },
   typescript: {
     ignoreBuildErrors: true,
+  },
+  webpack: (config, { dev, isServer }) => {
+    if (dev) {
+      config.watchOptions = {
+        ...config.watchOptions,
+        ignored: [
+          ...((config.watchOptions && config.watchOptions.ignored) || []),
+          '**/users.json',
+          '**/presets.json',
+          '**/tags.json'
+        ]
+      }
+    }
+    return config;
   }
 };

@@ -3,7 +3,8 @@ import { getToken } from "next-auth/jwt";
 import fs from "fs";
 import path from "path";
 
-const USERS_FILE = path.join(process.cwd(), "users.json");
+const DB_DIR = path.join(process.cwd(), "..", "db");
+const USERS_FILE = path.join(DB_DIR, "users.json");
 const SUPERADMINS = ["451050854934511647", "197757429948219392"];
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {

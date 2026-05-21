@@ -3,8 +3,9 @@ import { getToken } from "next-auth/jwt";
 import fs from "fs";
 import path from "path";
 
-const TAGS_FILE = path.join(process.cwd(), "tags.json");
-const PRESETS_FILE = path.join(process.cwd(), "presets.json");
+const DB_DIR = path.join(process.cwd(), "..", "db");
+const TAGS_FILE = path.join(DB_DIR, "tags.json");
+const PRESETS_FILE = path.join(DB_DIR, "presets.json");
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   // Use the exact same secrets that [...nextauth].ts expects
@@ -13,7 +14,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   
   // Instant revocation check against live database
   if (token?.discordId && !token.isSuperadmin) {
-    const USERS_FILE = path.join(process.cwd(), "users.json");
+    const USERS_FILE = path.join(DB_DIR, "users.json");
     try {
       if (fs.existsSync(USERS_FILE)) {
         const users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
@@ -24,6 +25,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   // Initialize tags file if it doesn't exist
+  if (!fs.existsSync(DB_DIR)) {
+    fs.mkdirSync(DB_DIR, { recursive: true });
+  }
   if (!fs.existsSync(TAGS_FILE)) {
     fs.writeFileSync(TAGS_FILE, JSON.stringify([]));
   }

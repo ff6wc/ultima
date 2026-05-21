@@ -10,6 +10,7 @@ import { Schema } from "~/state/schemaSlice";
 import { wrapper } from "~/state/store";
 import "~/styles/globals.css";
 import { AppSessionProvider } from "~/hooks/useAppSession";
+import { ErrorBoundary } from "~/components/ErrorBoundary/ErrorBoundary";
 
 export const openSans = Open_Sans({
   subsets: ["latin"],
@@ -46,7 +47,9 @@ const App: AppType<Props> = ({ Component, ...rest }: AppProps<Props>) => {
             reCaptchaKey={process.env.NEXT_PUBLIC_RECAPTCHA_KEY as string}
           >
             <AppSessionProvider session={props.pageProps.session}>
-              <Component {...props.pageProps} />
+              <ErrorBoundary>
+                <Component {...props.pageProps} />
+              </ErrorBoundary>
             </AppSessionProvider>
           </GoogleReCaptchaProvider>
         </QueryClientProvider>

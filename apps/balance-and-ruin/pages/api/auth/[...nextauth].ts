@@ -4,7 +4,8 @@ import fs from "fs";
 import path from "path";
 
 const SUPERADMINS = ["451050854934511647", "197757429948219392"];
-const USERS_FILE = path.join(process.cwd(), "users.json");
+const DB_DIR = path.join(process.cwd(), "..", "db");
+const USERS_FILE = path.join(DB_DIR, "users.json");
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -24,6 +25,9 @@ export const authOptions: NextAuthOptions = {
       const isSuperadmin = typeof discordId === "string" && SUPERADMINS.includes(discordId);
       
       // Sync or initialize users.json database
+      if (!fs.existsSync(DB_DIR)) {
+        fs.mkdirSync(DB_DIR, { recursive: true });
+      }
       if (!fs.existsSync(USERS_FILE)) {
         fs.writeFileSync(USERS_FILE, JSON.stringify([]));
       }
