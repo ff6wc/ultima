@@ -473,13 +473,39 @@ function analyzeDifficulty(
   const xpmBaseline = partyXpSplit ? 7 : 3;
   if (partyXpSplit) {
     bullets.push({ text: "Party XP divided among survivors — effective XP baseline shifts to ~7×", severity: "hard" });
-    delta += 10;
+    delta += 12;
   }
   if (xpm !== null) {
-    if (xpm < xpmBaseline - 2) { bullets.push({ text: `XP multiplier ${xpm}× well below standard (${xpmBaseline}×) — slow leveling`, severity: "hard" }); delta += 12; }
-    else if (xpm < xpmBaseline - 0.5) { bullets.push({ text: `XP multiplier ${xpm}× below standard (${xpmBaseline}×)`, severity: "medium" }); delta += 6; }
-    else if (xpm > xpmBaseline + 4) { bullets.push({ text: `XP multiplier ${xpm}× well above standard — very fast leveling`, severity: "easy" }); delta -= 10; }
-    else if (xpm > xpmBaseline + 1) { bullets.push({ text: `XP multiplier ${xpm}× above standard — faster leveling`, severity: "easy" }); delta -= 5; }
+    const xpmDiff = xpm - xpmBaseline;
+    if (xpmDiff < 0) {
+      if (xpmDiff <= -4) {
+        bullets.push({ text: `XP multiplier ${xpm}× is extremely low compared to baseline (${xpmBaseline}×) — grinding will be extremely slow`, severity: "hard" });
+        delta += 24;
+      } else if (xpmDiff <= -2) {
+        bullets.push({ text: `XP multiplier ${xpm}× is well below baseline (${xpmBaseline}×) — leveling is very slow`, severity: "hard" });
+        delta += 16;
+      } else {
+        bullets.push({ text: `XP multiplier ${xpm}× is slightly below baseline (${xpmBaseline}×) — slow leveling`, severity: "medium" });
+        delta += 8;
+      }
+    } else if (xpmDiff > 0) {
+      if (xpmDiff >= 20) {
+        bullets.push({ text: `XP multiplier ${xpm}× is overwhelmingly high — leveling is virtually instant`, severity: "easy" });
+        delta -= 32;
+      } else if (xpmDiff >= 12) {
+        bullets.push({ text: `XP multiplier ${xpm}× is extremely high — extremely fast leveling`, severity: "easy" });
+        delta -= 24;
+      } else if (xpmDiff >= 6) {
+        bullets.push({ text: `XP multiplier ${xpm}× is very high — fast leveling`, severity: "easy" });
+        delta -= 16;
+      } else if (xpmDiff >= 3) {
+        bullets.push({ text: `XP multiplier ${xpm}× is above baseline — fast leveling`, severity: "easy" });
+        delta -= 10;
+      } else if (xpmDiff >= 1) {
+        bullets.push({ text: `XP multiplier ${xpm}× is slightly above baseline — faster leveling`, severity: "easy" });
+        delta -= 5;
+      }
+    }
   }
 
   // ── XP/GP reward scaling from enemies ── (2× = standard)
@@ -563,18 +589,75 @@ function analyzeDifficulty(
 
   // Esper learn rates (randomized = standard — no bullet)
   // Esper Equipability
-  if (hasFlag(fv, "-eer") || hasFlag(fv, "-eebr")) {
-    bullets.push({ text: "Esper equipping randomized — magic access varies by character", severity: "medium" });
-    delta += 5;
+  if (hasFlag(fv, "-eer")) {
+    const arr = flagNumArr(fv, "-eer");
+    if (arr) {
+      const [minE, maxE] = arr;
+      if (maxE <= 1) {
+        bullets.push({ text: `Esper equipability brutally restricted (${minE}–${maxE} chars per esper) — virtually no spell sharing possible`, severity: "hard" });
+        delta += 32;
+      } else if (maxE <= 2) {
+        bullets.push({ text: `Esper equipability highly restricted (${minE}–${maxE} chars per esper) — extremely limited magic access`, severity: "hard" });
+        delta += 24;
+      } else if (maxE <= 4) {
+        bullets.push({ text: `Esper equipability significantly restricted (${minE}–${maxE} chars per esper) — restricted magic access`, severity: "hard" });
+        delta += 16;
+      } else if (maxE <= 6) {
+        bullets.push({ text: `Esper equipability moderately restricted (${minE}–${maxE} chars per esper)`, severity: "medium" });
+        delta += 10;
+      } else {
+        bullets.push({ text: `Esper equipability slightly restricted (${minE}–${maxE} chars per esper)`, severity: "medium" });
+        delta += 6;
+      }
+    }
+  } else if (hasFlag(fv, "-eebr")) {
+    const v = flagNum(fv, "-eebr");
+    if (v !== null) {
+      if (v <= 1) {
+        bullets.push({ text: `Esper equipability balanced but brutally restricted (${v} char per esper) — virtually no spell sharing possible`, severity: "hard" });
+        delta += 32;
+      } else if (v <= 2) {
+        bullets.push({ text: `Esper equipability balanced but highly restricted (${v} chars per esper) — extremely limited magic access`, severity: "hard" });
+        delta += 24;
+      } else if (v <= 4) {
+        bullets.push({ text: `Esper equipability balanced but significantly restricted (${v} chars per esper) — restricted magic access`, severity: "hard" });
+        delta += 16;
+      } else if (v <= 6) {
+        bullets.push({ text: `Esper equipability balanced but moderately restricted (${v} chars per esper)`, severity: "medium" });
+        delta += 10;
+      } else {
+        bullets.push({ text: `Esper equipability balanced and slightly restricted (${v} chars per esper)`, severity: "medium" });
+        delta += 6;
+      }
+    }
   }
 
   // ── Character Stats ──
   const csrp = flagNumArr(fv, "-csrp");
   if (csrp) {
     const [lo, hi] = csrp;
-    if (lo < 50) { bullets.push({ text: `Character stats ${lo}–${hi}% — some characters may be very weak`, severity: "hard" }); delta += 10; }
-    else if (lo < 75 || hi > 150) { bullets.push({ text: `Character stats ${lo}–${hi}% — notable variance`, severity: "medium" }); delta += 5; }
-    // 80–125 = standard, skip
+    if (lo < 40) {
+      bullets.push({ text: `Character stats ${lo}–${hi}% — severe stats penalty, characters are extremely weak`, severity: "hard" });
+      delta += 25;
+    } else if (lo < 60) {
+      bullets.push({ text: `Character stats ${lo}–${hi}% — notable stats penalty, characters are significantly weaker`, severity: "hard" });
+      delta += 16;
+    } else if (lo < 78) {
+      bullets.push({ text: `Character stats ${lo}–${hi}% — slight stats penalty`, severity: "medium" });
+      delta += 8;
+    } else if (lo >= 150 && hi >= 200) {
+      bullets.push({ text: `Character stats ${lo}–${hi}% — godlike stats boost, characters are overwhelmingly powerful`, severity: "easy" });
+      delta -= 30;
+    } else if (lo >= 120 && hi >= 160) {
+      bullets.push({ text: `Character stats ${lo}–${hi}% — massive stats boost, characters are extremely powerful`, severity: "easy" });
+      delta -= 22;
+    } else if (lo >= 100 && hi >= 135) {
+      bullets.push({ text: `Character stats ${lo}–${hi}% — solid stats boost, characters are stronger than standard`, severity: "easy" });
+      delta -= 14;
+    } else if (lo > 80 || hi > 125) {
+      bullets.push({ text: `Character stats ${lo}–${hi}% — slight stats advantage`, severity: "easy" });
+      delta -= 6;
+    }
   }
 
   // ── Equipment Randomization ──
