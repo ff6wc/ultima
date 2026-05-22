@@ -4,9 +4,17 @@ import { WIKI_URL } from "~/../../packages/utils/constants";
 import { SotwButton } from "~/components/SotwButton/SotwButton";
 import { EventsButton } from "~/components/EventsButton/EventsButton";
 
-export type AppHeaderProps = Record<string, unknown>;
+export type AppHeaderProps = {
+  hideNav?: boolean;
+};
 
-export const AppHeader = (props: AppHeaderProps) => {
+export const AppHeader = ({ hideNav }: AppHeaderProps) => {
+  const router = useRouter();
+  
+  // Conditionally render the create button instead of the button for the current page
+  const showCreateForEvents = router.pathname.startsWith('/events');
+  const showCreateForSotw = router.pathname.startsWith('/sotw');
+
   return (
     <div>
       <Header className={"flex"}>

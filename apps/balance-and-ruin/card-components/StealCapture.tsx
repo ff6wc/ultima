@@ -26,7 +26,19 @@ const stealOptions: SubflagOption[] = [
   },
 ];
 
-const stealDropOptions: SubflagOption[] = [
+const stealRandomOptions: SubflagOption[] = [
+  {
+    defaultValue: 10,
+    flag: "-ss",
+    helperText: "Shuffle Items Stolen with given percent randomized",
+    label: "Shuffle + Random",
+    Renderable: ({ children }) => (
+      <FlagSlider flag="-ss" helperText="" label={children} />
+    ),
+  }
+];
+
+const dropRandomOptions: SubflagOption[] = [
   {
     defaultValue: 10,
     flag: "-ssd",
@@ -34,7 +46,7 @@ const stealDropOptions: SubflagOption[] = [
       "Shuffle Items Stolen and Dropped with given percent randomized",
     label: "Shuffle + Random",
     Renderable: ({ children }) => (
-      <FlagSlider flag="-ssd" helperText="" label={children} />
+      <FlagSlider flag="-sd" helperText="" label={children} />
     ),
   },
 ];
@@ -59,9 +71,18 @@ export const StealCapture = () => {
         />
 
         <FlagSubflagSelect
-          options={stealDropOptions}
+          options={stealRandomOptions}
           nullable={{
-            description: "Steals and Drops are original",
+            description: "Steals are original",
+            label: "Original",
+          }}
+          label="Steals"
+        />
+
+        <FlagSubflagSelect
+          options={dropRandomOptions}
+          nullable={{
+            description: "Drops are original",
             label: "Original",
           }}
           label="Steals & Drops"

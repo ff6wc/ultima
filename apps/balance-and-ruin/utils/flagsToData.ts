@@ -2,6 +2,7 @@ import { FlagValue } from "~/state/schemaSlice";
 
 const SPECIAL_FLAG_REGEX = /^-(com|cspr|cpal|cpor|cspp|name|rls|ir)$/;
 const OBJECTIVE_REGEX = /^(-o[a-z])$/;
+const STARTING_ITEMS_REGEX = /^(-si)$/;
 
 var foo = "-oa 45.-61.45.2.2.2.7.7.4.10.10 -ob 30.8.8.1.1.11.8";
 var FLAG_START_REGEX = /-(?=[a-z])/g;

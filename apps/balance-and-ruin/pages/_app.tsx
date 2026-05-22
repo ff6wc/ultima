@@ -7,7 +7,7 @@ import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { Provider } from "react-redux";
 import { Schema } from "~/state/schemaSlice";
-import { wrapper } from "~/state/store";
+import { makeStore, wrapper } from "~/state/store";
 import "~/styles/globals.css";
 import { AppSessionProvider } from "~/hooks/useAppSession";
 import { ErrorBoundary } from "~/components/ErrorBoundary/ErrorBoundary";
@@ -27,6 +27,7 @@ type Props = {
 
 const App: AppType<Props> = ({ Component, ...rest }: AppProps<Props>) => {
   const { store, props } = wrapper.useWrappedStore(rest);
+  singletonStore = store
 
   useDarkMode();
 

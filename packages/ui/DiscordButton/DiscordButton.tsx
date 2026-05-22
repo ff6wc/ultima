@@ -10,14 +10,14 @@ export const DiscordButton = ({}: {}) => {
         className: "max-w-[500px] min-h-[70px] inline-flex",
         variant: "discord",
       })}
-      href={DISCORD_URL}
+      href={href}
       target="_blank"
     >
       <Image
         alt="Join our Discord community"
         src="/discordwhite.svg"
-        width={155}
-        height={60}
+        width={116}
+        height={45}
       />
     </Link>
   );

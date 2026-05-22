@@ -51,3 +51,20 @@ python -m http.server
 and then open your browser to http://localhost:8000/
 
 The out directory can be uploaded to github pages, cloudflare pages, etc.
+
+## Managing Events
+
+The Events page fetches data from a Google Sheet published as a CSV.
+
+### Google Sheet Setup
+
+1. Create a Google Sheet with the following headers in the first row:
+   `id`, `title`, `status`, `date`, `shortDescription`, `description`, `rules`, `signupLink`, `discordLink`, `image`
+2. Populate the sheet with event data.
+   - **Status**: Must be one of `Upcoming`, `Current`, or `Archived`.
+   - **Rules**: Use `Alt + Enter` within a cell to add multiple rules on separate lines.
+3. Publish the sheet to the web:
+   - **File > Share > Publish to web**
+   - Select the sheet containing events and set the format to **Comma-separated values (.csv)**.
+   - Click **Publish** and copy the generated link.
+4. Update the `EVENTS_CSV_URL` constant in `apps/balance-and-ruin/pages/events.tsx` with your link.

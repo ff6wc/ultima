@@ -1,0 +1,1279 @@
+{
+  "itemsMetadata": [
+    {
+      "id": 0,
+      "name": "Dirk",
+      "hideable": true
+    },
+    {
+      "id": 1,
+      "name": "MithrilKnife",
+      "hideable": true
+    },
+    {
+      "id": 2,
+      "name": "Guardian",
+      "hideable": true
+    },
+    {
+      "id": 3,
+      "name": "Air Lancet",
+      "hideable": true
+    },
+    {
+      "id": 4,
+      "name": "ThiefKnife",
+      "hideable": true
+    },
+    {
+      "id": 5,
+      "name": "Assassin",
+      "hideable": true
+    },
+    {
+      "id": 6,
+      "name": "Man Eater",
+      "hideable": false
+    },
+    {
+      "id": 7,
+      "name": "SwordBreaker",
+      "hideable": false
+    },
+    {
+      "id": 8,
+      "name": "Graedus",
+      "hideable": false
+    },
+    {
+      "id": 9,
+      "name": "ValiantKnife",
+      "hideable": false
+    },
+    {
+      "id": 10,
+      "name": "MithrilBlade",
+      "hideable": true
+    },
+    {
+      "id": 11,
+      "name": "RegalCutlass",
+      "hideable": true
+    },
+    {
+      "id": 12,
+      "name": "Rune Edge",
+      "hideable": true
+    },
+    {
+      "id": 13,
+      "name": "Flame Sabre",
+      "hideable": false
+    },
+    {
+      "id": 14,
+      "name": "Blizzard",
+      "hideable": false
+    },
+    {
+      "id": 15,
+      "name": "ThunderBlade",
+      "hideable": false
+    },
+    {
+      "id": 16,
+      "name": "Epee",
+      "hideable": true
+    },
+    {
+      "id": 17,
+      "name": "Break Blade",
+      "hideable": true
+    },
+    {
+      "id": 18,
+      "name": "Drainer",
+      "hideable": true
+    },
+    {
+      "id": 19,
+      "name": "Enhancer",
+      "hideable": false
+    },
+    {
+      "id": 20,
+      "name": "Crystal",
+      "hideable": true
+    },
+    {
+      "id": 21,
+      "name": "Falchion",
+      "hideable": false
+    },
+    {
+      "id": 22,
+      "name": "Soul Sabre",
+      "hideable": false
+    },
+    {
+      "id": 23,
+      "name": "Ogre Nix",
+      "hideable": true
+    },
+    {
+      "id": 24,
+      "name": "Excalibur",
+      "hideable": false
+    },
+    {
+      "id": 25,
+      "name": "Scimitar",
+      "hideable": false
+    },
+    {
+      "id": 26,
+      "name": "Illumina",
+      "hideable": false
+    },
+    {
+      "id": 27,
+      "name": "Ragnarok",
+      "hideable": false
+    },
+    {
+      "id": 28,
+      "name": "Atma Weapon",
+      "hideable": false
+    },
+    {
+      "id": 29,
+      "name": "Mithril Pike",
+      "hideable": true
+    },
+    {
+      "id": 30,
+      "name": "Trident",
+      "hideable": true
+    },
+    {
+      "id": 31,
+      "name": "Stout Spear",
+      "hideable": true
+    },
+    {
+      "id": 32,
+      "name": "Partisan",
+      "hideable": true
+    },
+    {
+      "id": 33,
+      "name": "Pearl Lance",
+      "hideable": false
+    },
+    {
+      "id": 34,
+      "name": "Gold Lance",
+      "hideable": false
+    },
+    {
+      "id": 35,
+      "name": "Aura Lance",
+      "hideable": false
+    },
+    {
+      "id": 36,
+      "name": "Imp Halberd",
+      "hideable": false
+    },
+    {
+      "id": 37,
+      "name": "Imperial",
+      "hideable": true
+    },
+    {
+      "id": 38,
+      "name": "Kodachi",
+      "hideable": true
+    },
+    {
+      "id": 39,
+      "name": "Blossom",
+      "hideable": true
+    },
+    {
+      "id": 40,
+      "name": "Hardened",
+      "hideable": true
+    },
+    {
+      "id": 41,
+      "name": "Striker",
+      "hideable": false
+    },
+    {
+      "id": 42,
+      "name": "Stunner",
+      "hideable": false
+    },
+    {
+      "id": 43,
+      "name": "Ashura",
+      "hideable": true
+    },
+    {
+      "id": 44,
+      "name": "Kotetsu",
+      "hideable": true
+    },
+    {
+      "id": 45,
+      "name": "Forged",
+      "hideable": true
+    },
+    {
+      "id": 46,
+      "name": "Tempest",
+      "hideable": false
+    },
+    {
+      "id": 47,
+      "name": "Murasame",
+      "hideable": true
+    },
+    {
+      "id": 48,
+      "name": "Aura",
+      "hideable": true
+    },
+    {
+      "id": 49,
+      "name": "Strato",
+      "hideable": false
+    },
+    {
+      "id": 50,
+      "name": "Sky Render",
+      "hideable": false
+    },
+    {
+      "id": 51,
+      "name": "Heal Rod",
+      "hideable": false
+    },
+    {
+      "id": 52,
+      "name": "Mithril Rod",
+      "hideable": true
+    },
+    {
+      "id": 53,
+      "name": "Fire Rod",
+      "hideable": false
+    },
+    {
+      "id": 54,
+      "name": "Ice Rod",
+      "hideable": false
+    },
+    {
+      "id": 55,
+      "name": "Thunder Rod",
+      "hideable": false
+    },
+    {
+      "id": 56,
+      "name": "Poison Rod",
+      "hideable": false
+    },
+    {
+      "id": 57,
+      "name": "Pearl Rod",
+      "hideable": false
+    },
+    {
+      "id": 58,
+      "name": "Gravity Rod",
+      "hideable": false
+    },
+    {
+      "id": 59,
+      "name": "Punisher",
+      "hideable": true
+    },
+    {
+      "id": 60,
+      "name": "Magus Rod",
+      "hideable": false
+    },
+    {
+      "id": 61,
+      "name": "Chocobo Brsh",
+      "hideable": true
+    },
+    {
+      "id": 62,
+      "name": "DaVinci Brsh",
+      "hideable": true
+    },
+    {
+      "id": 63,
+      "name": "Magical Brsh",
+      "hideable": true
+    },
+    {
+      "id": 64,
+      "name": "Rainbow Brsh",
+      "hideable": false
+    },
+    {
+      "id": 65,
+      "name": "Shuriken",
+      "hideable": false
+    },
+    {
+      "id": 66,
+      "name": "Ninja Star",
+      "hideable": false
+    },
+    {
+      "id": 67,
+      "name": "Tack Star",
+      "hideable": false
+    },
+    {
+      "id": 68,
+      "name": "Flail",
+      "hideable": true
+    },
+    {
+      "id": 69,
+      "name": "Full Moon",
+      "hideable": true
+    },
+    {
+      "id": 70,
+      "name": "Morning Star",
+      "hideable": true
+    },
+    {
+      "id": 71,
+      "name": "Boomerang",
+      "hideable": true
+    },
+    {
+      "id": 72,
+      "name": "Rising Sun",
+      "hideable": true
+    },
+    {
+      "id": 73,
+      "name": "Hawk Eye",
+      "hideable": true
+    },
+    {
+      "id": 74,
+      "name": "Bone Club",
+      "hideable": true
+    },
+    {
+      "id": 75,
+      "name": "Sniper",
+      "hideable": false
+    },
+    {
+      "id": 76,
+      "name": "Wing Edge",
+      "hideable": false
+    },
+    {
+      "id": 77,
+      "name": "Cards",
+      "hideable": true
+    },
+    {
+      "id": 78,
+      "name": "Darts",
+      "hideable": true
+    },
+    {
+      "id": 79,
+      "name": "Doom Darts",
+      "hideable": false
+    },
+    {
+      "id": 80,
+      "name": "Trump",
+      "hideable": true
+    },
+    {
+      "id": 81,
+      "name": "Dice",
+      "hideable": true
+    },
+    {
+      "id": 82,
+      "name": "Fixed Dice",
+      "hideable": false
+    },
+    {
+      "id": 83,
+      "name": "MetalKnuckle",
+      "hideable": true
+    },
+    {
+      "id": 84,
+      "name": "Mithril Claw",
+      "hideable": true
+    },
+    {
+      "id": 85,
+      "name": "Kaiser",
+      "hideable": true
+    },
+    {
+      "id": 86,
+      "name": "Poison Claw",
+      "hideable": true
+    },
+    {
+      "id": 87,
+      "name": "Fire Knuckle",
+      "hideable": true
+    },
+    {
+      "id": 88,
+      "name": "Dragon Claw",
+      "hideable": false
+    },
+    {
+      "id": 89,
+      "name": "Tiger Fangs",
+      "hideable": false
+    },
+    {
+      "id": 90,
+      "name": "Buckler",
+      "hideable": true
+    },
+    {
+      "id": 91,
+      "name": "Heavy Shld",
+      "hideable": true
+    },
+    {
+      "id": 92,
+      "name": "Mithril Shld",
+      "hideable": true
+    },
+    {
+      "id": 93,
+      "name": "Gold Shld",
+      "hideable": true
+    },
+    {
+      "id": 94,
+      "name": "Aegis Shld",
+      "hideable": false
+    },
+    {
+      "id": 95,
+      "name": "Diamond Shld",
+      "hideable": true
+    },
+    {
+      "id": 96,
+      "name": "Flame Shld",
+      "hideable": false
+    },
+    {
+      "id": 97,
+      "name": "Ice Shld",
+      "hideable": false
+    },
+    {
+      "id": 98,
+      "name": "Thunder Shld",
+      "hideable": false
+    },
+    {
+      "id": 99,
+      "name": "Crystal Shld",
+      "hideable": true
+    },
+    {
+      "id": 100,
+      "name": "Genji Shld",
+      "hideable": false
+    },
+    {
+      "id": 101,
+      "name": "TortoiseShld",
+      "hideable": false
+    },
+    {
+      "id": 102,
+      "name": "Cursed Shld",
+      "hideable": false
+    },
+    {
+      "id": 103,
+      "name": "Paladin Shld",
+      "hideable": false
+    },
+    {
+      "id": 104,
+      "name": "Force Shld",
+      "hideable": false
+    },
+    {
+      "id": 105,
+      "name": "Leather Hat",
+      "hideable": true
+    },
+    {
+      "id": 106,
+      "name": "Hair Band",
+      "hideable": true
+    },
+    {
+      "id": 107,
+      "name": "Plumed Hat",
+      "hideable": true
+    },
+    {
+      "id": 108,
+      "name": "Beret",
+      "hideable": true
+    },
+    {
+      "id": 109,
+      "name": "Magus Hat",
+      "hideable": false
+    },
+    {
+      "id": 110,
+      "name": "Bandana",
+      "hideable": true
+    },
+    {
+      "id": 111,
+      "name": "Iron Helmet",
+      "hideable": true
+    },
+    {
+      "id": 112,
+      "name": "Coronet",
+      "hideable": true
+    },
+    {
+      "id": 113,
+      "name": "Bard's Hat",
+      "hideable": true
+    },
+    {
+      "id": 114,
+      "name": "Green Beret",
+      "hideable": false
+    },
+    {
+      "id": 115,
+      "name": "Head Band",
+      "hideable": false
+    },
+    {
+      "id": 116,
+      "name": "Mithril Helm",
+      "hideable": true
+    },
+    {
+      "id": 117,
+      "name": "Tiara",
+      "hideable": true
+    },
+    {
+      "id": 118,
+      "name": "Gold Helmet",
+      "hideable": true
+    },
+    {
+      "id": 119,
+      "name": "Tiger Mask",
+      "hideable": true
+    },
+    {
+      "id": 120,
+      "name": "Red Cap",
+      "hideable": false
+    },
+    {
+      "id": 121,
+      "name": "Mystery Veil",
+      "hideable": false
+    },
+    {
+      "id": 122,
+      "name": "Circlet",
+      "hideable": false
+    },
+    {
+      "id": 123,
+      "name": "Regal Crown",
+      "hideable": false
+    },
+    {
+      "id": 124,
+      "name": "Diamond Helm",
+      "hideable": true
+    },
+    {
+      "id": 125,
+      "name": "Dark Hood",
+      "hideable": true
+    },
+    {
+      "id": 126,
+      "name": "Crystal Helm",
+      "hideable": true
+    },
+    {
+      "id": 127,
+      "name": "Oath Veil",
+      "hideable": true
+    },
+    {
+      "id": 128,
+      "name": "Cat Hood",
+      "hideable": false
+    },
+    {
+      "id": 129,
+      "name": "Genji Helmet",
+      "hideable": false
+    },
+    {
+      "id": 130,
+      "name": "Thornlet",
+      "hideable": true
+    },
+    {
+      "id": 131,
+      "name": "Titanium",
+      "hideable": false
+    },
+    {
+      "id": 132,
+      "name": "LeatherArmor",
+      "hideable": true
+    },
+    {
+      "id": 133,
+      "name": "Cotton Robe",
+      "hideable": true
+    },
+    {
+      "id": 134,
+      "name": "Kung Fu Suit",
+      "hideable": true
+    },
+    {
+      "id": 135,
+      "name": "Iron Armor",
+      "hideable": true
+    },
+    {
+      "id": 136,
+      "name": "Silk Robe",
+      "hideable": true
+    },
+    {
+      "id": 137,
+      "name": "Mithril Vest",
+      "hideable": true
+    },
+    {
+      "id": 138,
+      "name": "Ninja Gear",
+      "hideable": true
+    },
+    {
+      "id": 139,
+      "name": "White Dress",
+      "hideable": false
+    },
+    {
+      "id": 140,
+      "name": "Mithril Mail",
+      "hideable": true
+    },
+    {
+      "id": 141,
+      "name": "Gaia Gear",
+      "hideable": false
+    },
+    {
+      "id": 142,
+      "name": "Mirage Vest",
+      "hideable": false
+    },
+    {
+      "id": 143,
+      "name": "Gold Armor",
+      "hideable": true
+    },
+    {
+      "id": 144,
+      "name": "Power Sash",
+      "hideable": false
+    },
+    {
+      "id": 145,
+      "name": "Light Robe",
+      "hideable": true
+    },
+    {
+      "id": 146,
+      "name": "Diamond Vest",
+      "hideable": true
+    },
+    {
+      "id": 147,
+      "name": "Red Jacket",
+      "hideable": false
+    },
+    {
+      "id": 148,
+      "name": "Force Armor",
+      "hideable": false
+    },
+    {
+      "id": 149,
+      "name": "DiamondArmor",
+      "hideable": true
+    },
+    {
+      "id": 150,
+      "name": "Dark Gear",
+      "hideable": true
+    },
+    {
+      "id": 151,
+      "name": "Tao Robe",
+      "hideable": false
+    },
+    {
+      "id": 152,
+      "name": "Crystal Mail",
+      "hideable": true
+    },
+    {
+      "id": 153,
+      "name": "Czarina Gown",
+      "hideable": false
+    },
+    {
+      "id": 154,
+      "name": "Genji Armor",
+      "hideable": false
+    },
+    {
+      "id": 155,
+      "name": "Imp's Armor",
+      "hideable": false
+    },
+    {
+      "id": 156,
+      "name": "Minerva",
+      "hideable": false
+    },
+    {
+      "id": 157,
+      "name": "Tabby Suit",
+      "hideable": true
+    },
+    {
+      "id": 158,
+      "name": "Chocobo Suit",
+      "hideable": true
+    },
+    {
+      "id": 159,
+      "name": "Moogle Suit",
+      "hideable": false
+    },
+    {
+      "id": 160,
+      "name": "Nutkin Suit",
+      "hideable": false
+    },
+    {
+      "id": 161,
+      "name": "BehemothSuit",
+      "hideable": false
+    },
+    {
+      "id": 162,
+      "name": "Snow Muffler",
+      "hideable": false
+    },
+    {
+      "id": 163,
+      "name": "NoiseBlaster",
+      "hideable": false
+    },
+    {
+      "id": 164,
+      "name": "Bio Blaster",
+      "hideable": true
+    },
+    {
+      "id": 165,
+      "name": "Flash",
+      "hideable": false
+    },
+    {
+      "id": 166,
+      "name": "Chain Saw",
+      "hideable": false
+    },
+    {
+      "id": 167,
+      "name": "Debilitator",
+      "hideable": false
+    },
+    {
+      "id": 168,
+      "name": "Drill",
+      "hideable": false
+    },
+    {
+      "id": 169,
+      "name": "Air Anchor",
+      "hideable": false
+    },
+    {
+      "id": 170,
+      "name": "AutoCrossbow",
+      "hideable": true
+    },
+    {
+      "id": 171,
+      "name": "Fire Skean",
+      "hideable": false
+    },
+    {
+      "id": 172,
+      "name": "Water Edge",
+      "hideable": false
+    },
+    {
+      "id": 173,
+      "name": "Bolt Edge",
+      "hideable": false
+    },
+    {
+      "id": 174,
+      "name": "Inviz Edge",
+      "hideable": true
+    },
+    {
+      "id": 175,
+      "name": "Shadow Edge",
+      "hideable": true
+    },
+    {
+      "id": 176,
+      "name": "Goggles",
+      "hideable": true
+    },
+    {
+      "id": 177,
+      "name": "Star Pendant",
+      "hideable": true
+    },
+    {
+      "id": 178,
+      "name": "Peace Ring",
+      "hideable": false
+    },
+    {
+      "id": 179,
+      "name": "Amulet",
+      "hideable": true
+    },
+    {
+      "id": 180,
+      "name": "White Cape",
+      "hideable": false
+    },
+    {
+      "id": 181,
+      "name": "Jewel Ring",
+      "hideable": true
+    },
+    {
+      "id": 182,
+      "name": "Fairy Ring",
+      "hideable": true
+    },
+    {
+      "id": 183,
+      "name": "Barrier Ring",
+      "hideable": true
+    },
+    {
+      "id": 184,
+      "name": "MithrilGlove",
+      "hideable": true
+    },
+    {
+      "id": 185,
+      "name": "Guard Ring",
+      "hideable": true
+    },
+    {
+      "id": 186,
+      "name": "RunningShoes",
+      "hideable": false
+    },
+    {
+      "id": 187,
+      "name": "Wall Ring",
+      "hideable": false
+    },
+    {
+      "id": 188,
+      "name": "Cherub Down",
+      "hideable": false
+    },
+    {
+      "id": 189,
+      "name": "Cure Ring",
+      "hideable": true
+    },
+    {
+      "id": 190,
+      "name": "True Knight",
+      "hideable": false
+    },
+    {
+      "id": 191,
+      "name": "DragoonBoots",
+      "hideable": false
+    },
+    {
+      "id": 192,
+      "name": "Zephyr Cape",
+      "hideable": false
+    },
+    {
+      "id": 193,
+      "name": "Czarina Ring",
+      "hideable": true
+    },
+    {
+      "id": 194,
+      "name": "Cursed Ring",
+      "hideable": false
+    },
+    {
+      "id": 195,
+      "name": "Earrings",
+      "hideable": false
+    },
+    {
+      "id": 196,
+      "name": "Atlas Armlet",
+      "hideable": false
+    },
+    {
+      "id": 197,
+      "name": "Blizzard Orb",
+      "hideable": false
+    },
+    {
+      "id": 198,
+      "name": "Rage Ring",
+      "hideable": false
+    },
+    {
+      "id": 199,
+      "name": "Sneak Ring",
+      "hideable": true
+    },
+    {
+      "id": 200,
+      "name": "Pod Bracelet",
+      "hideable": false
+    },
+    {
+      "id": 201,
+      "name": "Hero Ring",
+      "hideable": false
+    },
+    {
+      "id": 202,
+      "name": "Ribbon",
+      "hideable": false
+    },
+    {
+      "id": 203,
+      "name": "Muscle Belt",
+      "hideable": false
+    },
+    {
+      "id": 204,
+      "name": "Crystal Orb",
+      "hideable": false
+    },
+    {
+      "id": 205,
+      "name": "Gold Hairpin",
+      "hideable": false
+    },
+    {
+      "id": 206,
+      "name": "Economizer",
+      "hideable": false
+    },
+    {
+      "id": 207,
+      "name": "Thief Glove",
+      "hideable": true
+    },
+    {
+      "id": 208,
+      "name": "Gauntlet",
+      "hideable": false
+    },
+    {
+      "id": 209,
+      "name": "Genji Glove",
+      "hideable": false
+    },
+    {
+      "id": 210,
+      "name": "Hyper Wrist",
+      "hideable": false
+    },
+    {
+      "id": 211,
+      "name": "Offering",
+      "hideable": false
+    },
+    {
+      "id": 212,
+      "name": "Beads",
+      "hideable": false
+    },
+    {
+      "id": 213,
+      "name": "Black Belt",
+      "hideable": true
+    },
+    {
+      "id": 214,
+      "name": "Coin Toss",
+      "hideable": true
+    },
+    {
+      "id": 215,
+      "name": "FakeMustache",
+      "hideable": true
+    },
+    {
+      "id": 216,
+      "name": "Gem Box",
+      "hideable": false
+    },
+    {
+      "id": 217,
+      "name": "Dragon Horn",
+      "hideable": false
+    },
+    {
+      "id": 218,
+      "name": "Merit Award",
+      "hideable": false
+    },
+    {
+      "id": 219,
+      "name": "Memento Ring",
+      "hideable": false
+    },
+    {
+      "id": 220,
+      "name": "Safety Bit",
+      "hideable": false
+    },
+    {
+      "id": 221,
+      "name": "Relic Ring",
+      "hideable": true
+    },
+    {
+      "id": 222,
+      "name": "Moogle Charm",
+      "hideable": false
+    },
+    {
+      "id": 223,
+      "name": "Charm Bangle",
+      "hideable": true
+    },
+    {
+      "id": 224,
+      "name": "Marvel Shoes",
+      "hideable": false
+    },
+    {
+      "id": 225,
+      "name": "Back Guard",
+      "hideable": false
+    },
+    {
+      "id": 226,
+      "name": "Gale Hairpin",
+      "hideable": true
+    },
+    {
+      "id": 227,
+      "name": "Sniper Sight",
+      "hideable": true
+    },
+    {
+      "id": 228,
+      "name": "Exp. Egg",
+      "hideable": false
+    },
+    {
+      "id": 229,
+      "name": "Tintinabar",
+      "hideable": true
+    },
+    {
+      "id": 230,
+      "name": "Sprint Shoes",
+      "hideable": false
+    },
+    {
+      "id": 231,
+      "name": "Rename Card",
+      "hideable": true
+    },
+    {
+      "id": 232,
+      "name": "Tonic",
+      "hideable": false
+    },
+    {
+      "id": 233,
+      "name": "Potion",
+      "hideable": false
+    },
+    {
+      "id": 234,
+      "name": "X-Potion",
+      "hideable": false
+    },
+    {
+      "id": 235,
+      "name": "Tincture",
+      "hideable": false
+    },
+    {
+      "id": 236,
+      "name": "Ether",
+      "hideable": false
+    },
+    {
+      "id": 237,
+      "name": "X-Ether",
+      "hideable": false
+    },
+    {
+      "id": 238,
+      "name": "Elixir",
+      "hideable": false
+    },
+    {
+      "id": 239,
+      "name": "Megalixir",
+      "hideable": false
+    },
+    {
+      "id": 240,
+      "name": "Fenix Down",
+      "hideable": false
+    },
+    {
+      "id": 241,
+      "name": "Revivify",
+      "hideable": false
+    },
+    {
+      "id": 242,
+      "name": "Antidote",
+      "hideable": false
+    },
+    {
+      "id": 243,
+      "name": "Eyedrop",
+      "hideable": false
+    },
+    {
+      "id": 244,
+      "name": "Soft",
+      "hideable": false
+    },
+    {
+      "id": 245,
+      "name": "Remedy",
+      "hideable": false
+    },
+    {
+      "id": 246,
+      "name": "Sleeping Bag",
+      "hideable": false
+    },
+    {
+      "id": 247,
+      "name": "Tent",
+      "hideable": false
+    },
+    {
+      "id": 248,
+      "name": "Green Cherry",
+      "hideable": false
+    },
+    {
+      "id": 249,
+      "name": "Magicite",
+      "hideable": true
+    },
+    {
+      "id": 250,
+      "name": "Super Ball",
+      "hideable": false
+    },
+    {
+      "id": 251,
+      "name": "Echo Screen",
+      "hideable": false
+    },
+    {
+      "id": 252,
+      "name": "Smoke Bomb",
+      "hideable": false
+    },
+    {
+      "id": 253,
+      "name": "Warp Stone",
+      "hideable": false
+    },
+    {
+      "id": 254,
+      "name": "Dried Meat",
+      "hideable": false
+    }
+  ]
+}

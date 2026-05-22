@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { FlagCreatePage } from "~/components/FlagCreatePage/FlagCreatePage";
 import { setRawFlags } from "~/state/flagSlice";
+import { setRawObjectives } from "~/state/objectiveSlice";
+import { setRawStartingItems } from "~/state/itemSlice";
 import { setObjectiveMetadata } from "~/state/objectiveSlice";
 import { RawFlagMetadata, setSchema } from "~/state/schemaSlice";
 import { ObjectiveMetadata } from "~/types/objectives";
@@ -14,6 +16,16 @@ export type PageProps = {
   presets: Record<string, FlagPreset>;
   schema: Record<string, RawFlagMetadata>;
 };
+
+const DecodeB64QueryStringParam  = (param: string) => {
+  let base64 = param.replace(/-/g, '+').replace(/_/g, '/');
+  // Add padding if necessary
+  while (base64.length % 4 !== 0) {
+    base64 += '=';
+  }
+  const buf = Buffer.from(base64, "base64")
+  return buf.toString("utf-8")
+}
 
 const Create = () => {
   const dispatch = useDispatch();
