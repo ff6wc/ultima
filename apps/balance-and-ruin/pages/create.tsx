@@ -52,24 +52,36 @@ const Create = () => {
 
       if (cachedObjectives) {
         const parsed = JSON.parse(cachedObjectives);
-        setObjectives(parsed);
-        dispatch(setObjectiveMetadata(parsed));
+        if (parsed && typeof parsed === "object") {
+          setObjectives(parsed);
+          dispatch(setObjectiveMetadata(parsed));
+        }
       }
       if (cachedPresets) {
-        const parsed = normalizePresets(JSON.parse(cachedPresets));
-        setPresets(parsed);
-        const preset = parsed["ultros league"];
-        if (preset) {
-          dispatch(setRawFlags(preset.flags));
+        const parsed = JSON.parse(cachedPresets);
+        if (parsed && typeof parsed === "object") {
+          const normalized = normalizePresets(parsed);
+          if (normalized && Object.keys(normalized).length > 0) {
+            setPresets(normalized);
+            const preset = normalized["ultros league"];
+            if (preset) {
+              dispatch(setRawFlags(preset.flags));
+            }
+          }
         }
       }
       if (cachedSchema) {
         const parsed = JSON.parse(cachedSchema);
-        setSchemaLocal(parsed);
-        dispatch(setSchema(parsed));
+        if (parsed && typeof parsed === "object") {
+          setSchemaLocal(parsed);
+          dispatch(setSchema(parsed));
+        }
       }
       if (cachedVersion) {
-        setVersion(JSON.parse(cachedVersion));
+        const parsed = JSON.parse(cachedVersion);
+        if (parsed && typeof parsed === "string") {
+          setVersion(parsed);
+        }
       }
     } catch (e) {
       console.warn("Failed to parse cached metadata:", e);
@@ -195,6 +207,16 @@ const Create = () => {
         <div className="flex flex-col items-center gap-4">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
           <p className="animate-pulse">Loading Worlds Collide...</p>
+          <div className="text-xs text-slate-500 mt-4 font-mono border border-slate-800 rounded bg-slate-900/50 p-4 max-w-sm text-left">
+            <h4 className="font-bold text-slate-400 mb-2 uppercase tracking-wider text-[10px]">Diagnostics Panel</h4>
+            <div className="flex flex-col gap-1">
+              <div>• Mounted: <span className={isMounted ? "text-emerald-400" : "text-amber-500"}>{isMounted ? "Yes" : "No (Waiting...)"}</span></div>
+              <div>• Objectives: <span className={objectives ? "text-emerald-400" : "text-amber-500"}>{objectives ? "Loaded" : "Missing"}</span></div>
+              <div>• Presets: <span className={presets ? "text-emerald-400" : "text-amber-500"}>{presets ? "Loaded" : "Missing"}</span></div>
+              <div>• Flag Schema: <span className={schema ? "text-emerald-400" : "text-amber-500"}>{schema ? "Loaded" : "Missing"}</span></div>
+              <div>• Version: <span className={version ? "text-emerald-400" : "text-amber-500"}>{version ? `v${version}` : "Missing"}</span></div>
+            </div>
+          </div>
         </div>
       </div>
     );
