@@ -10,7 +10,7 @@ export const DiscordButton = ({}: {}) => {
         className: "max-w-[500px] min-h-[70px] inline-flex",
         variant: "discord",
       })}
-      href={href}
+      href={DISCORD_URL}
       target="_blank"
     >
       <Image

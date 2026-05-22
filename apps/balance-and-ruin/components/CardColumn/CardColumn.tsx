@@ -1,5 +1,5 @@
 export type CardColumnProps = {
-  children: React.ReactNode;
+  children?: React.ReactNode;
 };
 
 export const CardColumn = ({ children }: CardColumnProps) => {

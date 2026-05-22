@@ -1,4 +1,5 @@
 import { ButtonLink, DiscordButton, Header } from "@ff6wc/ui";
+import { useRouter } from "next/router";
 import { HiPencil } from "react-icons/hi";
 import { WIKI_URL } from "~/../../packages/utils/constants";
 import { SotwButton } from "~/components/SotwButton/SotwButton";

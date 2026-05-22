@@ -622,7 +622,7 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                       ? lastSelectedId 
                       : Object.keys(selectedIds).find(id => selectedIds[id]);
                     if (confirmId) {
-                      setShowConfirm(prev => ({ ...prev, [confirmId]: true }));
+                      setShowConfirm(prev => ({ ...prev, [confirmId as string]: true }));
                     }
                   }}
                   style={{

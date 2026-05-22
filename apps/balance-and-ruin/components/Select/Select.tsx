@@ -5,7 +5,7 @@ import { cx } from "cva";
 import { renderDescription } from "~/utils/renderDescription";
 
 export type SelectOption = {
-  readonly helperText?: React.ReactNode;
+  readonly helperText?: React.ReactNode | ((value: any) => React.ReactNode);
   readonly value: string;
   readonly label: string;
   readonly defaultValue?: any;
@@ -137,7 +137,7 @@ export const Select = ({
         {({ open }) => (
           <div className="relative">
             <Listbox.Button
-              onKeyDown={(e) => handleKeyDown(e, open)}
+              onKeyDown={(e: KeyboardEvent<HTMLButtonElement>) => handleKeyDown(e, open)}
               className={cx(
                 "relative w-full min-h-[42px] py-2 pl-3 pr-10 text-left transition-all duration-200 cursor-pointer",
                 "bg-[var(--bg-input)] border border-[var(--border-input)] rounded shadow-sm",
@@ -211,7 +211,7 @@ export const Select = ({
                             <div className="sticky top-0 z-10 px-4 py-1.5 text-xs font-bold tracking-wider uppercase bg-slate-800/30 text-blue-400 select-none backdrop-blur-sm border-b border-t border-[var(--border-light)]/10">
                               {item.label}
                             </div>
-                            {item.options.map((option, subIdx) => (
+                            {item.options.map((option: SelectOption, subIdx: number) => (
                               <Listbox.Option
                                 key={`${option.value}-${subIdx}`}
                                 className={({ active, selected }) =>

@@ -14,7 +14,7 @@ import { renderDescription } from "~/utils/renderDescription";
 
 export type BaseFlagSelectOption = {
   label: string;
-  helperText?: React.ReactNode;
+  helperText?: React.ReactNode | ((value: any) => React.ReactNode);
   defaultValue?: FlagValue;
 };
 
@@ -96,15 +96,10 @@ export const FlagSelect = ({
   };
 
   const selectedOption = value ?? defaultValue;
-  let valueDescription: React.ReactNode;
-  if (typeof selectedOption?.helperText === "function") {
-    // valueDescription = selectedOption.helperText(selectedOption.value);
-  } else {
-    valueDescription = renderDescription(
-      selectedOption?.helperText,
-      selectedOption?.value ?? null,
-    );
-  }
+  const valueDescription = renderDescription(
+    selectedOption?.helperText,
+    selectedOption?.value ?? null,
+  );
 
   return (
     <div className="flex flex-col gap-1">

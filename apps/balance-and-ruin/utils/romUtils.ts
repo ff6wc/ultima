@@ -1,7 +1,6 @@
 import {
   DEFAULT_IN_GAME_CONFIG,
   WINDOW_PALETTE_DEFAULTS,
-  FONT_PALETTE_DEFAULTS,
 } from "~/types/inGameConfig";
 
 const headerSize = 0x200;

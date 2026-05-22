@@ -29,10 +29,10 @@ const DecodeB64QueryStringParam  = (param: string) => {
 
 const Create = () => {
   const dispatch = useDispatch();
-  const [objectives, setObjectives] = useState(null);
-  const [presets, setPresets] = useState(null);
-  const [schema, setSchemaLocal] = useState(null);
-  const [version, setVersion] = useState(null);
+  const [objectives, setObjectives] = useState<ObjectiveMetadata | null>(null);
+  const [presets, setPresets] = useState<Record<string, FlagPreset> | null>(null);
+  const [schema, setSchemaLocal] = useState<Record<string, RawFlagMetadata> | null>(null);
+  const [version, setVersion] = useState<string | null>(null);
 
   useEffect(() => {
     // 1. Try to load initial values from localStorage cache for instant load

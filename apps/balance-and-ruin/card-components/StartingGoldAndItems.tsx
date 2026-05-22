@@ -1,13 +1,26 @@
 import { Card } from "@ff6wc/ui";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { CardColumn } from "~/components/CardColumn/CardColumn";
 import { FlagLabel } from "~/components/FlagLabel/FlagLabel";
 import { FlagNumberInput } from "~/components/FlagNumberInput/FlagNumberInput";
 import { FlagSlider } from "~/components/FlagSlider/FlagSlider";
 import { FlagTextInput } from "~/components/FlagInput/FlagInput";
+import { setFlag } from "~/state/flagSlice";
+import { selectStartingItems, setItems } from "~/state/itemSlice";
+import { StartingItem, StartingItems } from "~/types/starting_items";
+import { startingItemsToString } from "~/utils/startingItemsToString";
+import { StartingItemsAddItemButton } from "~/components/StartingItemsAddItemButton/StartingItemsAddItemButton";
+import { StartingItemSelect } from "~/components/StartingItemSelect/StartingItemSelect";
 
-export const StartingGoldAndItems = ({ items, curateItems }: StartingItemsProps) => {
+export interface StartingItemsProps {
+  items?: StartingItems;
+  curateItems?: boolean;
+}
+
+export const StartingGoldAndItems = ({ items: propsItems, curateItems = false }: StartingItemsProps) => {
   const dispatch = useDispatch();
+  const reduxItems = useSelector(selectStartingItems);
+  const items = propsItems ?? reduxItems;
 
   const onItemChange = (items: StartingItems) => {
     const sits = startingItemsToString;
@@ -79,7 +92,7 @@ export const StartingGoldAndItems = ({ items, curateItems }: StartingItemsProps)
         </div>
         <div className={"max-h-96 overflow-y-auto overflow-x-auto"}>
           <div className={"max-w-md"}>
-            {items.items.map((i, idx) => (
+            {items.items.map((i: StartingItem, idx: number) => (
               <StartingItemSelect
                 item={i}
                 key={idx}

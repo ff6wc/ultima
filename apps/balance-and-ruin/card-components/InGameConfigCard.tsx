@@ -724,7 +724,7 @@ function applyValueSelection(s: State, row: OptionRow, val: string | number): St
 
 let globalManifest: any = null;
 const globalWindowAssets: Record<number, WindowAsset> = {};
-const loadingPromises: Record<number, Promise<void>> = {};
+const loadingPromises: Record<number, Promise<void> | undefined> = {};
 const globalMagOrder: Record<number, ImageData> = {};
 let globalMagOrderBbox: [number, number, number, number] | null = null;
 

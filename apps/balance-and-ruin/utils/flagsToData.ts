@@ -62,3 +62,24 @@ export const objectivesToData = (rawFlags: string): Record<string, string> => {
     {} as Record<string, string>,
   );
 };
+
+export const startingItemsToData = (rawFlags: string): Record<string, string> => {
+  const flags = rawFlags
+    .split(FLAG_START_REGEX)
+    .filter((flag) => flag)
+    .map((flag) => `-${flag.trim()}`);
+
+  return flags.reduce(
+    (acc, flagWithValue) => {
+      const [key, val1] = flagWithValue.split(" ");
+      const isStartingItem = STARTING_ITEMS_REGEX.test(key);
+
+      if (!isStartingItem) {
+        return acc;
+      }
+      acc[key] = val1;
+      return acc;
+    },
+    {} as Record<string, string>,
+  );
+};
