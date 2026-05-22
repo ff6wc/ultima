@@ -31,6 +31,17 @@ export const SeedDetails = ({ seedId }: SeedDetailsProps) => {
   const [romData, setRomData] = useState<string | null>(null);
   const [romName, setRomName] = useState("");
   const [errorState, setErrorState] = useState<string | null>(null);
+  const [romSelectError, setRomSelectError] = useState<string | null>(null);
+  const [isGeneratingExact, setIsGeneratingExact] = useState(false);
+
+  const autoRollRef = useRef(false);
+
+  const ext = romName.slice(romName.length - 7, romName.length);
+  const displayRomName = !romName
+    ? ""
+    : romName.length > 20
+      ? romName.slice(0, 8).concat("...", ext)
+      : romName;
 
   const { executeRecaptcha } = useGoogleReCaptcha();
 
@@ -52,6 +63,14 @@ export const SeedDetails = ({ seedId }: SeedDetailsProps) => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
+  };
+
+  const clearRomValues = () => {
+    localStorage.removeItem("rom_name");
+    localStorage.removeItem("rom_data");
+    setRomName("");
+    setRomData(null);
+    setRomSelectError(null);
   };
 
   useEffect(() => {
@@ -156,9 +175,53 @@ export const SeedDetails = ({ seedId }: SeedDetailsProps) => {
     }
   };
 
+  const executeGenerateExact = async (currentRomData: string) => {
+    if (!seed || isGeneratingExact) {
+      return;
+    }
+    setIsGeneratingExact(true);
+    setRomSelectError(null);
+
+    try {
+      const { filename, patch, log } = seed;
+
+      // Perform standard base ROM patching stream using standard decoder logic
+      const patched = XDelta3Decoder.decode(
+        base64ToByteArray(patch as string),
+        base64ToByteArray(currentRomData),
+      );
+
+      applyInGameConfig(patched);
+
+      // Zip the components and release as file attachment stream
+      const jsz = new JSZip();
+      let zip = jsz.file(`${filename}.smc`, patched, { binary: true });
+      zip = jsz.file(`${filename}.txt`, log);
+      await zip.generateAsync({ type: "blob" }).then((content) => {
+        var link = document.createElement("a");
+        link.href = window.URL.createObjectURL(content);
+        link.download = `${filename}.zip`;
+        link.click();
+      });
+    } catch (err) {
+      setRomSelectError((err as Error).message);
+    } finally {
+      setIsGeneratingExact(false);
+    }
+  };
+
   const handleGenerateClick = () => {
     if (romData) {
       rollNewSeed(romData);
+    } else {
+      autoRollRef.current = true;
+      inputRef.current?.click();
+    }
+  };
+
+  const handleGenerateExactClick = () => {
+    if (romData) {
+      executeGenerateExact(romData);
     } else {
       inputRef.current?.click();
     }
@@ -174,7 +237,8 @@ export const SeedDetails = ({ seedId }: SeedDetailsProps) => {
 
         let result = await isValidROM(rom_data);
         if (!result.success) {
-          setErrorState(`${result.message}`);
+          setRomSelectError(`${result.message}`);
+          autoRollRef.current = false;
           return;
         }
 
@@ -186,7 +250,7 @@ export const SeedDetails = ({ seedId }: SeedDetailsProps) => {
         }
 
         data_string = btoa(data_string);
-        setErrorState(null);
+        setRomSelectError(null);
 
         try {
           localStorage.setItem("rom_data", data_string);
@@ -194,8 +258,11 @@ export const SeedDetails = ({ seedId }: SeedDetailsProps) => {
           setRomData(data_string);
           setRomName(file.name);
 
-          // Seamless execution flow immediately upon validation success
-          await rollNewSeed(data_string);
+          // If the user clicked "Generate (New Seed)" without a ROM, automatically trigger rolling it.
+          if (autoRollRef.current) {
+            autoRollRef.current = false;
+            await rollNewSeed(data_string);
+          }
         } catch (e) {
           return;
         }
@@ -226,41 +293,120 @@ export const SeedDetails = ({ seedId }: SeedDetailsProps) => {
                   readOnly
                   value={seed.flags}
                 />
-                <div className="flex flex-col items-end gap-2 mt-1">
-                  {errorState && (
-                    <span className="text-xs font-medium text-red-500 dark:text-red-400 mb-1 bg-red-500/5 px-3 py-1 rounded border border-red-500/10">
-                      {errorState}
+              </div>
+            </div>
+          )}
+        </CardColumn>
+      </Card>
+
+      {seed && (
+        <Card className="w-full shadow-lg" title={"Generate"}>
+          <CardColumn>
+            <div className="flex flex-col gap-4 w-full col-span-full">
+              {/* Step 1 */}
+              <div className="flex flex-col gap-1">
+                <h4 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                  Step 1: Verify the flags and seed above are correct
+                </h4>
+              </div>
+
+              <div className="border-t border-neutral-200 dark:border-neutral-700 w-full" />
+
+              {/* Step 2 */}
+              <div className="flex flex-col gap-2">
+                <h4 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                  Step 2: Select v1.0 US ROM file by clicking the input below
+                </h4>
+                
+                {romData ? (
+                  <div className="flex items-center flex-wrap gap-x-4 gap-y-2 bg-slate-50 dark:bg-slate-800/40 py-2.5 px-4 border border-slate-200 dark:border-slate-800 rounded-lg">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-green-500/10 text-green-500 border border-green-500/20">
+                      Valid ROM
                     </span>
-                  )}
-                  <div className="flex justify-end gap-3 items-center flex-wrap">
+                    <span className="text-sm text-slate-600 dark:text-slate-300 flex-grow">
+                      ROM named <strong className="font-mono underline text-slate-800 dark:text-white font-medium" title={romName}>{displayRomName}</strong> was previously uploaded and validated. To select another ROM, click Clear ROM.
+                    </span>
+                    <button
+                      onClick={clearRomValues}
+                      className="flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-1.5 px-3 rounded-md transition-colors active:scale-95 shadow-sm"
+                    >
+                      ✕ Clear ROM
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 bg-slate-50 dark:bg-slate-800/40 py-2.5 px-4 border border-slate-200 dark:border-slate-800 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                        Waiting for ROM upload
+                      </span>
+                      <span className="text-sm text-slate-500 dark:text-slate-400 hidden sm:inline">
+                        Once you have selected a valid ROM it will be reused for future visits.
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => inputRef.current?.click()}
+                      className="w-fit whitespace-nowrap flex items-center justify-center gap-2 transition-all duration-200 px-4 py-2 rounded-lg font-bold font-sans text-xs text-white bg-blue-600 hover:bg-blue-700 active:scale-[0.98] shadow-sm outline-none select-none"
+                    >
+                      Upload v1.0 US ROM file
+                    </button>
+                  </div>
+                )}
+                {romSelectError && (
+                  <div className="text-red-500 dark:text-red-400 font-medium text-xs bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-2 mt-1 self-start font-sans">
+                    {romSelectError}
+                  </div>
+                )}
+              </div>
+
+              <div className="border-t border-neutral-200 dark:border-neutral-700 w-full" />
+
+              {/* Step 3 */}
+              <div className="flex flex-col gap-2">
+                <h4 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                  Step 3: Click Generate!
+                </h4>
+                <div className="flex justify-between items-center flex-wrap gap-4 mt-1">
+                  {/* Exact Generate Button */}
+                  <button
+                    onClick={handleGenerateExactClick}
+                    disabled={!romData || isGeneratingExact}
+                    className="whitespace-nowrap flex items-center justify-center gap-2 transition-all duration-200 px-8 py-3 rounded-lg font-bold font-sans text-base text-white bg-blue-600 hover:bg-blue-700 disabled:bg-slate-500 dark:disabled:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] shadow-md outline-none select-none"
+                  >
+                    {isGeneratingExact ? "Generating..." : "Generate"}
+                  </button>
+
+                  {/* Copy Flags & New Seed Buttons (Right-aligned) */}
+                  <div className="flex items-center gap-3 flex-wrap">
+                    {errorState && (
+                      <span className="text-xs font-medium text-red-500 dark:text-red-400 bg-red-500/5 px-3 py-1.5 rounded border border-red-500/10">
+                        {errorState}
+                      </span>
+                    )}
+
                     <button
                       onClick={handleCopy}
-                      className={`whitespace-nowrap flex items-center justify-center gap-2 transition-all duration-200 px-6 py-2.5 rounded-lg font-semibold font-sans text-sm border shadow-sm outline-none select-none active:scale-[0.98] ${
+                      className={`whitespace-nowrap flex items-center justify-center gap-2 transition-all duration-200 px-5 py-2.5 rounded-lg font-semibold font-sans text-sm border shadow-sm outline-none select-none active:scale-[0.98] ${
                         copied
                           ? "border-green-500 text-green-600 bg-green-50 hover:bg-green-100"
-                          : "border-slate-300 text-slate-700 bg-white hover:bg-slate-50 hover:border-slate-400"
+                          : "border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700"
                       }`}
                     >
                       {copied ? (
                         <HiCheck size={18} className="text-green-600" />
                       ) : (
-                        <HiClipboardCopy size={18} className="text-slate-600" />
+                        <HiClipboardCopy size={18} className="text-slate-600 dark:text-slate-300" />
                       )}
-                      <span
-                        className={copied ? "text-green-600" : "text-slate-700"}
-                      >
-                        {copied ? "Copied!" : "Copy Flags"}
-                      </span>
+                      <span>{copied ? "Copied!" : "Copy Flags"}</span>
                     </button>
 
                     <button
                       onClick={handleGenerateClick}
                       disabled={isMutating}
-                      className="whitespace-nowrap flex items-center justify-center gap-2 transition-all duration-200 px-6 py-2.5 rounded-lg font-bold font-sans text-sm text-white bg-[#2c3859] hover:bg-[#1e293b] active:scale-[0.98] shadow-sm outline-none select-none disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="whitespace-nowrap flex items-center justify-center gap-2 transition-all duration-200 px-5 py-2.5 rounded-lg font-bold font-sans text-sm text-white bg-[#2c3859] hover:bg-[#1e293b] active:scale-[0.98] shadow-sm outline-none select-none disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <HiPlay size={18} />
                       <span>
-                        {isMutating ? "Generating..." : "Generate Another ROM"}
+                        {isMutating ? "Generating..." : "Generate (New Seed)"}
                       </span>
                     </button>
 
@@ -277,9 +423,9 @@ export const SeedDetails = ({ seedId }: SeedDetailsProps) => {
                 </div>
               </div>
             </div>
-          )}
-        </CardColumn>
-      </Card>
+          </CardColumn>
+        </Card>
+      )}
     </div>
   );
 };
