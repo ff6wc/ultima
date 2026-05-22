@@ -731,6 +731,9 @@ function analyzeDifficulty(
   if (hasFlag(fv, "-sie")) {
     bullets.push({ text: "All shop inventories empty — items must be sourced from the field", severity: "hard" });
     delta += 18;
+  } else if (hasFlag(fv, "-sirt")) {
+    bullets.push({ text: "Shops: tiered random — higher tier items are less likely to be sold", severity: "medium" });
+    delta += 6;
   } else {
     const sisr = flagNum(fv, "-sisr") ?? 0;
     const shopSev: BulletSeverity = sisr > 60 ? "medium" : "info";
@@ -748,8 +751,8 @@ function analyzeDifficulty(
     bullets.push({ text: "All chests are empty — no items in treasure chests", severity: "hard" });
     delta += 18;
   } else if (hasFlag(fv, "-ccrs") || hasFlag(fv, "-ccrt")) {
-    bullets.push({ text: "Chest contents tiered/scaled — higher chance of quality finds", severity: "easy" });
-    delta -= 4;
+    bullets.push({ text: "Chest contents tiered/scaled — good items are harder to find early game", severity: "medium" });
+    delta += 4;
   } else {
     const ccsr = flagNum(fv, "-ccsr") ?? 0;
     bullets.push({ text: `Chests: ${ccsr}% contents randomized`, severity: "info" });
@@ -777,11 +780,18 @@ function analyzeDifficulty(
       }
       // 2–5 = standard, no bullet
     }
+  } else if (hasFlag(fv, "-esrt")) {
+    bullets.push({ text: "Esper spells tiered — powerful spells are harder to obtain early game", severity: "medium" });
+    delta += 5;
   } else if (hasFlag(fv, "-ess")) {
     bullets.push({ text: "Esper spells shuffled — magic redistributed, total unchanged", severity: "info" });
   }
 
   // Esper learn rates (randomized = standard — no bullet)
+  if (hasFlag(fv, "-elrt")) {
+    bullets.push({ text: "Esper learn rates tiered — powerful spells take longer to learn", severity: "medium" });
+    delta += 4;
+  }
   // Esper Equipability
   if (hasFlag(fv, "-eer")) {
     const arr = flagNumArr(fv, "-eer");
@@ -855,9 +865,21 @@ function analyzeDifficulty(
   }
 
   // ── Equipment Randomization ──
-  if (hasFlag(fv, "-ier") || hasFlag(fv, "-iebr") || hasFlag(fv, "-ietr")) {
+  if (hasFlag(fv, "-ietr")) {
+    bullets.push({ text: "Equipment equipability is tiered random — higher tier gear is less likely to be equipable", severity: "medium" });
+    delta += 8;
+  } else if (hasFlag(fv, "-ier") || hasFlag(fv, "-iebr")) {
     bullets.push({ text: "Equipment availability randomized — limited gear options per character", severity: "medium" });
     delta += 5;
+  }
+
+  // ── Relics Randomization ──
+  if (hasFlag(fv, "-iertr")) {
+    bullets.push({ text: "Relic equipability is tiered random — higher tier relics are less likely to be equipable", severity: "medium" });
+    delta += 8;
+  } else if (hasFlag(fv, "-ierr") || hasFlag(fv, "-ierbr") || hasFlag(fv, "-ieror") || hasFlag(fv, "-iersr")) {
+    bullets.push({ text: "Relic availability randomized", severity: "info" });
+    delta += 3;
   }
 
   // ── Challenge flags ──
