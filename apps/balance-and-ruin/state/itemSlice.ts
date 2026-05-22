@@ -46,12 +46,6 @@ const initialState: StartingItemsState = {
                 name: "Warp Stone",
                 min: 3,
                 max: 3
-            },
-            {
-                id: -1,
-                name: "",
-                min: 1,
-                max: 1
             }
         ],
     },
@@ -149,12 +143,6 @@ export const itemSlice = createSlice({
                         name: "Warp Stone",
                         min: 3,
                         max: 3
-                    },
-                    {
-                        id: -1,
-                        name: "",
-                        min: 1,
-                        max: 1
                     }
                 ];
             }
