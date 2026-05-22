@@ -91,15 +91,15 @@ export const StartingGoldAndItems = ({ items: propsItems, curateItems = false }:
               Starting Items Summary
             </span>
             {validItems.length > 0 ? (
-              <div className="flex flex-wrap gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 {validItems.map((item, idx) => {
                   const qty = item.min === item.max ? `${item.min}` : `${item.min}-${item.max}`;
                   return (
                     <div
                       key={idx}
-                      className="flex items-center gap-1.5 px-3 py-1 bg-blue-50/60 dark:bg-[#181d29] text-blue-900 dark:text-blue-300 border border-blue-100 dark:border-[#38445e]/50 rounded-md text-xs font-medium shadow-sm transition-all hover:bg-blue-100/50 dark:hover:bg-[#1f2637]"
+                      className="flex items-center justify-between gap-1.5 px-3 py-1 bg-blue-50/60 dark:bg-[#181d29] text-blue-900 dark:text-blue-300 border border-blue-100 dark:border-[#38445e]/50 rounded-md shadow-sm transition-all hover:bg-blue-100/50 dark:hover:bg-[#1f2637]"
                     >
-                      <span className="font-semibold">{item.name}</span>
+                      <span className="text-sm font-normal">{item.name}</span>
                       <span className="bg-blue-100/80 dark:bg-blue-900/40 text-blue-800 dark:text-blue-400 px-1.5 py-0.5 rounded text-[10px] font-bold">
                         x{qty}
                       </span>
