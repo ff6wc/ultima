@@ -837,7 +837,11 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
            String(p.creator_name).toLowerCase() === String(session?.user?.name).toLowerCase());
         const isLocalCustom = customPresets[p.name] !== undefined;
         const isUserDbPreset = mappedDbPresets.some(
-          (dbP) => dbP.name.toLowerCase() === p.name.toLowerCase(),
+          (dbP) =>
+            dbP.name.toLowerCase() === p.name.toLowerCase() &&
+            currentUserId &&
+            (String(dbP.creator_id) === String(currentUserId) ||
+             String(dbP.creator_name).toLowerCase() === String(session?.user?.name).toLowerCase())
         );
 
         return isOfficial || isUserOwned || isLocalCustom || isUserDbPreset;
