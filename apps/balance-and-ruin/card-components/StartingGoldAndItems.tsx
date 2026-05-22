@@ -50,7 +50,7 @@ export const StartingGoldAndItems = ({ items: propsItems, curateItems = false }:
         const rightHeight = rightColumnRef.current.offsetHeight;
         const headerHeight = leftHeaderRef.current.offsetHeight;
         const availableHeight = rightHeight - headerHeight - 16; // 16px is flex gap-4
-        setMaxHeight(availableHeight > 0 ? Math.max(380, availableHeight) : 380);
+        setMaxHeight(availableHeight > 0 ? Math.max(480, availableHeight) : 480);
       } else {
         setMaxHeight(500);
       }
