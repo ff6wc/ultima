@@ -1,7 +1,12 @@
 import type { NextPage } from "next";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { FlagCreatePage } from "~/components/FlagCreatePage/FlagCreatePage";
+import dynamic from "next/dynamic";
+
+const FlagCreatePage = dynamic<any>(
+  () => import("~/components/FlagCreatePage/FlagCreatePage").then((mod) => mod.FlagCreatePage),
+  { ssr: false }
+);
 import { setRawFlags } from "~/state/flagSlice";
 import { setRawObjectives } from "~/state/objectiveSlice";
 import { setRawStartingItems } from "~/state/itemSlice";

@@ -6,9 +6,6 @@ import { SeedData } from "~/components/SeedCard/SeedCard";
 import first from "lodash/first";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import useSWRMutation from "swr/mutation";
-import { base64ToByteArray } from "~/utils/base64ToByteArray";
-import { isValidROM, removeHeader, applyInGameConfig } from "~/utils/romUtils";
-import { XDelta3Decoder } from "~/utils/xdelta3_decoder";
 import JSZip from "jszip";
 
 export type SeedDetailsProps = {
@@ -149,6 +146,12 @@ export const SeedDetails = ({ seedId }: SeedDetailsProps) => {
 
       const { filename, patch, seed_id, log } = generateResult;
 
+      const [{ XDelta3Decoder }, { base64ToByteArray }, { applyInGameConfig }] = await Promise.all([
+        import("~/utils/xdelta3_decoder"),
+        import("~/utils/base64ToByteArray"),
+        import("~/utils/romUtils"),
+      ]);
+
       // Perform standard base ROM patching stream using standard decoder logic
       const patched = XDelta3Decoder.decode(
         base64ToByteArray(patch),
@@ -184,6 +187,12 @@ export const SeedDetails = ({ seedId }: SeedDetailsProps) => {
 
     try {
       const { filename, patch, log } = seed;
+
+      const [{ XDelta3Decoder }, { base64ToByteArray }, { applyInGameConfig }] = await Promise.all([
+        import("~/utils/xdelta3_decoder"),
+        import("~/utils/base64ToByteArray"),
+        import("~/utils/romUtils"),
+      ]);
 
       // Perform standard base ROM patching stream using standard decoder logic
       const patched = XDelta3Decoder.decode(
@@ -233,6 +242,7 @@ export const SeedDetails = ({ seedId }: SeedDetailsProps) => {
     if (file) {
       reader.onload = async function () {
         let rom_data = new Uint8Array(reader.result as ArrayBuffer);
+        const { removeHeader, isValidROM } = await import("~/utils/romUtils");
         rom_data = await removeHeader(rom_data);
 
         let result = await isValidROM(rom_data);

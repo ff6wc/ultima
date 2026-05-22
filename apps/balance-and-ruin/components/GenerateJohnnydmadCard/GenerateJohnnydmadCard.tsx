@@ -8,9 +8,6 @@ import { MdClear, MdFileUpload } from "react-icons/md";
 import useSWRMutation from "swr/mutation";
 import { BadgeText } from "~/components/BadgeText/BadgeText";
 import { ROM_FILE_EXTENSIONS } from "~/constants/romConstants";
-import { base64ToByteArray } from "~/utils/base64ToByteArray";
-import { XDelta3Decoder } from "~/utils/xdelta3_decoder";
-import { applyInGameConfig } from "~/utils/romUtils";
 
 export type GenerateJohnnydmadProps = {
   className?: string;
@@ -72,6 +69,12 @@ export const GenerateJohnnydmadCard = ({
     }
 
     const { filename, patch, seed_id, log: spoiler_log } = generateResult;
+
+    const [{ XDelta3Decoder }, { base64ToByteArray }, { applyInGameConfig }] = await Promise.all([
+      import("~/utils/xdelta3_decoder"),
+      import("~/utils/base64ToByteArray"),
+      import("~/utils/romUtils"),
+    ]);
 
     const patched = XDelta3Decoder.decode(
       base64ToByteArray(patch),
