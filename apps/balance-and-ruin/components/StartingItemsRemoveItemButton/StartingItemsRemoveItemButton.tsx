@@ -1,23 +1,18 @@
-import { Button } from "@ff6wc/ui";
-import { useDispatch, useSelector } from "react-redux";
-import { setFlag, useFlagValueSelector } from "~/state/flagSlice";
-import {
-  MAX_CUSTOM_ITEM_COUNT,
-  setItems,
-  selectItemById,
-} from "~/state/itemSlice";
+import { useDispatch } from "react-redux";
+import { setFlag } from "~/state/flagSlice";
+import { setItems } from "~/state/itemSlice";
 import { StartingItems, StartingItem } from "~/types/starting_items";
 import { startingItemsToString } from "~/utils/startingItemsToString";
-import { MdClear } from "react-icons/md";
+import { FaTrash } from "react-icons/fa";
 
 type StartingItemsProps = {
   items: StartingItems;
   item: StartingItem;
 };
 
-
 export const StartingItemsRemoveItemButton = ({
-  items, item
+  items,
+  item,
 }: StartingItemsProps) => {
   const dispatch = useDispatch();
 
@@ -58,14 +53,19 @@ export const StartingItemsRemoveItemButton = ({
   };
 
   return (
-    <Button
-      className="w-fit flex-shrink-0"
+    <button
       disabled={items.items.length <= 0}
       onClick={removeItem}
-      size="small"
-      variant={isCleared ? "danger" : "secondary"}
+      className={`p-2 rounded transition-all cursor-pointer flex items-center justify-center shrink-0 ${
+        isCleared
+          ? "text-red-400 hover:text-red-500 hover:bg-red-950/30"
+          : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
+      }`}
+      title={isCleared ? "Remove Slot" : "Clear Item"}
+      style={{ width: "32px", height: "32px" }}
     >
-      {isCleared ? "Remove Slot" : "Clear Item"}
-    </Button>
+      <FaTrash size={13} />
+    </button>
   );
 };
+

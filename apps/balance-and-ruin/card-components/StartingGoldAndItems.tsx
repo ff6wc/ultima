@@ -73,13 +73,12 @@ export const StartingGoldAndItems = ({ items: propsItems, curateItems = false }:
         {/* Right Column: Starting Items & Starting Junk */}
         <div className="flex flex-col md:justify-between md:h-full gap-6 md:gap-0">
           <div className="flex flex-col gap-4">
-            <div className="flex justify-between items-center gap-4">
+            <div className="flex flex-col gap-1">
               <FlagLabel
                 flag={"-si"}
                 helperText={"The dropdown menus support searching for items"}
                 label={"Starting Items"}
               />
-              <StartingItemsAddItemButton items={items} />
             </div>
 
             <div className="max-h-[380px] overflow-y-auto overflow-x-hidden pr-2 flex flex-col gap-2">
@@ -92,6 +91,7 @@ export const StartingGoldAndItems = ({ items: propsItems, curateItems = false }:
                   onChange={onItemChange}
                 />
               ))}
+              <StartingItemsAddItemButton items={items} />
             </div>
           </div>
 
