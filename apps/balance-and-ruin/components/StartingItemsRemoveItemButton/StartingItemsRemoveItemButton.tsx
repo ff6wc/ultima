@@ -56,7 +56,7 @@ export const StartingItemsRemoveItemButton = ({
     <button
       disabled={items.items.length <= 0}
       onClick={removeItem}
-      className="p-2 rounded transition-all cursor-pointer flex items-center justify-center shrink-0 text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200 hover:bg-zinc-200 dark:hover:bg-zinc-800"
+      className="p-2 rounded transition-all cursor-pointer flex items-center justify-center shrink-0 text-zinc-500 hover:text-blue-600 dark:text-zinc-400 dark:hover:text-blue-300 hover:bg-blue-100/60 dark:hover:bg-blue-950/30"
       title={isCleared ? "Remove Slot" : "Clear Item"}
       style={{ width: "32px", height: "32px" }}
     >
