@@ -17,12 +17,14 @@ import fallbackPresets from "~/public/metadata-fallback/presets.json";
 
 const HomeLandingPage = () => {
   const dispatch = useDispatch();
+  const [isMounted, setIsMounted] = useState(false);
   const [objectives, setObjectives] = useState<ObjectiveMetadata>(fallbackObjective as any);
   const [presets, setPresets] = useState<Record<string, FlagPreset>>(normalizePresets(fallbackPresets));
   const [schema, setSchemaLocal] = useState<Record<string, RawFlagMetadata>>(fallbackFlag as any);
   const [version, setVersion] = useState<string>((fallbackWc as any).version || "1.4.3d");
 
   useEffect(() => {
+    setIsMounted(true);
     // 1. Try to load initial values from localStorage cache for instant load
     try {
       const cachedObjectives = localStorage.getItem("cached_objectives");
@@ -159,7 +161,7 @@ const HomeLandingPage = () => {
       });
   }, [dispatch]);
 
-  if (objectives && presets && schema && version) {
+  if (isMounted && objectives && presets && schema && version) {
     return (
       <FlagCreatePage
         objectives={objectives}
