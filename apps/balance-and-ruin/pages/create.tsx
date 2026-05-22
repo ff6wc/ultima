@@ -10,6 +10,7 @@ import { RawFlagMetadata, setSchema } from "~/state/schemaSlice";
 import { ObjectiveMetadata } from "~/types/objectives";
 import { FlagPreset } from "~/types/preset";
 import { fetchWithTimeout } from "~/utils/fetchWithTimeout";
+import { normalizePresets } from "~/utils/presets";
 
 export type PageProps = {
   objectives: ObjectiveMetadata;
@@ -48,7 +49,7 @@ const Create = () => {
         dispatch(setObjectiveMetadata(parsed));
       }
       if (cachedPresets) {
-        const parsed = JSON.parse(cachedPresets);
+        const parsed = normalizePresets(JSON.parse(cachedPresets));
         setPresets(parsed);
         const preset = parsed["ultros league"];
         if (preset) {
@@ -71,29 +72,17 @@ const Create = () => {
     fetchWithTimeout(`${process.env.NEXT_PUBLIC_API_URL}/presets`, {}, 2500)
       .then((res) => res.json())
       .then((data) => {
-        setPresets(data);
-        localStorage.setItem("cached_presets", JSON.stringify(data));
-        const preset = data["ultros league"];
+        const normalized = normalizePresets(data);
+        setPresets(normalized);
+        localStorage.setItem("cached_presets", JSON.stringify(normalized));
+        const preset = normalized["ultros league"];
         if (preset) {
           dispatch(setRawFlags(preset.flags));
         }
       })
       .catch((err) => {
-        console.warn("Failed to fetch presets from API, trying fallback:", err);
-        fetch("/metadata-fallback/presets.json")
-          .then((res) => res.json())
-          .then((data) => {
-            setPresets(data);
-            localStorage.setItem("cached_presets", JSON.stringify(data));
-            const preset = data["ultros league"];
-            if (preset) {
-              dispatch(setRawFlags(preset.flags));
-            }
-          })
-          .catch((fallbackErr) => {
-            console.error("Failed to fetch fallback presets:", fallbackErr);
-            if (!presets) setPresets({});
-          });
+        console.warn("Failed to fetch presets from API:", err);
+        setPresets((prev) => prev || {});
       });
 
     fetchWithTimeout(`${process.env.NEXT_PUBLIC_API_URL}/api/metadata/flag`, {}, 2500)
