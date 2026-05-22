@@ -673,10 +673,13 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
           : (!!p.official || (Array.isArray(p.tags) && p.tags.includes("official")));
         const createdAt = p.created_at || p.created_timestamp;
 
+        const isSelf = creatorId != null && currentUserId != null && String(creatorId) === String(currentUserId);
+        const displayName = isSelf ? "You" : (p.creator_name || (creatorId === "seedbot" ? "Seedbot" : "Community"));
+
         return {
           name: p.name,
-          creator_name: p.creator_name || (creatorId === "seedbot" ? "Seedbot" : "You"),
-          creator: p.creator_name || (creatorId === "seedbot" ? "Seedbot" : "You"),
+          creator_name: displayName,
+          creator: displayName,
           description: p.description || "",
           flags: p.flags,
           creator_id: creatorId,
@@ -689,7 +692,7 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
           tags: p.tags || [],
         };
       });
-  }, [dbPresets]);
+  }, [dbPresets, currentUserId]);
 
   const mergedPresets = useMemo(
     () => ({

@@ -88,7 +88,12 @@ export const GenerateCard = ({
           "Content-Type": "application/json",
           ...(token ? { "Authorization": `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify({ name: presetName, description: presetDescription, flags }),
+        body: JSON.stringify({
+          name: presetName,
+          description: presetDescription,
+          flags,
+          creator_name: session?.user?.name || undefined,
+        }),
       });
       if (!res.ok) {
         const data = await res.json();
