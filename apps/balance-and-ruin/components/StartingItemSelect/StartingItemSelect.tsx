@@ -96,9 +96,9 @@ export const StartingItemSelect = ({
   const helperText = getHelperText();
 
   return (
-    <div className="flex flex-col gap-3 p-4 bg-zinc-900/60 rounded-lg border border-zinc-800 hover:border-zinc-700/60 transition-all shadow-md">
+    <div className="flex flex-col gap-3 p-4 bg-zinc-50 dark:bg-zinc-900/40 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700/60 transition-all shadow-md">
       <div className="flex justify-between items-center gap-4">
-        <HelperText className="text-zinc-300 font-medium"> {helperText} </HelperText>
+        <HelperText className="text-zinc-700 dark:text-zinc-300 font-medium"> {helperText} </HelperText>
         <StartingItemsRemoveItemButton items={items} item={item} />
       </div>
 
