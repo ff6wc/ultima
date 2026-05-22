@@ -8,8 +8,12 @@ export const normalizePresets = (data: any): Record<string, FlagPreset> => {
     if (p && name) {
       let flags = p.flags || "";
       if (name.toLowerCase() === "atma series" && typeof flags === "string") {
-        if (flags.includes("-si ") && flags.includes(".233.3.3")) {
-          flags = flags.replace(".233.3.3", ".222.3.3");
+        if (flags.includes("-si ")) {
+          if (flags.includes(".233.3.3") && !flags.includes(".222.3.3")) {
+            flags = flags.replace(".233.3.3", ".233.3.3.222.3.3");
+          } else if (flags.includes(".222.3.3") && !flags.includes(".233.3.3")) {
+            flags = flags.replace(".222.3.3", ".233.3.3.222.3.3");
+          }
         }
       }
 
