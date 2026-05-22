@@ -48,7 +48,7 @@ export const StartingGoldAndItems = ({ items: propsItems, curateItems = false }:
             />
           </div>
 
-          <div className="max-h-[450px] overflow-y-auto overflow-x-hidden pr-2 flex flex-col gap-2">
+          <div className="max-h-[500px] overflow-y-auto overflow-x-hidden pr-2 flex flex-col gap-2">
             {items.items.map((i: StartingItem, idx: number) => (
               <StartingItemSelect
                 item={i}
