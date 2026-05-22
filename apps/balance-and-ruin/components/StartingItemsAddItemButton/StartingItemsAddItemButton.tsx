@@ -1,10 +1,9 @@
 import { Button } from "@ff6wc/ui";
-import { useDispatch, useSelector } from "react-redux";
-import { setFlag, useFlagValueSelector } from "~/state/flagSlice";
+import { useDispatch } from "react-redux";
+import { setFlag } from "~/state/flagSlice";
 import {
   MAX_CUSTOM_ITEM_COUNT,
   setItems,
-  selectItemById,
 } from "~/state/itemSlice";
 import { StartingItems, StartingItem } from "~/types/starting_items";
 import { startingItemsToString } from "~/utils/startingItemsToString";
@@ -18,21 +17,18 @@ export const StartingItemsAddItemButton = ({
   items,
 }: StartingItemsProps) => {
   const dispatch = useDispatch();
-  const itemsById = useSelector(selectItemById) ?? {};
 
   const addItem = () => {
     if (items.items.length >= MAX_CUSTOM_ITEM_COUNT) {
       return;
     }
-    const MC_ID = 222
-    const mcMeta = itemsById[MC_ID]
     const newItems = { ...items };
     const itemsArray = [...items.items];
     const newItem: StartingItem = {
-      id: MC_ID,
-      name: mcMeta.name,
-      min: 3,
-      max: 3,
+      id: -1,
+      name: "",
+      min: 1,
+      max: 1,
     };
 
     itemsArray.push(newItem);
