@@ -1,167 +1,166 @@
-import { ButtonLink, DiscordButton, Header } from "@ff6wc/ui";
-import { openSans } from "~/pages/_app";
-import { cva, cx } from "cva";
-import type { GetStaticPropsContext, NextPage } from "next";
-import { HiPencil, HiFlag } from "react-icons/hi";
-import { WIKI_URL } from "@ff6wc/utils/constants";
-import { AppLandingGridItem } from "~/components/AppLandingGridItem/AppLandingGridItem";
-import { AppLandingSection } from "~/components/AppLandingSection/AppLandingSection";
-import { HomeFooter } from "~/components/Footer/Footer";
-import { SotwButton } from "~/components/SotwButton/SotwButton";
-import { EventsButton } from "~/components/EventsButton/EventsButton";
-import { CreateButton } from "~/components/CreateButton/CreateButton";
-import { SpriteDrawAnimation } from "~/components/SpriteDrawAnimation/SpriteDrawAnimation";
-import { AppHeader } from "~/components/AppHeader/AppHeader";
-import Head from "next/head";
+import type { NextPage } from "next";
+import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import { FlagCreatePage } from "~/components/FlagCreatePage/FlagCreatePage";
+import { setRawFlags } from "~/state/flagSlice";
+import { setObjectiveMetadata } from "~/state/objectiveSlice";
+import { RawFlagMetadata, setSchema } from "~/state/schemaSlice";
+import { ObjectiveMetadata } from "~/types/objectives";
+import { FlagPreset } from "~/types/preset";
+import { fetchWithTimeout } from "~/utils/fetchWithTimeout";
 
-export async function getStaticProps(context: GetStaticPropsContext) {
-  return {
-    props: {},
-  };
-}
+const HomeLandingPage = () => {
+  const dispatch = useDispatch();
+  const [objectives, setObjectives] = useState<ObjectiveMetadata | null>(null);
+  const [presets, setPresets] = useState<Record<string, FlagPreset> | null>(null);
+  const [schema, setSchemaLocal] = useState<Record<string, RawFlagMetadata> | null>(null);
+  const [version, setVersion] = useState<string | null>(null);
 
-const button = cva(["w-fit max-w-[500px] min-h-[70px] inline-flex"]);
+  useEffect(() => {
+    // 1. Try to load initial values from localStorage cache for instant load
+    try {
+      const cachedObjectives = localStorage.getItem("cached_objectives");
+      const cachedPresets = localStorage.getItem("cached_presets");
+      const cachedSchema = localStorage.getItem("cached_schema");
+      const cachedVersion = localStorage.getItem("cached_version");
 
-export default function NewLandingPage() {
-  return (
-    <>
-      <Head>
-        <title>FF6 Worlds Collide</title>
-        <meta
-          name="description"
-          content="Final Fantasy VI open-world randomizer"
-        />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      <div className="flex flex-col min-h-screen bg-slate-950 text-white relative">
-        <Header className="pb-16 pt-8 border-b border-white/10 shadow-2xl">
-          <div className={cx(openSans.className, "max-w-4xl mx-auto text-center flex flex-col items-center px-8 mt-4")}>
-            <div className="flex flex-col gap-6 text-lg lg:text-xl text-slate-100 max-w-3xl mx-auto font-medium" style={{ textShadow: "1px 1px 3px rgba(0,0,0,0.8)" }}>
-              <p>
-                Worlds Collide (WC) is an open-world randomizer for Final Fantasy VI on the SNES. Players begin aboard the airship and can travel freely between the World of Balance and the World of Ruin to discover characters and espers. Once you&apos;ve gathered enough, you can face off against Kefka.
-              </p>
-              <p>
-                Options within WC include options to randomize characters, commands, espers, treasure, shops and more with over 200 flags to customize each playthrough.
-              </p>
-            </div>
-          </div>
-        </Header>
-        <main className={cx(openSans.className, "flex-grow")}>
-        <AppLandingSection title={"Getting Started"}>
-          <AppLandingGridItem
-            className="lg:col-span-2"
-            title={
-              <>
-                <SpriteDrawAnimation
-                  delay={300}
-                  spriteId={0}
-                  paletteId={74}
-                  poses={[1, 0, 1, 2]}
-                />
-                <span className="px-4">Randomizer</span>
-              </>
+      if (cachedObjectives) {
+        const parsed = JSON.parse(cachedObjectives);
+        setObjectives(parsed);
+        dispatch(setObjectiveMetadata(parsed));
+      }
+      if (cachedPresets) {
+        const parsed = JSON.parse(cachedPresets);
+        setPresets(parsed);
+        const preset = parsed["ultros league"];
+        if (preset) {
+          dispatch(setRawFlags(preset.flags));
+        }
+      }
+      if (cachedSchema) {
+        const parsed = JSON.parse(cachedSchema);
+        setSchemaLocal(parsed);
+        dispatch(setSchema(parsed));
+      }
+      if (cachedVersion) {
+        setVersion(JSON.parse(cachedVersion));
+      }
+    } catch (e) {
+      console.warn("Failed to parse cached metadata:", e);
+    }
+
+    // 2. Fetch fresh data in the background (Stale-While-Revalidate)
+    fetchWithTimeout(`${process.env.NEXT_PUBLIC_API_URL}/presets`, {}, 2500)
+      .then((res) => res.json())
+      .then((data) => {
+        setPresets(data);
+        localStorage.setItem("cached_presets", JSON.stringify(data));
+        const preset = data["ultros league"];
+        if (preset) {
+          dispatch(setRawFlags(preset.flags));
+        }
+      })
+      .catch((err) => {
+        console.warn("Failed to fetch presets from API, trying fallback:", err);
+        fetch("/metadata-fallback/presets.json")
+          .then((res) => res.json())
+          .then((data) => {
+            setPresets(data);
+            localStorage.setItem("cached_presets", JSON.stringify(data));
+            const preset = data["ultros league"];
+            if (preset) {
+              dispatch(setRawFlags(preset.flags));
             }
-          >
-            <div className="text-center">
-              Generate a random seed and begin to play Worlds Collide
-            </div>
-            <CreateButton />
-          </AppLandingGridItem>
+          })
+          .catch((fallbackErr) => {
+            console.error("Failed to fetch fallback presets:", fallbackErr);
+            if (!presets) setPresets({});
+          });
+      });
 
-          <AppLandingGridItem
-            title={
-              <>
-                <SpriteDrawAnimation
-                  delay={150}
-                  spriteId={5}
-                  paletteId={0}
-                  poses={[16, 17]}
-                />
-                <span className="px-4">Discord</span>
-              </>
-            }
-          >
-            <div className="text-center">
-              Join our Discord server to talk with the community and learn about
-              the latest news and events
-            </div>
-            <div>
-              <DiscordButton />
-            </div>
-          </AppLandingGridItem>
+    fetchWithTimeout(`${process.env.NEXT_PUBLIC_API_URL}/api/metadata/flag`, {}, 2500)
+      .then((res) => res.json())
+      .then((data) => {
+        setSchemaLocal(data);
+        localStorage.setItem("cached_schema", JSON.stringify(data));
+        dispatch(setSchema(data));
+      })
+      .catch((err) => {
+        console.warn("Failed to fetch flag metadata from API, trying fallback:", err);
+        fetch("/metadata-fallback/flag.json")
+          .then((res) => res.json())
+          .then((data) => {
+            setSchemaLocal(data);
+            localStorage.setItem("cached_schema", JSON.stringify(data));
+            dispatch(setSchema(data));
+          })
+          .catch((fallbackErr) => {
+            console.error("Failed to fetch fallback flag metadata:", fallbackErr);
+          });
+      });
 
-          <AppLandingGridItem
-            title={
-              <>
-                <SpriteDrawAnimation
-                  delay={150}
-                  spriteId={21}
-                  paletteId={3}
-                  poses={[29, 30]}
-                />
-                <span className="px-4">Seed of the Week</span>
-              </>
-            }
-          >
-            <div className="text-center">
-              Play a weekly seed submitted by a community member. You can post
-              your time in the discord and see how you compare to others!
-            </div>
-            <SotwButton />
-          </AppLandingGridItem>
+    fetchWithTimeout(`${process.env.NEXT_PUBLIC_API_URL}/api/metadata/objective`, {}, 2500)
+      .then((res) => res.json())
+      .then((data) => {
+        setObjectives(data);
+        localStorage.setItem("cached_objectives", JSON.stringify(data));
+        dispatch(setObjectiveMetadata(data));
+      })
+      .catch((err) => {
+        console.warn("Failed to fetch objective metadata from API, trying fallback:", err);
+        fetch("/metadata-fallback/objective.json")
+          .then((res) => res.json())
+          .then((data) => {
+            setObjectives(data);
+            localStorage.setItem("cached_objectives", JSON.stringify(data));
+            dispatch(setObjectiveMetadata(data));
+          })
+          .catch((fallbackErr) => {
+            console.error("Failed to fetch fallback objective metadata:", fallbackErr);
+          });
+      });
 
-          <AppLandingGridItem
-            title={
-              <>
-                <SpriteDrawAnimation
-                  delay={300}
-                  spriteId={15}
-                  paletteId={0}
-                  poses={[25, 25, 26]}
-                />
-                <span className="px-4">Wiki</span>
-              </>
-            }
-          >
-            <div className="text-center">
-              Visit the wiki for guides, resources, and how to get the most out
-              of WC
-            </div>
+    fetchWithTimeout(`${process.env.NEXT_PUBLIC_API_URL}/api/wc`, {}, 2500)
+      .then((res) => res.json())
+      .then((data) => {
+        const fetchedVersion = data["version"];
+        setVersion(fetchedVersion);
+        localStorage.setItem("cached_version", JSON.stringify(fetchedVersion));
+      })
+      .catch((err) => {
+        console.warn("Failed to fetch version from API, trying fallback:", err);
+        fetch("/metadata-fallback/wc.json")
+          .then((res) => res.json())
+          .then((data) => {
+            const fetchedVersion = data["version"];
+            setVersion(fetchedVersion);
+            localStorage.setItem("cached_version", JSON.stringify(fetchedVersion));
+          })
+          .catch((fallbackErr) => {
+            console.error("Failed to fetch fallback version:", fallbackErr);
+          });
+      });
+  }, [dispatch]);
 
-            <ButtonLink
-              className="w-fit max-w-[500px] min-h-[50px] inline-flex items-center gap-3"
-              href={WIKI_URL}
-              variant="primary"
-            >
-              <HiPencil size={28} className="text-white" />
-              <div className="flex flex-col items-start">
-                <div className="font-bold">Wiki</div>
-              </div>
-            </ButtonLink>
-          </AppLandingGridItem>
-
-          <AppLandingGridItem
-            title={
-              <>
-                <SpriteDrawAnimation
-                  delay={300}
-                  spriteId={10}
-                  paletteId={0}
-                  poses={[1, 0, 1, 2]}
-                />
-                <span className="px-4">Events</span>
-              </>
-            }
-          >
-            <div className="text-center">
-              Check out our ongoing community events and tournaments!
-            </div>
-            <EventsButton />
-          </AppLandingGridItem>
-        </AppLandingSection>
-        </main>
-        <HomeFooter />
+  if (objectives && presets && schema && version) {
+    return (
+      <FlagCreatePage
+        objectives={objectives}
+        presets={presets}
+        schema={schema}
+        version={version}
+      />
+    );
+  } else {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center bg-slate-950 text-white font-outfit text-xl">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+          <p className="animate-pulse">Loading Worlds Collide...</p>
+        </div>
       </div>
-    </>
-  );
-}
+    );
+  }
+};
+
+export default HomeLandingPage;

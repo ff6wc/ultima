@@ -1,16 +1,17 @@
 import React, { useId, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import BaseSelect from "react-select";
 import { FlagLabel } from "~/components/FlagLabel/FlagLabel";
-import { components, OptionProps } from "react-select";
+import { Select as CustomSelect } from "~/components/Select/Select";
 import {
   EMPTY_FLAG_VALUE,
   selectActiveMutuallyExclusiveFlag,
+  selectFlagValues,
   setFlag,
   useFlagValueSelector,
 } from "~/state/flagSlice";
 import { FlagValue, selectDescription } from "~/state/schemaSlice";
 import { renderDescription } from "~/utils/renderDescription";
+import { FlagSubflagContext } from "./FlagSubflagContext";
 
 export type SubflagOption = {
   defaultValue: FlagValue;
@@ -23,6 +24,7 @@ export type SubflagOption = {
 };
 
 export type FlagSubflagSelectProps = {
+  className?: string;
   label: React.ReactNode;
   options: SubflagOption[];
   nullable?: {
@@ -30,44 +32,28 @@ export type FlagSubflagSelectProps = {
     label: string;
   };
   defaultSelected?: SubflagOption;
-};
-
-export const FlagSelectOption = <T extends SubflagOption>({
-  children,
-  data,
-  ...rest
-}: OptionProps<T, false>) => {
-  const { helperText, defaultValue } = data;
-
-  let description: React.ReactNode;
-  if (typeof helperText === "function") {
-    description = helperText(defaultValue);
-  } else {
-    description = renderDescription(helperText, defaultValue ?? "x");
-  }
-  return (
-    <components.Option data={data} {...rest}>
-      <p className="text-base pt-1 px-2">{children}</p>
-      <p className="text-xs pb-1 px-2">{description}</p>
-    </components.Option>
-  );
+  descriptionClassName?: string;
 };
 
 export const FlagSubflagSelect = ({
+  className = "h-fit",
   label,
   nullable,
   options: baseOptions,
   defaultSelected,
+  descriptionClassName = "",
 }: FlagSubflagSelectProps) => {
   const dispatch = useDispatch();
   const id = useId();
 
   const selectedFlag = useSelector(
-    selectActiveMutuallyExclusiveFlag(...baseOptions.map(({ flag }) => flag))
+    selectActiveMutuallyExclusiveFlag(...baseOptions.map(({ flag }) => flag)),
   );
 
+  const allFlagValues = useSelector(selectFlagValues);
+
   const schemaDescription = useSelector(
-    selectedFlag ? selectDescription(selectedFlag) : () => null
+    selectedFlag ? selectDescription(selectedFlag) : () => null,
   );
 
   const empty = useMemo<SubflagOption>(
@@ -77,7 +63,7 @@ export const FlagSubflagSelect = ({
       defaultValue: null,
       helperText: nullable?.description ?? "",
     }),
-    [nullable]
+    [nullable],
   );
 
   const options: SubflagOption[] = useMemo(() => {
@@ -95,7 +81,7 @@ export const FlagSubflagSelect = ({
         setFlag({
           flag: selectedFlag,
           value: null,
-        })
+        }),
       );
     }
 
@@ -104,7 +90,7 @@ export const FlagSubflagSelect = ({
         setFlag({
           flag,
           value: defaultValue,
-        })
+        }),
       );
     }
   };
@@ -122,7 +108,7 @@ export const FlagSubflagSelect = ({
       }) ??
       defaultSelected ??
       empty,
-    [options, defaultSelected, empty, selectedFlag, selectedValue]
+    [options, defaultSelected, empty, selectedFlag, selectedValue],
   );
 
   let description: React.ReactNode;
@@ -132,33 +118,65 @@ export const FlagSubflagSelect = ({
     description = renderDescription(selectedOption.helperText, selectedValue);
   }
 
+  const ghosts = useMemo(() => {
+    return options.map((opt) => {
+      if (typeof opt.helperText === "function") {
+        return null;
+      }
+      return renderDescription(opt.helperText, opt.defaultValue);
+    });
+  }, [options]);
+
   const { Renderable } = selectedOption;
 
-  const Select = (
-    <BaseSelect
-      className="ff6wc-select-container"
-      classNamePrefix="ff6wc-select"
-      components={{ Option: FlagSelectOption }}
-      instanceId={id}
-      getOptionLabel={(option) => option.label}
-      getOptionValue={(option) => option.flag + option.defaultValue}
-      menuPosition="fixed"
-      options={options}
-      onChange={(selected) => onChange(selected as SubflagOption)}
-      value={selectedOption}
+  // Create custom mapping to match CustomSelect schema safely
+  const selectOptions = options.map((opt) => ({
+    ...opt,
+    value: opt.flag + opt.defaultValue, // Use the unique selector key
+    helperText: opt.helperText,
+    dynamicValue: allFlagValues[opt.flag] ?? opt.defaultValue,
+  }));
+
+  const activeSelectValue =
+    selectOptions.find(
+      (opt) =>
+        opt.flag === selectedOption.flag &&
+        opt.defaultValue === selectedOption.defaultValue,
+    ) ?? null;
+
+  const SelectWrapper = (
+    <CustomSelect
+      options={selectOptions}
+      onChange={(selected) => {
+        const originalOpt = options.find(
+          (opt) => opt.flag + opt.defaultValue === selected?.value,
+        );
+        if (originalOpt) {
+          onChange(originalOpt);
+        }
+      }}
+      value={activeSelectValue}
     />
   );
 
   return (
-    <div className="flex flex-col gap-1">
+    <div className={`flex flex-col gap-2 ${className}`}>
       <>
         <FlagLabel
+          className={descriptionClassName}
           flag={selectedOption.flag}
           helperText={description}
           label={label}
+          ghosts={ghosts}
         />
 
-        {Renderable ? <Renderable>{Select}</Renderable> : Select}
+        <FlagSubflagContext.Provider value={true}>
+          {Renderable ? (
+            <Renderable>{SelectWrapper}</Renderable>
+          ) : (
+            SelectWrapper
+          )}
+        </FlagSubflagContext.Provider>
       </>
     </div>
   );

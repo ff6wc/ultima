@@ -1,25 +1,26 @@
 import { Card } from "@ff6wc/ui";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { CardColumn } from "~/components/CardColumn/CardColumn";
 import { FlagLabel } from "~/components/FlagLabel/FlagLabel";
 import { FlagNumberInput } from "~/components/FlagNumberInput/FlagNumberInput";
 import { FlagSlider } from "~/components/FlagSlider/FlagSlider";
-import { StartingItemSelect } from "~/components/StartingItemSelect/StartingItemSelect";
-import { StartingItemsAddItemButton } from "~/components/StartingItemsAddItemButton/StartingItemsAddItemButton";
+import { FlagTextInput } from "~/components/FlagInput/FlagInput";
 import { setFlag } from "~/state/flagSlice";
-import {
-  setItems,
-} from "~/state/itemSlice";
-import { StartingItems } from "~/types/starting_items";
+import { selectStartingItems, setItems } from "~/state/itemSlice";
+import { StartingItem, StartingItems } from "~/types/starting_items";
 import { startingItemsToString } from "~/utils/startingItemsToString";
+import { StartingItemsAddItemButton } from "~/components/StartingItemsAddItemButton/StartingItemsAddItemButton";
+import { StartingItemSelect } from "~/components/StartingItemSelect/StartingItemSelect";
 
-type StartingItemsProps = {
-  items: StartingItems;
-  curateItems: boolean;
-};
+export interface StartingItemsProps {
+  items?: StartingItems;
+  curateItems?: boolean;
+}
 
-export const StartingGoldAndItems = ({ items, curateItems }: StartingItemsProps) => {
+export const StartingGoldAndItems = ({ items: propsItems, curateItems = false }: StartingItemsProps) => {
   const dispatch = useDispatch();
+  const reduxItems = useSelector(selectStartingItems);
+  const items = propsItems ?? reduxItems;
 
   const onItemChange = (items: StartingItems) => {
     const sits = startingItemsToString;
@@ -47,21 +48,39 @@ export const StartingGoldAndItems = ({ items, curateItems }: StartingItemsProps)
           label="Starting Gold"
           type="int"
         />
+        <div className="hidden md:block" />
 
+        <FlagSlider
+          flag="-sshoes"
+          helperText="Begin the game with {{ . }} Sprint Shoes"
+          label="Starting Sprint Shoes"
+        />
         <FlagSlider
           flag="-smc"
           helperText="Begin the game with {{ . }} Moogle Charms"
-          label="(Old Style) Starting Moogle Charms"
+          label="Starting Moogle Charms"
+        />
+
+        <FlagSlider
+          helperText="Begin the game with {{ . }} Fenix Downs"
+          flag="-sfd"
+          label="Starting Fenix Downs"
         />
         <FlagSlider
           helperText="Begin the game with {{ . }} Warp Stones"
           flag="-sws"
-          label="(Old Style) Starting Warp Stones"
+          label="Starting Warp Stones"
+        />
+
+        <FlagSlider
+          flag="-sj"
+          label="Starting Junk"
+          helperText="Begin the game with {{.}} unique low tier items (weapons, armors, helmets, shields, and relics)"
         />
         <FlagSlider
-          helperText="Begin the game with {{ . }} Fenix Downs"
-          flag="-sfd"
-          label="(Old Style) Starting Fenix Downs"
+          helperText="Begin the game with {{ . }} different random tools"
+          flag="-sto"
+          label="Starting Tools"
         />
 
         <div className={"flex justify-between items-center gap-4"}>
@@ -73,7 +92,7 @@ export const StartingGoldAndItems = ({ items, curateItems }: StartingItemsProps)
         </div>
         <div className={"max-h-96 overflow-y-auto overflow-x-auto"}>
           <div className={"max-w-md"}>
-            {items.items.map((i, idx) => (
+            {items.items.map((i: StartingItem, idx: number) => (
               <StartingItemSelect
                 item={i}
                 key={idx}
