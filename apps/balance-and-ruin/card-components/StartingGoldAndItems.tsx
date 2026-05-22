@@ -46,12 +46,6 @@ export const StartingGoldAndItems = ({ items: propsItems, curateItems = false }:
           />
 
           <FlagSlider
-            flag="-sshoes"
-            helperText="Begin the game with {{ . }} Sprint Shoes"
-            label="Starting Sprint Shoes"
-          />
-          
-          <FlagSlider
             flag="-smc"
             helperText="Begin the game with {{ . }} Moogle Charms"
             label="Starting Moogle Charms"
