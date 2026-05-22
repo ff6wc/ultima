@@ -106,16 +106,45 @@ export const StartingGoldAndItems = ({ items: propsItems, curateItems = false }:
           <div
             ref={scrollRef}
             style={{ maxHeight: `${maxHeight}px` }}
-            className="overflow-y-auto overflow-x-hidden pr-2 flex flex-col gap-2"
+            className={`overflow-y-auto overflow-x-hidden pr-2 flex flex-col gap-2 ${
+              items.items.length > 4 ? "pb-36" : "pb-2"
+            }`}
           >
             {items.items.map((i: StartingItem, idx: number) => (
-              <StartingItemSelect
-                item={i}
+              <div
                 key={idx}
-                items={items}
-                curateItems={curateItems}
-                onChange={onItemChange}
-              />
+                onClick={() => {
+                  if (idx === items.items.length - 1) {
+                    setTimeout(() => {
+                      if (scrollRef.current) {
+                        scrollRef.current.scrollTo({
+                          top: scrollRef.current.scrollHeight,
+                          behavior: "smooth",
+                        });
+                      }
+                    }, 150);
+                  }
+                }}
+                onFocusCapture={() => {
+                  if (idx === items.items.length - 1) {
+                    setTimeout(() => {
+                      if (scrollRef.current) {
+                        scrollRef.current.scrollTo({
+                          top: scrollRef.current.scrollHeight,
+                          behavior: "smooth",
+                        });
+                      }
+                    }, 150);
+                  }
+                }}
+              >
+                <StartingItemSelect
+                  item={i}
+                  items={items}
+                  curateItems={curateItems}
+                  onChange={onItemChange}
+                />
+              </div>
             ))}
             <StartingItemsAddItemButton items={items} />
           </div>
