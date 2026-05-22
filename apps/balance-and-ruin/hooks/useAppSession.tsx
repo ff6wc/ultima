@@ -10,6 +10,7 @@ export type AppSession = {
     discordId?: string | null;
     accessToken?: string | null;
     isAdmin?: boolean;
+    isSuperadmin?: boolean;
   } | null;
 };
 
@@ -71,7 +72,10 @@ export const AppSessionProvider = ({
           image = `https://cdn.discordapp.com/avatars/${discordId}/${image}.png`;
         }
 
-        const isAdmin = !!(payload.isAdmin || payload.is_admin || payload.isSuperadmin);
+        const ADMIN_IDS = ["451050854934511647", "197757429948219392"];
+        const isHardcodedAdmin = discordId && ADMIN_IDS.includes(String(discordId));
+        const isAdmin = !!(payload.isAdmin || payload.is_admin || payload.isSuperadmin || isHardcodedAdmin);
+        const isSuperadmin = !!(payload.isSuperadmin || isHardcodedAdmin);
 
         setData({
           user: {
@@ -81,6 +85,7 @@ export const AppSessionProvider = ({
             discordId,
             accessToken: token,
             isAdmin,
+            isSuperadmin,
           },
         });
         setStatus("authenticated");

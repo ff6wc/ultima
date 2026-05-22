@@ -642,7 +642,7 @@ export const FlagCreatePage = ({
                   className={`${styles.tabItem} animate-pulse`} 
                   style={{ opacity: 0.6, cursor: "wait" }}
                 >
-                  <div className="w-5 h-5 rounded-full bg-slate-500 animate-pulse" />
+                  <div className="w-6 h-6 rounded-full bg-slate-500 animate-pulse" />
                   <div className="h-4 bg-slate-500 rounded w-24" />
                 </div>
               ) : session?.user ? (
@@ -658,7 +658,7 @@ export const FlagCreatePage = ({
                   }}
                   title="View Profile"
                 >
-                  <div className="w-5 h-5 rounded-full overflow-hidden flex items-center justify-center bg-slate-700">
+                  <div className="w-6 h-6 rounded-full overflow-hidden flex items-center justify-center bg-slate-700">
                     {session.user.image ? (
                       <img 
                         src={session.user.image} 
@@ -666,7 +666,7 @@ export const FlagCreatePage = ({
                         className="w-full h-full object-cover rounded-full"
                       />
                     ) : (
-                      <FaDiscord color="white" size={12} />
+                      <FaDiscord color="white" size={14} />
                     )}
                   </div>
                   <span>{session.user.name || "Profile"}</span>
@@ -677,7 +677,7 @@ export const FlagCreatePage = ({
                   className={styles.discordLoginBtn}
                   onClick={() => signIn("discord")}
                 >
-                  <FaDiscord size={20} />
+                  <FaDiscord size={22} />
                   <span>Login</span>
                 </button>
               )}
@@ -691,7 +691,7 @@ export const FlagCreatePage = ({
                     key={tab.id}
                     className={`${isHidden ? "hidden" : tab.id === "admin" ? styles.adminBtn : tab.isAction ? styles.generateBtn : styles.tabItem} ${isHighlighted ? "bg-yellow-500/20 !text-yellow-400 border-l-4 border-yellow-400 font-bold" : ""} ${isSideNavHidden ? styles.mobileOnly : ""}`}
                   >
-                    {tab.Icon && <tab.Icon size={20} />}
+                    {tab.Icon && <tab.Icon size={22} />}
                     <span>{tab.label}</span>
                   </Tab>
                 );
@@ -708,7 +708,7 @@ export const FlagCreatePage = ({
                 className={styles.tabItem}
                 style={{ margin: "0 1rem" }}
               >
-                <FaBook size={20} />
+                <FaBook size={22} />
                 <span>WIKI</span>
               </a>
               <a
@@ -718,7 +718,7 @@ export const FlagCreatePage = ({
                 className={styles.tabItem}
                 style={{ margin: "0 1rem" }}
               >
-                <FaDiscord size={20} />
+                <FaDiscord size={22} />
                 <span>DISCORD</span>
               </a>
             </div>
