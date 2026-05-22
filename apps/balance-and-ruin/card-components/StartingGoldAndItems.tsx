@@ -46,31 +46,19 @@ export const StartingGoldAndItems = ({ items: propsItems, curateItems = false }:
           />
 
           <FlagSlider
-            flag="-smc"
-            helperText="Begin the game with {{ . }} Moogle Charms"
-            label="Starting Moogle Charms"
-          />
-
-          <FlagSlider
-            helperText="Begin the game with {{ . }} Fenix Downs"
-            flag="-sfd"
-            label="Starting Fenix Downs"
-          />
-          
-          <FlagSlider
-            helperText="Begin the game with {{ . }} Warp Stones"
-            flag="-sws"
-            label="Starting Warp Stones"
-          />
-
-          <FlagSlider
             helperText="Begin the game with {{ . }} different random tools"
             flag="-sto"
             label="Starting Tools"
           />
+
+          <FlagSlider
+            flag="-sj"
+            label="Starting Junk"
+            helperText="Begin the game with {{.}} unique low tier items (weapons, armors, helmets, shields, and relics)"
+          />
         </div>
 
-        {/* Right Column: Starting Items & Starting Junk */}
+        {/* Right Column: Starting Items */}
         <div className="flex flex-col md:justify-between md:h-full gap-6 md:gap-0">
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-1">
@@ -93,14 +81,6 @@ export const StartingGoldAndItems = ({ items: propsItems, curateItems = false }:
               ))}
               <StartingItemsAddItemButton items={items} />
             </div>
-          </div>
-
-          <div className="pt-6 border-t border-zinc-800">
-            <FlagSlider
-              flag="-sj"
-              label="Starting Junk"
-              helperText="Begin the game with {{.}} unique low tier items (weapons, armors, helmets, shields, and relics)"
-            />
           </div>
         </div>
       </div>

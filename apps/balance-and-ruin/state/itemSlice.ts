@@ -31,6 +31,24 @@ const initialState: StartingItemsState = {
                 name: "Moogle Charm",
                 min: 3,
                 max: 3
+            },
+            {
+                id: 240,
+                name: "Fenix Down",
+                min: 3,
+                max: 3
+            },
+            {
+                id: 253,
+                name: "Warp Stone",
+                min: 3,
+                max: 3
+            },
+            {
+                id: -1,
+                name: "",
+                min: 1,
+                max: 1
             }
         ],
     },
