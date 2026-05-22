@@ -10,6 +10,7 @@ import { RawFlagMetadata, setSchema } from "~/state/schemaSlice";
 import { ObjectiveMetadata } from "~/types/objectives";
 import { FlagPreset } from "~/types/preset";
 import { fetchWithTimeout } from "~/utils/fetchWithTimeout";
+import { normalizePresets } from "~/utils/presets";
 
 export type PageProps = {
   objectives: ObjectiveMetadata;
@@ -26,17 +27,6 @@ const DecodeB64QueryStringParam  = (param: string) => {
   const buf = Buffer.from(base64, "base64")
   return buf.toString("utf-8")
 }
-
-const normalizePresets = (data: any): Record<string, FlagPreset> => {
-  if (!data) return {};
-  const presetsArray = Array.isArray(data) ? data : Object.values(data);
-  return presetsArray.reduce((acc: Record<string, FlagPreset>, p: any) => {
-    if (p && p.name) {
-      acc[p.name.toLowerCase()] = p;
-    }
-    return acc;
-  }, {});
-};
 
 const Create = () => {
   const dispatch = useDispatch();

@@ -765,6 +765,7 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
 
   // Annotate each preset with the user's last-downloaded timestamp from localStorage
   const allPresets = useMemo<FlagPreset[]>(() => {
+    const currentUserNameLower = session?.user?.name?.toLowerCase() || "";
     const overridesMap = new Map<string, any>();
     for (const p of dbPresets) {
       const creatorId = p.owner_id || p.creator_id;
@@ -834,14 +835,14 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
         const isUserOwned =
           currentUserId &&
           (String(p.creator_id) === String(currentUserId) ||
-           String(p.creator_name).toLowerCase() === String(session?.user?.name).toLowerCase());
+           String(p.creator_name).toLowerCase() === currentUserNameLower);
         const isLocalCustom = customPresets[p.name] !== undefined;
         const isUserDbPreset = mappedDbPresets.some(
           (dbP) =>
             dbP.name.toLowerCase() === p.name.toLowerCase() &&
             currentUserId &&
             (String(dbP.creator_id) === String(currentUserId) ||
-             String(dbP.creator_name).toLowerCase() === String(session?.user?.name).toLowerCase())
+             String(dbP.creator_name).toLowerCase() === currentUserNameLower)
         );
 
         return isOfficial || isUserOwned || isLocalCustom || isUserDbPreset;
