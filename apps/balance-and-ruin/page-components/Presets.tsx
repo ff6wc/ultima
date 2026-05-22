@@ -673,8 +673,8 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
           : (!!p.official || (Array.isArray(p.tags) && p.tags.includes("official")));
         const createdAt = p.created_at || p.created_timestamp;
 
-        const isSelf = creatorId && currentUserId && String(creatorId) === String(currentUserId);
-        const displayName = p.creator_name || (creatorId === "seedbot" ? "Seedbot" : (isSelf ? "You" : "Community"));
+        const isSelf = creatorId != null && currentUserId != null && String(creatorId) === String(currentUserId);
+        const displayName = isSelf ? "You" : (p.creator_name || (creatorId === "seedbot" ? "Seedbot" : "Community"));
 
         return {
           name: p.name,
