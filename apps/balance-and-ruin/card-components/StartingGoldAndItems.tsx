@@ -122,7 +122,7 @@ export const StartingGoldAndItems = ({ items: propsItems, curateItems = false }:
         </div>
 
         {/* Right Column: Sliders and numeric options + Summary at the bottom */}
-        <div ref={rightColumnRef} className="flex flex-col h-full justify-between gap-6">
+        <div ref={rightColumnRef} className="flex flex-col gap-6">
           <div className="flex flex-col gap-4">
             <FlagNumberInput
               description="Begin the game with {{ . }} gold"
