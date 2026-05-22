@@ -50,7 +50,7 @@ export const StartingGoldAndItems = ({ items: propsItems, curateItems = false }:
         const rightHeight = rightColumnRef.current.offsetHeight;
         const headerHeight = leftHeaderRef.current.offsetHeight;
         const availableHeight = rightHeight - headerHeight - 16; // 16px is flex gap-4
-        setMaxHeight(availableHeight > 0 ? availableHeight : 350);
+        setMaxHeight(availableHeight > 0 ? Math.max(280, availableHeight) : 350);
       } else {
         setMaxHeight(500);
       }
@@ -122,53 +122,55 @@ export const StartingGoldAndItems = ({ items: propsItems, curateItems = false }:
         </div>
 
         {/* Right Column: Sliders and numeric options + Summary at the bottom */}
-        <div ref={rightColumnRef} className="flex flex-col gap-6">
-          <div className="flex flex-col gap-4">
-            <FlagNumberInput
-              description="Begin the game with {{ . }} gold"
-              flag="-gp"
-              label="Starting Gold"
-              type="int"
-            />
+        <div className="flex flex-col">
+          <div ref={rightColumnRef} className="flex flex-col gap-6">
+            <div className="flex flex-col gap-4">
+              <FlagNumberInput
+                description="Begin the game with {{ . }} gold"
+                flag="-gp"
+                label="Starting Gold"
+                type="int"
+              />
 
-            <FlagSlider
-              helperText="Begin the game with {{ . }} different random tools"
-              flag="-sto"
-              label="Starting Tools"
-            />
+              <FlagSlider
+                helperText="Begin the game with {{ . }} different random tools"
+                flag="-sto"
+                label="Starting Tools"
+              />
 
-            <FlagSlider
-              flag="-sj"
-              label="Starting Junk"
-              helperText="Begin the game with {{.}} unique low tier items (weapons, armors, helmets, shields, and relics)"
-            />
-          </div>
+              <FlagSlider
+                flag="-sj"
+                label="Starting Junk"
+                helperText="Begin the game with {{.}} unique low tier items (weapons, armors, helmets, shields, and relics)"
+              />
+            </div>
 
-          {/* Starting Items Summary Panel */}
-          <div className="flex flex-col gap-2 pt-6 border-t border-zinc-800/80">
-            <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
-              Starting Items Summary
-            </span>
-            {validItems.length > 0 ? (
-              <div className="grid grid-cols-2 gap-2">
-                {validItems.map((item, idx) => {
-                  const qty = item.min === item.max ? `${item.min}` : `${item.min}-${item.max}`;
-                  return (
-                    <div
-                      key={idx}
-                      className="flex items-center justify-between gap-1.5 px-3 py-1 bg-blue-50/60 dark:bg-[#181d29] text-blue-900 dark:text-blue-300 border border-blue-100 dark:border-[#38445e]/50 rounded-md shadow-sm transition-all hover:bg-blue-100/50 dark:hover:bg-[#1f2637]"
-                    >
-                      <span className="text-sm font-normal">{item.name}</span>
-                      <span className="bg-blue-100/80 dark:bg-blue-900/40 text-blue-800 dark:text-blue-400 px-1.5 py-0.5 rounded text-[10px] font-bold">
-                        x{qty}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <span className="text-xs italic text-zinc-500">No starting items selected.</span>
-            )}
+            {/* Starting Items Summary Panel */}
+            <div className="flex flex-col gap-2 pt-6 border-t border-zinc-800/80">
+              <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+                Starting Items Summary
+              </span>
+              {validItems.length > 0 ? (
+                <div className="grid grid-cols-2 gap-2">
+                  {validItems.map((item, idx) => {
+                    const qty = item.min === item.max ? `${item.min}` : `${item.min}-${item.max}`;
+                    return (
+                      <div
+                        key={idx}
+                        className="flex items-center justify-between gap-1.5 px-3 py-1 bg-blue-50/60 dark:bg-[#181d29] text-blue-900 dark:text-blue-300 border border-blue-100 dark:border-[#38445e]/50 rounded-md shadow-sm transition-all hover:bg-blue-100/50 dark:hover:bg-[#1f2637]"
+                      >
+                        <span className="text-sm font-normal">{item.name}</span>
+                        <span className="bg-blue-100/80 dark:bg-blue-900/40 text-blue-800 dark:text-blue-400 px-1.5 py-0.5 rounded text-[10px] font-bold">
+                          x{qty}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <span className="text-xs italic text-zinc-500">No starting items selected.</span>
+              )}
+            </div>
           </div>
         </div>
       </div>
