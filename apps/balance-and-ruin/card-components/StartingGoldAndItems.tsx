@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Card } from "@ff6wc/ui";
 import { useDispatch, useSelector } from "react-redux";
 import { CardColumn } from "~/components/CardColumn/CardColumn";
@@ -23,6 +23,9 @@ export const StartingGoldAndItems = ({ items: propsItems, curateItems = false }:
   const reduxItems = useSelector(selectStartingItems);
   const items = propsItems ?? reduxItems;
   const scrollRef = useRef<HTMLDivElement>(null);
+  const rightColumnRef = useRef<HTMLDivElement>(null);
+  const leftHeaderRef = useRef<HTMLDivElement>(null);
+  const [maxHeight, setMaxHeight] = useState<number>(500);
   const prevItemsLength = useRef(items.items.length);
 
   useEffect(() => {
@@ -38,6 +41,41 @@ export const StartingGoldAndItems = ({ items: propsItems, curateItems = false }:
     }
     prevItemsLength.current = items.items.length;
   }, [items.items.length]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const updateHeight = () => {
+      if (window.innerWidth >= 768 && rightColumnRef.current && leftHeaderRef.current) {
+        const rightHeight = rightColumnRef.current.offsetHeight;
+        const headerHeight = leftHeaderRef.current.offsetHeight;
+        const availableHeight = rightHeight - headerHeight - 16; // 16px is flex gap-4
+        setMaxHeight(Math.max(500, availableHeight));
+      } else {
+        setMaxHeight(500);
+      }
+    };
+
+    updateHeight();
+
+    const observer = new ResizeObserver(() => {
+      updateHeight();
+    });
+
+    if (rightColumnRef.current) {
+      observer.observe(rightColumnRef.current);
+    }
+    if (leftHeaderRef.current) {
+      observer.observe(leftHeaderRef.current);
+    }
+
+    window.addEventListener("resize", updateHeight);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", updateHeight);
+    };
+  }, [items.items]);
 
   const onItemChange = (items: StartingItems) => {
     const sits = startingItemsToString;
@@ -57,7 +95,7 @@ export const StartingGoldAndItems = ({ items: propsItems, curateItems = false }:
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
         {/* Left Column: Starting Items */}
         <div className="flex flex-col gap-4 h-full">
-          <div className="flex flex-col gap-1">
+          <div ref={leftHeaderRef} className="flex flex-col gap-1">
             <FlagLabel
               flag={"-si"}
               helperText={"The dropdown menus support searching for items"}
@@ -67,7 +105,8 @@ export const StartingGoldAndItems = ({ items: propsItems, curateItems = false }:
 
           <div
             ref={scrollRef}
-            className="max-h-[500px] overflow-y-auto overflow-x-hidden pr-2 flex flex-col gap-2"
+            style={{ maxHeight: `${maxHeight}px` }}
+            className="overflow-y-auto overflow-x-hidden pr-2 flex flex-col gap-2"
           >
             {items.items.map((i: StartingItem, idx: number) => (
               <StartingItemSelect
@@ -83,7 +122,7 @@ export const StartingGoldAndItems = ({ items: propsItems, curateItems = false }:
         </div>
 
         {/* Right Column: Sliders and numeric options + Summary at the bottom */}
-        <div className="flex flex-col h-full justify-between gap-6">
+        <div ref={rightColumnRef} className="flex flex-col h-full justify-between gap-6">
           <div className="flex flex-col gap-4">
             <FlagNumberInput
               description="Begin the game with {{ . }} gold"
