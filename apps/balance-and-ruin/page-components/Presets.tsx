@@ -20,6 +20,7 @@ import {
 import { generateRandom, generateChaos, generateTrueChaos } from "~/utils/randomFlagsets";
 import { setRawFlags, selectRawFlags } from "~/state/flagSlice";
 import { setRawObjectives } from "~/state/objectiveSlice";
+import { setRawStartingItems } from "~/state/itemSlice";
 import {
   setActivePreset,
   clearActivePreset,
@@ -580,6 +581,7 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
       dispatch(clearActivePreset());
       dispatch(setRawFlags(rolledFlags));
       dispatch(setRawObjectives(rolledFlags));
+      dispatch(setRawStartingItems(rolledFlags));
       
       const typeLabel = type === "random" ? "Random" : type === "chaos" ? "Chaos" : "True Chaos";
       setToast({
@@ -900,6 +902,7 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
     dispatch(setActivePreset(preset.name));
     dispatch(setRawFlags(preset.flags));
     dispatch(setRawObjectives(preset.flags));
+    dispatch(setRawStartingItems(preset.flags));
   };
 
   const handleClear = () => {

@@ -8,7 +8,8 @@ const FlagCreatePage = dynamic<any>(
   { ssr: false }
 );
 import { setRawFlags } from "~/state/flagSlice";
-import { setObjectiveMetadata } from "~/state/objectiveSlice";
+import { setObjectiveMetadata, setRawObjectives } from "~/state/objectiveSlice";
+import { setRawStartingItems, initItemMetadata } from "~/state/itemSlice";
 import { RawFlagMetadata, setSchema } from "~/state/schemaSlice";
 import { ObjectiveMetadata } from "~/types/objectives";
 import { FlagPreset } from "~/types/preset";
@@ -30,6 +31,7 @@ const HomeLandingPage = () => {
 
   useEffect(() => {
     setIsMounted(true);
+    dispatch(initItemMetadata());
     // 1. Try to load initial values from localStorage cache for instant load
     try {
       const cachedObjectives = localStorage.getItem("cached_objectives");
@@ -53,6 +55,8 @@ const HomeLandingPage = () => {
             const preset = normalized["ultros league"];
             if (preset) {
               dispatch(setRawFlags(preset.flags));
+              dispatch(setRawObjectives(preset.flags));
+              dispatch(setRawStartingItems(preset.flags));
             }
           }
         }
@@ -84,6 +88,8 @@ const HomeLandingPage = () => {
         const preset = normalized["ultros league"];
         if (preset) {
           dispatch(setRawFlags(preset.flags));
+          dispatch(setRawObjectives(preset.flags));
+          dispatch(setRawStartingItems(preset.flags));
         }
       })
       .catch((err) => {
@@ -97,6 +103,8 @@ const HomeLandingPage = () => {
             const preset = normalized["ultros league"];
             if (preset) {
               dispatch(setRawFlags(preset.flags));
+              dispatch(setRawObjectives(preset.flags));
+              dispatch(setRawStartingItems(preset.flags));
             }
           })
           .catch((fallbackErr) => {

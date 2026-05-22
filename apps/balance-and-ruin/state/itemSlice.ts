@@ -16,13 +16,16 @@ export interface StartingItemsState {
     items: StartingItems;
 }
 
+const prefilledItems = itemsMetadata.itemsMetadata.reduce( (acc, val) => {
+    acc[val.id] = val;
+    return acc;
+}, {} as Record<number, RawStartingItem>);
+
 // Initial state
 const initialState: StartingItemsState = {
-    metadata: {
-        itemsMetadata: [],
-    },
+    metadata: itemsMetadata,
     metadataById: {
-        items: {},
+        items: prefilledItems,
     },
     items: {
         items:[
