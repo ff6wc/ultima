@@ -11,6 +11,10 @@ import { ObjectiveMetadata } from "~/types/objectives";
 import { FlagPreset } from "~/types/preset";
 import { fetchWithTimeout } from "~/utils/fetchWithTimeout";
 import { normalizePresets } from "~/utils/presets";
+import fallbackFlag from "~/public/metadata-fallback/flag.json";
+import fallbackObjective from "~/public/metadata-fallback/objective.json";
+import fallbackWc from "~/public/metadata-fallback/wc.json";
+
 
 export type PageProps = {
   objectives: ObjectiveMetadata;
@@ -81,8 +85,22 @@ const Create = () => {
         }
       })
       .catch((err) => {
-        console.warn("Failed to fetch presets from API:", err);
-        setPresets((prev) => prev || {});
+        console.warn("Failed to fetch presets from API, trying fallback fetch:", err);
+        fetch("/metadata-fallback/presets.json")
+          .then((res) => res.json())
+          .then((data) => {
+            const normalized = normalizePresets(data);
+            setPresets(normalized);
+            localStorage.setItem("cached_presets", JSON.stringify(normalized));
+            const preset = normalized["ultros league"];
+            if (preset) {
+              dispatch(setRawFlags(preset.flags));
+            }
+          })
+          .catch((fallbackErr) => {
+            console.error("Failed to fetch fallback presets:", fallbackErr);
+            setPresets((prev) => prev || {});
+          });
       });
 
     fetchWithTimeout(`${process.env.NEXT_PUBLIC_API_URL}/api/metadata/flag`, {}, 2500)
@@ -93,7 +111,7 @@ const Create = () => {
         dispatch(setSchema(data));
       })
       .catch((err) => {
-        console.warn("Failed to fetch flag metadata from API, trying fallback:", err);
+        console.warn("Failed to fetch flag metadata from API, trying fallback fetch:", err);
         fetch("/metadata-fallback/flag.json")
           .then((res) => res.json())
           .then((data) => {
@@ -102,7 +120,10 @@ const Create = () => {
             dispatch(setSchema(data));
           })
           .catch((fallbackErr) => {
-            console.error("Failed to fetch fallback flag metadata:", fallbackErr);
+            console.error("Failed to fetch fallback flag metadata, using hardcoded fallback:", fallbackErr);
+            setSchemaLocal(fallbackFlag as any);
+            localStorage.setItem("cached_schema", JSON.stringify(fallbackFlag));
+            dispatch(setSchema(fallbackFlag as any));
           });
       });
 
@@ -114,7 +135,7 @@ const Create = () => {
         dispatch(setObjectiveMetadata(data));
       })
       .catch((err) => {
-        console.warn("Failed to fetch objective metadata from API, trying fallback:", err);
+        console.warn("Failed to fetch objective metadata from API, trying fallback fetch:", err);
         fetch("/metadata-fallback/objective.json")
           .then((res) => res.json())
           .then((data) => {
@@ -123,7 +144,10 @@ const Create = () => {
             dispatch(setObjectiveMetadata(data));
           })
           .catch((fallbackErr) => {
-            console.error("Failed to fetch fallback objective metadata:", fallbackErr);
+            console.error("Failed to fetch fallback objective metadata, using hardcoded fallback:", fallbackErr);
+            setObjectives(fallbackObjective as any);
+            localStorage.setItem("cached_objectives", JSON.stringify(fallbackObjective));
+            dispatch(setObjectiveMetadata(fallbackObjective as any));
           });
       });
 
@@ -135,7 +159,7 @@ const Create = () => {
         localStorage.setItem("cached_version", JSON.stringify(fetchedVersion));
       })
       .catch((err) => {
-        console.warn("Failed to fetch version from API, trying fallback:", err);
+        console.warn("Failed to fetch version from API, trying fallback fetch:", err);
         fetch("/metadata-fallback/wc.json")
           .then((res) => res.json())
           .then((data) => {
@@ -144,9 +168,13 @@ const Create = () => {
             localStorage.setItem("cached_version", JSON.stringify(fetchedVersion));
           })
           .catch((fallbackErr) => {
-            console.error("Failed to fetch fallback version:", fallbackErr);
+            console.error("Failed to fetch fallback version, using hardcoded fallback:", fallbackErr);
+            const fetchedVersion = (fallbackWc as any).version || "1.4.3d";
+            setVersion(fetchedVersion);
+            localStorage.setItem("cached_version", JSON.stringify(fetchedVersion));
           });
       });
+
   }, [dispatch]);
 
   if (objectives && presets && schema && version) {
