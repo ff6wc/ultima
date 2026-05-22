@@ -12,23 +12,9 @@ import { FlagSwitch } from "~/components/FlagSwitch/FlagSwitch";
 const spellOptions: SubflagOption[] = [
   {
     defaultValue: true,
-    flag: "-esrr",
-    helperText: "(DEPRECATED) Original esper spells with random learn rates",
-    label: "Original (Random Rates)",
-    isStatic: true,
-  },
-  {
-    defaultValue: true,
     flag: "-ess",
     helperText: "Spells are shuffled between espers",
     label: "Shuffle",
-    isStatic: true,
-  },
-  {
-    defaultValue: true,
-    flag: "-essrr",
-    helperText: "(DEPRECATED) Esper spells shuffled with random learn rates",
-    label: "Shuffle (Random Rates)",
     isStatic: true,
   },
   {

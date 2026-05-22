@@ -21,6 +21,8 @@ export const StartingItemsRemoveItemButton = ({
 }: StartingItemsProps) => {
   const dispatch = useDispatch();
 
+  const isCleared = item.id === -1;
+
   const removeItem = () => {
     if (items.items.length <= 0) {
       return;
@@ -28,8 +30,20 @@ export const StartingItemsRemoveItemButton = ({
     const newItems = { ...items };
     const itemsArray = [...items.items];
     const index = itemsArray.indexOf(item);
-    if (index > -1) { // only splice array when item is found
-      itemsArray.splice(index, 1); // 2nd parameter means remove one item only
+    if (index > -1) {
+      if (isCleared) {
+        // If it's already cleared, delete the slot/row completely from the list
+        itemsArray.splice(index, 1);
+      } else {
+        // Otherwise, reset the item ID and name to clear the selection, retaining the dropdown
+        itemsArray[index] = {
+          ...item,
+          id: -1,
+          name: "",
+          min: 1,
+          max: 1,
+        };
+      }
     }
     newItems.items = itemsArray;
 
@@ -49,9 +63,9 @@ export const StartingItemsRemoveItemButton = ({
       disabled={items.items.length <= 0}
       onClick={removeItem}
       size="small"
-      variant="danger"
+      variant={isCleared ? "danger" : "secondary"}
     >
-      Clear Item
+      {isCleared ? "Remove Slot" : "Clear Item"}
     </Button>
   );
 };

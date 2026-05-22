@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 import { useSelector } from "react-redux";
-import BaseSelect, { SingleValue } from "react-select";
-import { SelectOption } from "~/components/Select/Select";
+import { Select, SelectOption } from "~/components/Select/Select";
 import { selectItemById } from "~/state/itemSlice";
 import { StartingItem, StartingItems } from "~/types/starting_items";
 import { Slider, HelperText } from "@ff6wc/ui";
@@ -24,27 +23,6 @@ export const StartingItemSelect = ({
   const { id, name } = item;
 
   const meta = orderBy(useSelector(selectItemById), i => i.name);
-  const myMeta = meta[id];
-
-  const options = useMemo(
-    () =>
-      Object.values(meta).map<SelectOption>((c) => ({
-        label: c.name,
-        value: c.id.toString(),
-      })),
-    [meta]
-  );
-
-  const optionsById = useMemo(
-    () =>
-      options.reduce((acc, val) => {
-        acc[val.value] = val;
-        return acc;
-      }, {} as Record<string, SelectOption>),
-    [options]
-  );
-
-  const selectedItem = optionsById[id];
 
   const onRangeValueChange = (value: number[]) => {
     const idx = items.items.indexOf(item);
@@ -58,22 +36,16 @@ export const StartingItemSelect = ({
     array[idx] = newItem;
     obj.items = array;
     onChange(obj);
-    helperText = getHelperText();
   };
 
-  const onSelectValueChange = (selected: SingleValue<SelectOption>) => {
+  const onSelectValueChange = (selected: SelectOption | null) => {
     if (!selected) {
       return;
     }
 
     const idx = items.items.indexOf(item);
 
-    if (!selected) {
-      ("idk");
-      return;
-    }
     if (idx === -1) {
-      // item doesn't exist in result?
       console.error(
         "item not found within list of starting items",
         items,
@@ -91,64 +63,66 @@ export const StartingItemSelect = ({
     };
     array[idx] = newItem;
     obj.items = array;
-    helperText = getHelperText();
     onChange(obj);
   };
 
-  const selectOptions =
-    Object.values(meta).filter(v => !v.hideable || !curateItems).map<SelectOption>((value, idx) => {
-      return {
+  const selectOptions = useMemo(() => {
+    return Object.values(meta)
+      .filter(v => !v.hideable || !curateItems)
+      .map<SelectOption>((value) => ({
         label: value.name,
         value: value.id.toString(),
-      };
-    }) ?? [];
+      })) ?? [];
+  }, [meta, curateItems]);
 
   const getSelectedValueOption = () =>
     selectOptions.find(
       ({ value }) => value === item.id?.toString()
-    );
+    ) || null;
 
-  const getHelperText = () =>
-    {
-      const min = item.min.toString();
-      const max = item.max.toString();
-      var name = item.name;
-      if(!name.endsWith("s")) {
-        name = name + "s";
-      }
-      return "Begin the game with " + min + "-" + max + " " + name + ".";
+  const getHelperText = () => {
+    if (item.id === -1 || !item.name) {
+      return "Select an item to begin.";
     }
+    const min = item.min.toString();
+    const max = item.max.toString();
+    let displayName = item.name;
+    if (!displayName.endsWith("s")) {
+      displayName = displayName + "s";
+    }
+    return "Begin the game with " + min + "-" + max + " " + displayName + ".";
+  };
 
-  var helperText = getHelperText();
+  const helperText = getHelperText();
 
   return (
-    <div className="flex flex-col gap-2">
-      <HelperText> {helperText} </HelperText>
-      <BaseSelect
-        className="ff6wc-select-container"
-        classNamePrefix="ff6wc-select"
-        instanceId={id}
-        getOptionLabel={(option) => option.label}
-        getOptionValue={(option) => option.value}
-        menuPosition="fixed"
+    <div className="flex flex-col gap-3 p-4 bg-zinc-900/60 rounded-lg border border-zinc-800 hover:border-zinc-700/60 transition-all shadow-md">
+      <div className="flex justify-between items-center gap-4">
+        <HelperText className="text-zinc-300 font-medium"> {helperText} </HelperText>
+        <StartingItemsRemoveItemButton items={items} item={item} />
+      </div>
+
+      <Select
         options={selectOptions}
         onChange={(val) => onSelectValueChange(val)}
         value={getSelectedValueOption()}
         isSearchable={true}
+        placeholder="Select starting item..."
       />
 
-      <Slider
-        markActiveValues
-        min={1}
-        max={99}
-        step={1}
-        onChange={(val) => onRangeValueChange(val)}
-        range={true}
-        value={[item.min,item.max]}
-      />
-
-      <StartingItemsRemoveItemButton items={items} item={item} />
-      <br/>
+      {item.id !== -1 && (
+        <div className="px-2 pt-1 pb-1">
+          <Slider
+            markActiveValues
+            min={1}
+            max={99}
+            step={1}
+            onChange={(val) => onRangeValueChange(val)}
+            range={true}
+            value={[item.min, item.max]}
+          />
+        </div>
+      )}
     </div>
   );
 };
