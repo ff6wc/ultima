@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const rootDir = 'C:/Users/drlov/.gemini/antigravity/scratch/ultima/apps/balance-and-ruin';
+const rootDir = path.resolve(__dirname);
 
 const PAGE_MAPPINGS = {
   presets: ['Presets.tsx', 'PresetsCard.tsx', 'BetaPresetsCard.tsx'],
