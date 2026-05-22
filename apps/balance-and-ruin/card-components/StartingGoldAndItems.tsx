@@ -176,7 +176,7 @@ export const StartingGoldAndItems = ({ items: propsItems, curateItems = false }:
 
             {/* Starting Items Summary Panel */}
             <div className="flex flex-col gap-2 pt-6 border-t border-zinc-800/80">
-              <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+              <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-sub)]">
                 Starting Items Summary
               </span>
               {validItems.length > 0 ? (
@@ -186,10 +186,10 @@ export const StartingGoldAndItems = ({ items: propsItems, curateItems = false }:
                     return (
                       <div
                         key={idx}
-                        className="flex items-center justify-between gap-1.5 px-3 py-1 bg-blue-50/60 dark:bg-[#181d29] text-blue-900 dark:text-blue-300 border border-blue-100 dark:border-[#38445e]/50 rounded-md shadow-sm transition-all hover:bg-blue-100/50 dark:hover:bg-[#1f2637]"
+                        className="flex items-center justify-between gap-1.5 px-3 py-1 bg-zinc-50/60 dark:bg-[#181d29] text-[var(--text-main)] border border-zinc-200/80 dark:border-[#38445e]/50 rounded-md shadow-sm transition-all hover:bg-zinc-100/50 dark:hover:bg-[#1f2637]"
                       >
                         <span className="text-sm font-normal">{item.name}</span>
-                        <span className="bg-blue-100/80 dark:bg-blue-900/40 text-blue-800 dark:text-blue-400 px-1.5 py-0.5 rounded text-[10px] font-bold">
+                        <span className="bg-zinc-100 dark:bg-zinc-800/60 text-[var(--text-sub)] px-1.5 py-0.5 rounded text-[10px] font-bold">
                           x{qty}
                         </span>
                       </div>
@@ -197,7 +197,7 @@ export const StartingGoldAndItems = ({ items: propsItems, curateItems = false }:
                   })}
                 </div>
               ) : (
-                <span className="text-xs italic text-zinc-500">No starting items selected.</span>
+                <span className="text-xs italic text-[var(--text-sub)]">No starting items selected.</span>
               )}
             </div>
           </div>
