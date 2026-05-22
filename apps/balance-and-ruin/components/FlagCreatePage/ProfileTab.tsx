@@ -53,10 +53,19 @@ export const ProfileTab = () => {
         .then((res) => res.json())
         .then((data) => {
           if (Array.isArray(data)) {
-            const mine = data.filter((p) => {
-              const creatorId = p.owner_id || p.creator_id;
-              return creatorId && String(creatorId) === String(userDiscordId);
-            });
+            const mine = data
+              .filter((p) => {
+                const creatorId = p.owner_id || p.creator_id;
+                return creatorId && String(creatorId) === String(userDiscordId);
+              })
+              .map((p, index) => {
+                const presetName = p.preset_name || p.name || "";
+                return {
+                  ...p,
+                  id: p.id || presetName || `user-preset-${index}`,
+                  name: presetName,
+                };
+              });
             setUserPresets(mine);
           }
         })

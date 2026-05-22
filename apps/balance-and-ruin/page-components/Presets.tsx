@@ -676,8 +676,9 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
         const isSelf = creatorId != null && currentUserId != null && String(creatorId) === String(currentUserId);
         const displayName = isSelf ? "You" : (p.creator_name || (creatorId === "seedbot" ? "Seedbot" : "Community"));
 
+        const presetName = p.preset_name || p.name || "";
         return {
-          name: p.name,
+          name: presetName,
           creator_name: displayName,
           creator: displayName,
           description: p.description || "",
@@ -688,7 +689,7 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
           hidden: false,
           created_at: createdAt,
           last_downloaded: p.download_timestamp || undefined,
-          id: p.id,
+          id: p.id || presetName,
           tags: p.tags || [],
         };
       });
@@ -773,7 +774,10 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
     for (const p of dbPresets) {
       const creatorId = p.owner_id || p.creator_id;
       if (creatorId === "override") {
-        overridesMap.set(p.name.toLowerCase(), p);
+        const name = p.preset_name || p.name;
+        if (name) {
+          overridesMap.set(name.toLowerCase(), p);
+        }
       }
     }
 

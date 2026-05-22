@@ -109,8 +109,9 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
     // Create a map of db overrides by lowercase name for easy lookup
     const dbMap = new Map<string, any>();
     allPresets.forEach((p) => {
-      if (p.name && (p.owner_id === "override" || p.creator_id === "override")) {
-        dbMap.set(p.name.toLowerCase(), p);
+      const name = p.preset_name || p.name;
+      if (name && (p.owner_id === "override" || p.creator_id === "override")) {
+        dbMap.set(name.toLowerCase(), p);
       }
     });
 
@@ -160,15 +161,16 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
     });
 
     // 2. Process remaining database presets (pure user presets or custom database presets)
-    allPresets.forEach((dbPreset) => {
-      const lowercaseName = dbPreset.name ? dbPreset.name.toLowerCase() : "";
-      if (!processedDbNames.has(lowercaseName)) {
+    allPresets.forEach((dbPreset, index) => {
+      const name = dbPreset.preset_name || dbPreset.name;
+      const lowercaseName = name ? name.toLowerCase() : "";
+      if (lowercaseName && !processedDbNames.has(lowercaseName)) {
         // Skip if marked deleted
         if (dbPreset.deleted) return;
 
         combined.push({
-          id: dbPreset.id,
-          name: dbPreset.name,
+          id: dbPreset.id || name || `db-preset-${index}`,
+          name: name,
           description: dbPreset.description || "",
           flags: dbPreset.flags || "",
           tags: dbPreset.tags || [],
