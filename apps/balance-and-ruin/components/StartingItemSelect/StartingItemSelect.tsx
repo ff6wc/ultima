@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { Select, SelectOption } from "~/components/Select/Select";
 import { selectItemById } from "~/state/itemSlice";
 import { StartingItem, StartingItems } from "~/types/starting_items";
-import { Slider } from "@ff6wc/ui";
+import { Slider, Input } from "@ff6wc/ui";
 import orderBy from "lodash/orderBy";
 import { StartingItemsRemoveItemButton } from "~/components/StartingItemsRemoveItemButton/StartingItemsRemoveItemButton";
 
@@ -80,6 +80,18 @@ export const StartingItemSelect = ({
       ({ value }) => value === item.id?.toString()
     ) || null;
 
+  const onMinInputChange = (val: number) => {
+    const parsed = Math.max(1, Math.min(99, val || 1));
+    const maxVal = Math.max(parsed, item.max);
+    onRangeValueChange([parsed, maxVal]);
+  };
+
+  const onMaxInputChange = (val: number) => {
+    const parsed = Math.max(1, Math.min(99, val || 1));
+    const minVal = Math.min(parsed, item.min);
+    onRangeValueChange([minVal, parsed]);
+  };
+
   return (
     <div className="flex flex-col gap-3 p-3 bg-blue-50/50 dark:bg-[#181d29] rounded-lg border border-blue-100 dark:border-[#38445e]/50 hover:border-blue-200 dark:hover:border-[#38445e]/80 transition-all shadow-md">
       <div className="flex items-center gap-2 w-full">
@@ -92,6 +104,26 @@ export const StartingItemSelect = ({
             placeholder="Select starting item..."
           />
         </div>
+        {item.id !== -1 && (
+          <div className="flex items-center gap-1 shrink-0">
+            <Input
+              type="number"
+              className="w-14 text-center px-1"
+              min={1}
+              max={99}
+              value={item.min}
+              onChange={(e) => onMinInputChange(Number.parseInt(e.target.value))}
+            />
+            <Input
+              type="number"
+              className="w-14 text-center px-1"
+              min={1}
+              max={99}
+              value={item.max}
+              onChange={(e) => onMaxInputChange(Number.parseInt(e.target.value))}
+            />
+          </div>
+        )}
         {item.id === -1 && (
           <StartingItemsRemoveItemButton items={items} item={item} />
         )}
