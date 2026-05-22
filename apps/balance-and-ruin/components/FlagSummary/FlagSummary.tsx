@@ -209,14 +209,14 @@ function buildInfoRows(fv: Record<string, any>, objectives: Record<string, any>)
     });
   }
 
-  // Excluded Commands — only show if different from standard (Possess=28, Shock=27)
+  // Excluded Commands — only show if different from standard (Possess=28, Shock=27, Steal=5)
   const recFlags = ["-rec1", "-rec2", "-rec3", "-rec4", "-rec5", "-rec6"];
   const excludedCmds = recFlags
     .map((f) => flagNum(fv, f))
     .filter((v) => v !== null && v !== 97)
     .map((v) => COMMAND_NAMES[v as number] ?? `#${v}`);
   const sortedExcluded = [...excludedCmds].sort().join(", ");
-  const stdExcluded = ["Possess", "Shock"].sort().join(", "); // rec1=28, rec2=27
+  const stdExcluded = ["Possess", "Shock", "Steal"].sort().join(", "); // rec1=28, rec2=27, rec3=5
   if (sortedExcluded !== stdExcluded) {
     rows.push({
       label: "Excluded Commands",
@@ -787,10 +787,10 @@ function analyzeDifficulty(
     bullets.push({ text: "Esper spells shuffled — magic redistributed, total unchanged", severity: "info" });
   }
 
-  // Esper learn rates (randomized = standard — no bullet)
-  if (hasFlag(fv, "-elrt")) {
-    bullets.push({ text: "Esper learn rates tiered — powerful spells take longer to learn", severity: "medium" });
-    delta += 4;
+  // Esper learn rates (tiered = standard — no bullet/delta)
+  if (hasFlag(fv, "-elr")) {
+    bullets.push({ text: "Esper learn rates randomized — faster access to powerful spells", severity: "easy" });
+    delta -= 4;
   }
   // Esper Equipability
   if (hasFlag(fv, "-eer")) {

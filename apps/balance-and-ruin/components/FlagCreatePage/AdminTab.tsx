@@ -538,11 +538,8 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
           </div>
 
           {/* Search Input */}
-          <div 
-            style={{ display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.5rem 0.75rem", borderRadius: "6px", border: "1px solid rgba(239, 68, 68, 0.25)", marginBottom: "1rem" }}
-            className="bg-white dark:bg-slate-950/80"
-          >
-            <FaSearch size={12} className="text-slate-400 dark:text-slate-500 flex-shrink-0" />
+          <div style={{ position: "relative", marginBottom: "1rem" }}>
+            <FaSearch size={14} className="text-slate-400 dark:text-slate-500" style={{ position: "absolute", left: "0.75rem", top: "50%", transform: "translateY(-50%)", pointerEvents: "none", zIndex: 10 }} />
             <input
               type="text"
               placeholder="Search presets by name, author, tags, or description..."
@@ -551,8 +548,15 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                 setAdminSearch(e.target.value);
                 setVisibleCount(10); // Reset visible count on search
               }}
-              style={{ background: "transparent", border: "none", outline: "none", fontSize: "0.85rem", flex: 1, width: "100%", boxShadow: "none", color: "inherit" }}
-              className="text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+              style={{
+                width: "100%",
+                padding: "0.5rem 2.5rem 0.5rem 2.25rem",
+                borderRadius: "6px",
+                fontSize: "0.9rem",
+                outline: "none",
+                boxShadow: "none"
+              }}
+              className="placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-red-500 dark:focus:border-red-500 transition-all border border-[var(--border-input)]"
             />
             {adminSearch && (
               <button
@@ -560,7 +564,18 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                   setAdminSearch("");
                   setVisibleCount(10);
                 }}
-                style={{ background: "none", border: "none", cursor: "pointer", fontSize: "0.85rem", lineHeight: 1 }}
+                style={{
+                  position: "absolute",
+                  right: "0.75rem",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  fontSize: "0.85rem",
+                  lineHeight: 1,
+                  zIndex: 10
+                }}
                 className="text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 transition-colors"
               >
                 ✕
@@ -670,21 +685,29 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                   >
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <div style={{ display: "flex", alignItems: "center", flex: 1, minWidth: 0, paddingRight: "1rem" }}>
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={(e) => {
+                        <div 
+                          onClick={(e) => {
+                            e.stopPropagation();
                             setSelectedIds((prev) => ({
                               ...prev,
-                              [preset.id]: e.target.checked
+                              [preset.id]: !isSelected
                             }));
-                            if (e.target.checked) {
+                            if (!isSelected) {
                               setLastSelectedId(preset.id);
                             }
                           }}
-                          onClick={(e) => e.stopPropagation()}
-                          style={{ marginRight: "0.75rem", cursor: "pointer", width: "16px", height: "16px", accentColor: "#dc2626", flexShrink: 0 }}
-                        />
+                          className={`w-5 h-5 rounded border flex items-center justify-center cursor-pointer transition-all mr-3 flex-shrink-0
+                            ${isSelected 
+                              ? "bg-red-500 border-red-500 text-white shadow-sm" 
+                              : "border-slate-300 dark:border-slate-600 hover:border-red-400 dark:hover:border-red-500 bg-white dark:bg-slate-900"
+                            }`}
+                        >
+                          {isSelected && (
+                            <svg className="w-3.5 h-3.5 fill-current stroke-current" viewBox="0 0 24 24">
+                              <path strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" stroke="currentColor" fill="none" />
+                            </svg>
+                          )}
+                        </div>
 
                         <div style={{ display: "flex", alignItems: "baseline", gap: "0.75rem", overflow: "hidden", flex: 1, minWidth: 0 }}>
                           <h4 className="text-slate-800 dark:text-slate-100" style={{ margin: 0, fontSize: "1rem", fontWeight: "bold", whiteSpace: "nowrap", flexShrink: 0 }}>

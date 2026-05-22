@@ -829,17 +829,7 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
       }
     }
 
-    return combined
-      .map((p) => {
-        const isDoubleDownRaceStandard =
-          p.name.toLowerCase() === "race standard" &&
-          (p.creator_name || p.creator || "").toLowerCase().includes("doubledown");
-        if (isDoubleDownRaceStandard) {
-          return { ...p, official: false };
-        }
-        return p;
-      })
-      .filter((p) => {
+    return combined.filter((p) => {
         const isOfficial = p.official;
         const isUserOwned =
           currentUserId &&
