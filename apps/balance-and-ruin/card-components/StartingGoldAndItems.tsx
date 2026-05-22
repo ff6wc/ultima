@@ -37,7 +37,7 @@ export const StartingGoldAndItems = ({ items: propsItems, curateItems = false }:
     <Card title={"Starting Gold/Items"}>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
         {/* Left Column: Sliders and numeric options */}
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col md:justify-between md:h-full gap-6 md:gap-0">
           <FlagNumberInput
             description="Begin the game with {{ . }} gold"
             flag="-gp"
@@ -71,7 +71,7 @@ export const StartingGoldAndItems = ({ items: propsItems, curateItems = false }:
         </div>
 
         {/* Right Column: Starting Items & Starting Junk */}
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col md:justify-between md:h-full gap-6 md:gap-0">
           <div className="flex flex-col gap-4">
             <div className="flex justify-between items-center gap-4">
               <FlagLabel
