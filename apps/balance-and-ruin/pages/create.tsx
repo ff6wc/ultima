@@ -4,7 +4,7 @@ import { useDispatch } from "react-redux";
 import dynamic from "next/dynamic";
 
 const FlagCreatePage = dynamic<any>(
-  () => import("~/components/FlagCreatePage/FlagCreatePage").then((mod) => mod.FlagCreatePage),
+  () => import("../components/FlagCreatePage/FlagCreatePage").then((mod) => mod.FlagCreatePage),
   { ssr: false }
 );
 import { setRawFlags } from "~/state/flagSlice";

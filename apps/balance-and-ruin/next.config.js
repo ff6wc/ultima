@@ -11,6 +11,7 @@ module.exports = {
   },
   webpack: (config, { dev, isServer }) => {
     if (dev) {
+      config.cache = false;
       config.watchOptions = {
         ...config.watchOptions,
         ignored: [
