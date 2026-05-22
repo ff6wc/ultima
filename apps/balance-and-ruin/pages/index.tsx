@@ -12,14 +12,15 @@ import { normalizePresets } from "~/utils/presets";
 import fallbackFlag from "~/public/metadata-fallback/flag.json";
 import fallbackObjective from "~/public/metadata-fallback/objective.json";
 import fallbackWc from "~/public/metadata-fallback/wc.json";
+import fallbackPresets from "~/public/metadata-fallback/presets.json";
 
 
 const HomeLandingPage = () => {
   const dispatch = useDispatch();
-  const [objectives, setObjectives] = useState<ObjectiveMetadata | null>(null);
-  const [presets, setPresets] = useState<Record<string, FlagPreset> | null>(null);
-  const [schema, setSchemaLocal] = useState<Record<string, RawFlagMetadata> | null>(null);
-  const [version, setVersion] = useState<string | null>(null);
+  const [objectives, setObjectives] = useState<ObjectiveMetadata>(fallbackObjective as any);
+  const [presets, setPresets] = useState<Record<string, FlagPreset>>(normalizePresets(fallbackPresets));
+  const [schema, setSchemaLocal] = useState<Record<string, RawFlagMetadata>>(fallbackFlag as any);
+  const [version, setVersion] = useState<string>((fallbackWc as any).version || "1.4.3d");
 
   useEffect(() => {
     // 1. Try to load initial values from localStorage cache for instant load
