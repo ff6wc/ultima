@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { Card } from "@ff6wc/ui";
 import { useDispatch, useSelector } from "react-redux";
 import { CardColumn } from "~/components/CardColumn/CardColumn";
@@ -21,6 +22,22 @@ export const StartingGoldAndItems = ({ items: propsItems, curateItems = false }:
   const dispatch = useDispatch();
   const reduxItems = useSelector(selectStartingItems);
   const items = propsItems ?? reduxItems;
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const prevItemsLength = useRef(items.items.length);
+
+  useEffect(() => {
+    if (items.items.length > prevItemsLength.current) {
+      setTimeout(() => {
+        if (scrollRef.current) {
+          scrollRef.current.scrollTo({
+            top: scrollRef.current.scrollHeight,
+            behavior: "smooth",
+          });
+        }
+      }, 50);
+    }
+    prevItemsLength.current = items.items.length;
+  }, [items.items.length]);
 
   const onItemChange = (items: StartingItems) => {
     const sits = startingItemsToString;
@@ -48,7 +65,10 @@ export const StartingGoldAndItems = ({ items: propsItems, curateItems = false }:
             />
           </div>
 
-          <div className="max-h-[500px] overflow-y-auto overflow-x-hidden pr-2 flex flex-col gap-2">
+          <div
+            ref={scrollRef}
+            className="max-h-[500px] overflow-y-auto overflow-x-hidden pr-2 flex flex-col gap-2"
+          >
             {items.items.map((i: StartingItem, idx: number) => (
               <StartingItemSelect
                 item={i}
