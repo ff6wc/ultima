@@ -6,9 +6,17 @@ export const normalizePresets = (data: any): Record<string, FlagPreset> => {
   return presetsArray.reduce((acc: Record<string, FlagPreset>, p: any) => {
     const name = p ? (p.preset_name || p.name) : null;
     if (p && name) {
+      let flags = p.flags || "";
+      if (name.toLowerCase() === "atma series" && typeof flags === "string") {
+        if (flags.includes("-si ") && flags.includes(".233.3.3")) {
+          flags = flags.replace(".233.3.3", ".222.3.3");
+        }
+      }
+
       const normalizedPreset = {
         ...p,
-        name: name
+        name: name,
+        flags: flags
       };
       acc[name.toLowerCase()] = normalizedPreset;
     }

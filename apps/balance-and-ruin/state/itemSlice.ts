@@ -131,7 +131,32 @@ export const itemSlice = createSlice({
             if (items && items.length > 0 && items[0]) {
                 state.items.items = items[0].items;
             } else {
-                state.items.items = []
+                state.items.items = [
+                    {
+                        id: 222,
+                        name: "Moogle Charm",
+                        min: 3,
+                        max: 3
+                    },
+                    {
+                        id: 240,
+                        name: "Fenix Down",
+                        min: 3,
+                        max: 3
+                    },
+                    {
+                        id: 253,
+                        name: "Warp Stone",
+                        min: 3,
+                        max: 3
+                    },
+                    {
+                        id: -1,
+                        name: "",
+                        min: 1,
+                        max: 1
+                    }
+                ];
             }
         },
     },
