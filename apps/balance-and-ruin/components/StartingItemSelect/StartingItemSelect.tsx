@@ -86,11 +86,12 @@ export const StartingItemSelect = ({
     }
     const min = item.min.toString();
     const max = item.max.toString();
+    const range = item.min === item.max ? min : min + "-" + max;
     let displayName = item.name;
     if (!displayName.endsWith("s")) {
       displayName = displayName + "s";
     }
-    return "Begin the game with " + min + "-" + max + " " + displayName + ".";
+    return "Begin the game with " + range + " " + displayName + ".";
   };
 
   const helperText = getHelperText();
