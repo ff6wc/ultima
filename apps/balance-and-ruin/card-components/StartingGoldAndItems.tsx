@@ -33,54 +33,83 @@ export const StartingGoldAndItems = ({ items: propsItems, curateItems = false }:
     );
   };
 
+  const validItems = items.items.filter(i => i.id >= 0 && i.name);
+
   return (
     <Card title={"Starting Gold/Items"}>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
-        {/* Left Column: Sliders and numeric options */}
-        <div className="flex flex-col md:justify-between md:h-full gap-6 md:gap-0">
-          <FlagNumberInput
-            description="Begin the game with {{ . }} gold"
-            flag="-gp"
-            label="Starting Gold"
-            type="int"
-          />
+        {/* Left Column: Starting Items */}
+        <div className="flex flex-col gap-4 h-full">
+          <div className="flex flex-col gap-1">
+            <FlagLabel
+              flag={"-si"}
+              helperText={"The dropdown menus support searching for items"}
+              label={"Starting Items"}
+            />
+          </div>
 
-          <FlagSlider
-            helperText="Begin the game with {{ . }} different random tools"
-            flag="-sto"
-            label="Starting Tools"
-          />
-
-          <FlagSlider
-            flag="-sj"
-            label="Starting Junk"
-            helperText="Begin the game with {{.}} unique low tier items (weapons, armors, helmets, shields, and relics)"
-          />
+          <div className="max-h-[380px] overflow-y-auto overflow-x-hidden pr-2 flex flex-col gap-2">
+            {items.items.map((i: StartingItem, idx: number) => (
+              <StartingItemSelect
+                item={i}
+                key={idx}
+                items={items}
+                curateItems={curateItems}
+                onChange={onItemChange}
+              />
+            ))}
+            <StartingItemsAddItemButton items={items} />
+          </div>
         </div>
 
-        {/* Right Column: Starting Items */}
-        <div className="flex flex-col md:justify-between md:h-full gap-6 md:gap-0">
+        {/* Right Column: Sliders and numeric options + Summary at the bottom */}
+        <div className="flex flex-col h-full justify-between gap-6">
           <div className="flex flex-col gap-4">
-            <div className="flex flex-col gap-1">
-              <FlagLabel
-                flag={"-si"}
-                helperText={"The dropdown menus support searching for items"}
-                label={"Starting Items"}
-              />
-            </div>
+            <FlagNumberInput
+              description="Begin the game with {{ . }} gold"
+              flag="-gp"
+              label="Starting Gold"
+              type="int"
+            />
 
-            <div className="max-h-[380px] overflow-y-auto overflow-x-hidden pr-2 flex flex-col gap-2">
-              {items.items.map((i: StartingItem, idx: number) => (
-                <StartingItemSelect
-                  item={i}
-                  key={idx}
-                  items={items}
-                  curateItems={curateItems}
-                  onChange={onItemChange}
-                />
-              ))}
-              <StartingItemsAddItemButton items={items} />
-            </div>
+            <FlagSlider
+              helperText="Begin the game with {{ . }} different random tools"
+              flag="-sto"
+              label="Starting Tools"
+            />
+
+            <FlagSlider
+              flag="-sj"
+              label="Starting Junk"
+              helperText="Begin the game with {{.}} unique low tier items (weapons, armors, helmets, shields, and relics)"
+            />
+          </div>
+
+          {/* Starting Items Summary Panel */}
+          <div className="flex flex-col gap-2 pt-6 border-t border-zinc-800/80">
+            <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+              Starting Items Summary
+            </span>
+            {validItems.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {validItems.map((item, idx) => {
+                  const qty = item.min === item.max ? `${item.min}` : `${item.min}-${item.max}`;
+                  return (
+                    <div
+                      key={idx}
+                      className="flex items-center gap-1.5 px-3 py-1 bg-blue-50/60 dark:bg-[#181d29] text-blue-900 dark:text-blue-300 border border-blue-100 dark:border-[#38445e]/50 rounded-md text-xs font-medium shadow-sm transition-all hover:bg-blue-100/50 dark:hover:bg-[#1f2637]"
+                    >
+                      <span className="font-semibold">{item.name}</span>
+                      <span className="bg-blue-100/80 dark:bg-blue-900/40 text-blue-800 dark:text-blue-400 px-1.5 py-0.5 rounded text-[10px] font-bold">
+                        x{qty}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <span className="text-xs italic text-zinc-500">No starting items selected.</span>
+            )}
           </div>
         </div>
       </div>
