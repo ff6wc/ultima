@@ -90,8 +90,11 @@ export const GenerateCard = ({
         },
         body: JSON.stringify({
           name: presetName,
+          preset_name: presetName,
+          preset_name_lower: presetName.toLowerCase(),
           description: presetDescription,
           flags,
+          creator_id: session?.user?.discordId || undefined,
           creator_name: session?.user?.name || undefined,
         }),
       });

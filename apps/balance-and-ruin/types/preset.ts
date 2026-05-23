@@ -3,6 +3,8 @@ export type FlagPreset = {
   creator: string;
   creator_name: string;
   creator_id: number | string;
+  preset_name?: string;
+  preset_name_lower?: string;
   description: string;
   /** flags */
   flags: string;
