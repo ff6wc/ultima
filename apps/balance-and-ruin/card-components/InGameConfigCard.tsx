@@ -747,10 +747,7 @@ export const InGameConfigCard = () => {
           </div>
 
           {/* D-pad Controller for Mobile Only */}
-          <div className="flex flex-col items-center gap-2 mt-4 md:hidden w-full max-w-[280px]">
-            <span className="text-[10px] uppercase tracking-wider text-slate-500 font-bold font-sans">
-              Directional Controls
-            </span>
+          <div className="flex flex-col items-center mt-4 md:hidden w-full max-w-[280px]">
             <div className="relative w-36 h-36 bg-slate-900 rounded-full border border-slate-700/80 shadow-lg flex items-center justify-center">
               <div className="grid grid-cols-3 grid-rows-3 w-28 h-28 items-center justify-items-center">
                 {/* Row 1 */}
