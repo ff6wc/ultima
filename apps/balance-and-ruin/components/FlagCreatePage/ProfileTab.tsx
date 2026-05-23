@@ -19,6 +19,25 @@ export const ProfileTab = () => {
 
   const isAdmin = !!(session?.user as any)?.isAdmin;
 
+  const [sortBy, setSortBy] = useState<"name" | "date">("name");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+
+  const sortedPresets = React.useMemo(() => {
+    return [...userPresets].sort((a, b) => {
+      if (sortBy === "name") {
+        const nameA = (a.name || "").toLowerCase();
+        const nameB = (b.name || "").toLowerCase();
+        if (nameA < nameB) return sortDir === "asc" ? -1 : 1;
+        if (nameA > nameB) return sortDir === "asc" ? 1 : -1;
+        return 0;
+      } else {
+        const timeA = new Date(a.created_at || a.created_timestamp || 0).getTime();
+        const timeB = new Date(b.created_at || b.created_timestamp || 0).getTime();
+        return sortDir === "asc" ? timeA - timeB : timeB - timeA;
+      }
+    });
+  }, [userPresets, sortBy, sortDir]);
+
   useEffect(() => {
     try {
       const count = parseInt(localStorage.getItem("seeds_generated") || "0", 10);
@@ -385,7 +404,7 @@ export const ProfileTab = () => {
             fontFamily: "var(--font-runic, monospace)",
           }}
         >
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", borderBottom: "2px solid rgba(59, 130, 246, 0.4)", paddingBottom: "1rem", marginBottom: "1.5rem" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", borderBottom: "2px solid rgba(59, 130, 246, 0.4)", paddingBottom: "1rem", marginBottom: "1rem" }}>
             <h2 style={{ margin: 0, fontSize: "1.5rem", fontWeight: "bold", letterSpacing: "1px", color: "#60a5fa" }}>
               MY SAVED PRESETS
             </h2>
@@ -393,6 +412,66 @@ export const ProfileTab = () => {
               {userPresets.length} / 50
             </span>
           </div>
+
+          {userPresets.length > 0 && !loadingPresets && (
+            <div style={{ display: "flex", gap: "1rem", alignItems: "center", marginBottom: "1.25rem", flexWrap: "wrap", fontSize: "0.85rem", color: "#cbd5e1" }}>
+              <span style={{ fontWeight: "bold", textTransform: "uppercase", color: "#94a3b8", letterSpacing: "0.5px" }}>Sort By:</span>
+              <div style={{ display: "flex", gap: "0.5rem" }}>
+                <button
+                  onClick={() => {
+                    if (sortBy === "name") {
+                      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+                    } else {
+                      setSortBy("name");
+                      setSortDir("asc");
+                    }
+                  }}
+                  style={{
+                    backgroundColor: sortBy === "name" ? "rgba(59, 130, 246, 0.2)" : "rgba(30, 41, 59, 0.6)",
+                    border: sortBy === "name" ? "1px solid #3b82f6" : "1px solid rgba(59, 130, 246, 0.2)",
+                    borderRadius: "4px",
+                    color: sortBy === "name" ? "#f8fafc" : "#94a3b8",
+                    padding: "0.25rem 0.75rem",
+                    cursor: "pointer",
+                    fontWeight: "bold",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.25rem",
+                    transition: "all 0.2s",
+                  }}
+                  className="hover:border-blue-500 hover:text-white"
+                >
+                  Name {sortBy === "name" && (sortDir === "asc" ? "▲" : "▼")}
+                </button>
+                <button
+                  onClick={() => {
+                    if (sortBy === "date") {
+                      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+                    } else {
+                      setSortBy("date");
+                      setSortDir("desc");
+                    }
+                  }}
+                  style={{
+                    backgroundColor: sortBy === "date" ? "rgba(59, 130, 246, 0.2)" : "rgba(30, 41, 59, 0.6)",
+                    border: sortBy === "date" ? "1px solid #3b82f6" : "1px solid rgba(59, 130, 246, 0.2)",
+                    borderRadius: "4px",
+                    color: sortBy === "date" ? "#f8fafc" : "#94a3b8",
+                    padding: "0.25rem 0.75rem",
+                    cursor: "pointer",
+                    fontWeight: "bold",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.25rem",
+                    transition: "all 0.2s",
+                  }}
+                  className="hover:border-blue-500 hover:text-white"
+                >
+                  Date Created {sortBy === "date" && (sortDir === "asc" ? "▲" : "▼")}
+                </button>
+              </div>
+            </div>
+          )}
           
           {loadingPresets ? (
             <div className="animate-pulse" style={{ color: "#94a3b8", fontSize: "0.9rem" }}>Loading presets...</div>
@@ -402,7 +481,7 @@ export const ProfileTab = () => {
             </div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-              {userPresets.map((preset) => {
+              {sortedPresets.map((preset) => {
                 const isExpanded = !!expandedPresets[preset.id];
                 return (
                   <div key={preset.id} style={{ backgroundColor: "rgba(30, 41, 59, 0.6)", padding: "0.75rem 1rem", borderRadius: "6px", border: "1px solid rgba(59, 130, 246, 0.2)" }}>
