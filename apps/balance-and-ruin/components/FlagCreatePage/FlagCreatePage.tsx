@@ -948,48 +948,54 @@ export const FlagCreatePage = ({
 
             {/* Mobile Bottom Navigation Bar */}
             <div 
-              className="fixed bottom-0 left-0 right-0 z-40 lg:hidden flex justify-between items-center p-3.5 bg-slate-900/90 dark:bg-slate-950/90 backdrop-blur-md border-t border-white/10 shadow-[0_-4px_20px_rgba(0,0,0,0.4)]"
+              className="fixed bottom-0 left-0 right-0 z-40 lg:hidden grid grid-cols-3 items-center p-3.5 bg-slate-900/90 dark:bg-slate-950/90 backdrop-blur-md border-t border-white/10 shadow-[0_-4px_20px_rgba(0,0,0,0.4)]"
               style={{ paddingBottom: "calc(0.875rem + env(safe-area-inset-bottom, 0px))" }}
             >
-              <button
-                type="button"
-                onClick={handlePrevious}
-                disabled={isPreviousDisabled}
-                className={`flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 border select-none cursor-pointer ${
-                  isPreviousDisabled
-                    ? "bg-slate-800/40 border-slate-700/30 text-slate-500 cursor-not-allowed opacity-50"
-                    : "bg-slate-800 hover:bg-slate-700 border-slate-700 active:scale-95 text-slate-100 hover:text-white"
-                }`}
-              >
-                <FaChevronLeft size={12} />
-                <span>Previous</span>
-              </button>
+              <div className="justify-self-start">
+                <button
+                  type="button"
+                  onClick={handlePrevious}
+                  disabled={isPreviousDisabled}
+                  className={`flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 border select-none cursor-pointer ${
+                    isPreviousDisabled
+                      ? "bg-slate-800/40 border-slate-700/30 text-slate-500 cursor-not-allowed opacity-50"
+                      : "bg-slate-800 hover:bg-slate-700 border-slate-700 active:scale-95 text-slate-100 hover:text-white"
+                  }`}
+                >
+                  <FaChevronLeft size={12} />
+                  <span>Prev</span>
+                </button>
+              </div>
 
-              <button
-                type="button"
-                onClick={handleGenerate}
-                className="flex items-center gap-1.5 px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 border border-[#734c22] select-none cursor-pointer text-white active:scale-95 shadow-[0_2px_10px_rgba(138,98,51,0.2)]"
-                style={{
-                  background: "linear-gradient(180deg, #c09963 0%, #8a6233 100%)",
-                }}
-              >
-                <FaBolt size={12} className="text-yellow-200" />
-                <span>Generate</span>
-              </button>
+              <div className="justify-self-center">
+                <button
+                  type="button"
+                  onClick={handleGenerate}
+                  className="flex items-center gap-1.5 px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 border border-[#734c22] select-none cursor-pointer text-white active:scale-95 shadow-[0_2px_10px_rgba(138,98,51,0.2)]"
+                  style={{
+                    background: "linear-gradient(180deg, #c09963 0%, #8a6233 100%)",
+                  }}
+                >
+                  <FaBolt size={12} className="text-yellow-200" />
+                  <span>Generate</span>
+                </button>
+              </div>
 
-              <button
-                type="button"
-                onClick={handleNext}
-                disabled={isNextDisabled}
-                className={`flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 border select-none cursor-pointer ${
-                  isNextDisabled
-                    ? "bg-slate-800/40 border-slate-700/30 text-slate-500 cursor-not-allowed opacity-50"
-                    : "bg-slate-800 hover:bg-slate-700 border-slate-700 active:scale-95 text-slate-100 hover:text-white"
-                }`}
-              >
-                <span>Next</span>
-                <FaChevronRight size={12} />
-              </button>
+              <div className="justify-self-end">
+                <button
+                  type="button"
+                  onClick={handleNext}
+                  disabled={isNextDisabled}
+                  className={`flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 border select-none cursor-pointer ${
+                    isNextDisabled
+                      ? "bg-slate-800/40 border-slate-700/30 text-slate-500 cursor-not-allowed opacity-50"
+                      : "bg-slate-800 hover:bg-slate-700 border-slate-700 active:scale-95 text-slate-100 hover:text-white"
+                  }`}
+                >
+                  <span>Next</span>
+                  <FaChevronRight size={12} />
+                </button>
+              </div>
             </div>
           </main>
         </Tab.Group>
