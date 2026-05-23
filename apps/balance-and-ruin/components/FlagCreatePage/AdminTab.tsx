@@ -131,6 +131,8 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
           creator_id: apiPreset.creator_id || "community",
           created_timestamp: apiPreset.created_at || new Date().toISOString(),
           download_timestamp: dbOverride.download_timestamp,
+          downloads: dbOverride.downloads,
+          download_count: dbOverride.download_count,
           isApiPreset: true,
           dbRecord: dbOverride
         });
@@ -169,6 +171,8 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
           creator_id: dbPreset.owner_id || dbPreset.creator_id || "unknown",
           created_timestamp: dbPreset.created_at || dbPreset.created_timestamp || new Date().toISOString(),
           download_timestamp: dbPreset.download_timestamp,
+          downloads: dbPreset.downloads,
+          download_count: dbPreset.download_count,
           isApiPreset: false
         });
       }
@@ -729,6 +733,21 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
 
                       {/* Preset Actions */}
                       <div style={{ display: "flex", alignItems: "center", gap: "1rem", flexShrink: 0 }}>
+                        <span 
+                          style={{ 
+                            fontSize: "0.75rem", 
+                            fontWeight: "bold", 
+                            padding: "0.15rem 0.5rem", 
+                            borderRadius: "999px",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "0.25rem",
+                          }}
+                          className="bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400 border border-blue-200 dark:border-blue-900/50"
+                          title="Total downloads on site"
+                        >
+                          📥 {preset.downloads ?? preset.download_count ?? preset.dbRecord?.downloads ?? preset.dbRecord?.download_count ?? 0}
+                        </span>
                         {showConfirm[preset.id] ? (
                           <>
                             <span style={{ color: "#f87171", fontSize: "0.8rem", fontWeight: "bold", marginRight: "0.25rem" }}>Confirm?</span>
@@ -881,8 +900,9 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                         <div className="text-slate-800 dark:text-slate-300 bg-slate-200/50 dark:bg-slate-950/60" style={{ padding: "0.75rem", borderRadius: "4px", fontSize: "0.8rem", fontFamily: "monospace", overflowX: "auto", whiteSpace: "pre-wrap", wordBreak: "break-all", border: "1px solid var(--border-light, rgba(255,255,255,0.05))" }}>
                           {preset.flags || "(No flags provided in external API)"}
                         </div>
-                        <div className="text-slate-500 dark:text-slate-400" style={{ display: "flex", gap: "1rem", marginTop: "0.75rem", fontSize: "0.75rem", fontWeight: "bold" }}>
+                        <div className="text-slate-500 dark:text-slate-400" style={{ display: "flex", gap: "1rem", marginTop: "0.75rem", fontSize: "0.75rem", fontWeight: "bold", flexWrap: "wrap" }}>
                           <span>Created: {new Date(preset.created_timestamp).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })}</span>
+                          <span>Total Downloads: {preset.downloads ?? preset.download_count ?? preset.dbRecord?.downloads ?? preset.dbRecord?.download_count ?? 0}</span>
                           {preset.download_timestamp && (
                             <span>
                               Last Downloaded:{" "}
