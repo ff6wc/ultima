@@ -19,12 +19,33 @@ export default function LoginSuccess() {
 
     if (token) {
       localStorage.setItem("auth_token", token);
+      
+      // If we are in a popup, send the token to the opener
+      if (window.opener) {
+        try {
+          window.opener.postMessage({ type: "LOGIN_SUCCESS", token }, "*");
+          // Close the popup after a short delay to ensure message delivery
+          const timer = setTimeout(() => {
+            window.close();
+          }, 800);
+          return () => clearTimeout(timer);
+        } catch (e) {
+          console.error("Failed to post message to opener:", e);
+        }
+      }
+
       const timer = setTimeout(() => {
         window.location.href = "/";
       }, 800);
       return () => clearTimeout(timer);
     } else {
       // Fallback: if no token is found, redirect back home after a short delay
+      if (window.opener) {
+        const timer = setTimeout(() => {
+          window.close();
+        }, 1500);
+        return () => clearTimeout(timer);
+      }
       const timer = setTimeout(() => {
         window.location.href = "/";
       }, 1500);

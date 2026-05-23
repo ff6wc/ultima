@@ -20,6 +20,7 @@ import {
 import { generateRandom, generateChaos, generateTrueChaos } from "~/utils/randomFlagsets";
 import { setRawFlags, selectRawFlags } from "~/state/flagSlice";
 import { setRawObjectives } from "~/state/objectiveSlice";
+import { setRawStartingItems } from "~/state/itemSlice";
 import {
   setActivePreset,
   clearActivePreset,
@@ -580,6 +581,7 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
       dispatch(clearActivePreset());
       dispatch(setRawFlags(rolledFlags));
       dispatch(setRawObjectives(rolledFlags));
+      dispatch(setRawStartingItems(rolledFlags));
       
       const typeLabel = type === "random" ? "Random" : type === "chaos" ? "Chaos" : "True Chaos";
       setToast({
@@ -829,17 +831,7 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
       }
     }
 
-    return combined
-      .map((p) => {
-        const isDoubleDownRaceStandard =
-          p.name.toLowerCase() === "race standard" &&
-          (p.creator_name || p.creator || "").toLowerCase().includes("doubledown");
-        if (isDoubleDownRaceStandard) {
-          return { ...p, official: false };
-        }
-        return p;
-      })
-      .filter((p) => {
+    return combined.filter((p) => {
         const isOfficial = p.official;
         const isUserOwned =
           currentUserId &&
@@ -902,6 +894,7 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
     dispatch(setActivePreset(preset.name));
     dispatch(setRawFlags(preset.flags));
     dispatch(setRawObjectives(preset.flags));
+    dispatch(setRawStartingItems(preset.flags));
   };
 
   const handleClear = () => {

@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import { HiChevronDown, HiChevronUp } from "react-icons/hi2";
 import { selectFlagValues } from "~/state/flagSlice";
 import { selectObjectives } from "~/state/objectiveSlice";
+import { selectActivePresetName } from "~/state/presetSlice";
 import styles from "./FlagSummary.module.css";
 
 // ─── Objective result IDs ─────────────────────────────────────────────────────
@@ -209,14 +210,14 @@ function buildInfoRows(fv: Record<string, any>, objectives: Record<string, any>)
     });
   }
 
-  // Excluded Commands — only show if different from standard (Possess=28, Shock=27)
+  // Excluded Commands — only show if different from standard (Possess=28, Shock=27, Steal=5)
   const recFlags = ["-rec1", "-rec2", "-rec3", "-rec4", "-rec5", "-rec6"];
   const excludedCmds = recFlags
     .map((f) => flagNum(fv, f))
     .filter((v) => v !== null && v !== 97)
     .map((v) => COMMAND_NAMES[v as number] ?? `#${v}`);
   const sortedExcluded = [...excludedCmds].sort().join(", ");
-  const stdExcluded = ["Possess", "Shock"].sort().join(", "); // rec1=28, rec2=27
+  const stdExcluded = ["Possess", "Shock", "Steal"].sort().join(", "); // rec1=28, rec2=27, rec3=5
   if (sortedExcluded !== stdExcluded) {
     rows.push({
       label: "Excluded Commands",
@@ -399,9 +400,15 @@ function buildInfoRows(fv: Record<string, any>, objectives: Record<string, any>)
 
 const BASE_SCORE = 20;
 
+// Configuration map for preset-specific difficulty overrides
+const PRESET_DIFFICULTY_OVERRIDES: Record<string, { score: number; label: string; color: string }> = {
+  "atma series": { score: 20, label: "Standard", color: "#3b82f6" },
+};
+
 function analyzeDifficulty(
   fv: Record<string, any>,
-  objectives: Record<string, any>
+  objectives: Record<string, any>,
+  activePresetName: string | null
 ): { score: number; label: string; color: string; bullets: Bullet[] } {
   const bullets: Bullet[] = [];
   let delta = 0; // points above/below the standard baseline
@@ -497,24 +504,54 @@ function analyzeDifficulty(
     const isStd = activeScalingFlag === "-lsced" && mult === 2;
 
     if (mult !== null) {
-      if (mult < 1.0) {
-        bullets.push({ text: `Enemy scaling ${mult}× — enemies are much weaker than standard`, severity: "easy" });
-        delta -= 12;
-      } else if (mult < 2.0) {
-        bullets.push({ text: `Enemy scaling ${mult}× ${lbl} — easier than the 2× standard`, severity: "easy" });
-        delta -= 6;
-      } else if (mult >= 4.0) {
-        bullets.push({ text: `Enemy scaling ${mult}× ${lbl} — extreme difficulty`, severity: "hard" });
-        delta += 25;
-      } else if (mult >= 3.0) {
-        bullets.push({ text: `Enemy scaling ${mult}× ${lbl} — harder than standard 2×`, severity: "hard" });
-        delta += 15;
-      } else if (mult > 2.5) {
-        bullets.push({ text: `Enemy scaling ${mult}× ${lbl} — slightly above standard`, severity: "medium" });
-        delta += 8;
+      if (activeScalingFlag === "-lst") {
+        if (mult === 0.5) {
+          bullets.push({ text: `Enemy scaling every ${mult} min. — extremely fast level ups, extreme difficulty`, severity: "hard" });
+          delta += 30;
+        } else if (mult === 1.0) {
+          bullets.push({ text: `Enemy scaling every ${mult} min. — very fast level ups, very high difficulty`, severity: "hard" });
+          delta += 22;
+        } else if (mult === 1.5) {
+          bullets.push({ text: `Enemy scaling every ${mult} min. — fast level ups, harder than standard`, severity: "medium" });
+          delta += 12;
+        } else if (mult === 3.0) {
+          bullets.push({ text: `Enemy scaling every ${mult} min. — slow level ups, easier than standard`, severity: "easy" });
+          delta -= 4;
+        } else if (mult === 3.5) {
+          bullets.push({ text: `Enemy scaling every ${mult} min. — slow level ups, easier than standard`, severity: "easy" });
+          delta -= 7;
+        } else if (mult === 4.0) {
+          bullets.push({ text: `Enemy scaling every ${mult} min. — very slow level ups, much easier than standard`, severity: "easy" });
+          delta -= 10;
+        } else if (mult === 4.5) {
+          bullets.push({ text: `Enemy scaling every ${mult} min. — very slow level ups, much easier than standard`, severity: "easy" });
+          delta -= 12;
+        } else if (mult >= 5.0) {
+          bullets.push({ text: `Enemy scaling every ${mult} min. — extremely slow level ups, minimal difficulty`, severity: "easy" });
+          delta -= 14;
+        } else {
+          bullets.push({ text: `Enemy scaling every ${mult} min.`, severity: "info" });
+        }
       } else {
-        // 2.0–2.5 = standard — always show as info
-        bullets.push({ text: `Enemy scaling ${mult}× ${lbl}`, severity: "info" });
+        if (mult < 1.0) {
+          bullets.push({ text: `Enemy scaling ${mult}× — enemies are much weaker than standard`, severity: "easy" });
+          delta -= 12;
+        } else if (mult < 2.0) {
+          bullets.push({ text: `Enemy scaling ${mult}× ${lbl} — easier than the 2× standard`, severity: "easy" });
+          delta -= 6;
+        } else if (mult >= 4.0) {
+          bullets.push({ text: `Enemy scaling ${mult}× ${lbl} — extreme difficulty`, severity: "hard" });
+          delta += 25;
+        } else if (mult >= 3.0) {
+          bullets.push({ text: `Enemy scaling ${mult}× ${lbl} — harder than standard 2×`, severity: "hard" });
+          delta += 15;
+        } else if (mult > 2.5) {
+          bullets.push({ text: `Enemy scaling ${mult}× ${lbl} — slightly above standard`, severity: "medium" });
+          delta += 8;
+        } else {
+          // 2.0–2.5 = standard — always show as info
+          bullets.push({ text: `Enemy scaling ${mult}× ${lbl}`, severity: "info" });
+        }
       }
 
       // Max scale level — only call out if non-standard (standard = 40)
@@ -535,19 +572,72 @@ function analyzeDifficulty(
   if (activeHpFlag) {
     const hpMult = flagNum(fv, activeHpFlag);
     if (hpMult !== null) {
-      if (hpMult < 1.5) { bullets.push({ text: `Enemy HP/MP ${hpMult}× — squishier than standard`, severity: "easy" }); delta -= 6; }
-      else if (hpMult > 3.0) { bullets.push({ text: `Enemy HP/MP ${hpMult}× — very tanky, fights are drawn out`, severity: "hard" }); delta += 18; }
-      else if (hpMult > 2.5) { bullets.push({ text: `Enemy HP/MP ${hpMult}× — above-standard tankiness`, severity: "hard" }); delta += 10; }
-      else if (hpMult < 2.0) { bullets.push({ text: `Enemy HP/MP ${hpMult}× — slightly below standard`, severity: "easy" }); delta -= 3; }
-      // 2.0–2.5 = standard, skip
+      if (activeHpFlag === "-hmt") {
+        if (hpMult === 0.5) {
+          bullets.push({ text: `Enemy HP/MP scaling every ${hpMult} min. — extremely fast growth, fights get very tough quickly`, severity: "hard" });
+          delta += 22;
+        } else if (hpMult === 1.0) {
+          bullets.push({ text: `Enemy HP/MP scaling every ${hpMult} min. — very fast growth, fights get tough quickly`, severity: "hard" });
+          delta += 16;
+        } else if (hpMult === 1.5) {
+          bullets.push({ text: `Enemy HP/MP scaling every ${hpMult} min. — fast growth, fights get tough quickly`, severity: "medium" });
+          delta += 8;
+        } else if (hpMult === 3.0) {
+          bullets.push({ text: `Enemy HP/MP scaling every ${hpMult} min. — slow growth, fights stay slightly easier`, severity: "easy" });
+          delta -= 2;
+        } else if (hpMult === 3.5) {
+          bullets.push({ text: `Enemy HP/MP scaling every ${hpMult} min. — slow growth, fights stay slightly easier`, severity: "easy" });
+          delta -= 4;
+        } else if (hpMult === 4.0) {
+          bullets.push({ text: `Enemy HP/MP scaling every ${hpMult} min. — very slow growth, fights stay easier`, severity: "easy" });
+          delta -= 6;
+        } else if (hpMult === 4.5) {
+          bullets.push({ text: `Enemy HP/MP scaling every ${hpMult} min. — very slow growth, fights stay easier`, severity: "easy" });
+          delta -= 8;
+        } else if (hpMult >= 5.0) {
+          bullets.push({ text: `Enemy HP/MP scaling every ${hpMult} min. — extremely slow growth, fights stay much easier`, severity: "easy" });
+          delta -= 10;
+        }
+      } else {
+        if (hpMult < 1.5) { bullets.push({ text: `Enemy HP/MP ${hpMult}× — squishier than standard`, severity: "easy" }); delta -= 6; }
+        else if (hpMult > 3.0) { bullets.push({ text: `Enemy HP/MP ${hpMult}× — very tanky, fights are drawn out`, severity: "hard" }); delta += 18; }
+        else if (hpMult > 2.5) { bullets.push({ text: `Enemy HP/MP ${hpMult}× — above-standard tankiness`, severity: "hard" }); delta += 10; }
+        else if (hpMult < 2.0) { bullets.push({ text: `Enemy HP/MP ${hpMult}× — slightly below standard`, severity: "easy" }); delta -= 3; }
+        // 2.0–2.5 = standard, skip
+      }
     }
   }
 
-  // ── Ability Scaling ── (≤2× = standard, skip)
+  // ── Ability Scaling ── (lower = harder; 2.0-2.5 = standard, skip)
   if (hasFlag(fv, "-ase") || hasFlag(fv, "-asr")) {
     const asMult = flagNum(fv, "-ase") || flagNum(fv, "-asr");
-    if (asMult !== null && asMult >= 4.0) { bullets.push({ text: `Ability scaling ${asMult}× — spells escalate very quickly`, severity: "hard" }); delta += 12; }
-    else if (asMult !== null && asMult >= 3.0) { bullets.push({ text: `Ability scaling ${asMult}× — above standard 2×`, severity: "medium" }); delta += 6; }
+    if (asMult !== null) {
+      if (asMult === 0.5) {
+        bullets.push({ text: `Ability scaling is extremely fast (${asMult}×) — enemies gain powerful spells very early`, severity: "hard" });
+        delta += 16;
+      } else if (asMult === 1.0) {
+        bullets.push({ text: `Ability scaling is very fast (${asMult}×) — enemies gain powerful spells early`, severity: "hard" });
+        delta += 12;
+      } else if (asMult === 1.5) {
+        bullets.push({ text: `Ability scaling is fast (${asMult}×) — enemies gain powerful spells earlier than standard`, severity: "medium" });
+        delta += 6;
+      } else if (asMult === 3.0) {
+        bullets.push({ text: `Ability scaling is slow (${asMult}×) — enemies gain powerful spells later than standard`, severity: "easy" });
+        delta -= 3;
+      } else if (asMult === 3.5) {
+        bullets.push({ text: `Ability scaling is slow (${asMult}×) — enemies gain powerful spells later than standard`, severity: "easy" });
+        delta -= 5;
+      } else if (asMult === 4.0) {
+        bullets.push({ text: `Ability scaling is very slow (${asMult}×) — enemies gain powerful spells very late`, severity: "easy" });
+        delta -= 7;
+      } else if (asMult === 4.5) {
+        bullets.push({ text: `Ability scaling is very slow (${asMult}×) — enemies gain powerful spells very late`, severity: "easy" });
+        delta -= 8;
+      } else if (asMult >= 5.0) {
+        bullets.push({ text: `Ability scaling is extremely slow (${asMult}×) — enemies gain powerful spells very late`, severity: "easy" });
+        delta -= 9;
+      }
+    }
   }
 
   // ── XP Multiplier ── (3× = standard; 7× if party XP split)
@@ -563,30 +653,30 @@ function analyzeDifficulty(
     if (xpmDiff < 0) {
       if (xpmDiff <= -4) {
         bullets.push({ text: `XP multiplier ${xpm}× is extremely low compared to baseline (${xpmBaseline}×) — grinding will be extremely slow`, severity: "hard" });
-        delta += 24;
+        delta += 30;
       } else if (xpmDiff <= -2) {
         bullets.push({ text: `XP multiplier ${xpm}× is well below baseline (${xpmBaseline}×) — leveling is very slow`, severity: "hard" });
-        delta += 16;
+        delta += 20;
       } else {
         bullets.push({ text: `XP multiplier ${xpm}× is slightly below baseline (${xpmBaseline}×) — slow leveling`, severity: "medium" });
-        delta += 8;
+        delta += 10;
       }
     } else if (xpmDiff > 0) {
       if (xpmDiff >= 20) {
         bullets.push({ text: `XP multiplier ${xpm}× is overwhelmingly high — leveling is virtually instant`, severity: "easy" });
-        delta -= 32;
+        delta -= 38;
       } else if (xpmDiff >= 12) {
         bullets.push({ text: `XP multiplier ${xpm}× is extremely high — extremely fast leveling`, severity: "easy" });
-        delta -= 24;
+        delta -= 28;
       } else if (xpmDiff >= 6) {
         bullets.push({ text: `XP multiplier ${xpm}× is very high — fast leveling`, severity: "easy" });
-        delta -= 16;
+        delta -= 20;
       } else if (xpmDiff >= 3) {
         bullets.push({ text: `XP multiplier ${xpm}× is above baseline — fast leveling`, severity: "easy" });
-        delta -= 10;
+        delta -= 12;
       } else if (xpmDiff >= 1) {
         bullets.push({ text: `XP multiplier ${xpm}× is slightly above baseline — faster leveling`, severity: "easy" });
-        delta -= 5;
+        delta -= 6;
       }
     }
   }
@@ -596,9 +686,37 @@ function analyzeDifficulty(
   if (activeXgFlag) {
     const xgMult = flagNum(fv, activeXgFlag);
     if (xgMult !== null) {
-      if (xgMult < 1.0) { bullets.push({ text: `Enemy XP/GP yield ${xgMult}× — very low rewards`, severity: "hard" }); delta += 10; }
-      else if (xgMult < 2.0) { bullets.push({ text: `Enemy XP/GP yield ${xgMult}× — below the 2× standard`, severity: "medium" }); delta += 5; }
-      else if (xgMult > 4.0) { bullets.push({ text: `Enemy XP/GP yield ${xgMult}× — generous rewards`, severity: "easy" }); delta -= 8; }
+      if (activeXgFlag === "-xgt") {
+        if (xgMult === 0.5) {
+          bullets.push({ text: `Enemy XP/GP yield scaling every ${xgMult} min. — extremely fast reward scaling`, severity: "hard" });
+          delta += 12;
+        } else if (xgMult === 1.0) {
+          bullets.push({ text: `Enemy XP/GP yield scaling every ${xgMult} min. — fast reward scaling`, severity: "hard" });
+          delta += 8;
+        } else if (xgMult === 1.5) {
+          bullets.push({ text: `Enemy XP/GP yield scaling every ${xgMult} min. — fast reward scaling`, severity: "medium" });
+          delta += 4;
+        } else if (xgMult === 3.0) {
+          bullets.push({ text: `Enemy XP/GP yield scaling every ${xgMult} min. — slow reward scaling`, severity: "easy" });
+          delta -= 2;
+        } else if (xgMult === 3.5) {
+          bullets.push({ text: `Enemy XP/GP yield scaling every ${xgMult} min. — slow reward scaling`, severity: "easy" });
+          delta -= 4;
+        } else if (xgMult === 4.0) {
+          bullets.push({ text: `Enemy XP/GP yield scaling every ${xgMult} min. — very slow reward scaling`, severity: "easy" });
+          delta -= 6;
+        } else if (xgMult === 4.5) {
+          bullets.push({ text: `Enemy XP/GP yield scaling every ${xgMult} min. — very slow reward scaling`, severity: "easy" });
+          delta -= 7;
+        } else if (xgMult >= 5.0) {
+          bullets.push({ text: `Enemy XP/GP yield scaling every ${xgMult} min. — extremely slow reward scaling`, severity: "easy" });
+          delta -= 8;
+        }
+      } else {
+        if (xgMult < 1.0) { bullets.push({ text: `Enemy XP/GP yield ${xgMult}× — very low rewards`, severity: "hard" }); delta += 10; }
+        else if (xgMult < 2.0) { bullets.push({ text: `Enemy XP/GP yield ${xgMult}× — below the 2× standard`, severity: "medium" }); delta += 5; }
+        else if (xgMult > 4.0) { bullets.push({ text: `Enemy XP/GP yield ${xgMult}× — generous rewards`, severity: "easy" }); delta -= 8; }
+      }
     }
   }
 
@@ -620,6 +738,9 @@ function analyzeDifficulty(
   if (hasFlag(fv, "-sie")) {
     bullets.push({ text: "All shop inventories empty — items must be sourced from the field", severity: "hard" });
     delta += 18;
+  } else if (hasFlag(fv, "-sirt")) {
+    bullets.push({ text: "Shops: tiered random — higher tier items are less likely to be sold", severity: "medium" });
+    delta += 6;
   } else {
     const sisr = flagNum(fv, "-sisr") ?? 0;
     const shopSev: BulletSeverity = sisr > 60 ? "medium" : "info";
@@ -637,8 +758,8 @@ function analyzeDifficulty(
     bullets.push({ text: "All chests are empty — no items in treasure chests", severity: "hard" });
     delta += 18;
   } else if (hasFlag(fv, "-ccrs") || hasFlag(fv, "-ccrt")) {
-    bullets.push({ text: "Chest contents tiered/scaled — higher chance of quality finds", severity: "easy" });
-    delta -= 4;
+    bullets.push({ text: "Chest contents tiered/scaled — good items are harder to find early game", severity: "medium" });
+    delta += 4;
   } else {
     const ccsr = flagNum(fv, "-ccsr") ?? 0;
     bullets.push({ text: `Chests: ${ccsr}% contents randomized`, severity: "info" });
@@ -666,11 +787,18 @@ function analyzeDifficulty(
       }
       // 2–5 = standard, no bullet
     }
+  } else if (hasFlag(fv, "-esrt")) {
+    bullets.push({ text: "Esper spells tiered — powerful spells are harder to obtain early game", severity: "medium" });
+    delta += 5;
   } else if (hasFlag(fv, "-ess")) {
     bullets.push({ text: "Esper spells shuffled — magic redistributed, total unchanged", severity: "info" });
   }
 
-  // Esper learn rates (randomized = standard — no bullet)
+  // Esper learn rates (tiered = standard — no bullet/delta)
+  if (hasFlag(fv, "-elr")) {
+    bullets.push({ text: "Esper learn rates randomized — faster access to powerful spells", severity: "easy" });
+    delta -= 4;
+  }
   // Esper Equipability
   if (hasFlag(fv, "-eer")) {
     const arr = flagNumArr(fv, "-eer");
@@ -744,9 +872,21 @@ function analyzeDifficulty(
   }
 
   // ── Equipment Randomization ──
-  if (hasFlag(fv, "-ier") || hasFlag(fv, "-iebr") || hasFlag(fv, "-ietr")) {
+  if (hasFlag(fv, "-ietr")) {
+    bullets.push({ text: "Equipment equipability is tiered random — higher tier gear is less likely to be equipable", severity: "medium" });
+    delta += 8;
+  } else if (hasFlag(fv, "-ier") || hasFlag(fv, "-iebr")) {
     bullets.push({ text: "Equipment availability randomized — limited gear options per character", severity: "medium" });
     delta += 5;
+  }
+
+  // ── Relics Randomization ──
+  if (hasFlag(fv, "-iertr")) {
+    bullets.push({ text: "Relic equipability is tiered random — higher tier relics are less likely to be equipable", severity: "medium" });
+    delta += 8;
+  } else if (hasFlag(fv, "-ierr") || hasFlag(fv, "-ierbr") || hasFlag(fv, "-ieror") || hasFlag(fv, "-iersr")) {
+    bullets.push({ text: "Relic availability randomized", severity: "info" });
+    delta += 3;
   }
 
   // ── Challenge flags ──
@@ -768,7 +908,7 @@ function analyzeDifficulty(
   if (hasFlag(fv, "-open")) { bullets.push({ text: "Open world — all events accessible from the start", severity: "easy" }); delta -= 5; }
 
   // Final score = BASE (standard) + deviations
-  const score = Math.max(0, BASE_SCORE + delta);
+  let score = Math.max(0, BASE_SCORE + delta);
 
   let label: string;
   let color: string;
@@ -784,6 +924,19 @@ function analyzeDifficulty(
   else if (score <= 65) { label = "Hard";        color = "#ef4444"; }
   else                  { label = "Brutal";      color = "#a855f7"; }
 
+  // Check for preset difficulty overrides based on active preset name
+  if (activePresetName) {
+    const nameLower = activePresetName.toLowerCase();
+    for (const [presetKey, override] of Object.entries(PRESET_DIFFICULTY_OVERRIDES)) {
+      if (nameLower.includes(presetKey)) {
+        score = override.score;
+        label = override.label;
+        color = override.color;
+        break;
+      }
+    }
+  }
+
   return { score, label, color, bullets };
 }
 
@@ -791,6 +944,7 @@ function analyzeDifficulty(
 export const FlagSummary = () => {
   const flagValues = useSelector(selectFlagValues) as Record<string, any>;
   const objectives = useSelector(selectObjectives) as Record<string, any>;
+  const activePresetName = useSelector(selectActivePresetName);
 
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -808,7 +962,7 @@ export const FlagSummary = () => {
   };
 
   const infoRows = buildInfoRows(flagValues, objectives);
-  const { score, label, color, bullets } = analyzeDifficulty(flagValues, objectives);
+  const { score, label, color, bullets } = analyzeDifficulty(flagValues, objectives, activePresetName);
 
   const severityIcon: Record<BulletSeverity, string> = {
     hard: "⚠️", medium: "◆", easy: "✓", info: "ℹ",

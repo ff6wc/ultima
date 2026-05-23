@@ -10,6 +10,7 @@ export type AppSession = {
     discordId?: string | null;
     accessToken?: string | null;
     isAdmin?: boolean;
+    isSuperadmin?: boolean;
   } | null;
 };
 
@@ -25,7 +26,27 @@ const AppSessionContext = createContext<AppSessionContextType>({
 
 export const signIn = (provider?: string) => {
   const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-  window.location.href = `${BACKEND_URL}/api/v1/auth/login`;
+  const loginUrl = `${BACKEND_URL}/api/v1/auth/login`;
+
+  // If we are on a preview domain or local development (not the main domain), use a popup to handle cross-origin login
+  const isMainDomain = typeof window !== "undefined" && 
+    (window.location.hostname === "dev.ff6worldscollide.com" || 
+     window.location.hostname === "ff6worldscollide.com");
+
+  if (!isMainDomain && typeof window !== "undefined") {
+    const width = 600;
+    const height = 750;
+    const left = window.screenX + (window.outerWidth - width) / 2;
+    const top = window.screenY + (window.outerHeight - height) / 2;
+    
+    window.open(
+      loginUrl,
+      "narshe_login",
+      `width=${width},height=${height},left=${left},top=${top},status=no,menubar=no,toolbar=no`
+    );
+  } else {
+    window.location.href = loginUrl;
+  }
 };
 
 export const signOut = (options?: { callbackUrl?: string }) => {
@@ -45,9 +66,19 @@ export const AppSessionProvider = ({
   const [status, setStatus] = useState<"authenticated" | "unauthenticated" | "loading">("loading");
 
   useEffect(() => {
+    // Add message listener for cross-origin popup login
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === "LOGIN_SUCCESS" && event.data?.token) {
+        localStorage.setItem("auth_token", event.data.token);
+        window.location.reload();
+      }
+    };
+    window.addEventListener("message", handleMessage);
+
     if (!AUTH_ENABLED) {
       setData(null);
       setStatus("unauthenticated");
+      window.removeEventListener("message", handleMessage);
       return;
     }
 
@@ -71,7 +102,13 @@ export const AppSessionProvider = ({
           image = `https://cdn.discordapp.com/avatars/${discordId}/${image}.png`;
         }
 
-        const isAdmin = !!(payload.isAdmin || payload.is_admin || payload.isSuperadmin);
+        const envAdminIds = process.env.NEXT_PUBLIC_ADMIN_DISCORD_IDS;
+        const ADMIN_IDS = envAdminIds
+          ? envAdminIds.split(",")
+          : ["451050854934511647", "197757429948219392"];
+        const isHardcodedAdmin = discordId && ADMIN_IDS.includes(String(discordId));
+        const isAdmin = !!(payload.isAdmin || payload.is_admin || payload.isSuperadmin || isHardcodedAdmin);
+        const isSuperadmin = !!(payload.isSuperadmin || isHardcodedAdmin);
 
         setData({
           user: {
@@ -81,6 +118,7 @@ export const AppSessionProvider = ({
             discordId,
             accessToken: token,
             isAdmin,
+            isSuperadmin,
           },
         });
         setStatus("authenticated");
@@ -94,6 +132,10 @@ export const AppSessionProvider = ({
       setData(null);
       setStatus("unauthenticated");
     }
+
+    return () => {
+      window.removeEventListener("message", handleMessage);
+    };
   }, []);
 
   return (

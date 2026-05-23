@@ -6,9 +6,6 @@ import { useRef, useState } from "react";
 import { MdClear, MdFileUpload } from "react-icons/md";
 import { SeedCardProps } from "~/components/SeedCard/SeedCard";
 import { ROM_FILE_EXTENSIONS } from "~/constants/romConstants";
-import { base64ToByteArray } from "~/utils/base64ToByteArray";
-import { XDelta3Decoder } from "~/utils/xdelta3_decoder";
-import { applyInGameConfig } from "~/utils/romUtils";
 
 export const MusicSeedCard = ({ className, seed, ...rest }: SeedCardProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -26,6 +23,12 @@ export const MusicSeedCard = ({ className, seed, ...rest }: SeedCardProps) => {
       return;
     }
     const { filename, patch, seed_id, log: spoiler_log } = seed;
+
+    const [{ XDelta3Decoder }, { base64ToByteArray }, { applyInGameConfig }] = await Promise.all([
+      import("~/utils/xdelta3_decoder"),
+      import("~/utils/base64ToByteArray"),
+      import("~/utils/romUtils"),
+    ]);
 
     const patched = XDelta3Decoder.decode(
       base64ToByteArray(patch),

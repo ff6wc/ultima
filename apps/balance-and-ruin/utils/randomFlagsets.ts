@@ -142,10 +142,35 @@ export function generateRandom(): string {
     "23",
     "29",
   ];
-  const rec1 = weightedChoice([" -rec1 28", ""], [1, 0]);
-  const rec2 = weightedChoice([" -rec2 23", ""], [1, 0]);
-  const rec3 = weightedChoice([" -rec3 " + choice(recskills), ""], [0, 1]);
-  const rec4 = weightedChoice([" -rec4 " + choice(recskills), ""], [0, 1]);
+  const usedRecs = new Set<string>();
+  let rec1 = "";
+  if (weightedChoice([true, false], [1, 0])) {
+    rec1 = " -rec1 28";
+    usedRecs.add("28");
+  }
+  let rec2 = "";
+  if (weightedChoice([true, false], [1, 0])) {
+    rec2 = " -rec2 23";
+    usedRecs.add("23");
+  }
+  let rec3 = "";
+  if (weightedChoice([true, false], [0, 1])) {
+    const available = recskills.filter(s => !usedRecs.has(s));
+    if (available.length > 0) {
+      const chosen = choice(available);
+      rec3 = " -rec3 " + chosen;
+      usedRecs.add(chosen);
+    }
+  }
+  let rec4 = "";
+  if (weightedChoice([true, false], [0, 1])) {
+    const available = recskills.filter(s => !usedRecs.has(s));
+    if (available.length > 0) {
+      const chosen = choice(available);
+      rec4 = " -rec4 " + chosen;
+      usedRecs.add(chosen);
+    }
+  }
   const commands = scc + com + rec1 + rec2 + rec3 + rec4;
 
   const party = sparty + swdtech + blitz + lores + rage + dance + cstats + commands + steal;
@@ -505,11 +530,44 @@ export function generateChaos(): string {
     "23",
     "29",
   ];
-  const rec1 = weightedChoice([" -rec1 28", ""], [10, 1]);
-  const rec2 = weightedChoice([" -rec2 23", ""], [7, 1]);
-  const rec3 = weightedChoice([" -rec3 " + choice(recskills), ""], [1, 10]);
-  const rec4 = weightedChoice([" -rec4 " + choice(recskills), ""], [1, 10]);
-  const rec5 = weightedChoice([" -rec5 " + choice(recskills), ""], [1, 10]);
+  const usedRecs = new Set<string>();
+  let rec1 = "";
+  if (weightedChoice([true, false], [10, 1])) {
+    rec1 = " -rec1 28";
+    usedRecs.add("28");
+  }
+  let rec2 = "";
+  if (weightedChoice([true, false], [7, 1])) {
+    rec2 = " -rec2 23";
+    usedRecs.add("23");
+  }
+  let rec3 = "";
+  if (weightedChoice([true, false], [1, 10])) {
+    const available = recskills.filter(s => !usedRecs.has(s));
+    if (available.length > 0) {
+      const chosen = choice(available);
+      rec3 = " -rec3 " + chosen;
+      usedRecs.add(chosen);
+    }
+  }
+  let rec4 = "";
+  if (weightedChoice([true, false], [1, 10])) {
+    const available = recskills.filter(s => !usedRecs.has(s));
+    if (available.length > 0) {
+      const chosen = choice(available);
+      rec4 = " -rec4 " + chosen;
+      usedRecs.add(chosen);
+    }
+  }
+  let rec5 = "";
+  if (weightedChoice([true, false], [1, 10])) {
+    const available = recskills.filter(s => !usedRecs.has(s));
+    if (available.length > 0) {
+      const chosen = choice(available);
+      rec5 = " -rec5 " + chosen;
+      usedRecs.add(chosen);
+    }
+  }
   const commands = scc + com + rec1 + rec2 + rec3 + rec4 + rec5;
 
   const party = sparty + swdtech + blitz + lores + rage + dance + cstats + commands + steal + scis;
@@ -900,11 +958,52 @@ export function generateTrueChaos(): string {
     }
   }
   const com = " -com " + coms;
-  const rec1 = choice(["", " -rec1 " + choice(recskills)]);
-  const rec2 = choice(["", " -rec2 " + choice(recskills)]);
-  const rec3 = choice(["", " -rec3 " + choice(recskills)]);
-  const rec4 = choice(["", " -rec4 " + choice(recskills)]);
-  const rec5 = choice(["", " -rec5 " + choice(recskills)]);
+  const usedRecs = new Set<string>();
+  let rec1 = "";
+  if (choice([true, false])) {
+    const available = recskills.filter(s => !usedRecs.has(s));
+    if (available.length > 0) {
+      const chosen = choice(available);
+      rec1 = " -rec1 " + chosen;
+      usedRecs.add(chosen);
+    }
+  }
+  let rec2 = "";
+  if (choice([true, false])) {
+    const available = recskills.filter(s => !usedRecs.has(s));
+    if (available.length > 0) {
+      const chosen = choice(available);
+      rec2 = " -rec2 " + chosen;
+      usedRecs.add(chosen);
+    }
+  }
+  let rec3 = "";
+  if (choice([true, false])) {
+    const available = recskills.filter(s => !usedRecs.has(s));
+    if (available.length > 0) {
+      const chosen = choice(available);
+      rec3 = " -rec3 " + chosen;
+      usedRecs.add(chosen);
+    }
+  }
+  let rec4 = "";
+  if (choice([true, false])) {
+    const available = recskills.filter(s => !usedRecs.has(s));
+    if (available.length > 0) {
+      const chosen = choice(available);
+      rec4 = " -rec4 " + chosen;
+      usedRecs.add(chosen);
+    }
+  }
+  let rec5 = "";
+  if (choice([true, false])) {
+    const available = recskills.filter(s => !usedRecs.has(s));
+    if (available.length > 0) {
+      const chosen = choice(available);
+      rec5 = " -rec5 " + chosen;
+      usedRecs.add(chosen);
+    }
+  }
   const commands = scc + com + rec1 + rec2 + rec3 + rec4 + rec5;
 
   const party = sparty + swdtech + blitz + lores + rage + dance + cstats + commands + steal;

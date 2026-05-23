@@ -607,7 +607,6 @@ export const FlagCreatePage = ({
                   setSidebarOpen(false);
                 }}
                 style={{
-                  padding: "10px 10px 0 10px",
                   position: "relative",
                   width: "100%",
                   cursor: "pointer",
@@ -637,49 +636,55 @@ export const FlagCreatePage = ({
             </div>
 
             <Tab.List className={styles.tabList}>
-              {!AUTH_ENABLED ? null : status === "loading" ? (
-                <div 
-                  className={`${styles.tabItem} animate-pulse`} 
-                  style={{ opacity: 0.6, cursor: "wait" }}
-                >
-                  <div className="w-5 h-5 rounded-full bg-slate-500 animate-pulse" />
-                  <div className="h-4 bg-slate-500 rounded w-24" />
-                </div>
-              ) : session?.user ? (
-                <button
-                  type="button"
-                  className={`${styles.tabItem} ${activeTabId === "profile" ? styles.profileTabActive : ""}`}
-                  onClick={() => {
-                    const idx = tabs.findIndex((t) => t.id === "profile");
-                    if (idx !== -1) {
-                      setSelectedIndex(idx);
-                      setSidebarOpen(false);
-                    }
-                  }}
-                  title="View Profile"
-                >
-                  <div className="w-5 h-5 rounded-full overflow-hidden flex items-center justify-center bg-slate-700">
-                    {session.user.image ? (
-                      <img 
-                        src={session.user.image} 
-                        alt={session.user.name || "Profile"} 
-                        className="w-full h-full object-cover rounded-full"
-                      />
-                    ) : (
-                      <FaDiscord color="white" size={12} />
-                    )}
-                  </div>
-                  <span>{session.user.name || "Profile"}</span>
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  className={styles.discordLoginBtn}
-                  onClick={() => signIn("discord")}
-                >
-                  <FaDiscord size={20} />
-                  <span>Login</span>
-                </button>
+              {!AUTH_ENABLED ? null : (
+                <>
+                  <div style={{ borderTop: "1px solid rgba(255, 255, 255, 0.15)", margin: "1.5rem 1rem 0.75rem 1rem" }} />
+                  {status === "loading" ? (
+                    <div 
+                      className={`${styles.tabItem} animate-pulse`} 
+                      style={{ opacity: 0.6, cursor: "wait" }}
+                    >
+                      <div className="w-6 h-6 rounded-full bg-slate-500 animate-pulse" />
+                      <div className="h-4 bg-slate-500 rounded w-24" />
+                    </div>
+                  ) : session?.user ? (
+                    <button
+                      type="button"
+                      className={`${styles.tabItem} ${activeTabId === "profile" ? styles.profileTabActive : ""}`}
+                      onClick={() => {
+                        const idx = tabs.findIndex((t) => t.id === "profile");
+                        if (idx !== -1) {
+                          setSelectedIndex(idx);
+                          setSidebarOpen(false);
+                        }
+                      }}
+                      title="View Profile"
+                    >
+                      <div className="w-6 h-6 rounded-full overflow-hidden flex items-center justify-center bg-slate-700">
+                        {session.user.image ? (
+                          <img 
+                            src={session.user.image} 
+                            alt={session.user.name || "Profile"} 
+                            className="w-full h-full object-cover rounded-full"
+                          />
+                        ) : (
+                          <FaDiscord color="white" size={14} />
+                        )}
+                      </div>
+                      <span>{session.user.name || "Profile"}</span>
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      className={styles.discordLoginBtn}
+                      onClick={() => signIn("discord")}
+                    >
+                      <FaDiscord size={22} />
+                      <span>Login</span>
+                    </button>
+                  )}
+                  <div style={{ borderTop: "1px solid rgba(255, 255, 255, 0.15)", margin: "0.75rem 1rem 0.75rem 1rem" }} />
+                </>
               )}
               {tabs.map((tab) => {
                 const isSideNavHidden = ["events", "sotw"].includes(tab.id);
@@ -691,7 +696,7 @@ export const FlagCreatePage = ({
                     key={tab.id}
                     className={`${isHidden ? "hidden" : tab.id === "admin" ? styles.adminBtn : tab.isAction ? styles.generateBtn : styles.tabItem} ${isHighlighted ? "bg-yellow-500/20 !text-yellow-400 border-l-4 border-yellow-400 font-bold" : ""} ${isSideNavHidden ? styles.mobileOnly : ""}`}
                   >
-                    {tab.Icon && <tab.Icon size={20} />}
+                    {tab.Icon && <tab.Icon size={22} />}
                     <span>{tab.label}</span>
                   </Tab>
                 );
@@ -708,7 +713,7 @@ export const FlagCreatePage = ({
                 className={styles.tabItem}
                 style={{ margin: "0 1rem" }}
               >
-                <FaBook size={20} />
+                <FaBook size={22} />
                 <span>WIKI</span>
               </a>
               <a
@@ -718,7 +723,7 @@ export const FlagCreatePage = ({
                 className={styles.tabItem}
                 style={{ margin: "0 1rem" }}
               >
-                <FaDiscord size={20} />
+                <FaDiscord size={22} />
                 <span>DISCORD</span>
               </a>
             </div>

@@ -1,9 +1,6 @@
 import { cx } from "cva";
 import first from "lodash/first";
 import { useEffect, useRef, useState } from "react";
-import { base64ToByteArray } from "~/utils/base64ToByteArray";
-import { isValidROM, removeHeader, applyInGameConfig } from "~/utils/romUtils";
-import { XDelta3Decoder } from "~/utils/xdelta3_decoder";
 import JSZip from "jszip";
 import styles from "~/components/GenerateCard/GenerateCard.module.css";
 
@@ -57,6 +54,12 @@ export const SeedCard = ({ className, seed }: SeedCardProps) => {
   const executeGenerate = async (currentRomData: string) => {
     const { filename, patch, log } = seed;
 
+    const [{ XDelta3Decoder }, { base64ToByteArray }, { applyInGameConfig }] = await Promise.all([
+      import("~/utils/xdelta3_decoder"),
+      import("~/utils/base64ToByteArray"),
+      import("~/utils/romUtils"),
+    ]);
+
     const patched = XDelta3Decoder.decode(
       base64ToByteArray(patch as string),
       base64ToByteArray(currentRomData),
@@ -89,6 +92,7 @@ export const SeedCard = ({ className, seed }: SeedCardProps) => {
     if (file) {
       reader.onload = async function () {
         let rom_data = new Uint8Array(reader.result as ArrayBuffer);
+        const { removeHeader, isValidROM } = await import("~/utils/romUtils");
         rom_data = await removeHeader(rom_data);
 
         let result = await isValidROM(rom_data);

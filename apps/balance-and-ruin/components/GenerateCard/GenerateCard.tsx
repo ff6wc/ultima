@@ -5,9 +5,6 @@ import { MdClear, MdFileUpload } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
 import useSWRMutation from "swr/mutation";
 import { getFlagValue, selectFlagValues, setRawFlags } from "~/state/flagSlice";
-import { base64ToByteArray } from "~/utils/base64ToByteArray";
-import { isValidROM, removeHeader, applyInGameConfig } from "~/utils/romUtils";
-import { XDelta3Decoder } from "~/utils/xdelta3_decoder";
 import JSZip from "jszip";
 import { useRouter } from "next/router";
 import { selectSchema } from "~/state/schemaSlice";
@@ -167,6 +164,11 @@ export const GenerateCard = ({
     }
     setClientError(null);
 
+    const newWindow = window.open("", "_blank");
+    if (newWindow) {
+      newWindow.document.write("<p>Generating seed... Please wait.</p>");
+    }
+
     let reCAPTCHA: string | null = null;
     try {
       if (!executeRecaptcha) {
@@ -181,6 +183,7 @@ export const GenerateCard = ({
         );
       }
     } catch (e) {
+      if (newWindow) newWindow.close();
       setClientError(
         `Validation Error: ${(e as Error).message || "Ensure you access the app via a whitelisted domain like http://dev.ff6worldscollide.com:3001 (see .env.local) instead of localhost."}`,
       );
@@ -194,6 +197,12 @@ export const GenerateCard = ({
       }
       const { filename, patch, seed_id, log } = generateResult;
       const rom = romData as string;
+
+      const [{ XDelta3Decoder }, { base64ToByteArray }, { applyInGameConfig }] = await Promise.all([
+        import("~/utils/xdelta3_decoder"),
+        import("~/utils/base64ToByteArray"),
+        import("~/utils/romUtils"),
+      ]);
 
       const patched = XDelta3Decoder.decode(
         base64ToByteArray(patch as string),
@@ -210,7 +219,12 @@ export const GenerateCard = ({
         link.href = window.URL.createObjectURL(content);
         link.download = `${filename}.zip`;
         link.click();
-        window.open(`/seed/?id=${seed_id}`, "_blank");
+        
+        if (newWindow) {
+          newWindow.location.href = `/seed/?id=${seed_id}`;
+        } else {
+          window.open(`/seed/?id=${seed_id}`, "_blank");
+        }
       });
 
       // Track seed generation count in localStorage
@@ -255,6 +269,7 @@ export const GenerateCard = ({
         }
       }
     } catch (err) {
+      if (newWindow) newWindow.close();
       setClientError((err as Error).message);
     }
   };
@@ -274,6 +289,7 @@ export const GenerateCard = ({
     if (file) {
       reader.onload = async function () {
         let rom_data = new Uint8Array(reader.result as ArrayBuffer);
+        const { removeHeader, isValidROM } = await import("~/utils/romUtils");
         rom_data = await removeHeader(rom_data);
 
         let result = await isValidROM(rom_data);

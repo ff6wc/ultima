@@ -59,8 +59,6 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
   const [newTagName, setNewTagName] = useState("");
   const [editingTag, setEditingTag] = useState<{old: string, new: string} | null>(null);
 
-  // User Administration
-  const [usersDb, setUsersDb] = useState<any[]>([]);
   const isSuperadmin = !!(session?.user as any)?.isSuperadmin;
 
   const isAdmin = !!(session?.user as any)?.isAdmin || isSuperadmin;
@@ -85,20 +83,10 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
       .catch((e) => console.error("Error fetching tags:", e));
   };
 
-  const fetchUsers = () => {
-    narsheFetch("/users")
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data)) setUsersDb(data);
-      })
-      .catch((e) => console.error("Error fetching users:", e));
-  };
-
   useEffect(() => {
     if (session?.user && isAdmin) {
       fetchPresets();
       fetchTags();
-      fetchUsers();
     }
   }, [session?.user, isAdmin]);
 
@@ -538,11 +526,8 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
           </div>
 
           {/* Search Input */}
-          <div 
-            style={{ display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.5rem 0.75rem", borderRadius: "6px", border: "1px solid rgba(239, 68, 68, 0.25)", marginBottom: "1rem" }}
-            className="bg-white dark:bg-slate-950/80"
-          >
-            <FaSearch size={12} className="text-slate-400 dark:text-slate-500 flex-shrink-0" />
+          <div style={{ position: "relative", marginBottom: "1rem" }}>
+            <FaSearch size={14} className="text-slate-400 dark:text-slate-500" style={{ position: "absolute", left: "0.75rem", top: "50%", transform: "translateY(-50%)", pointerEvents: "none", zIndex: 10 }} />
             <input
               type="text"
               placeholder="Search presets by name, author, tags, or description..."
@@ -551,8 +536,15 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                 setAdminSearch(e.target.value);
                 setVisibleCount(10); // Reset visible count on search
               }}
-              style={{ background: "transparent", border: "none", outline: "none", fontSize: "0.85rem", flex: 1, width: "100%", boxShadow: "none", color: "inherit" }}
-              className="text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+              style={{
+                width: "100%",
+                padding: "0.5rem 2.5rem 0.5rem 2.25rem",
+                borderRadius: "6px",
+                fontSize: "0.9rem",
+                outline: "none",
+                boxShadow: "none"
+              }}
+              className="placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-red-500 dark:focus:border-red-500 transition-all border border-[var(--border-input)]"
             />
             {adminSearch && (
               <button
@@ -560,7 +552,18 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                   setAdminSearch("");
                   setVisibleCount(10);
                 }}
-                style={{ background: "none", border: "none", cursor: "pointer", fontSize: "0.85rem", lineHeight: 1 }}
+                style={{
+                  position: "absolute",
+                  right: "0.75rem",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  fontSize: "0.85rem",
+                  lineHeight: 1,
+                  zIndex: 10
+                }}
                 className="text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 transition-colors"
               >
                 ✕
@@ -670,21 +673,44 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                   >
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <div style={{ display: "flex", alignItems: "center", flex: 1, minWidth: 0, paddingRight: "1rem" }}>
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={(e) => {
+                        <div 
+                          role="checkbox"
+                          aria-checked={isSelected}
+                          tabIndex={0}
+                          onKeyDown={(e) => {
+                            if (e.key === " " || e.key === "Enter") {
+                              e.preventDefault();
+                              setSelectedIds((prev) => ({
+                                ...prev,
+                                [preset.id]: !isSelected
+                              }));
+                              if (!isSelected) {
+                                setLastSelectedId(preset.id);
+                              }
+                            }
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
                             setSelectedIds((prev) => ({
                               ...prev,
-                              [preset.id]: e.target.checked
+                              [preset.id]: !isSelected
                             }));
-                            if (e.target.checked) {
+                            if (!isSelected) {
                               setLastSelectedId(preset.id);
                             }
                           }}
-                          onClick={(e) => e.stopPropagation()}
-                          style={{ marginRight: "0.75rem", cursor: "pointer", width: "16px", height: "16px", accentColor: "#dc2626", flexShrink: 0 }}
-                        />
+                          className={`w-5 h-5 rounded border flex items-center justify-center cursor-pointer transition-all mr-3 flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-red-500
+                            ${isSelected 
+                              ? "bg-red-500 border-red-500 text-white shadow-sm" 
+                              : "border-slate-300 dark:border-slate-600 hover:border-red-400 dark:hover:border-red-500 bg-white dark:bg-slate-900"
+                            }`}
+                        >
+                          {isSelected && (
+                            <svg className="w-3.5 h-3.5 fill-current stroke-current" viewBox="0 0 24 24">
+                              <path strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" stroke="currentColor" fill="none" />
+                            </svg>
+                          )}
+                        </div>
 
                         <div style={{ display: "flex", alignItems: "baseline", gap: "0.75rem", overflow: "hidden", flex: 1, minWidth: 0 }}>
                           <h4 className="text-slate-800 dark:text-slate-100" style={{ margin: 0, fontSize: "1rem", fontWeight: "bold", whiteSpace: "nowrap", flexShrink: 0 }}>
@@ -1027,98 +1053,7 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
           </div>
         </div>
 
-        {/* USER ADMINISTRATION */}
-        <div
-          style={{
-            border: "4px double #10b981",
-            borderRadius: "8px",
-            boxShadow: "0 8px 30px rgba(0, 0, 0, 0.4)",
-            padding: "2rem",
-            fontFamily: "var(--font-runic, monospace)",
-          }}
-          className="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100"
-        >
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", borderBottom: "2px solid rgba(16, 185, 129, 0.4)", paddingBottom: "1rem", marginBottom: "1.5rem" }}>
-            <h2 style={{ margin: 0, fontSize: "1.5rem", fontWeight: "bold", letterSpacing: "1px", color: "#34d399" }}>
-              USER ADMINISTRATION
-            </h2>
-            <span className="text-slate-500 dark:text-slate-400" style={{ fontSize: "1rem", fontWeight: "bold" }}>
-              {usersDb.length} Registered Users
-            </span>
-          </div>
 
-          <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.85rem", textAlign: "left" }}>
-              <thead>
-                <tr style={{ borderBottom: "2px solid rgba(16, 185, 129, 0.2)" }} className="bg-slate-200/60 dark:bg-slate-950/60">
-                  <th className="text-emerald-700 dark:text-emerald-300" style={{ padding: "0.75rem" }}>User</th>
-                  <th className="text-emerald-700 dark:text-emerald-300" style={{ padding: "0.75rem" }}>Discord ID</th>
-                  <th className="text-emerald-700 dark:text-emerald-300" style={{ padding: "0.75rem" }}>Logins</th>
-                  <th className="text-emerald-700 dark:text-emerald-300" style={{ padding: "0.75rem" }}>First Login</th>
-                  <th className="text-emerald-700 dark:text-emerald-300" style={{ padding: "0.75rem" }}>Last Login</th>
-                  <th className="text-emerald-700 dark:text-emerald-300" style={{ padding: "0.75rem" }}>Presets Owned</th>
-                  {isSuperadmin && <th className="text-emerald-700 dark:text-emerald-300" style={{ padding: "0.75rem", textAlign: "center" }}>Role Control</th>}
-                </tr>
-              </thead>
-              <tbody>
-                {usersDb.map((user) => {
-                  const ownedPresets = allPresets.filter(p => String(p.creator_id) === String(user.discordId)).length;
-                  const isUserSuperadmin = ["451050854934511647", "197757429948219392"].includes(String(user.discordId));
-                  
-                  return (
-                    <tr key={user.discordId} style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }} className="hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                      <td className="text-slate-800 dark:text-slate-100" style={{ padding: "0.75rem", fontWeight: "bold" }}>{user.name}</td>
-                      <td className="text-slate-500 dark:text-slate-400" style={{ padding: "0.75rem", fontFamily: "monospace" }}>{user.discordId}</td>
-                      <td className="text-slate-700 dark:text-slate-300" style={{ padding: "0.75rem" }}>{user.loginCount || 1}</td>
-                      <td className="text-slate-500 dark:text-slate-400" style={{ padding: "0.75rem" }}>{new Date(user.firstLogin).toLocaleDateString()}</td>
-                      <td className="text-slate-500 dark:text-slate-400" style={{ padding: "0.75rem" }}>{new Date(user.lastLogin).toLocaleDateString()}</td>
-                      <td className="text-slate-700 dark:text-slate-300" style={{ padding: "0.75rem" }}>{ownedPresets}</td>
-                      {isSuperadmin && (
-                        <td style={{ padding: "0.75rem", textAlign: "center" }}>
-                          {isUserSuperadmin ? (
-                            <span style={{ backgroundColor: "rgba(245, 158, 11, 0.2)", color: "#f59e0b", border: "1px solid rgba(245, 158, 11, 0.3)", padding: "0.2rem 0.5rem", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "bold" }}>SUPERADMIN</span>
-                          ) : (
-                            <button
-                              onClick={async () => {
-                                const newStatus = !user.isAdmin;
-                                if(confirm(`Change ${user.name}'s role to ${newStatus ? 'Admin' : 'User'}?`)) {
-                                  try {
-                                    const res = await narsheFetch("/users", {
-                                      method: "PUT",
-                                      body: JSON.stringify({ discordId: user.discordId, isAdmin: newStatus })
-                                    });
-                                    if (!res.ok) throw new Error(await res.text());
-                                    fetchUsers();
-                                  } catch (e: any) {
-                                    alert(`Failed to update role: ${e.message}`);
-                                  }
-                                }
-                              }}
-                              style={{
-                                backgroundColor: user.isAdmin ? "rgba(59, 130, 246, 0.2)" : "rgba(255, 255, 255, 0.05)",
-                                color: user.isAdmin ? "#60a5fa" : "#94a3b8",
-                                border: `1px solid ${user.isAdmin ? "rgba(59, 130, 246, 0.4)" : "rgba(255, 255, 255, 0.2)"}`,
-                                padding: "0.2rem 0.6rem",
-                                borderRadius: "4px",
-                                fontSize: "0.7rem",
-                                fontWeight: "bold",
-                                cursor: "pointer",
-                                transition: "all 0.2s"
-                              }}
-                              className="hover:brightness-125"
-                            >
-                              {user.isAdmin ? "ADMIN" : "USER"}
-                            </button>
-                          )}
-                        </td>
-                      )}
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
 
       </div>
     </PageContainer>
