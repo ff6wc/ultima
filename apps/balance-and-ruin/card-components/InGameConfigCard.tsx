@@ -5,6 +5,7 @@ import {
   DEFAULT_FONT_COLOR,
   WINDOW_PALETTE_DEFAULTS,
 } from "~/types/inGameConfig";
+import { FaCaretUp, FaCaretDown, FaCaretLeft, FaCaretRight } from "react-icons/fa";
 
 type RGB = [number, number, number];
 
@@ -742,6 +743,61 @@ export const InGameConfigCard = () => {
                   padding: 0,
                 }}
               />
+            </div>
+          </div>
+
+          {/* D-pad Controller for Mobile Only */}
+          <div className="flex flex-col items-center gap-2 mt-4 md:hidden w-full max-w-[280px]">
+            <span className="text-[10px] uppercase tracking-wider text-slate-500 font-bold font-sans">
+              Directional Controls
+            </span>
+            <div className="relative w-36 h-36 bg-slate-900 rounded-full border border-slate-700/80 shadow-lg flex items-center justify-center">
+              <div className="grid grid-cols-3 grid-rows-3 w-28 h-28 items-center justify-items-center">
+                {/* Row 1 */}
+                <div></div>
+                <button
+                  type="button"
+                  onClick={() => { move(-1, 0); canvasRef.current?.focus(); }}
+                  className="w-9 h-10 bg-slate-800 hover:bg-slate-700 active:bg-emerald-600 active:text-white border-t border-x border-slate-600 rounded-t-md shadow-md text-slate-400 flex items-center justify-center transition-all transform active:scale-95 cursor-pointer outline-none"
+                  title="Move Up"
+                >
+                  <FaCaretUp size={20} />
+                </button>
+                <div></div>
+
+                {/* Row 2 */}
+                <button
+                  type="button"
+                  onClick={() => { move(0, -1); canvasRef.current?.focus(); }}
+                  className="w-10 h-9 bg-slate-800 hover:bg-slate-700 active:bg-emerald-600 active:text-white border-y border-l border-slate-600 rounded-l-md shadow-md text-slate-400 flex items-center justify-center transition-all transform active:scale-95 cursor-pointer outline-none"
+                  title="Decrease / Previous"
+                >
+                  <FaCaretLeft size={20} />
+                </button>
+                <div className="w-9 h-9 bg-slate-800 border border-slate-700 shadow-inner flex items-center justify-center text-slate-600 select-none">
+                  <div className="w-2.5 h-2.5 bg-slate-950 rounded-full" />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => { move(0, 1); canvasRef.current?.focus(); }}
+                  className="w-10 h-9 bg-slate-800 hover:bg-slate-700 active:bg-emerald-600 active:text-white border-y border-r border-slate-600 rounded-r-md shadow-md text-slate-400 flex items-center justify-center transition-all transform active:scale-95 cursor-pointer outline-none"
+                  title="Increase / Next"
+                >
+                  <FaCaretRight size={20} />
+                </button>
+
+                {/* Row 3 */}
+                <div></div>
+                <button
+                  type="button"
+                  onClick={() => { move(1, 0); canvasRef.current?.focus(); }}
+                  className="w-9 h-10 bg-slate-800 hover:bg-slate-700 active:bg-emerald-600 active:text-white border-b border-x border-slate-600 rounded-b-md shadow-md text-slate-400 flex items-center justify-center transition-all transform active:scale-95 cursor-pointer outline-none"
+                  title="Move Down"
+                >
+                  <FaCaretDown size={20} />
+                </button>
+                <div></div>
+              </div>
             </div>
           </div>
         </div>
