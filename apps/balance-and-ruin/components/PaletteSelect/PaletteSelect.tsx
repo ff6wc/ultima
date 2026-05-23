@@ -1,6 +1,6 @@
 import { useId } from "react";
 import { PaletteSwatch } from "~/components/PaletteSwatch/PaletteSwatch";
-import { Select } from "~/components/Select/Select";
+import { Select, AutoPanText } from "~/components/Select/Select";
 
 export type PaletteSelectOption = {
   readonly value: string;
@@ -28,8 +28,8 @@ const PaletteSelect = ({ options, onChange, value }: SelectProps) => {
         }}
         value={value}
         renderOption={(opt: PaletteSelectOption) => (
-          <div className="flex flex-col justify-center gap-2">
-            <span className="block truncate font-medium">{opt.label}</span>
+          <div className="flex flex-col justify-center gap-2 w-full min-w-0">
+            <span className="block font-medium w-full min-w-0"><AutoPanText text={opt.label} /></span>
             <div>
               <PaletteSwatch colors={opt.color as number[][]} />
             </div>

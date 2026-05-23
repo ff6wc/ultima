@@ -1,8 +1,73 @@
 import { Listbox, Transition } from "@headlessui/react";
-import { Fragment, KeyboardEvent, useMemo, useState } from "react";
+import { Fragment, KeyboardEvent, useMemo, useState, useRef, useEffect } from "react";
 import { HiChevronDown, HiMagnifyingGlass } from "react-icons/hi2";
 import { cx } from "cva";
 import { renderDescription } from "~/utils/renderDescription";
+
+export const AutoPanText = ({ text, className }: { text: string; className?: string }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLSpanElement>(null);
+  const [shouldPan, setShouldPan] = useState(false);
+  const [translateX, setTranslateX] = useState("0px");
+  const [duration, setDuration] = useState("0s");
+
+  useEffect(() => {
+    const container = containerRef.current;
+    const textEl = textRef.current;
+    if (container && textEl) {
+      const containerWidth = container.getBoundingClientRect().width;
+      const textWidth = textEl.getBoundingClientRect().width;
+      const isOverflowing = textWidth > containerWidth;
+      
+      setShouldPan(isOverflowing);
+      if (isOverflowing) {
+        const overflowAmount = textWidth - containerWidth;
+        setTranslateX(`-${overflowAmount}px`);
+        // Speed: 25px per second + 2 seconds pause
+        const calculatedDuration = overflowAmount / 25 + 2;
+        setDuration(`${calculatedDuration}s`);
+      } else {
+        setTranslateX("0px");
+        setDuration("0s");
+      }
+    }
+  }, [text]);
+
+  return (
+    <div 
+      ref={containerRef} 
+      className={`relative overflow-hidden whitespace-nowrap w-full ${className || ""}`}
+      style={{
+        maskImage: shouldPan ? "linear-gradient(to right, black 85%, transparent 100%)" : "none",
+        WebkitMaskImage: shouldPan ? "linear-gradient(to right, black 85%, transparent 100%)" : "none",
+      }}
+    >
+      <span
+        ref={textRef}
+        className="inline-block"
+        style={{
+          display: "inline-block",
+          transform: shouldPan ? undefined : "none",
+          animation: shouldPan ? `auto-pan-loop ${duration} linear infinite alternate` : "none",
+          // Set custom properties for keyframes to read
+          ["--pan-amount" as any]: translateX,
+        }}
+      >
+        {text}
+      </span>
+      
+      <style>{`
+        @keyframes auto-pan-loop {
+          0% { transform: translate3d(0, 0, 0); }
+          15% { transform: translate3d(0, 0, 0); }
+          85% { transform: translate3d(var(--pan-amount), 0, 0); }
+          100% { transform: translate3d(var(--pan-amount), 0, 0); }
+        }
+      `}</style>
+    </div>
+  );
+};
+
 
 export type SelectOption = {
   readonly helperText?: React.ReactNode | ((value: any) => React.ReactNode);
@@ -145,12 +210,12 @@ export const Select = ({
                 className,
               )}
             >
-              <span className="flex items-center gap-2 truncate text-sm font-medium text-[var(--text-main)]">
+              <span className="flex items-center gap-2 text-sm font-medium text-[var(--text-main)] w-full min-w-0">
                 {activeOption
                   ? renderValue
                     ? renderValue(activeOption)
-                    : activeOption.label
-                  : (placeholder ?? "Select option...")}
+                    : <AutoPanText text={activeOption.label} />
+                  : <span className="opacity-60">{placeholder ?? "Select option..."}</span>}
               </span>
               <span className="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none">
                 <HiChevronDown
@@ -234,13 +299,13 @@ export const Select = ({
                                       <>
                                         <span
                                           className={cx(
-                                            "block truncate",
+                                            "block w-full min-w-0",
                                             selected
                                               ? "font-semibold"
                                               : "font-normal",
                                           )}
                                         >
-                                          {option.label}
+                                          <AutoPanText text={option.label} />
                                         </span>
                                         {option.helperText && (
                                           <span
@@ -294,13 +359,13 @@ export const Select = ({
                                 <>
                                   <span
                                     className={cx(
-                                      "block truncate",
+                                      "block w-full min-w-0",
                                       selected
                                         ? "font-semibold"
                                         : "font-normal",
                                     )}
                                   >
-                                    {option.label}
+                                    <AutoPanText text={option.label} />
                                   </span>
                                   {option.helperText && (
                                     <span

@@ -116,37 +116,35 @@ export const SpritePalettes = ({
           return (
             <React.Fragment key={idx}>
               {idx ? <Divider /> : null}
-              <div className="w-full overflow-x-auto pb-1 scrollbar-thin scrollbar-thumb-slate-700">
-                <div className="flex items-center gap-6 min-w-[360px] w-full">
-                  <div className="shrink-0 min-w-[100px]">
-                    <FlagLabel
-                      flag="-cpal"
-                      helperText=""
-                      label={`Palette ${idx}`}
-                    />
-                  </div>
-                  <div className="flex-grow min-w-[200px]">
-                    <PaletteSelect
-                      onChange={(val) => {
-                        if (val) {
-                          const paletteValuesBak = [...paletteValues];
-                          paletteValuesBak.splice(
-                            idx,
-                            1,
-                            Number.parseInt(val.value),
-                          );
-                          dispatch(
-                            setFlag({
-                              flag: "-cpal",
-                              value: paletteValuesBak.join("."),
-                            }),
-                          );
-                        }
-                      }}
-                      options={paletteOptions}
-                      value={palettesById[paletteValues[idx]]}
-                    />
-                  </div>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 flex-grow w-full min-w-0">
+                <div className="shrink-0 sm:min-w-[120px]">
+                  <FlagLabel
+                    flag="-cpal"
+                    helperText=""
+                    label={`Palette ${idx}`}
+                  />
+                </div>
+                <div className="flex-grow w-full min-w-0">
+                  <PaletteSelect
+                    onChange={(val) => {
+                      if (val) {
+                        const paletteValuesBak = [...paletteValues];
+                        paletteValuesBak.splice(
+                          idx,
+                          1,
+                          Number.parseInt(val.value),
+                        );
+                        dispatch(
+                          setFlag({
+                            flag: "-cpal",
+                            value: paletteValuesBak.join("."),
+                          }),
+                        );
+                      }
+                    }}
+                    options={paletteOptions}
+                    value={palettesById[paletteValues[idx]]}
+                  />
                 </div>
               </div>
               <div>{<PaletteSwatch colors={paletteColors} />}</div>

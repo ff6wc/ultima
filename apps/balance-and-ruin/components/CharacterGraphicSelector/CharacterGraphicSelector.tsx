@@ -173,31 +173,30 @@ export const CharacterGraphicSelector = ({
   };
 
   return (
-    <div className="w-full overflow-x-auto pb-1 scrollbar-thin scrollbar-thumb-slate-700">
-      <div className="flex gap-8 items-center min-w-[480px]" key={id}>
-        <div className="flex flex-col gap-3 items-center min-w-[150px] shrink-0">
-          {/* NAME INPUT */}
-          <div className="w-full">
-            {Label}
-          </div>
-          {/* PORTRAIT + SPRITE */}
-          <div className="flex justify-evenly items-end w-full">
-            {portraitId !== null ? (
-              <PortraitDrawLoad portraitId={portraitValues[portraitId]} />
-            ) : null}
-            <span>
-              <SpriteDrawLoad
-                onClick={onSpriteClick}
-                paletteId={paletteValues[characterPaletteValues[id]]}
-                poseId={poseId}
-                spriteId={spriteValues[id]}
-                scale={3}
-              />
-            </span>
-          </div>
+    <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 w-full min-w-0" key={id}>
+      <div className="flex flex-col gap-3 items-center w-full sm:w-auto sm:min-w-[150px] shrink-0">
+        {/* NAME INPUT */}
+        <div className="w-full text-center sm:text-left">
+          {Label}
         </div>
-        {/* Selects */}
-        <div className="flex flex-col gap-3 flex-grow min-w-[280px]">
+        {/* PORTRAIT + SPRITE */}
+        <div className="flex justify-evenly items-end w-full max-w-[200px] sm:max-w-none">
+          {portraitId !== null ? (
+            <PortraitDrawLoad portraitId={portraitValues[portraitId]} />
+          ) : null}
+          <span>
+            <SpriteDrawLoad
+              onClick={onSpriteClick}
+              paletteId={paletteValues[characterPaletteValues[id]]}
+              poseId={poseId}
+              spriteId={spriteValues[id]}
+              scale={3}
+            />
+          </span>
+        </div>
+      </div>
+      {/* Selects */}
+      <div className="flex flex-col gap-3 flex-grow w-full min-w-0">
           {/* PORTRAIT */}
           {portraitId != null ? (
             <Select
@@ -256,6 +255,5 @@ export const CharacterGraphicSelector = ({
           />
         </div>
       </div>
-    </div>
   );
 };
