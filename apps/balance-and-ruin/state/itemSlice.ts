@@ -153,7 +153,7 @@ export const itemSlice = createSlice({
         [HYDRATE]: (state, action) => {
             return {
                 ...state,
-                ...action.payload.items,
+                ...action.payload.item,
             };
         },
     },

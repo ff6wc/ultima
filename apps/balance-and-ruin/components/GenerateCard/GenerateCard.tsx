@@ -161,6 +161,11 @@ export const GenerateCard = ({
     }
     setClientError(null);
 
+    const newWindow = window.open("", "_blank");
+    if (newWindow) {
+      newWindow.document.write("<p>Generating seed... Please wait.</p>");
+    }
+
     let reCAPTCHA: string | null = null;
     try {
       if (!executeRecaptcha) {
@@ -175,6 +180,7 @@ export const GenerateCard = ({
         );
       }
     } catch (e) {
+      if (newWindow) newWindow.close();
       setClientError(
         `Validation Error: ${(e as Error).message || "Ensure you access the app via a whitelisted domain like http://dev.ff6worldscollide.com:3001 (see .env.local) instead of localhost."}`,
       );
@@ -210,7 +216,12 @@ export const GenerateCard = ({
         link.href = window.URL.createObjectURL(content);
         link.download = `${filename}.zip`;
         link.click();
-        window.open(`/seed/?id=${seed_id}`, "_blank");
+        
+        if (newWindow) {
+          newWindow.location.href = `/seed/?id=${seed_id}`;
+        } else {
+          window.open(`/seed/?id=${seed_id}`, "_blank");
+        }
       });
 
       // Track seed generation count in localStorage
@@ -255,6 +266,7 @@ export const GenerateCard = ({
         }
       }
     } catch (err) {
+      if (newWindow) newWindow.close();
       setClientError((err as Error).message);
     }
   };

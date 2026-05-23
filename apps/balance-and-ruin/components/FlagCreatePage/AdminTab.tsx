@@ -59,8 +59,6 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
   const [newTagName, setNewTagName] = useState("");
   const [editingTag, setEditingTag] = useState<{old: string, new: string} | null>(null);
 
-  // User Administration
-  const [usersDb, setUsersDb] = useState<any[]>([]);
   const isSuperadmin = !!(session?.user as any)?.isSuperadmin;
 
   const isAdmin = !!(session?.user as any)?.isAdmin || isSuperadmin;
@@ -85,20 +83,10 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
       .catch((e) => console.error("Error fetching tags:", e));
   };
 
-  const fetchUsers = () => {
-    narsheFetch("/users")
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data)) setUsersDb(data);
-      })
-      .catch((e) => console.error("Error fetching users:", e));
-  };
-
   useEffect(() => {
     if (session?.user && isAdmin) {
       fetchPresets();
       fetchTags();
-      fetchUsers();
     }
   }, [session?.user, isAdmin]);
 
@@ -1050,98 +1038,7 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
           </div>
         </div>
 
-        {/* USER ADMINISTRATION */}
-        <div
-          style={{
-            border: "4px double #10b981",
-            borderRadius: "8px",
-            boxShadow: "0 8px 30px rgba(0, 0, 0, 0.4)",
-            padding: "2rem",
-            fontFamily: "var(--font-runic, monospace)",
-          }}
-          className="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100"
-        >
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", borderBottom: "2px solid rgba(16, 185, 129, 0.4)", paddingBottom: "1rem", marginBottom: "1.5rem" }}>
-            <h2 style={{ margin: 0, fontSize: "1.5rem", fontWeight: "bold", letterSpacing: "1px", color: "#34d399" }}>
-              USER ADMINISTRATION
-            </h2>
-            <span className="text-slate-500 dark:text-slate-400" style={{ fontSize: "1rem", fontWeight: "bold" }}>
-              {usersDb.length} Registered Users
-            </span>
-          </div>
 
-          <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.85rem", textAlign: "left" }}>
-              <thead>
-                <tr style={{ borderBottom: "2px solid rgba(16, 185, 129, 0.2)" }} className="bg-slate-200/60 dark:bg-slate-950/60">
-                  <th className="text-emerald-700 dark:text-emerald-300" style={{ padding: "0.75rem" }}>User</th>
-                  <th className="text-emerald-700 dark:text-emerald-300" style={{ padding: "0.75rem" }}>Discord ID</th>
-                  <th className="text-emerald-700 dark:text-emerald-300" style={{ padding: "0.75rem" }}>Logins</th>
-                  <th className="text-emerald-700 dark:text-emerald-300" style={{ padding: "0.75rem" }}>First Login</th>
-                  <th className="text-emerald-700 dark:text-emerald-300" style={{ padding: "0.75rem" }}>Last Login</th>
-                  <th className="text-emerald-700 dark:text-emerald-300" style={{ padding: "0.75rem" }}>Presets Owned</th>
-                  {isSuperadmin && <th className="text-emerald-700 dark:text-emerald-300" style={{ padding: "0.75rem", textAlign: "center" }}>Role Control</th>}
-                </tr>
-              </thead>
-              <tbody>
-                {usersDb.map((user) => {
-                  const ownedPresets = allPresets.filter(p => String(p.creator_id) === String(user.discordId)).length;
-                  const isUserSuperadmin = ["451050854934511647", "197757429948219392"].includes(String(user.discordId));
-                  
-                  return (
-                    <tr key={user.discordId} style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }} className="hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                      <td className="text-slate-800 dark:text-slate-100" style={{ padding: "0.75rem", fontWeight: "bold" }}>{user.name}</td>
-                      <td className="text-slate-500 dark:text-slate-400" style={{ padding: "0.75rem", fontFamily: "monospace" }}>{user.discordId}</td>
-                      <td className="text-slate-700 dark:text-slate-300" style={{ padding: "0.75rem" }}>{user.loginCount || 1}</td>
-                      <td className="text-slate-500 dark:text-slate-400" style={{ padding: "0.75rem" }}>{new Date(user.firstLogin).toLocaleDateString()}</td>
-                      <td className="text-slate-500 dark:text-slate-400" style={{ padding: "0.75rem" }}>{new Date(user.lastLogin).toLocaleDateString()}</td>
-                      <td className="text-slate-700 dark:text-slate-300" style={{ padding: "0.75rem" }}>{ownedPresets}</td>
-                      {isSuperadmin && (
-                        <td style={{ padding: "0.75rem", textAlign: "center" }}>
-                          {isUserSuperadmin ? (
-                            <span style={{ backgroundColor: "rgba(245, 158, 11, 0.2)", color: "#f59e0b", border: "1px solid rgba(245, 158, 11, 0.3)", padding: "0.2rem 0.5rem", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "bold" }}>SUPERADMIN</span>
-                          ) : (
-                            <button
-                              onClick={async () => {
-                                const newStatus = !user.isAdmin;
-                                if(confirm(`Change ${user.name}'s role to ${newStatus ? 'Admin' : 'User'}?`)) {
-                                  try {
-                                    const res = await narsheFetch("/users", {
-                                      method: "PUT",
-                                      body: JSON.stringify({ discordId: user.discordId, isAdmin: newStatus })
-                                    });
-                                    if (!res.ok) throw new Error(await res.text());
-                                    fetchUsers();
-                                  } catch (e: any) {
-                                    alert(`Failed to update role: ${e.message}`);
-                                  }
-                                }
-                              }}
-                              style={{
-                                backgroundColor: user.isAdmin ? "rgba(59, 130, 246, 0.2)" : "rgba(255, 255, 255, 0.05)",
-                                color: user.isAdmin ? "#60a5fa" : "#94a3b8",
-                                border: `1px solid ${user.isAdmin ? "rgba(59, 130, 246, 0.4)" : "rgba(255, 255, 255, 0.2)"}`,
-                                padding: "0.2rem 0.6rem",
-                                borderRadius: "4px",
-                                fontSize: "0.7rem",
-                                fontWeight: "bold",
-                                cursor: "pointer",
-                                transition: "all 0.2s"
-                              }}
-                              className="hover:brightness-125"
-                            >
-                              {user.isAdmin ? "ADMIN" : "USER"}
-                            </button>
-                          )}
-                        </td>
-                      )}
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
 
       </div>
     </PageContainer>

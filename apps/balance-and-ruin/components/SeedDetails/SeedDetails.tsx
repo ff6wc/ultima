@@ -120,6 +120,11 @@ export const SeedDetails = ({ seedId }: SeedDetailsProps) => {
     }
     setErrorState(null);
 
+    const newWindow = window.open("", "_blank");
+    if (newWindow) {
+      newWindow.document.write("<p>Generating seed... Please wait.</p>");
+    }
+
     let reCAPTCHA: string | null = null;
     try {
       if (!executeRecaptcha) {
@@ -132,6 +137,7 @@ export const SeedDetails = ({ seedId }: SeedDetailsProps) => {
         throw new Error("Could not extract recaptcha confirmation payload.");
       }
     } catch (e) {
+      if (newWindow) newWindow.close();
       setErrorState(
         `Validation Error: ${(e as Error).message || "Failed to verify recaptcha."}`,
       );
@@ -172,8 +178,13 @@ export const SeedDetails = ({ seedId }: SeedDetailsProps) => {
       });
 
       // Pop out to the resulting seed details route natively
-      window.open(`/seed/?id=${seed_id}`, "_blank");
+      if (newWindow) {
+        newWindow.location.href = `/seed/?id=${seed_id}`;
+      } else {
+        window.open(`/seed/?id=${seed_id}`, "_blank");
+      }
     } catch (err) {
+      if (newWindow) newWindow.close();
       setErrorState((err as Error).message);
     }
   };
@@ -294,9 +305,26 @@ export const SeedDetails = ({ seedId }: SeedDetailsProps) => {
 
           {seed && (
             <div className="mt-8 pt-6 border-t border-neutral-200 dark:border-neutral-700 flex flex-col gap-3 w-full col-span-full">
-              <h3 className="text-xs font-bold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
-                Flags Used
-              </h3>
+              <div className="flex justify-between items-center w-full">
+                <h3 className="text-xs font-bold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
+                  Flags Used
+                </h3>
+                <button
+                  onClick={handleCopy}
+                  className={`whitespace-nowrap flex items-center justify-center gap-2 transition-all duration-200 px-4 py-1.5 rounded-lg font-semibold font-sans text-xs border shadow-sm outline-none select-none active:scale-[0.98] ${
+                    copied
+                      ? "border-green-500 text-green-600 bg-green-50 hover:bg-green-100"
+                      : "border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700"
+                  }`}
+                >
+                  {copied ? (
+                    <HiCheck size={14} className="text-green-600" />
+                  ) : (
+                    <HiClipboardCopy size={14} className="text-slate-600 dark:text-slate-300" />
+                  )}
+                  <span>{copied ? "Copied!" : "Copy Flags"}</span>
+                </button>
+              </div>
               <div className="flex flex-col gap-3 w-full">
                 <textarea
                   className="w-full min-h-[150px] max-h-[300px] p-4 bg-[var(--bg-input)] border border-[var(--border-input)] rounded-lg font-mono text-[0.9rem] text-[var(--text-input)] resize-y leading-relaxed focus:outline-none select-all shadow-inner"
@@ -394,29 +422,13 @@ export const SeedDetails = ({ seedId }: SeedDetailsProps) => {
                     )}
 
                     <button
-                      onClick={handleCopy}
-                      className={`whitespace-nowrap flex items-center justify-center gap-2 transition-all duration-200 px-5 py-2.5 rounded-lg font-semibold font-sans text-sm border shadow-sm outline-none select-none active:scale-[0.98] ${
-                        copied
-                          ? "border-green-500 text-green-600 bg-green-50 hover:bg-green-100"
-                          : "border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700"
-                      }`}
-                    >
-                      {copied ? (
-                        <HiCheck size={18} className="text-green-600" />
-                      ) : (
-                        <HiClipboardCopy size={18} className="text-slate-600 dark:text-slate-300" />
-                      )}
-                      <span>{copied ? "Copied!" : "Copy Flags"}</span>
-                    </button>
-
-                    <button
                       onClick={handleGenerateClick}
                       disabled={isMutating}
                       className="whitespace-nowrap flex items-center justify-center gap-2 transition-all duration-200 px-5 py-2.5 rounded-lg font-bold font-sans text-sm text-white bg-[#2c3859] hover:bg-[#1e293b] active:scale-[0.98] shadow-sm outline-none select-none disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <HiPlay size={18} />
                       <span>
-                        {isMutating ? "Generating..." : "Generate (New Seed)"}
+                        {isMutating ? "Rolling..." : "Roll Another Seed"}
                       </span>
                     </button>
 

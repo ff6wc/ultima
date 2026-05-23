@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import { HiChevronDown, HiChevronUp } from "react-icons/hi2";
 import { selectFlagValues } from "~/state/flagSlice";
 import { selectObjectives } from "~/state/objectiveSlice";
+import { selectActivePresetName } from "~/state/presetSlice";
 import styles from "./FlagSummary.module.css";
 
 // ─── Objective result IDs ─────────────────────────────────────────────────────
@@ -924,6 +925,7 @@ function analyzeDifficulty(
 export const FlagSummary = () => {
   const flagValues = useSelector(selectFlagValues) as Record<string, any>;
   const objectives = useSelector(selectObjectives) as Record<string, any>;
+  const activePresetName = useSelector(selectActivePresetName);
 
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -941,7 +943,13 @@ export const FlagSummary = () => {
   };
 
   const infoRows = buildInfoRows(flagValues, objectives);
-  const { score, label, color, bullets } = analyzeDifficulty(flagValues, objectives);
+  let { score, label, color, bullets } = analyzeDifficulty(flagValues, objectives);
+
+  if (activePresetName && activePresetName.toLowerCase().includes("atma series")) {
+    score = 20;
+    label = "Standard";
+    color = "#3b82f6";
+  }
 
   const severityIcon: Record<BulletSeverity, string> = {
     hard: "⚠️", medium: "◆", easy: "✓", info: "ℹ",

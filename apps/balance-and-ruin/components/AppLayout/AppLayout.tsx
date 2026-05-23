@@ -116,32 +116,38 @@ export const AppLayout = ({ children, title }: AppLayoutProps) => {
             <span>Generator</span>
           </a>
 
-          {AUTH_ENABLED && session?.user ? (
-            <a
-              href="/create?tab=profile"
-              className={styles.tabItem}
-              style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "0.5rem" }}
-            >
-              <div style={{ width: "20px", height: "20px", borderRadius: "50%", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "#334155", flexShrink: 0 }}>
-                {session.user.image ? (
-                  <img src={session.user.image} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                ) : (
-                  <FaDiscord size={12} color="white" />
-                )}
-              </div>
-              <span>Profile</span>
-            </a>
-          ) : AUTH_ENABLED ? (
-            <button
-              type="button"
-              onClick={() => signIn("discord")}
-              className={styles.discordLoginBtn}
-              style={{ width: "calc(100% - 2rem)" }}
-            >
-              <FaDiscord size={20} />
-              <span>Login</span>
-            </button>
-          ) : null}
+          {!AUTH_ENABLED ? null : (
+            <>
+              <div style={{ borderTop: "1px solid rgba(255, 255, 255, 0.15)", margin: "0.5rem 1rem" }} />
+              {session?.user ? (
+                <a
+                  href="/create?tab=profile"
+                  className={styles.tabItem}
+                  style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "0.5rem" }}
+                >
+                  <div style={{ width: "20px", height: "20px", borderRadius: "50%", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "#334155", flexShrink: 0 }}>
+                    {session.user.image ? (
+                      <img src={session.user.image} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    ) : (
+                      <FaDiscord size={12} color="white" />
+                    )}
+                  </div>
+                  <span>Profile</span>
+                </a>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => signIn("discord")}
+                  className={styles.discordLoginBtn}
+                  style={{ width: "calc(100% - 2rem)" }}
+                >
+                  <FaDiscord size={20} />
+                  <span>Login</span>
+                </button>
+              )}
+              <div style={{ borderTop: "1px solid rgba(255, 255, 255, 0.15)", margin: "0.5rem 1rem" }} />
+            </>
+          )}
         </div>
 
         {/* Bottom link */}
