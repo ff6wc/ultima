@@ -411,6 +411,19 @@ export const FlagCreatePage = ({
     let touchStartY = 0;
 
     const handleTouchStart = (e: TouchEvent) => {
+      const target = e.target as HTMLElement;
+      // Skip swipe gesture if touching interactive controls to prevent conflict
+      if (
+        target.closest("input") ||
+        target.closest("button") ||
+        target.closest("select") ||
+        target.closest("a") ||
+        target.closest('[role="slider"]') ||
+        target.closest('[class*="Slider"]') ||
+        target.closest('[class*="slider"]')
+      ) {
+        return;
+      }
       const touch = e.changedTouches[0];
       touchStartX = touch.clientX;
       touchStartY = touch.clientY;
@@ -425,12 +438,12 @@ export const FlagCreatePage = ({
       const diffY = touchEndY - touchStartY;
 
       // Ensure horizontal swipe is dominant and above threshold
-      const SWIPE_THRESHOLD = 60;
+      const SWIPE_THRESHOLD = 50;
       if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > SWIPE_THRESHOLD) {
         if (diffX > 0) {
           // Swipe Right (Left-to-Right) -> Open sidebar
-          // Only trigger if started near the left edge of the screen to prevent conflict with other page elements
-          if (touchStartX <= 50 && !sidebarOpen) {
+          // Trigger within a comfortable 160px of the left edge of the screen
+          if (touchStartX > 0 && touchStartX <= 160 && !sidebarOpen) {
             setSidebarOpen(true);
           }
         } else {
@@ -440,6 +453,10 @@ export const FlagCreatePage = ({
           }
         }
       }
+
+      // Reset touch coordinates
+      touchStartX = 0;
+      touchStartY = 0;
     };
 
     window.addEventListener("touchstart", handleTouchStart, { passive: true });

@@ -371,7 +371,7 @@
     top: 0;
     z-index: 50;
     box-shadow: none;
-    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+    transition: left 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease;
   }
   
   .sidebar.sidebarOpen {
