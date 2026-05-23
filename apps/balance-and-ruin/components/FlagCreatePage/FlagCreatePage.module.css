@@ -432,10 +432,40 @@
 
 .tabItemsContainer > [aria-selected="true"],
 .tabItemsContainer > .profileTabActive {
-  border-right: none !important;
-  border-top-right-radius: 8px !important;
-  border-bottom-right-radius: 8px !important;
+  border-right-color: transparent !important;
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
   margin-right: -1px !important;
   position: relative;
   z-index: 2;
+}
+
+.tabItemsContainer > [aria-selected="true"]::before,
+.tabItemsContainer > .profileTabActive::before {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: -8px;
+  width: 8px;
+  height: 9px;
+  background-color: var(--bg-sidebar);
+  border-bottom-right-radius: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.55);
+  border-right: 1px solid rgba(255, 255, 255, 0.55);
+  z-index: 3;
+}
+
+.tabItemsContainer > [aria-selected="true"]::after,
+.tabItemsContainer > .profileTabActive::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: -8px;
+  width: 8px;
+  height: 9px;
+  background-color: var(--bg-sidebar);
+  border-top-right-radius: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.55);
+  border-right: 1px solid rgba(255, 255, 255, 0.55);
+  z-index: 3;
 }
