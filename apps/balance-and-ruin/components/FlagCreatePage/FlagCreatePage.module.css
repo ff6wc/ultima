@@ -404,7 +404,7 @@
   }
   
   .pageContainer {
-    padding: 1rem 0.25rem 6.5rem 0.25rem; /* Reduced padding on left/right to stretch card width */
+    padding: 1rem 0.35rem 6.5rem 0.35rem; /* Slightly larger padding for border gap */
   }
 }
 
