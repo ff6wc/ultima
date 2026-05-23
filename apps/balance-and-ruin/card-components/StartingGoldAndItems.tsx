@@ -75,7 +75,7 @@ export const StartingGoldAndItems = ({ items: propsItems, curateItems = false }:
       observer.disconnect();
       window.removeEventListener("resize", updateHeight);
     };
-  }, [items.items]);
+  }, []);
 
   const onItemChange = (items: StartingItems) => {
     const sits = startingItemsToString;

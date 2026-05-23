@@ -400,9 +400,15 @@ function buildInfoRows(fv: Record<string, any>, objectives: Record<string, any>)
 
 const BASE_SCORE = 20;
 
+// Configuration map for preset-specific difficulty overrides
+const PRESET_DIFFICULTY_OVERRIDES: Record<string, { score: number; label: string; color: string }> = {
+  "atma series": { score: 20, label: "Standard", color: "#3b82f6" },
+};
+
 function analyzeDifficulty(
   fv: Record<string, any>,
-  objectives: Record<string, any>
+  objectives: Record<string, any>,
+  activePresetName: string | null
 ): { score: number; label: string; color: string; bullets: Bullet[] } {
   const bullets: Bullet[] = [];
   let delta = 0; // points above/below the standard baseline
@@ -902,7 +908,7 @@ function analyzeDifficulty(
   if (hasFlag(fv, "-open")) { bullets.push({ text: "Open world — all events accessible from the start", severity: "easy" }); delta -= 5; }
 
   // Final score = BASE (standard) + deviations
-  const score = Math.max(0, BASE_SCORE + delta);
+  let score = Math.max(0, BASE_SCORE + delta);
 
   let label: string;
   let color: string;
@@ -917,6 +923,19 @@ function analyzeDifficulty(
   else if (score <= 42) { label = "Challenging"; color = "#f59e0b"; }
   else if (score <= 65) { label = "Hard";        color = "#ef4444"; }
   else                  { label = "Brutal";      color = "#a855f7"; }
+
+  // Check for preset difficulty overrides based on active preset name
+  if (activePresetName) {
+    const nameLower = activePresetName.toLowerCase();
+    for (const [presetKey, override] of Object.entries(PRESET_DIFFICULTY_OVERRIDES)) {
+      if (nameLower.includes(presetKey)) {
+        score = override.score;
+        label = override.label;
+        color = override.color;
+        break;
+      }
+    }
+  }
 
   return { score, label, color, bullets };
 }
@@ -943,13 +962,7 @@ export const FlagSummary = () => {
   };
 
   const infoRows = buildInfoRows(flagValues, objectives);
-  let { score, label, color, bullets } = analyzeDifficulty(flagValues, objectives);
-
-  if (activePresetName && activePresetName.toLowerCase().includes("atma series")) {
-    score = 20;
-    label = "Standard";
-    color = "#3b82f6";
-  }
+  const { score, label, color, bullets } = analyzeDifficulty(flagValues, objectives, activePresetName);
 
   const severityIcon: Record<BulletSeverity, string> = {
     hard: "⚠️", medium: "◆", easy: "✓", info: "ℹ",

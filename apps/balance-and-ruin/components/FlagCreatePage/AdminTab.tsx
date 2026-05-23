@@ -674,6 +674,21 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <div style={{ display: "flex", alignItems: "center", flex: 1, minWidth: 0, paddingRight: "1rem" }}>
                         <div 
+                          role="checkbox"
+                          aria-checked={isSelected}
+                          tabIndex={0}
+                          onKeyDown={(e) => {
+                            if (e.key === " " || e.key === "Enter") {
+                              e.preventDefault();
+                              setSelectedIds((prev) => ({
+                                ...prev,
+                                [preset.id]: !isSelected
+                              }));
+                              if (!isSelected) {
+                                setLastSelectedId(preset.id);
+                              }
+                            }
+                          }}
                           onClick={(e) => {
                             e.stopPropagation();
                             setSelectedIds((prev) => ({
@@ -684,7 +699,7 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                               setLastSelectedId(preset.id);
                             }
                           }}
-                          className={`w-5 h-5 rounded border flex items-center justify-center cursor-pointer transition-all mr-3 flex-shrink-0
+                          className={`w-5 h-5 rounded border flex items-center justify-center cursor-pointer transition-all mr-3 flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-red-500
                             ${isSelected 
                               ? "bg-red-500 border-red-500 text-white shadow-sm" 
                               : "border-slate-300 dark:border-slate-600 hover:border-red-400 dark:hover:border-red-500 bg-white dark:bg-slate-900"

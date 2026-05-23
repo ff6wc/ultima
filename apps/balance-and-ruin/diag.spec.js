@@ -1,5 +1,7 @@
 const { test } = require('@playwright/test');
 
+const BASE_URL = (process.env.PLAYWRIGHT_BASE_URL || 'https://dev-difficulty-updates.ultima-3cm.pages.dev').replace(/\/$/, '');
+
 test('diagnose dev page errors on home', async ({ page }) => {
   page.on('console', msg => {
     console.log(`[HOME CONSOLE] [${msg.type()}] ${msg.text()}`);
@@ -14,7 +16,7 @@ test('diagnose dev page errors on home', async ({ page }) => {
   });
 
   console.log("Navigating to home preview site...");
-  await page.goto('https://dev-difficulty-updates.ultima-3cm.pages.dev/', { waitUntil: 'load', timeout: 30000 });
+  await page.goto(`${BASE_URL}/`, { waitUntil: 'load', timeout: 30000 });
   
   console.log("Waiting 10 seconds for hydration...");
   await page.waitForTimeout(10000);
@@ -39,7 +41,7 @@ test('diagnose dev page errors on create', async ({ page }) => {
   });
 
   console.log("Navigating to create preview site...");
-  await page.goto('https://dev-difficulty-updates.ultima-3cm.pages.dev/create', { waitUntil: 'load', timeout: 30000 });
+  await page.goto(`${BASE_URL}/create`, { waitUntil: 'load', timeout: 30000 });
   
   console.log("Waiting 10 seconds for hydration...");
   await page.waitForTimeout(10000);

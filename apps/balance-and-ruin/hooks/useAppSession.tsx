@@ -102,7 +102,10 @@ export const AppSessionProvider = ({
           image = `https://cdn.discordapp.com/avatars/${discordId}/${image}.png`;
         }
 
-        const ADMIN_IDS = ["451050854934511647", "197757429948219392"];
+        const envAdminIds = process.env.NEXT_PUBLIC_ADMIN_DISCORD_IDS;
+        const ADMIN_IDS = envAdminIds
+          ? envAdminIds.split(",")
+          : ["451050854934511647", "197757429948219392"];
         const isHardcodedAdmin = discordId && ADMIN_IDS.includes(String(discordId));
         const isAdmin = !!(payload.isAdmin || payload.is_admin || payload.isSuperadmin || isHardcodedAdmin);
         const isSuperadmin = !!(payload.isSuperadmin || isHardcodedAdmin);
