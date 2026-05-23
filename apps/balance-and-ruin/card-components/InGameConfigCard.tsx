@@ -377,6 +377,16 @@ export const InGameConfigCard = () => {
     magOrder: {},
     magOrderBbox: null,
   });
+
+  const timerRef = useRef<any>(null);
+  const intervalRef = useRef<any>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, []);
   const [state, setStateRaw] = useState<State>(defaultInternalState);
   const stateRef = useRef(state);
   const [ready, setReady] = useState(false);
@@ -525,6 +535,28 @@ export const InGameConfigCard = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
+
+  const startRepeat = (dRow: number, dCol: number) => {
+    stopRepeat();
+    move(dRow, dCol);
+    canvasRef.current?.focus();
+    timerRef.current = setTimeout(() => {
+      intervalRef.current = setInterval(() => {
+        move(dRow, dCol);
+      }, 80);
+    }, 300);
+  };
+
+  const stopRepeat = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  };
 
   const selectCurrent = useCallback(() => {
     setState((s) => {
@@ -754,8 +786,13 @@ export const InGameConfigCard = () => {
                 <div></div>
                 <button
                   type="button"
-                  onClick={() => { move(-1, 0); canvasRef.current?.focus(); }}
-                  className="w-9 h-10 bg-slate-800 hover:bg-slate-700 active:bg-emerald-600 active:text-white border-t border-x border-slate-600 rounded-t-md shadow-md text-slate-400 flex items-center justify-center transition-all transform active:scale-95 cursor-pointer outline-none"
+                  onMouseDown={() => startRepeat(-1, 0)}
+                  onMouseUp={stopRepeat}
+                  onMouseLeave={stopRepeat}
+                  onTouchStart={(e) => { e.preventDefault(); startRepeat(-1, 0); }}
+                  onTouchEnd={stopRepeat}
+                  onTouchCancel={stopRepeat}
+                  className="w-9 h-10 bg-slate-800 hover:bg-slate-700 active:bg-emerald-600 active:text-white border-t border-x border-slate-600 rounded-t-md shadow-md text-slate-400 flex items-center justify-center transition-all transform active:scale-95 cursor-pointer outline-none select-none"
                   title="Move Up"
                 >
                   <FaCaretUp size={20} />
@@ -765,8 +802,13 @@ export const InGameConfigCard = () => {
                 {/* Row 2 */}
                 <button
                   type="button"
-                  onClick={() => { move(0, -1); canvasRef.current?.focus(); }}
-                  className="w-10 h-9 bg-slate-800 hover:bg-slate-700 active:bg-emerald-600 active:text-white border-y border-l border-slate-600 rounded-l-md shadow-md text-slate-400 flex items-center justify-center transition-all transform active:scale-95 cursor-pointer outline-none"
+                  onMouseDown={() => startRepeat(0, -1)}
+                  onMouseUp={stopRepeat}
+                  onMouseLeave={stopRepeat}
+                  onTouchStart={(e) => { e.preventDefault(); startRepeat(0, -1); }}
+                  onTouchEnd={stopRepeat}
+                  onTouchCancel={stopRepeat}
+                  className="w-10 h-9 bg-slate-800 hover:bg-slate-700 active:bg-emerald-600 active:text-white border-y border-l border-slate-600 rounded-l-md shadow-md text-slate-400 flex items-center justify-center transition-all transform active:scale-95 cursor-pointer outline-none select-none"
                   title="Decrease / Previous"
                 >
                   <FaCaretLeft size={20} />
@@ -776,8 +818,13 @@ export const InGameConfigCard = () => {
                 </div>
                 <button
                   type="button"
-                  onClick={() => { move(0, 1); canvasRef.current?.focus(); }}
-                  className="w-10 h-9 bg-slate-800 hover:bg-slate-700 active:bg-emerald-600 active:text-white border-y border-r border-slate-600 rounded-r-md shadow-md text-slate-400 flex items-center justify-center transition-all transform active:scale-95 cursor-pointer outline-none"
+                  onMouseDown={() => startRepeat(0, 1)}
+                  onMouseUp={stopRepeat}
+                  onMouseLeave={stopRepeat}
+                  onTouchStart={(e) => { e.preventDefault(); startRepeat(0, 1); }}
+                  onTouchEnd={stopRepeat}
+                  onTouchCancel={stopRepeat}
+                  className="w-10 h-9 bg-slate-800 hover:bg-slate-700 active:bg-emerald-600 active:text-white border-y border-r border-slate-600 rounded-r-md shadow-md text-slate-400 flex items-center justify-center transition-all transform active:scale-95 cursor-pointer outline-none select-none"
                   title="Increase / Next"
                 >
                   <FaCaretRight size={20} />
@@ -787,8 +834,13 @@ export const InGameConfigCard = () => {
                 <div></div>
                 <button
                   type="button"
-                  onClick={() => { move(1, 0); canvasRef.current?.focus(); }}
-                  className="w-9 h-10 bg-slate-800 hover:bg-slate-700 active:bg-emerald-600 active:text-white border-b border-x border-slate-600 rounded-b-md shadow-md text-slate-400 flex items-center justify-center transition-all transform active:scale-95 cursor-pointer outline-none"
+                  onMouseDown={() => startRepeat(1, 0)}
+                  onMouseUp={stopRepeat}
+                  onMouseLeave={stopRepeat}
+                  onTouchStart={(e) => { e.preventDefault(); startRepeat(1, 0); }}
+                  onTouchEnd={stopRepeat}
+                  onTouchCancel={stopRepeat}
+                  className="w-9 h-10 bg-slate-800 hover:bg-slate-700 active:bg-emerald-600 active:text-white border-b border-x border-slate-600 rounded-b-md shadow-md text-slate-400 flex items-center justify-center transition-all transform active:scale-95 cursor-pointer outline-none select-none"
                   title="Move Down"
                 >
                   <FaCaretDown size={20} />
