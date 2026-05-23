@@ -154,7 +154,7 @@
   background: linear-gradient(180deg, #8a6233 0%, #5c3d1d 100%); /* Deep burnished bronze active state */
   color: white; /* White text when active */
   font-weight: 700;
-  border: 1px solid #5c3d1d;
+  border: 1px solid #ffffff;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
@@ -221,7 +221,7 @@
   background: linear-gradient(180deg, #b91c1c 0%, #7f1d1d 100%);
   color: white;
   font-weight: 700;
-  border: 1px solid #7f1d1d;
+  border: 1px solid #ffffff;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
@@ -412,4 +412,28 @@
   .searchBar {
     display: none; /* Hide search on small screens to leave space for buttons */
   }
+}
+
+.tabItemsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex-grow: 1;
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
+  margin-right: 1rem;
+  position: relative;
+}
+
+.tabItemsContainer > * {
+  margin-right: 0 !important;
+}
+
+.tabItemsContainer > [aria-selected="true"],
+.tabItemsContainer > .profileTabActive {
+  border-right-color: transparent !important;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  margin-right: -1px !important;
+  position: relative;
+  z-index: 2;
 }

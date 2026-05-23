@@ -686,21 +686,23 @@ export const FlagCreatePage = ({
                   <div style={{ borderTop: "1px solid rgba(255, 255, 255, 0.15)", margin: "0.75rem 1rem 0.5rem 1rem" }} />
                 </>
               )}
-              {tabs.map((tab) => {
-                const isSideNavHidden = ["events", "sotw"].includes(tab.id);
-                const isHighlighted = matchesSearch(tab.id);
-                const isHidden = ["home", "profile"].includes(tab.id);
+              <div className={styles.tabItemsContainer}>
+                {tabs.map((tab) => {
+                  const isSideNavHidden = ["events", "sotw"].includes(tab.id);
+                  const isHighlighted = matchesSearch(tab.id);
+                  const isHidden = ["home", "profile"].includes(tab.id);
 
-                return (
-                  <Tab
-                    key={tab.id}
-                    className={`${isHidden ? "hidden" : tab.id === "admin" ? styles.adminBtn : tab.isAction ? styles.generateBtn : styles.tabItem} ${isHighlighted ? "bg-yellow-500/20 !text-yellow-400 border-l-4 border-yellow-400 font-bold" : ""} ${isSideNavHidden ? styles.mobileOnly : ""}`}
-                  >
-                    {tab.Icon && <tab.Icon size={22} />}
-                    <span>{tab.label}</span>
-                  </Tab>
-                );
-              })}
+                  return (
+                    <Tab
+                      key={tab.id}
+                      className={`${isHidden ? "hidden" : tab.id === "admin" ? styles.adminBtn : tab.isAction ? styles.generateBtn : styles.tabItem} ${isHighlighted ? "bg-yellow-500/20 !text-yellow-400 border-l-4 border-yellow-400 font-bold" : ""} ${isSideNavHidden ? styles.mobileOnly : ""}`}
+                    >
+                      {tab.Icon && <tab.Icon size={22} />}
+                      <span>{tab.label}</span>
+                    </Tab>
+                  );
+                })}
+              </div>
             </Tab.List>
 
             <div
