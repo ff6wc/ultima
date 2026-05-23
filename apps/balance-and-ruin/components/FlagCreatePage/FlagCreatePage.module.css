@@ -159,7 +159,7 @@
 }
 
 .discordLoginBtn {
-  margin: 0 1rem 1rem 1rem;
+  margin: 0 1rem;
   display: flex;
   align-items: center;
   justify-content: flex-start;
