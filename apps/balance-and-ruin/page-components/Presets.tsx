@@ -355,6 +355,21 @@ const CategorySection = ({
   const [sortField, setSortField] = useState<SortField>("name");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
 
+  useEffect(() => {
+    const key = `presets-category-open-${title.toLowerCase().replace(/\s+/g, "-")}`;
+    const saved = localStorage.getItem(key);
+    if (saved !== null) {
+      setOpen(saved === "true");
+    }
+  }, [title]);
+
+  const toggleOpen = () => {
+    const nextOpen = !open;
+    setOpen(nextOpen);
+    const key = `presets-category-open-${title.toLowerCase().replace(/\s+/g, "-")}`;
+    localStorage.setItem(key, String(nextOpen));
+  };
+
   const handleSortChange = useCallback((f: SortField, d: SortDir) => {
     setSortField(f);
     setSortDir(d);
@@ -386,7 +401,7 @@ const CategorySection = ({
     >
       {/* Header */}
       <button
-        onClick={() => setOpen(!open)}
+        onClick={toggleOpen}
         style={{
           width: "100%",
           display: "flex",
