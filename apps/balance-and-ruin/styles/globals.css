@@ -350,19 +350,24 @@ input:not([type="range"]):not([type="checkbox"]):not([type="radio"]), select, te
 
   /* Reduce padding on page containers to expand card width */
   .p-5 {
-    padding-left: 0.35rem !important;
-    padding-right: 0.35rem !important;
+    padding-left: 0.6rem !important;
+    padding-right: 0.6rem !important;
   }
 
   /* Compact Card padding & margins */
   .WC-Card {
-    padding: 0.5rem !important;
+    padding: 0px !important;
     border-radius: 8px !important;
+    overflow: hidden !important;
   }
 
   .WC-Card > div[class*="heading"] {
-    padding: 0.5rem 0.5rem !important;
-    margin-bottom: 0.5rem !important;
+    padding: 0.6rem 0.75rem !important;
+    margin-bottom: 0px !important;
+  }
+
+  .WC-Card > div[class*="content"] {
+    padding: 0.75rem 0.75rem !important;
   }
 
   /* Compress Select containers */
