@@ -638,7 +638,7 @@ export const FlagCreatePage = ({
             <Tab.List className={styles.tabList}>
               {!AUTH_ENABLED ? null : (
                 <>
-                  <div style={{ borderTop: "1px solid rgba(255, 255, 255, 0.55)", margin: "1.5rem 1rem 0.75rem 1rem" }} />
+                  <div style={{ borderTop: "1px solid rgba(255, 255, 255, 0.15)", margin: "1.5rem 1rem 0.75rem 1rem" }} />
                   {status === "loading" ? (
                     <div 
                       className={`${styles.tabItem} animate-pulse`} 
@@ -683,25 +683,24 @@ export const FlagCreatePage = ({
                       <span>Login</span>
                     </button>
                   )}
+                  <div style={{ borderTop: "1px solid rgba(255, 255, 255, 0.15)", margin: "0.75rem 1rem 0.5rem 1rem" }} />
                 </>
               )}
-              <div className={styles.tabItemsContainer}>
-                {tabs.map((tab) => {
-                  const isSideNavHidden = ["events", "sotw"].includes(tab.id);
-                  const isHighlighted = matchesSearch(tab.id);
-                  const isHidden = ["home", "profile"].includes(tab.id);
+              {tabs.map((tab) => {
+                const isSideNavHidden = ["events", "sotw"].includes(tab.id);
+                const isHighlighted = matchesSearch(tab.id);
+                const isHidden = ["home", "profile"].includes(tab.id);
 
-                  return (
-                    <Tab
-                      key={tab.id}
-                      className={`${isHidden ? "hidden" : tab.id === "admin" ? styles.adminBtn : tab.isAction ? styles.generateBtn : styles.tabItem} ${isHighlighted ? "bg-yellow-500/20 !text-yellow-400 border-l-4 border-yellow-400 font-bold" : ""} ${isSideNavHidden ? styles.mobileOnly : ""}`}
-                    >
-                      {tab.Icon && <tab.Icon size={22} />}
-                      <span>{tab.label}</span>
-                    </Tab>
-                  );
-                })}
-              </div>
+                return (
+                  <Tab
+                    key={tab.id}
+                    className={`${isHidden ? "hidden" : tab.id === "admin" ? styles.adminBtn : tab.isAction ? styles.generateBtn : styles.tabItem} ${isHighlighted ? "bg-yellow-500/20 !text-yellow-400 border-l-4 border-yellow-400 font-bold" : ""} ${isSideNavHidden ? styles.mobileOnly : ""}`}
+                  >
+                    {tab.Icon && <tab.Icon size={22} />}
+                    <span>{tab.label}</span>
+                  </Tab>
+                );
+              })}
             </Tab.List>
 
             <div
