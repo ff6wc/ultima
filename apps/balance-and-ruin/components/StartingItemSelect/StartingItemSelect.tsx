@@ -93,40 +93,42 @@ export const StartingItemSelect = ({
   };
 
   return (
-    <div className="flex flex-col gap-3 p-3 bg-blue-50/50 dark:bg-[#181d29] rounded-lg border border-blue-100 dark:border-[#38445e]/50 hover:border-blue-200 dark:hover:border-[#38445e]/80 transition-all shadow-md">
-      <div className="flex items-center gap-2 w-full">
-        <div className="flex-1">
-          <Select
-            options={selectOptions}
-            onChange={(val) => onSelectValueChange(val)}
-            value={getSelectedValueOption()}
-            isSearchable={true}
-            placeholder="Select starting item..."
-          />
-        </div>
-        {item.id !== -1 && (
-          <div className="flex items-center gap-1 shrink-0">
-            <Input
-              type="number"
-              className="w-14 text-center px-1"
-              min={1}
-              max={99}
-              value={item.min}
-              onChange={(e) => onMinInputChange(Number.parseInt(e.target.value))}
-            />
-            <Input
-              type="number"
-              className="w-14 text-center px-1"
-              min={1}
-              max={99}
-              value={item.max}
-              onChange={(e) => onMaxInputChange(Number.parseInt(e.target.value))}
+    <div className="flex flex-col gap-3 p-3 bg-blue-50/50 dark:bg-[#181d29] rounded-lg border border-blue-100 dark:border-[#38445e]/50 hover:border-blue-200 dark:hover:border-[#38445e]/80 transition-all shadow-md w-full min-w-0">
+      <div className="w-full overflow-x-auto pb-1 scrollbar-thin scrollbar-thumb-slate-700">
+        <div className="flex items-center gap-2 min-w-[380px] w-full">
+          <div className="flex-1 min-w-[180px]">
+            <Select
+              options={selectOptions}
+              onChange={(val) => onSelectValueChange(val)}
+              value={getSelectedValueOption()}
+              isSearchable={true}
+              placeholder="Select starting item..."
             />
           </div>
-        )}
-        {item.id === -1 && (
-          <StartingItemsRemoveItemButton items={items} item={item} />
-        )}
+          {item.id !== -1 && (
+            <div className="flex items-center gap-1 shrink-0">
+              <Input
+                type="number"
+                className="w-14 text-center px-1"
+                min={1}
+                max={99}
+                value={item.min}
+                onChange={(e) => onMinInputChange(Number.parseInt(e.target.value))}
+              />
+              <Input
+                type="number"
+                className="w-14 text-center px-1"
+                min={1}
+                max={99}
+                value={item.max}
+                onChange={(e) => onMaxInputChange(Number.parseInt(e.target.value))}
+              />
+            </div>
+          )}
+          {item.id === -1 && (
+            <StartingItemsRemoveItemButton items={items} item={item} />
+          )}
+        </div>
       </div>
 
       {item.id !== -1 && (

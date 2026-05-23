@@ -173,84 +173,88 @@ export const CharacterGraphicSelector = ({
   };
 
   return (
-    <div className="flex gap-8" key={id}>
-      <div className="flex flex-col gap-3 items-center min-w-[150px]">
-        {/* NAME INPUT */}
-        {Label}
-        {/* PORTRAIT + SPRITE */}
-        <div className="flex justify-evenly items-end w-full">
-          {portraitId !== null ? (
-            <PortraitDrawLoad portraitId={portraitValues[portraitId]} />
-          ) : null}
-          <span>
-            <SpriteDrawLoad
-              onClick={onSpriteClick}
-              paletteId={paletteValues[characterPaletteValues[id]]}
-              poseId={poseId}
-              spriteId={spriteValues[id]}
-              scale={3}
-            />
-          </span>
+    <div className="w-full overflow-x-auto pb-1 scrollbar-thin scrollbar-thumb-slate-700">
+      <div className="flex gap-8 items-center min-w-[480px]" key={id}>
+        <div className="flex flex-col gap-3 items-center min-w-[150px] shrink-0">
+          {/* NAME INPUT */}
+          <div className="w-full">
+            {Label}
+          </div>
+          {/* PORTRAIT + SPRITE */}
+          <div className="flex justify-evenly items-end w-full">
+            {portraitId !== null ? (
+              <PortraitDrawLoad portraitId={portraitValues[portraitId]} />
+            ) : null}
+            <span>
+              <SpriteDrawLoad
+                onClick={onSpriteClick}
+                paletteId={paletteValues[characterPaletteValues[id]]}
+                poseId={poseId}
+                spriteId={spriteValues[id]}
+                scale={3}
+              />
+            </span>
+          </div>
         </div>
-      </div>
-      {/* Selects */}
-      <div className="flex flex-col gap-3 flex-grow">
-        {/* PORTRAIT */}
-        {portraitId != null ? (
+        {/* Selects */}
+        <div className="flex flex-col gap-3 flex-grow min-w-[280px]">
+          {/* PORTRAIT */}
+          {portraitId != null ? (
+            <Select
+              options={portraitOptions}
+              nextOnArrowKeys
+              onChange={(val) => {
+                if (val) {
+                  const pors = [...portraitValues];
+                  pors.splice(portraitId, 1, Number.parseInt(val.value));
+                  dispatch(
+                    setFlag({
+                      flag: "-cpor",
+                      value: pors.join("."),
+                    }),
+                  );
+                }
+              }}
+              value={portraitsById[portraitValues[portraitId]]}
+            />
+          ) : null}
+          {/* SPRITE */}
           <Select
-            options={portraitOptions}
             nextOnArrowKeys
             onChange={(val) => {
               if (val) {
-                const pors = [...portraitValues];
-                pors.splice(portraitId, 1, Number.parseInt(val.value));
+                const sprs = [...spriteValues];
+                sprs.splice(id, 1, Number.parseInt(val.value));
                 dispatch(
                   setFlag({
-                    flag: "-cpor",
-                    value: pors.join("."),
+                    flag: "-cspr",
+                    value: sprs.join("."),
                   }),
                 );
               }
             }}
-            value={portraitsById[portraitValues[portraitId]]}
+            options={spriteOptions}
+            value={spritesById[spriteValues[id]]}
           />
-        ) : null}
-        {/* SPRITE */}
-        <Select
-          nextOnArrowKeys
-          onChange={(val) => {
-            if (val) {
-              const sprs = [...spriteValues];
-              sprs.splice(id, 1, Number.parseInt(val.value));
-              dispatch(
-                setFlag({
-                  flag: "-cspr",
-                  value: sprs.join("."),
-                }),
-              );
-            }
-          }}
-          options={spriteOptions}
-          value={spritesById[spriteValues[id]]}
-        />
-        {/* PALETTE */}
-        <Select
-          nextOnArrowKeys
-          options={paletteOptions}
-          onChange={(val) => {
-            if (val) {
-              const pals = [...characterPaletteValues];
-              pals.splice(id, 1, Number.parseInt(val.value));
-              dispatch(
-                setFlag({
-                  flag: "-cspp",
-                  value: pals.join("."),
-                }),
-              );
-            }
-          }}
-          value={palettesById[characterPaletteValues[id]]}
-        />
+          {/* PALETTE */}
+          <Select
+            nextOnArrowKeys
+            options={paletteOptions}
+            onChange={(val) => {
+              if (val) {
+                const pals = [...characterPaletteValues];
+                pals.splice(id, 1, Number.parseInt(val.value));
+                dispatch(
+                  setFlag({
+                    flag: "-cspp",
+                    value: pals.join("."),
+                  }),
+                );
+              }
+            }}
+            value={palettesById[characterPaletteValues[id]]}
+          />
+        </div>
       </div>
     </div>
   );
