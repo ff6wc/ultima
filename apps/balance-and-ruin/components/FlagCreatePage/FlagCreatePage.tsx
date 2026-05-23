@@ -399,9 +399,10 @@ export const FlagCreatePage = ({
   const [searchQuery, setSearchQuery] = useState("");
 
   const NAV_FLOW = useMemo(() => [
+    "home",
     "presets",
     "objectives",
-    "characters",
+    "party",
     "commands",
     "battle",
     "magic",
@@ -413,7 +414,8 @@ export const FlagCreatePage = ({
   ], []);
 
   const currentFlowIndex = NAV_FLOW.indexOf(activeTabId);
-  const isPreviousDisabled = currentFlowIndex <= 0;
+  // Disables the Previous button on both the Home page (index 0) and the Presets page (index 1) as requested.
+  const isPreviousDisabled = currentFlowIndex <= 1;
   const isNextDisabled = currentFlowIndex === -1 || activeTabId === "generate";
 
   const handlePrevious = () => {
