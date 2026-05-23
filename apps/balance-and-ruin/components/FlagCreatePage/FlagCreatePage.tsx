@@ -683,7 +683,7 @@ export const FlagCreatePage = ({
                       <span>Login</span>
                     </button>
                   )}
-                  <div style={{ borderTop: "1px solid rgba(255, 255, 255, 0.15)", margin: "0.75rem 1rem 0.5rem 1rem" }} />
+                  <div style={{ borderTop: "1px solid rgba(255, 255, 255, 0.15)", margin: "0.75rem 1rem 0.75rem 1rem" }} />
                 </>
               )}
               {tabs.map((tab) => {
