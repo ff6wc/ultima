@@ -544,7 +544,7 @@ export const InGameConfigCard = () => {
       intervalRef.current = setInterval(() => {
         move(dRow, dCol);
       }, 80);
-    }, 300);
+    }, 600);
   };
 
   const stopRepeat = () => {
