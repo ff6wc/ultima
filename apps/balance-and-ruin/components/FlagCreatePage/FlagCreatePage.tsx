@@ -638,7 +638,7 @@ export const FlagCreatePage = ({
             <Tab.List className={styles.tabList}>
               {!AUTH_ENABLED ? null : (
                 <>
-                  <div style={{ borderTop: "1px solid rgba(255, 255, 255, 0.15)", margin: "1.5rem 1rem 0.75rem 1rem" }} />
+                  <div style={{ borderTop: "1px solid rgba(255, 255, 255, 0.55)", margin: "1.5rem 1rem 0.75rem 1rem" }} />
                   {status === "loading" ? (
                     <div 
                       className={`${styles.tabItem} animate-pulse`} 
