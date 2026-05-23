@@ -405,6 +405,52 @@ export const FlagCreatePage = ({
     }
   }, [selectedIndex]);
 
+  // Swipe to open/close mobile sidebar drawer
+  useEffect(() => {
+    let touchStartX = 0;
+    let touchStartY = 0;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      const touch = e.changedTouches[0];
+      touchStartX = touch.clientX;
+      touchStartY = touch.clientY;
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      const touch = e.changedTouches[0];
+      const touchEndX = touch.clientX;
+      const touchEndY = touch.clientY;
+
+      const diffX = touchEndX - touchStartX;
+      const diffY = touchEndY - touchStartY;
+
+      // Ensure horizontal swipe is dominant and above threshold
+      const SWIPE_THRESHOLD = 60;
+      if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > SWIPE_THRESHOLD) {
+        if (diffX > 0) {
+          // Swipe Right (Left-to-Right) -> Open sidebar
+          // Only trigger if started near the left edge of the screen to prevent conflict with other page elements
+          if (touchStartX <= 50 && !sidebarOpen) {
+            setSidebarOpen(true);
+          }
+        } else {
+          // Swipe Left (Right-to-Left) -> Close sidebar
+          if (sidebarOpen) {
+            setSidebarOpen(false);
+          }
+        }
+      }
+    };
+
+    window.addEventListener("touchstart", handleTouchStart, { passive: true });
+    window.addEventListener("touchend", handleTouchEnd, { passive: true });
+
+    return () => {
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, [sidebarOpen]);
+
   const dispatch = useDispatch();
   const showFlags = useSelector(selectShowFlags);
 
