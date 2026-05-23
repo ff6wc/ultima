@@ -348,6 +348,12 @@ input:not([type="range"]):not([type="checkbox"]):not([type="radio"]), select, te
     font-size: 14px !important; /* Reduces typography globally by ~12.5% */
   }
 
+  /* Reduce padding on page containers to expand card width */
+  .p-5 {
+    padding-left: 0.25rem !important;
+    padding-right: 0.25rem !important;
+  }
+
   /* Compact Card padding & margins */
   .WC-Card {
     padding: 0.85rem !important;
