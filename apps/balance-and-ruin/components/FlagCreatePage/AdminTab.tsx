@@ -40,7 +40,7 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
   
   // UI states
   const [adminSearch, setAdminSearch] = useState("");
-  const [adminSortField, setAdminSortField] = useState<"name" | "author" | "created_at">("name");
+  const [adminSortField, setAdminSortField] = useState<"name" | "author" | "created_at" | "downloads">("name");
   const [adminSortDir, setAdminSortDir] = useState<"asc" | "desc">("asc");
   const [selectedIds, setSelectedIds] = useState<Record<string, boolean>>({});
   
@@ -206,6 +206,10 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
         cmp = (a.creator_name || "").localeCompare(b.creator_name || "");
       } else if (adminSortField === "created_at") {
         cmp = new Date(a.created_timestamp || 0).getTime() - new Date(b.created_timestamp || 0).getTime();
+      } else if (adminSortField === "downloads") {
+        const aCount = a.downloads ?? a.download_count ?? a.dbRecord?.downloads ?? a.dbRecord?.download_count ?? 0;
+        const bCount = b.downloads ?? b.download_count ?? b.dbRecord?.downloads ?? b.dbRecord?.download_count ?? 0;
+        cmp = aCount - bCount;
       }
       return adminSortDir === "asc" ? cmp : -cmp;
     });
@@ -579,15 +583,25 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem", marginBottom: "1.5rem" }}>
             <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "0.5rem" }}>
               <span className="text-slate-500 dark:text-slate-400" style={{ fontSize: "0.75rem", fontWeight: "bold", textTransform: "uppercase" }}>Sort:</span>
-              {(["name", "author", "created_at"] as const).map((f) => {
+              {(["name", "author", "downloads", "created_at"] as const).map((f) => {
                 const active = adminSortField === f;
-                const label = f === "name" ? "Name" : f === "author" ? "Author" : "Creation Date";
+                const label = 
+                  f === "name" 
+                    ? "Name" 
+                    : f === "author" 
+                      ? "Author" 
+                      : f === "downloads" 
+                        ? "Downloads" 
+                        : "Creation Date";
                 return (
                   <button
                     key={f}
                     onClick={() => {
+                      const nextDir = active 
+                        ? (adminSortDir === "asc" ? "desc" : "asc")
+                        : (f === "downloads" ? "desc" : "asc");
                       setAdminSortField(f);
-                      setAdminSortDir(active && adminSortDir === "asc" ? "desc" : "asc");
+                      setAdminSortDir(nextDir);
                     }}
                     style={{
                       padding: "0.25rem 0.6rem",
