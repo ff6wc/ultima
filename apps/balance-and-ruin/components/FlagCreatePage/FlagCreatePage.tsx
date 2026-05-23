@@ -442,8 +442,8 @@ export const FlagCreatePage = ({
       if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > SWIPE_THRESHOLD) {
         if (diffX > 0) {
           // Swipe Right (Left-to-Right) -> Open sidebar
-          // Trigger within a comfortable 160px of the left edge of the screen
-          if (touchStartX > 0 && touchStartX <= 160 && !sidebarOpen) {
+          // Trigger starting from anywhere in the left half of the screen (up to the center)
+          if (touchStartX > 0 && touchStartX <= window.innerWidth / 2 && !sidebarOpen) {
             setSidebarOpen(true);
           }
         } else {
