@@ -947,7 +947,10 @@ export const FlagCreatePage = ({
             </div>
 
             {/* Mobile Bottom Navigation Bar */}
-            <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden flex justify-between items-center p-3.5 bg-slate-900/90 dark:bg-slate-950/90 backdrop-blur-md border-t border-white/10 shadow-[0_-4px_20px_rgba(0,0,0,0.4)]">
+            <div 
+              className="fixed bottom-0 left-0 right-0 z-40 lg:hidden flex justify-between items-center p-3.5 bg-slate-900/90 dark:bg-slate-950/90 backdrop-blur-md border-t border-white/10 shadow-[0_-4px_20px_rgba(0,0,0,0.4)]"
+              style={{ paddingBottom: "calc(0.875rem + env(safe-area-inset-bottom, 0px))" }}
+            >
               <button
                 type="button"
                 onClick={handlePrevious}
