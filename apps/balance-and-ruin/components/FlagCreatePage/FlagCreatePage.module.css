@@ -404,7 +404,7 @@
   }
   
   .pageContainer {
-    padding: 1rem 0.5rem; /* Standard minimal mobile layout spacing */
+    padding: 1rem 0.5rem 6.5rem 0.5rem; /* Standard minimal mobile layout spacing + bottom padding for navigation bar */
   }
 }
 

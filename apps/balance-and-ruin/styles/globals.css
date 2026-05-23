@@ -341,3 +341,65 @@ input:not([type="range"]):not([type="checkbox"]):not([type="radio"]), select, te
     @apply text-lg;
   }
 }
+
+/* Mobile high-density layout compression ("higher resolution") */
+@media (max-width: 640px) {
+  :root, html {
+    font-size: 14px !important; /* Reduces typography globally by ~12.5% */
+  }
+
+  /* Compact Card padding & margins */
+  .WC-Card {
+    padding: 0.85rem !important;
+    border-radius: 8px !important;
+  }
+
+  .WC-Card > div[class*="heading"] {
+    padding: 0.5rem 0.85rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  /* Compress Select containers */
+  .ff6wc-select-container .ff6wc-select__control {
+    min-height: 36px !important;
+    border-radius: 8px !important;
+  }
+
+  .ff6wc-select-container .ff6wc-select__value-container {
+    padding-left: 10px !important;
+  }
+
+  .ff6wc-select-container .ff6wc-select__single-value,
+  .ff6wc-select-container .ff6wc-select__placeholder {
+    font-size: 0.825rem !apply text-xs !important;
+  }
+
+  /* Compact ranges and sliders */
+  .ff6-slider.rc-slider {
+    height: 32px !important;
+  }
+
+  .ff6-slider .rc-slider-mark {
+    top: 22px !important;
+  }
+
+  .ff6-slider .rc-slider-mark-text {
+    font-size: 0.75rem !important;
+  }
+
+  .ff6-slider .rc-slider-dot {
+    top: 14px !important;
+  }
+
+  .ff6-slider .rc-slider-handle {
+    width: 16px !important;
+    height: 16px !important;
+    top: 2px !important;
+  }
+
+  .ff6-slider .rc-slider-rail,
+  .ff6-slider .rc-slider-step,
+  .ff6-slider .rc-slider-track {
+    height: 8px !important;
+  }
+}

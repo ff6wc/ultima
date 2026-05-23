@@ -41,6 +41,8 @@ import {
   FaBars,
   FaTimes,
   FaShieldAlt,
+  FaChevronLeft,
+  FaChevronRight,
 } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { selectShowFlags, setShowFlags } from "~/state/settingsSlice";
@@ -395,6 +397,43 @@ export const FlagCreatePage = ({
   const activeTabId = tabs[selectedIndex]?.id;
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+
+  const NAV_FLOW = useMemo(() => [
+    "presets",
+    "objectives",
+    "characters",
+    "commands",
+    "battle",
+    "magic",
+    "items",
+    "misc",
+    "Graphics",
+    "settings",
+    "generate"
+  ], []);
+
+  const currentFlowIndex = NAV_FLOW.indexOf(activeTabId);
+  const isPreviousDisabled = currentFlowIndex <= 0;
+  const isNextDisabled = currentFlowIndex === -1 || activeTabId === "generate";
+
+  const handlePrevious = () => {
+    if (isPreviousDisabled) return;
+    const prevTabId = NAV_FLOW[currentFlowIndex - 1];
+    const idx = tabs.findIndex((t) => t.id === prevTabId);
+    if (idx !== -1) setSelectedIndex(idx);
+  };
+
+  const handleNext = () => {
+    if (isNextDisabled) return;
+    const nextTabId = NAV_FLOW[currentFlowIndex + 1];
+    const idx = tabs.findIndex((t) => t.id === nextTabId);
+    if (idx !== -1) setSelectedIndex(idx);
+  };
+
+  const handleGenerate = () => {
+    const idx = tabs.findIndex((t) => t.id === "generate");
+    if (idx !== -1) setSelectedIndex(idx);
+  };
 
   const mainContentRef = useRef<HTMLElement>(null);
 
@@ -903,6 +942,49 @@ export const FlagCreatePage = ({
                   <Tab.Panel key={`tab-panel-${id}`}>{content}</Tab.Panel>
                 ))}
               </Tab.Panels>
+            </div>
+
+            {/* Mobile Bottom Navigation Bar */}
+            <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden flex justify-between items-center p-3.5 bg-slate-900/90 dark:bg-slate-950/90 backdrop-blur-md border-t border-white/10 shadow-[0_-4px_20px_rgba(0,0,0,0.4)]">
+              <button
+                type="button"
+                onClick={handlePrevious}
+                disabled={isPreviousDisabled}
+                className={`flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 border select-none cursor-pointer ${
+                  isPreviousDisabled
+                    ? "bg-slate-800/40 border-slate-700/30 text-slate-500 cursor-not-allowed opacity-50"
+                    : "bg-slate-800 hover:bg-slate-700 border-slate-700 active:scale-95 text-slate-100 hover:text-white"
+                }`}
+              >
+                <FaChevronLeft size={12} />
+                <span>Previous</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleGenerate}
+                className="flex items-center gap-1.5 px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 border border-[#734c22] select-none cursor-pointer text-white active:scale-95 shadow-[0_2px_10px_rgba(138,98,51,0.2)]"
+                style={{
+                  background: "linear-gradient(180deg, #c09963 0%, #8a6233 100%)",
+                }}
+              >
+                <FaBolt size={12} className="text-yellow-200" />
+                <span>Generate</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleNext}
+                disabled={isNextDisabled}
+                className={`flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 border select-none cursor-pointer ${
+                  isNextDisabled
+                    ? "bg-slate-800/40 border-slate-700/30 text-slate-500 cursor-not-allowed opacity-50"
+                    : "bg-slate-800 hover:bg-slate-700 border-slate-700 active:scale-95 text-slate-100 hover:text-white"
+                }`}
+              >
+                <span>Next</span>
+                <FaChevronRight size={12} />
+              </button>
             </div>
           </main>
         </Tab.Group>
