@@ -536,13 +536,8 @@ export const InGameConfigCard = () => {
     });
   }, [setState]);
 
-  const handleSliderClick = (
-    e: React.MouseEvent<HTMLButtonElement>,
-    rowIdx: number,
-    channel: 0 | 1 | 2
-  ) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const relativeClick = (e.clientX - rect.left) / rect.width;
+  const updateSliderValue = (clientX: number, rect: DOMRect, rowIdx: number, channel: 0 | 1 | 2) => {
+    const relativeClick = (clientX - rect.left) / rect.width;
     const xCanvas = (SLIDER_BAR_X0 - 4) + relativeClick * (SLIDER_BAR_W31 + 8);
     const t = (xCanvas - SLIDER_BAR_X0) / SLIDER_BAR_W31;
     const v = Math.round(Math.max(0, Math.min(1, t)) * 31);
@@ -551,7 +546,60 @@ export const InGameConfigCard = () => {
       rgb[channel] = v;
       return { ...writeEditedRgb(s, rgb), cursor: rowIdx };
     });
+  };
+
+  const handleSliderMouseDown = (
+    e: React.MouseEvent<HTMLButtonElement>,
+    rowIdx: number,
+    channel: 0 | 1 | 2
+  ) => {
+    if (e.button !== 0) return; // only left click
+    e.preventDefault();
+    const button = e.currentTarget;
+    const rect = button.getBoundingClientRect();
+
+    updateSliderValue(e.clientX, rect, rowIdx, channel);
     canvasRef.current?.focus();
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      updateSliderValue(moveEvent.clientX, rect, rowIdx, channel);
+    };
+
+    const handleMouseUp = () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+  };
+
+  const handleSliderTouchStart = (
+    e: React.TouchEvent<HTMLButtonElement>,
+    rowIdx: number,
+    channel: 0 | 1 | 2
+  ) => {
+    e.preventDefault();
+    const button = e.currentTarget;
+    const rect = button.getBoundingClientRect();
+    const touch = e.touches[0];
+
+    updateSliderValue(touch.clientX, rect, rowIdx, channel);
+    canvasRef.current?.focus();
+
+    const handleTouchMove = (moveEvent: TouchEvent) => {
+      if (moveEvent.touches.length > 0) {
+        updateSliderValue(moveEvent.touches[0].clientX, rect, rowIdx, channel);
+      }
+    };
+
+    const handleTouchEnd = () => {
+      window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("touchend", handleTouchEnd);
+    };
+
+    window.addEventListener("touchmove", handleTouchMove, { passive: true });
+    window.addEventListener("touchend", handleTouchEnd);
   };
 
   const handleHitClick = (rowIdx: number, val: string | number) => {
@@ -637,8 +685,9 @@ export const InGameConfigCard = () => {
                     <button
                       key={`slider-${rIdx}`}
                       type="button"
-                      onClick={(e) => handleSliderClick(e, rIdx, row.channel)}
-                      title={`${row.key}: click to set`}
+                      onMouseDown={(e) => handleSliderMouseDown(e, rIdx, row.channel)}
+                      onTouchStart={(e) => handleSliderTouchStart(e, rIdx, row.channel)}
+                      title={`${row.key}: click and drag to set`}
                       className="absolute pointer-events-auto cursor-pointer hover:outline hover:outline-1 hover:outline-dashed hover:outline-white/40"
                       style={{
                         left: `${((SLIDER_BAR_X0 - 4) / 256) * 100}%`,
