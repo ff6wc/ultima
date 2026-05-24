@@ -5,6 +5,10 @@
 @tailwind components;
 @tailwind utilities;
 
+* {
+  -webkit-tap-highlight-color: transparent !important;
+}
+
 html,
 body,
 body > div:first-child,
@@ -358,12 +362,12 @@ input:not([type="range"]):not([type="checkbox"]):not([type="radio"]), select, te
   .WC-Card {
     padding: 0px !important;
     border-radius: 8px !important;
-    overflow: hidden !important;
   }
 
   .WC-Card > div[class*="heading"] {
     padding: 0.6rem 0.75rem !important;
     margin-bottom: 0px !important;
+    border-radius: 8px 8px 0 0 !important;
   }
 
   .WC-Card > div[class*="content"] {
