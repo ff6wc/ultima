@@ -454,6 +454,11 @@ export const FlagCreatePage = ({
     const drawerWidth = 260; // matching CSS width
 
     const handleTouchStart = (e: TouchEvent) => {
+      // ALWAYS reset state first to guarantee no stuck gestures!
+      touchStartX = 0;
+      touchStartY = 0;
+      activeDrag = false;
+
       const target = e.target as HTMLElement;
       // Skip swipe gesture if touching interactive controls to prevent conflict
       if (
@@ -470,7 +475,6 @@ export const FlagCreatePage = ({
       const touch = e.changedTouches[0];
       touchStartX = touch.clientX;
       touchStartY = touch.clientY;
-      activeDrag = false;
     };
 
     const handleTouchMove = (e: TouchEvent) => {
@@ -565,11 +569,13 @@ export const FlagCreatePage = ({
     window.addEventListener("touchstart", handleTouchStart, { passive: true });
     window.addEventListener("touchmove", handleTouchMove, { passive: false });
     window.addEventListener("touchend", handleTouchEnd, { passive: true });
+    window.addEventListener("touchcancel", handleTouchEnd, { passive: true });
 
     return () => {
       window.removeEventListener("touchstart", handleTouchStart);
       window.removeEventListener("touchmove", handleTouchMove);
       window.removeEventListener("touchend", handleTouchEnd);
+      window.removeEventListener("touchcancel", handleTouchEnd);
     };
   }, [sidebarOpen]);
 
