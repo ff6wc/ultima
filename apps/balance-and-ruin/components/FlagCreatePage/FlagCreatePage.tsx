@@ -460,18 +460,26 @@ export const FlagCreatePage = ({
       activeDrag = false;
 
       const target = e.target as HTMLElement;
-      // Skip swipe gesture if touching interactive controls to prevent conflict
-      if (
-        target.closest("input") ||
-        target.closest("button") ||
-        target.closest("select") ||
-        target.closest("a") ||
-        target.closest('[role="slider"]') ||
-        target.closest('[class*="Slider"]') ||
-        target.closest('[class*="slider"]')
-      ) {
-        return;
+      try {
+        const element = target.nodeType === Node.TEXT_NODE ? target.parentElement : target;
+        if (element && typeof element.closest === "function") {
+          // Skip swipe gesture if touching interactive controls to prevent conflict
+          if (
+            element.closest("input") ||
+            element.closest("button") ||
+            element.closest("select") ||
+            element.closest("a") ||
+            element.closest('[role="slider"]') ||
+            element.closest('[class*="Slider"]') ||
+            element.closest('[class*="slider"]')
+          ) {
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn("Touchstart closest check ignored:", err);
       }
+
       const touch = e.changedTouches[0];
       touchStartX = touch.clientX;
       touchStartY = touch.clientY;
@@ -487,7 +495,7 @@ export const FlagCreatePage = ({
       // Determine active drag if horizontal movement is dominant
       if (!activeDrag) {
         if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 10) {
-          if (!sidebarOpen && touchStartX < 60 && diffX > 0) {
+          if (!sidebarOpen && diffX > 0) {
             activeDrag = true;
           } else if (sidebarOpen && diffX < 0) {
             activeDrag = true;
