@@ -8,8 +8,6 @@ import { MdClear, MdFileUpload } from "react-icons/md";
 import useSWRMutation from "swr/mutation";
 import { BadgeText } from "~/components/BadgeText/BadgeText";
 import { ROM_FILE_EXTENSIONS } from "~/constants/romConstants";
-import { base64ToByteArray } from "~/utils/base64ToByteArray";
-import { XDelta3Decoder } from "~/utils/xdelta3_decoder";
 
 export type GenerateJohnnydmadProps = {
   className?: string;
@@ -40,8 +38,11 @@ export const GenerateJohnnydmadCard = ({
   const { error, trigger, isMutating } = useSWRMutation(
     ["/api/music/generate", romData],
     async (key, { arg }) => {
-      const result = await fetch("/api/music/generate", {
-        headers: {},
+      const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+      const result = await fetch(`${BACKEND_URL}/api/music/generate`, {
+        headers: {
+          "Content-Type": "application/json",
+        },
         method: "POST",
         body: JSON.stringify({
           key: "ff6wc",
@@ -55,7 +56,7 @@ export const GenerateJohnnydmadCard = ({
 
       const data = await result.json();
       return data as GenerateResponse;
-    }
+    },
   );
   const generate = async () => {
     if (isMutating || !romData || !jsz || !romName) {
@@ -69,10 +70,18 @@ export const GenerateJohnnydmadCard = ({
 
     const { filename, patch, seed_id, log: spoiler_log } = generateResult;
 
+    const [{ XDelta3Decoder }, { base64ToByteArray }, { applyInGameConfig }] = await Promise.all([
+      import("~/utils/xdelta3_decoder"),
+      import("~/utils/base64ToByteArray"),
+      import("~/utils/romUtils"),
+    ]);
+
     const patched = XDelta3Decoder.decode(
       base64ToByteArray(patch),
-      base64ToByteArray(romData)
+      base64ToByteArray(romData),
     );
+
+    applyInGameConfig(patched);
 
     jsz.file(romName, patched, { binary: true });
     jsz.file(`${filename}.txt`, spoiler_log);
@@ -114,12 +123,12 @@ export const GenerateJohnnydmadCard = ({
         const zip = await jszip.loadAsync(zip_data);
 
         const rom = Object.values(zip.files).find(({ name }) =>
-          ROM_FILE_EXTENSIONS.some((ext) => name.endsWith(ext))
+          ROM_FILE_EXTENSIONS.some((ext) => name.endsWith(ext)),
         );
 
         if (!rom) {
           setZipSelectError(
-            "Invalid file - No file ending in .smc or .sfc was found in the zip"
+            "Invalid file - No file ending in .smc or .sfc was found in the zip",
           );
           return;
         }
@@ -127,7 +136,7 @@ export const GenerateJohnnydmadCard = ({
         const data = await rom.async("base64");
 
         const others = Object.values(zip.files).filter(
-          ({ name }) => name !== rom?.name
+          ({ name }) => name !== rom?.name,
         );
 
         try {

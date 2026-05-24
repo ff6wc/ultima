@@ -16,19 +16,34 @@ export interface StartingItemsState {
     items: StartingItems;
 }
 
+const prefilledItems = itemsMetadata.itemsMetadata.reduce( (acc, val) => {
+    acc[val.id] = val;
+    return acc;
+}, {} as Record<number, RawStartingItem>);
+
 // Initial state
 const initialState: StartingItemsState = {
-    metadata: {
-        itemsMetadata: [],
-    },
+    metadata: itemsMetadata,
     metadataById: {
-        items: {},
+        items: prefilledItems,
     },
     items: {
         items:[
             {
                 id: 222,
                 name: "Moogle Charm",
+                min: 3,
+                max: 3
+            },
+            {
+                id: 240,
+                name: "Fenix Down",
+                min: 3,
+                max: 3
+            },
+            {
+                id: 253,
+                name: "Warp Stone",
                 min: 3,
                 max: 3
             }
@@ -110,7 +125,26 @@ export const itemSlice = createSlice({
             if (items && items.length > 0 && items[0]) {
                 state.items.items = items[0].items;
             } else {
-                state.items.items = []
+                state.items.items = [
+                    {
+                        id: 222,
+                        name: "Moogle Charm",
+                        min: 3,
+                        max: 3
+                    },
+                    {
+                        id: 240,
+                        name: "Fenix Down",
+                        min: 3,
+                        max: 3
+                    },
+                    {
+                        id: 253,
+                        name: "Warp Stone",
+                        min: 3,
+                        max: 3
+                    }
+                ];
             }
         },
     },
@@ -119,7 +153,7 @@ export const itemSlice = createSlice({
         [HYDRATE]: (state, action) => {
             return {
                 ...state,
-                ...action.payload.items,
+                ...action.payload.item,
             };
         },
     },

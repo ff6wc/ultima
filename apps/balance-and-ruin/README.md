@@ -34,7 +34,6 @@ pnpm vercel
 
 **NOTE:** The first time running `pnpm vercel` it will want to connect to your repo/project - Sign in using github and connect to the project you created earlier
 
-
 ### Generate static (doesn't require vercel account)
 
 ```
@@ -61,7 +60,7 @@ The Events page fetches data from a Google Sheet published as a CSV.
 
 1. Create a Google Sheet with the following headers in the first row:
    `id`, `title`, `status`, `date`, `shortDescription`, `description`, `rules`, `signupLink`, `discordLink`, `image`
-2. Populate the sheet with event data. 
+2. Populate the sheet with event data.
    - **Status**: Must be one of `Upcoming`, `Current`, or `Archived`.
    - **Rules**: Use `Alt + Enter` within a cell to add multiple rules on separate lines.
 3. Publish the sheet to the web:

@@ -5,7 +5,8 @@ import { flagSlice } from "./flagSlice";
 import { schemaSlice } from "~/state/schemaSlice";
 import { settingsSlice } from "~/state/settingsSlice";
 import { objectiveSlice } from "~/state/objectiveSlice";
-import { itemSlice } from "~/state/itemSlice";
+import { presetSlice } from "~/state/presetSlice";
+import { itemSlice } from "./itemSlice";
 
 export const makeStore = () =>
   configureStore({
@@ -15,6 +16,7 @@ export const makeStore = () =>
       [objectiveSlice.name]: objectiveSlice.reducer,
       [schemaSlice.name]: schemaSlice.reducer,
       [settingsSlice.name]: settingsSlice.reducer,
+      [presetSlice.name]: presetSlice.reducer,
       [itemSlice.name]: itemSlice.reducer,
     },
     devTools: true,

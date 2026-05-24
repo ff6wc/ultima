@@ -3,7 +3,6 @@ import startCase from "lodash/startCase";
 import { useId, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FlagLabel } from "~/components/FlagLabel/FlagLabel";
-import { FlagSelectOption } from "~/components/FlagSelectOption/FlagSelectOption";
 import { Select, SelectOption } from "~/components/Select/Select";
 import { setFlag, useFlagValueSelector } from "~/state/flagSlice";
 import {
@@ -15,7 +14,7 @@ import { renderDescription } from "~/utils/renderDescription";
 
 export type BaseFlagSelectOption = {
   label: string;
-  helperText?: React.ReactNode;
+  helperText?: React.ReactNode | ((value: any) => React.ReactNode);
   defaultValue?: FlagValue;
 };
 
@@ -61,7 +60,7 @@ export const FlagSelect = ({
               value: val,
               label: startCase(val as string),
               isDisabled: false,
-            } as FlagSelectOption)
+            }) as FlagSelectOption,
         ) || [];
 
     if (nullable) {
@@ -83,7 +82,7 @@ export const FlagSelect = ({
         setFlag({
           flag,
           value: null,
-        })
+        }),
       );
       return;
     }
@@ -92,27 +91,21 @@ export const FlagSelect = ({
       setFlag({
         flag,
         value: option?.value ?? null,
-      })
+      }),
     );
   };
 
   const selectedOption = value ?? defaultValue;
-  let valueDescription: React.ReactNode;
-  if (typeof selectedOption?.helperText === "function") {
-    // valueDescription = selectedOption.helperText(selectedOption.value);
-  } else {
-    valueDescription = renderDescription(
-      selectedOption?.helperText,
-      selectedOption?.value ?? null
-    );
-  }
+  const valueDescription = renderDescription(
+    selectedOption?.helperText,
+    selectedOption?.value ?? null,
+  );
 
   return (
     <div className="flex flex-col gap-1">
       <FlagLabel flag={flag} helperText={description} label={label} />
 
       <Select
-        components={{ Option: FlagSelectOption }}
         options={options}
         onChange={onChange}
         value={value ?? (defaultValue as FlagSelectOption)}

@@ -1,167 +1,220 @@
-import { ButtonLink, DiscordButton, Header } from "@ff6wc/ui";
-import { openSans } from "~/pages/_app";
-import { cva, cx } from "cva";
-import type { GetStaticPropsContext, NextPage } from "next";
-import { HiPencil, HiFlag } from "react-icons/hi";
-import { WIKI_URL } from "@ff6wc/utils/constants";
-import { AppLandingGridItem } from "~/components/AppLandingGridItem/AppLandingGridItem";
-import { AppLandingSection } from "~/components/AppLandingSection/AppLandingSection";
-import { HomeFooter } from "~/components/Footer/Footer";
-import { SotwButton } from "~/components/SotwButton/SotwButton";
-import { EventsButton } from "~/components/EventsButton/EventsButton";
-import { CreateButton } from "~/components/CreateButton/CreateButton";
-import { SpriteDrawAnimation } from "~/components/SpriteDrawAnimation/SpriteDrawAnimation";
-import { AppHeader } from "~/components/AppHeader/AppHeader";
-import Head from "next/head";
+import type { NextPage } from "next";
+import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import dynamic from "next/dynamic";
 
-export async function getStaticProps(context: GetStaticPropsContext) {
-  return {
-    props: {},
-  };
-}
+const FlagCreatePage = dynamic<any>(
+  () => import("../components/FlagCreatePage/FlagCreatePage").then((mod) => mod.FlagCreatePage),
+  { ssr: false }
+);
+import { setRawFlags } from "~/state/flagSlice";
+import { setObjectiveMetadata, setRawObjectives } from "~/state/objectiveSlice";
+import { setRawStartingItems, initItemMetadata } from "~/state/itemSlice";
+import { RawFlagMetadata, setSchema } from "~/state/schemaSlice";
+import { ObjectiveMetadata } from "~/types/objectives";
+import { FlagPreset } from "~/types/preset";
+import { fetchWithTimeout } from "~/utils/fetchWithTimeout";
+import { normalizePresets } from "~/utils/presets";
+import fallbackFlag from "~/public/metadata-fallback/flag.json";
+import fallbackObjective from "~/public/metadata-fallback/objective.json";
+import fallbackWc from "~/public/metadata-fallback/wc.json";
+import fallbackPresets from "~/public/metadata-fallback/presets.json";
 
-const button = cva(["w-fit max-w-[500px] min-h-[70px] inline-flex"]);
 
-export default function NewLandingPage() {
-  return (
-    <>
-      <Head>
-        <title>FF6 Worlds Collide</title>
-        <meta
-          name="description"
-          content="Final Fantasy VI open-world randomizer"
-        />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      <div className="flex flex-col min-h-screen bg-slate-950 text-white relative">
-        <Header className="pb-16 pt-8 border-b border-white/10 shadow-2xl">
-          <div className={cx(openSans.className, "max-w-4xl mx-auto text-center flex flex-col items-center px-8 mt-4")}>
-            <div className="flex flex-col gap-6 text-lg lg:text-xl text-slate-100 max-w-3xl mx-auto font-medium" style={{ textShadow: "1px 1px 3px rgba(0,0,0,0.8)" }}>
-              <p>
-                Worlds Collide (WC) is an open-world randomizer for Final Fantasy VI on the SNES. Players begin aboard the airship and can travel freely between the World of Balance and the World of Ruin to discover characters and espers. Once you&apos;ve gathered enough, you can face off against Kefka.
-              </p>
-              <p>
-                Options within WC include options to randomize characters, commands, espers, treasure, shops and more with over 200 flags to customize each playthrough.
-              </p>
+const HomeLandingPage = () => {
+  const dispatch = useDispatch();
+  const [isMounted, setIsMounted] = useState(false);
+  const [objectives, setObjectives] = useState<ObjectiveMetadata>(fallbackObjective as any);
+  const [presets, setPresets] = useState<Record<string, FlagPreset>>(normalizePresets(fallbackPresets));
+  const [schema, setSchemaLocal] = useState<Record<string, RawFlagMetadata>>(fallbackFlag as any);
+  const [version, setVersion] = useState<string>((fallbackWc as any).version || "1.4.3d");
+
+  useEffect(() => {
+    setIsMounted(true);
+    dispatch(initItemMetadata());
+    // 1. Try to load initial values from localStorage cache for instant load
+    try {
+      const cachedObjectives = localStorage.getItem("cached_objectives");
+      const cachedPresets = localStorage.getItem("cached_presets");
+      const cachedSchema = localStorage.getItem("cached_schema");
+      const cachedVersion = localStorage.getItem("cached_version");
+
+      if (cachedObjectives) {
+        const parsed = JSON.parse(cachedObjectives);
+        if (parsed && typeof parsed === "object") {
+          setObjectives(parsed);
+          dispatch(setObjectiveMetadata(parsed));
+        }
+      }
+      if (cachedPresets) {
+        const parsed = JSON.parse(cachedPresets);
+        if (parsed && typeof parsed === "object") {
+          const normalized = normalizePresets(parsed);
+          if (normalized && Object.keys(normalized).length > 0) {
+            setPresets(normalized);
+            const preset = normalized["ultros league"];
+            if (preset) {
+              dispatch(setRawFlags(preset.flags));
+              dispatch(setRawObjectives(preset.flags));
+              dispatch(setRawStartingItems(preset.flags));
+            }
+          }
+        }
+      }
+      if (cachedSchema) {
+        const parsed = JSON.parse(cachedSchema);
+        if (parsed && typeof parsed === "object") {
+          setSchemaLocal(parsed);
+          dispatch(setSchema(parsed));
+        }
+      }
+      if (cachedVersion) {
+        const parsed = JSON.parse(cachedVersion);
+        if (parsed && typeof parsed === "string") {
+          setVersion(parsed);
+        }
+      }
+    } catch (e) {
+      console.warn("Failed to parse cached metadata:", e);
+    }
+
+    // 2. Fetch fresh data in the background (Stale-While-Revalidate)
+    fetchWithTimeout(`${process.env.NEXT_PUBLIC_API_URL}/presets`, {}, 2500)
+      .then((res) => res.json())
+      .then((data) => {
+        const normalized = normalizePresets(data);
+        setPresets(normalized);
+        localStorage.setItem("cached_presets", JSON.stringify(normalized));
+        const preset = normalized["ultros league"];
+        if (preset) {
+          dispatch(setRawFlags(preset.flags));
+          dispatch(setRawObjectives(preset.flags));
+          dispatch(setRawStartingItems(preset.flags));
+        }
+      })
+      .catch((err) => {
+        console.warn("Failed to fetch presets from API, trying fallback fetch:", err);
+        fetch("/metadata-fallback/presets.json")
+          .then((res) => res.json())
+          .then((data) => {
+            const normalized = normalizePresets(data);
+            setPresets(normalized);
+            localStorage.setItem("cached_presets", JSON.stringify(normalized));
+            const preset = normalized["ultros league"];
+            if (preset) {
+              dispatch(setRawFlags(preset.flags));
+              dispatch(setRawObjectives(preset.flags));
+              dispatch(setRawStartingItems(preset.flags));
+            }
+          })
+          .catch((fallbackErr) => {
+            console.error("Failed to fetch fallback presets:", fallbackErr);
+            setPresets((prev) => prev || {});
+          });
+      });
+
+    fetchWithTimeout(`${process.env.NEXT_PUBLIC_API_URL}/api/metadata/flag`, {}, 2500)
+      .then((res) => res.json())
+      .then((data) => {
+        setSchemaLocal(data);
+        localStorage.setItem("cached_schema", JSON.stringify(data));
+        dispatch(setSchema(data));
+      })
+      .catch((err) => {
+        console.warn("Failed to fetch flag metadata from API, trying fallback fetch:", err);
+        fetch("/metadata-fallback/flag.json")
+          .then((res) => res.json())
+          .then((data) => {
+            setSchemaLocal(data);
+            localStorage.setItem("cached_schema", JSON.stringify(data));
+            dispatch(setSchema(data));
+          })
+          .catch((fallbackErr) => {
+            console.error("Failed to fetch fallback flag metadata, using hardcoded fallback:", fallbackErr);
+            setSchemaLocal(fallbackFlag as any);
+            localStorage.setItem("cached_schema", JSON.stringify(fallbackFlag));
+            dispatch(setSchema(fallbackFlag as any));
+          });
+      });
+
+    fetchWithTimeout(`${process.env.NEXT_PUBLIC_API_URL}/api/metadata/objective`, {}, 2500)
+      .then((res) => res.json())
+      .then((data) => {
+        setObjectives(data);
+        localStorage.setItem("cached_objectives", JSON.stringify(data));
+        dispatch(setObjectiveMetadata(data));
+      })
+      .catch((err) => {
+        console.warn("Failed to fetch objective metadata from API, trying fallback fetch:", err);
+        fetch("/metadata-fallback/objective.json")
+          .then((res) => res.json())
+          .then((data) => {
+            setObjectives(data);
+            localStorage.setItem("cached_objectives", JSON.stringify(data));
+            dispatch(setObjectiveMetadata(data));
+          })
+          .catch((fallbackErr) => {
+            console.error("Failed to fetch fallback objective metadata, using hardcoded fallback:", fallbackErr);
+            setObjectives(fallbackObjective as any);
+            localStorage.setItem("cached_objectives", JSON.stringify(fallbackObjective));
+            dispatch(setObjectiveMetadata(fallbackObjective as any));
+          });
+      });
+
+    fetchWithTimeout(`${process.env.NEXT_PUBLIC_API_URL}/api/wc`, {}, 2500)
+      .then((res) => res.json())
+      .then((data) => {
+        const fetchedVersion = data["version"];
+        setVersion(fetchedVersion);
+        localStorage.setItem("cached_version", JSON.stringify(fetchedVersion));
+      })
+      .catch((err) => {
+        console.warn("Failed to fetch version from API, trying fallback fetch:", err);
+        fetch("/metadata-fallback/wc.json")
+          .then((res) => res.json())
+          .then((data) => {
+            const fetchedVersion = data["version"];
+            setVersion(fetchedVersion);
+            localStorage.setItem("cached_version", JSON.stringify(fetchedVersion));
+          })
+          .catch((fallbackErr) => {
+            console.error("Failed to fetch fallback version, using hardcoded fallback:", fallbackErr);
+            const fetchedVersion = (fallbackWc as any).version || "1.4.3d";
+            setVersion(fetchedVersion);
+            localStorage.setItem("cached_version", JSON.stringify(fetchedVersion));
+          });
+      });
+  }, [dispatch]);
+
+  if (isMounted && objectives && presets && schema && version) {
+    return (
+      <FlagCreatePage
+        objectives={objectives}
+        presets={presets}
+        schema={schema}
+        version={version}
+      />
+    );
+  } else {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center bg-slate-950 text-white font-outfit text-xl">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+          <p className="animate-pulse">Loading Worlds Collide...</p>
+          <div className="text-xs text-slate-500 mt-4 font-mono border border-slate-800 rounded bg-slate-900/50 p-4 max-w-sm text-left">
+            <h4 className="font-bold text-slate-400 mb-2 uppercase tracking-wider text-[10px]">Diagnostics Panel</h4>
+            <div className="flex flex-col gap-1">
+              <div>• Mounted: <span className={isMounted ? "text-emerald-400" : "text-amber-500"}>{isMounted ? "Yes" : "No (Waiting...)"}</span></div>
+              <div>• Objectives: <span className={objectives ? "text-emerald-400" : "text-amber-500"}>{objectives ? "Loaded" : "Missing"}</span></div>
+              <div>• Presets: <span className={presets ? "text-emerald-400" : "text-amber-500"}>{presets ? "Loaded" : "Missing"}</span></div>
+              <div>• Flag Schema: <span className={schema ? "text-emerald-400" : "text-amber-500"}>{schema ? "Loaded" : "Missing"}</span></div>
+              <div>• Version: <span className={version ? "text-emerald-400" : "text-amber-500"}>{version ? `v${version}` : "Missing"}</span></div>
             </div>
           </div>
-        </Header>
-        <main className={cx(openSans.className, "flex-grow")}>
-        <AppLandingSection title={"Getting Started"}>
-          <AppLandingGridItem
-            className="lg:col-span-2"
-            title={
-              <>
-                <SpriteDrawAnimation
-                  delay={300}
-                  spriteId={0}
-                  paletteId={74}
-                  poses={[1, 0, 1, 2]}
-                />
-                <span className="px-4">Randomizer</span>
-              </>
-            }
-          >
-            <div className="text-center">
-              Generate a random seed and begin to play Worlds Collide
-            </div>
-            <CreateButton />
-          </AppLandingGridItem>
-
-          <AppLandingGridItem
-            title={
-              <>
-                <SpriteDrawAnimation
-                  delay={150}
-                  spriteId={5}
-                  paletteId={0}
-                  poses={[16, 17]}
-                />
-                <span className="px-4">Discord</span>
-              </>
-            }
-          >
-            <div className="text-center">
-              Join our Discord server to talk with the community and learn about
-              the latest news and events
-            </div>
-            <div>
-              <DiscordButton />
-            </div>
-          </AppLandingGridItem>
-
-          <AppLandingGridItem
-            title={
-              <>
-                <SpriteDrawAnimation
-                  delay={150}
-                  spriteId={21}
-                  paletteId={3}
-                  poses={[29, 30]}
-                />
-                <span className="px-4">Seed of the Week</span>
-              </>
-            }
-          >
-            <div className="text-center">
-              Play a weekly seed submitted by a community member. You can post
-              your time in the discord and see how you compare to others!
-            </div>
-            <SotwButton />
-          </AppLandingGridItem>
-
-          <AppLandingGridItem
-            title={
-              <>
-                <SpriteDrawAnimation
-                  delay={300}
-                  spriteId={15}
-                  paletteId={0}
-                  poses={[25, 25, 26]}
-                />
-                <span className="px-4">Wiki</span>
-              </>
-            }
-          >
-            <div className="text-center">
-              Visit the wiki for guides, resources, and how to get the most out
-              of WC
-            </div>
-
-            <ButtonLink
-              className="w-fit max-w-[500px] min-h-[50px] inline-flex items-center gap-3"
-              href={WIKI_URL}
-              variant="primary"
-            >
-              <HiPencil size={28} className="text-white" />
-              <div className="flex flex-col items-start">
-                <div className="font-bold">Wiki</div>
-              </div>
-            </ButtonLink>
-          </AppLandingGridItem>
-
-          <AppLandingGridItem
-            title={
-              <>
-                <SpriteDrawAnimation
-                  delay={300}
-                  spriteId={10}
-                  paletteId={0}
-                  poses={[1, 0, 1, 2]}
-                />
-                <span className="px-4">Events</span>
-              </>
-            }
-          >
-            <div className="text-center">
-              Check out our ongoing community events and tournaments!
-            </div>
-            <EventsButton />
-          </AppLandingGridItem>
-        </AppLandingSection>
-        </main>
-        <HomeFooter />
+        </div>
       </div>
-    </>
-  );
-}
+    );
+  }
+};
+
+export default HomeLandingPage;

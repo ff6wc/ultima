@@ -1,15 +1,26 @@
 import type { NextPage } from "next";
 import { useEffect, useState } from "react";
-import { FlagCreatePage } from "~/components/FlagCreatePage/FlagCreatePage";
+import { useDispatch } from "react-redux";
+import dynamic from "next/dynamic";
+
+const FlagCreatePage = dynamic<any>(
+  () => import("../components/FlagCreatePage/FlagCreatePage").then((mod) => mod.FlagCreatePage),
+  { ssr: false }
+);
 import { setRawFlags } from "~/state/flagSlice";
 import { setRawObjectives } from "~/state/objectiveSlice";
-import { setRawStartingItems } from "~/state/itemSlice";
+import { setRawStartingItems, initItemMetadata } from "~/state/itemSlice";
 import { setObjectiveMetadata } from "~/state/objectiveSlice";
 import { RawFlagMetadata, setSchema } from "~/state/schemaSlice";
-import { initItemMetadata } from "~/state/itemSlice";
 import { ObjectiveMetadata } from "~/types/objectives";
 import { FlagPreset } from "~/types/preset";
-import { singletonStore } from "~/pages/_app";
+import { fetchWithTimeout } from "~/utils/fetchWithTimeout";
+import { normalizePresets } from "~/utils/presets";
+import fallbackFlag from "~/public/metadata-fallback/flag.json";
+import fallbackObjective from "~/public/metadata-fallback/objective.json";
+import fallbackWc from "~/public/metadata-fallback/wc.json";
+import fallbackPresets from "~/public/metadata-fallback/presets.json";
+
 
 export type PageProps = {
   objectives: ObjectiveMetadata;
@@ -28,72 +39,199 @@ const DecodeB64QueryStringParam  = (param: string) => {
 }
 
 const Create = () => {
-
-  const [objectives, setObjectives] = useState(null)
-  const [presets, setPresets] = useState(null)
-  const [schema, setSchemaLocal] = useState(null)
-  const [version, setVersion] = useState(null)
+  const dispatch = useDispatch();
+  const [isMounted, setIsMounted] = useState(false);
+  const [objectives, setObjectives] = useState<ObjectiveMetadata>(fallbackObjective as any);
+  const [presets, setPresets] = useState<Record<string, FlagPreset>>(normalizePresets(fallbackPresets));
+  const [schema, setSchemaLocal] = useState<Record<string, RawFlagMetadata>>(fallbackFlag as any);
+  const [version, setVersion] = useState<string>((fallbackWc as any).version || "1.4.3d");
 
   useEffect(() => {
-    const store = singletonStore
-    // fetch presets
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/presets`)
-      .then((res) => res.json())
-      .then((data) => {
-        setPresets(data)
-        
-        const queryParameters = new URLSearchParams(window.location.search)
-        const flagsParam = queryParameters.get("flags")
-        const presetParam = queryParameters.get("preset")
-        if(flagsParam) {
-          const flags = DecodeB64QueryStringParam(flagsParam)
-          console.log("Setting starting flags from query string")
-          store.dispatch(setRawFlags(flags));
-          store.dispatch(setRawObjectives(flags));
-          store.dispatch(setRawStartingItems(flags));
-        } else {
-          let preset: FlagPreset
-          if (presetParam) {
-            preset = data[presetParam];
-          } else {
-            preset = data["ultros league"];
-          }
-          if (preset) {
-            store.dispatch(setRawFlags(preset.flags));
-            store.dispatch(setRawObjectives(preset.flags));
-            store.dispatch(setRawStartingItems(preset.flags));
+    setIsMounted(true);
+    dispatch(initItemMetadata());
+    // 1. Try to load initial values from localStorage cache for instant load
+    try {
+      const cachedObjectives = localStorage.getItem("cached_objectives");
+      const cachedPresets = localStorage.getItem("cached_presets");
+      const cachedSchema = localStorage.getItem("cached_schema");
+      const cachedVersion = localStorage.getItem("cached_version");
+
+      if (cachedObjectives) {
+        const parsed = JSON.parse(cachedObjectives);
+        if (parsed && typeof parsed === "object") {
+          setObjectives(parsed);
+          dispatch(setObjectiveMetadata(parsed));
+        }
+      }
+      if (cachedPresets) {
+        const parsed = JSON.parse(cachedPresets);
+        if (parsed && typeof parsed === "object") {
+          const normalized = normalizePresets(parsed);
+          if (normalized && Object.keys(normalized).length > 0) {
+            setPresets(normalized);
+            const preset = normalized["ultros league"];
+            if (preset) {
+              dispatch(setRawFlags(preset.flags));
+              dispatch(setRawObjectives(preset.flags));
+              dispatch(setRawStartingItems(preset.flags));
+            }
           }
         }
-      })
-    
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/metadata/flag`)
+      }
+      if (cachedSchema) {
+        const parsed = JSON.parse(cachedSchema);
+        if (parsed && typeof parsed === "object") {
+          setSchemaLocal(parsed);
+          dispatch(setSchema(parsed));
+        }
+      }
+      if (cachedVersion) {
+        const parsed = JSON.parse(cachedVersion);
+        if (parsed && typeof parsed === "string") {
+          setVersion(parsed);
+        }
+      }
+    } catch (e) {
+      console.warn("Failed to parse cached metadata:", e);
+    }
+
+    // 2. Fetch fresh data in the background (Stale-While-Revalidate)
+    fetchWithTimeout(`${process.env.NEXT_PUBLIC_API_URL}/presets`, {}, 2500)
       .then((res) => res.json())
       .then((data) => {
-        setSchemaLocal(data)
-        store.dispatch(setSchema(data))
+        const normalized = normalizePresets(data);
+        setPresets(normalized);
+        localStorage.setItem("cached_presets", JSON.stringify(normalized));
+        const preset = normalized["ultros league"];
+        if (preset) {
+          dispatch(setRawFlags(preset.flags));
+          dispatch(setRawObjectives(preset.flags));
+          dispatch(setRawStartingItems(preset.flags));
+        }
       })
+      .catch((err) => {
+        console.warn("Failed to fetch presets from API, trying fallback fetch:", err);
+        fetch("/metadata-fallback/presets.json")
+          .then((res) => res.json())
+          .then((data) => {
+            const normalized = normalizePresets(data);
+            setPresets(normalized);
+            localStorage.setItem("cached_presets", JSON.stringify(normalized));
+            const preset = normalized["ultros league"];
+            if (preset) {
+              dispatch(setRawFlags(preset.flags));
+              dispatch(setRawObjectives(preset.flags));
+              dispatch(setRawStartingItems(preset.flags));
+            }
+          })
+          .catch((fallbackErr) => {
+            console.error("Failed to fetch fallback presets:", fallbackErr);
+            setPresets((prev) => prev || {});
+          });
+      });
 
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/metadata/objective`)
+    fetchWithTimeout(`${process.env.NEXT_PUBLIC_API_URL}/api/metadata/flag`, {}, 2500)
       .then((res) => res.json())
       .then((data) => {
-        setObjectives(data)
-        store.dispatch(setObjectiveMetadata(data))
+        setSchemaLocal(data);
+        localStorage.setItem("cached_schema", JSON.stringify(data));
+        dispatch(setSchema(data));
       })
+      .catch((err) => {
+        console.warn("Failed to fetch flag metadata from API, trying fallback fetch:", err);
+        fetch("/metadata-fallback/flag.json")
+          .then((res) => res.json())
+          .then((data) => {
+            setSchemaLocal(data);
+            localStorage.setItem("cached_schema", JSON.stringify(data));
+            dispatch(setSchema(data));
+          })
+          .catch((fallbackErr) => {
+            console.error("Failed to fetch fallback flag metadata, using hardcoded fallback:", fallbackErr);
+            setSchemaLocal(fallbackFlag as any);
+            localStorage.setItem("cached_schema", JSON.stringify(fallbackFlag));
+            dispatch(setSchema(fallbackFlag as any));
+          });
+      });
 
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/wc`)
+    fetchWithTimeout(`${process.env.NEXT_PUBLIC_API_URL}/api/metadata/objective`, {}, 2500)
       .then((res) => res.json())
       .then((data) => {
-        const fetchedVersion = data["version"]
-        setVersion(fetchedVersion)
+        setObjectives(data);
+        localStorage.setItem("cached_objectives", JSON.stringify(data));
+        dispatch(setObjectiveMetadata(data));
       })
+      .catch((err) => {
+        console.warn("Failed to fetch objective metadata from API, trying fallback fetch:", err);
+        fetch("/metadata-fallback/objective.json")
+          .then((res) => res.json())
+          .then((data) => {
+            setObjectives(data);
+            localStorage.setItem("cached_objectives", JSON.stringify(data));
+            dispatch(setObjectiveMetadata(data));
+          })
+          .catch((fallbackErr) => {
+            console.error("Failed to fetch fallback objective metadata, using hardcoded fallback:", fallbackErr);
+            setObjectives(fallbackObjective as any);
+            localStorage.setItem("cached_objectives", JSON.stringify(fallbackObjective));
+            dispatch(setObjectiveMetadata(fallbackObjective as any));
+          });
+      });
 
-    store.dispatch(initItemMetadata())
-  }, [])
+    fetchWithTimeout(`${process.env.NEXT_PUBLIC_API_URL}/api/wc`, {}, 2500)
+      .then((res) => res.json())
+      .then((data) => {
+        const fetchedVersion = data["version"];
+        setVersion(fetchedVersion);
+        localStorage.setItem("cached_version", JSON.stringify(fetchedVersion));
+      })
+      .catch((err) => {
+        console.warn("Failed to fetch version from API, trying fallback fetch:", err);
+        fetch("/metadata-fallback/wc.json")
+          .then((res) => res.json())
+          .then((data) => {
+            const fetchedVersion = data["version"];
+            setVersion(fetchedVersion);
+            localStorage.setItem("cached_version", JSON.stringify(fetchedVersion));
+          })
+          .catch((fallbackErr) => {
+            console.error("Failed to fetch fallback version, using hardcoded fallback:", fallbackErr);
+            const fetchedVersion = (fallbackWc as any).version || "1.4.3d";
+            setVersion(fetchedVersion);
+            localStorage.setItem("cached_version", JSON.stringify(fetchedVersion));
+          });
+      });
 
-  if(objectives && presets && schema && version) {
-    return(<FlagCreatePage objectives={objectives} presets={presets} schema={schema} version={version}/>)
+  }, [dispatch]);
+
+  if (isMounted && objectives && presets && schema && version) {
+    return (
+      <FlagCreatePage
+        objectives={objectives}
+        presets={presets}
+        schema={schema}
+        version={version}
+      />
+    );
   } else {
-    return(<p>Loading...</p>)
+    return (
+      <div className="flex h-screen w-screen items-center justify-center bg-slate-950 text-white font-outfit text-xl">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+          <p className="animate-pulse">Loading Worlds Collide...</p>
+          <div className="text-xs text-slate-500 mt-4 font-mono border border-slate-800 rounded bg-slate-900/50 p-4 max-w-sm text-left">
+            <h4 className="font-bold text-slate-400 mb-2 uppercase tracking-wider text-[10px]">Diagnostics Panel</h4>
+            <div className="flex flex-col gap-1">
+              <div>• Mounted: <span className={isMounted ? "text-emerald-400" : "text-amber-500"}>{isMounted ? "Yes" : "No (Waiting...)"}</span></div>
+              <div>• Objectives: <span className={objectives ? "text-emerald-400" : "text-amber-500"}>{objectives ? "Loaded" : "Missing"}</span></div>
+              <div>• Presets: <span className={presets ? "text-emerald-400" : "text-amber-500"}>{presets ? "Loaded" : "Missing"}</span></div>
+              <div>• Flag Schema: <span className={schema ? "text-emerald-400" : "text-amber-500"}>{schema ? "Loaded" : "Missing"}</span></div>
+              <div>• Version: <span className={version ? "text-emerald-400" : "text-amber-500"}>{version ? `v${version}` : "Missing"}</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 };
 

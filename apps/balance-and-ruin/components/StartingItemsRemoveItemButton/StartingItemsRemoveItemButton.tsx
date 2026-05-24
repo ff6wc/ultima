@@ -1,26 +1,20 @@
-import { Button } from "@ff6wc/ui";
-import { useDispatch, useSelector } from "react-redux";
-import { setFlag, useFlagValueSelector } from "~/state/flagSlice";
-import {
-  MAX_CUSTOM_ITEM_COUNT,
-  setItems,
-  selectItemById,
-} from "~/state/itemSlice";
+import { useDispatch } from "react-redux";
+import { setFlag } from "~/state/flagSlice";
+import { setItems } from "~/state/itemSlice";
 import { StartingItems, StartingItem } from "~/types/starting_items";
 import { startingItemsToString } from "~/utils/startingItemsToString";
-import { MdClear } from "react-icons/md";
+import { FaTrash } from "react-icons/fa";
 
 type StartingItemsProps = {
   items: StartingItems;
   item: StartingItem;
 };
 
-
 export const StartingItemsRemoveItemButton = ({
-  items, item
+  items,
+  item,
 }: StartingItemsProps) => {
   const dispatch = useDispatch();
-
   const removeItem = () => {
     if (items.items.length <= 0) {
       return;
@@ -28,8 +22,8 @@ export const StartingItemsRemoveItemButton = ({
     const newItems = { ...items };
     const itemsArray = [...items.items];
     const index = itemsArray.indexOf(item);
-    if (index > -1) { // only splice array when item is found
-      itemsArray.splice(index, 1); // 2nd parameter means remove one item only
+    if (index > -1) {
+      itemsArray.splice(index, 1);
     }
     newItems.items = itemsArray;
 
@@ -44,14 +38,15 @@ export const StartingItemsRemoveItemButton = ({
   };
 
   return (
-    <Button
-      className="w-fit flex-shrink-0"
+    <button
       disabled={items.items.length <= 0}
       onClick={removeItem}
-      size="small"
-      variant="danger"
+      className="p-2 rounded transition-all cursor-pointer flex items-center justify-center shrink-0 text-zinc-500 hover:text-blue-600 dark:text-zinc-400 dark:hover:text-blue-300 hover:bg-blue-100/60 dark:hover:bg-blue-950/30"
+      title="Remove Item"
+      style={{ width: "32px", height: "32px" }}
     >
-      Clear Item
-    </Button>
+      <FaTrash size={13} />
+    </button>
   );
 };
+

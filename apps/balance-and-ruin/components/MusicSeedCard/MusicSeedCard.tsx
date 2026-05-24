@@ -6,8 +6,6 @@ import { useRef, useState } from "react";
 import { MdClear, MdFileUpload } from "react-icons/md";
 import { SeedCardProps } from "~/components/SeedCard/SeedCard";
 import { ROM_FILE_EXTENSIONS } from "~/constants/romConstants";
-import { base64ToByteArray } from "~/utils/base64ToByteArray";
-import { XDelta3Decoder } from "~/utils/xdelta3_decoder";
 
 export const MusicSeedCard = ({ className, seed, ...rest }: SeedCardProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -26,10 +24,18 @@ export const MusicSeedCard = ({ className, seed, ...rest }: SeedCardProps) => {
     }
     const { filename, patch, seed_id, log: spoiler_log } = seed;
 
+    const [{ XDelta3Decoder }, { base64ToByteArray }, { applyInGameConfig }] = await Promise.all([
+      import("~/utils/xdelta3_decoder"),
+      import("~/utils/base64ToByteArray"),
+      import("~/utils/romUtils"),
+    ]);
+
     const patched = XDelta3Decoder.decode(
       base64ToByteArray(patch),
-      base64ToByteArray(romData)
+      base64ToByteArray(romData),
     );
+
+    applyInGameConfig(patched);
 
     jsz.file(romName, patched, { binary: true });
     jsz.file(`${filename}.txt`, spoiler_log);
@@ -70,12 +76,12 @@ export const MusicSeedCard = ({ className, seed, ...rest }: SeedCardProps) => {
         const zip = await jszip.loadAsync(zip_data);
 
         const rom = Object.values(zip.files).find(({ name }) =>
-          ROM_FILE_EXTENSIONS.some((ext) => name.endsWith(ext))
+          ROM_FILE_EXTENSIONS.some((ext) => name.endsWith(ext)),
         );
 
         if (!rom) {
           setZipSelectError(
-            "Invalid file - No file ending in .smc or .sfc was found in the zip"
+            "Invalid file - No file ending in .smc or .sfc was found in the zip",
           );
           return;
         }
@@ -83,7 +89,7 @@ export const MusicSeedCard = ({ className, seed, ...rest }: SeedCardProps) => {
         const data = await rom.async("base64");
 
         const others = Object.values(zip.files).filter(
-          ({ name }) => name !== rom?.name
+          ({ name }) => name !== rom?.name,
         );
 
         try {
