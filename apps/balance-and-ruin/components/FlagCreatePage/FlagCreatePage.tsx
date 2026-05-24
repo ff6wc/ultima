@@ -459,11 +459,28 @@ export const FlagCreatePage = ({
       touchStartY = 0;
       activeDrag = false;
 
+      // Fail-Safe 3: Proactively clear manual styles on touchstart if sidebar is closed.
+      // This guarantees that any stuck styles left behind from interrupted wiggles are cleared instantly on next screen contact.
+      if (!sidebarOpen) {
+        const sidebarEl = document.querySelector(`.${styles.sidebar}`) as HTMLElement;
+        const backdropEl = document.querySelector(`.${styles.sidebarBackdrop}`) as HTMLElement;
+        if (sidebarEl) sidebarEl.style.left = "";
+        if (backdropEl) {
+          backdropEl.classList.remove(styles.sidebarBackdropDragging);
+          backdropEl.style.opacity = "";
+        }
+      }
+
+      // Check if a dropdown is currently open (Fail-Safe 4)
+      if (document.querySelector('[data-dropdown-open="true"]')) {
+        return;
+      }
+
       const target = e.target as HTMLElement;
       try {
         const element = target.nodeType === Node.TEXT_NODE ? target.parentElement : target;
         if (element && typeof element.closest === "function") {
-          // Skip swipe gesture if touching interactive controls to prevent conflict
+          // Skip swipe gesture if touching interactive controls or dropdown popups/options to prevent conflict (Fail-Safe 1)
           if (
             element.closest("input") ||
             element.closest("button") ||
@@ -471,7 +488,10 @@ export const FlagCreatePage = ({
             element.closest("a") ||
             element.closest('[role="slider"]') ||
             element.closest('[class*="Slider"]') ||
-            element.closest('[class*="slider"]')
+            element.closest('[class*="slider"]') ||
+            element.closest('[class*="menu"]') ||
+            element.closest('[class*="option"]') ||
+            element.closest('[class*="Option"]')
           ) {
             return;
           }
@@ -492,9 +512,9 @@ export const FlagCreatePage = ({
       const diffX = touch.clientX - touchStartX;
       const diffY = touch.clientY - touchStartY;
 
-      // Determine active drag if horizontal movement is dominant
+      // Determine active drag if horizontal movement is dominant (Fail-Safe 2: increased threshold to 25px to prevent wiggle triggers)
       if (!activeDrag) {
-        if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 10) {
+        if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 25) {
           if (!sidebarOpen && diffX > 0) {
             activeDrag = true;
           } else if (sidebarOpen && diffX < 0) {
@@ -528,10 +548,8 @@ export const FlagCreatePage = ({
           sidebarEl.style.left = `${newLeft}px`;
         }
         if (backdropEl) {
-          backdropEl.style.transition = "none";
-          backdropEl.style.visibility = "visible";
+          backdropEl.classList.add(styles.sidebarBackdropDragging);
           backdropEl.style.opacity = `${percentOpen}`;
-          backdropEl.style.pointerEvents = "auto";
         }
       }
     };
@@ -560,15 +578,12 @@ export const FlagCreatePage = ({
           sidebarEl.style.left = "";
         }
         if (backdropEl) {
-          backdropEl.style.transition = "";
-          backdropEl.style.visibility = "";
+          backdropEl.classList.remove(styles.sidebarBackdropDragging);
           backdropEl.style.opacity = "";
-          backdropEl.style.pointerEvents = "";
         }
 
         setSidebarOpen(shouldOpen);
       }
-
       touchStartX = 0;
       touchStartY = 0;
       activeDrag = false;
@@ -765,14 +780,8 @@ export const FlagCreatePage = ({
           }}
         >
           <div
-            className={styles.sidebarBackdrop}
+            className={`${styles.sidebarBackdrop} ${sidebarOpen ? styles.sidebarBackdropOpen : ""}`}
             onClick={() => setSidebarOpen(false)}
-            style={{
-              opacity: sidebarOpen ? 1 : 0,
-              pointerEvents: sidebarOpen ? "auto" : "none",
-              visibility: sidebarOpen ? "visible" : "hidden",
-              transition: "opacity 0.35s ease, visibility 0.35s ease",
-            }}
           />
           {/* Sidebar */}
           <aside

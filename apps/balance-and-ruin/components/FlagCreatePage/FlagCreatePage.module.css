@@ -361,6 +361,26 @@
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 40;
   backdrop-filter: blur(2px);
+  
+  /* Guarantee that when closed, the backdrop is completely invisible and inactive */
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.35s ease, visibility 0.35s ease;
+}
+
+/* Open state */
+.sidebarBackdropOpen {
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+
+/* Active dragging state */
+.sidebarBackdropDragging {
+  visibility: visible !important;
+  pointer-events: auto !important;
+  transition: none !important;
 }
 
 /* MEDIA QUERIES FOR RESPONSIVENESS */
