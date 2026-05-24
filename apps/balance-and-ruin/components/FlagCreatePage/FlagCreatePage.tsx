@@ -446,10 +446,12 @@ export const FlagCreatePage = ({
     }
   }, [selectedIndex]);
 
-  // Swipe to open/close mobile sidebar drawer
+  // Swipe to open/close mobile sidebar drawer with real-time tracking (discord-style pull)
   useEffect(() => {
     let touchStartX = 0;
     let touchStartY = 0;
+    let activeDrag = false;
+    const drawerWidth = 260; // matching CSS width
 
     const handleTouchStart = (e: TouchEvent) => {
       const target = e.target as HTMLElement;
@@ -468,43 +470,105 @@ export const FlagCreatePage = ({
       const touch = e.changedTouches[0];
       touchStartX = touch.clientX;
       touchStartY = touch.clientY;
+      activeDrag = false;
     };
 
-    const handleTouchEnd = (e: TouchEvent) => {
-      const touch = e.changedTouches[0];
-      const touchEndX = touch.clientX;
-      const touchEndY = touch.clientY;
+    const handleTouchMove = (e: TouchEvent) => {
+      if (touchStartX === 0) return;
 
-      const diffX = touchEndX - touchStartX;
-      const diffY = touchEndY - touchStartY;
+      const touch = e.touches[0];
+      const diffX = touch.clientX - touchStartX;
+      const diffY = touch.clientY - touchStartY;
 
-      // Ensure horizontal swipe is dominant and above threshold
-      const SWIPE_THRESHOLD = 50;
-      if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > SWIPE_THRESHOLD) {
-        if (diffX > 0) {
-          // Swipe Right (Left-to-Right) -> Open sidebar
-          // Trigger starting from anywhere on the screen (no dynamic center restriction)
-          if (touchStartX > 0 && !sidebarOpen) {
-            setSidebarOpen(true);
-          }
-        } else {
-          // Swipe Left (Right-to-Left) -> Close sidebar
-          if (sidebarOpen) {
-            setSidebarOpen(false);
+      // Determine active drag if horizontal movement is dominant
+      if (!activeDrag) {
+        if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 10) {
+          if (!sidebarOpen && touchStartX < 60 && diffX > 0) {
+            activeDrag = true;
+          } else if (sidebarOpen && diffX < 0) {
+            activeDrag = true;
           }
         }
       }
 
-      // Reset touch coordinates
+      if (activeDrag) {
+        // Prevent default scrolling of parent content during pull
+        if (e.cancelable) {
+          e.preventDefault();
+        }
+
+        let newLeft = 0;
+        if (!sidebarOpen) {
+          // Closed -> Opening. Dragging right.
+          newLeft = Math.min(0, -drawerWidth + diffX);
+        } else {
+          // Open -> Closing. Dragging left.
+          newLeft = Math.max(-drawerWidth, diffX);
+        }
+
+        const percentOpen = (newLeft + drawerWidth) / drawerWidth; // 0 to 1
+
+        const sidebarEl = document.querySelector(`.${styles.sidebar}`) as HTMLElement;
+        const backdropEl = document.querySelector(`.${styles.sidebarBackdrop}`) as HTMLElement;
+
+        if (sidebarEl) {
+          sidebarEl.style.transition = "none";
+          sidebarEl.style.left = `${newLeft}px`;
+        }
+        if (backdropEl) {
+          backdropEl.style.transition = "none";
+          backdropEl.style.visibility = "visible";
+          backdropEl.style.opacity = `${percentOpen}`;
+          backdropEl.style.pointerEvents = "auto";
+        }
+      }
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      if (touchStartX === 0) return;
+
+      const touch = e.changedTouches[0];
+      const diffX = touch.clientX - touchStartX;
+
+      if (activeDrag) {
+        const threshold = 100; // threshold in pixels to register transition
+        let shouldOpen = sidebarOpen;
+
+        if (!sidebarOpen) {
+          shouldOpen = diffX > threshold;
+        } else {
+          shouldOpen = diffX >= -threshold;
+        }
+
+        const sidebarEl = document.querySelector(`.${styles.sidebar}`) as HTMLElement;
+        const backdropEl = document.querySelector(`.${styles.sidebarBackdrop}`) as HTMLElement;
+
+        if (sidebarEl) {
+          sidebarEl.style.transition = "";
+          sidebarEl.style.left = "";
+        }
+        if (backdropEl) {
+          backdropEl.style.transition = "";
+          backdropEl.style.visibility = "";
+          backdropEl.style.opacity = "";
+          backdropEl.style.pointerEvents = "";
+        }
+
+        setSidebarOpen(shouldOpen);
+      }
+
       touchStartX = 0;
       touchStartY = 0;
+      activeDrag = false;
     };
 
     window.addEventListener("touchstart", handleTouchStart, { passive: true });
+    window.addEventListener("touchmove", handleTouchMove, { passive: false });
     window.addEventListener("touchend", handleTouchEnd, { passive: true });
 
     return () => {
       window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchmove", handleTouchMove);
       window.removeEventListener("touchend", handleTouchEnd);
     };
   }, [sidebarOpen]);
@@ -686,12 +750,16 @@ export const FlagCreatePage = ({
             setSidebarOpen(false);
           }}
         >
-          {sidebarOpen && (
-            <div
-              className={styles.sidebarBackdrop}
-              onClick={() => setSidebarOpen(false)}
-            />
-          )}
+          <div
+            className={styles.sidebarBackdrop}
+            onClick={() => setSidebarOpen(false)}
+            style={{
+              opacity: sidebarOpen ? 1 : 0,
+              pointerEvents: sidebarOpen ? "auto" : "none",
+              visibility: sidebarOpen ? "visible" : "hidden",
+              transition: "opacity 0.35s ease, visibility 0.35s ease",
+            }}
+          />
           {/* Sidebar */}
           <aside
             className={`${styles.sidebar} ${sidebarOpen ? styles.sidebarOpen : ""}`}
