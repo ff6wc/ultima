@@ -12,7 +12,7 @@ type RGB = [number, number, number];
 type BinaryKey = "BatMode" | "Command" | "Gauge" | "Sound" | "Cursor" | "Reequip";
 type NumericKey = "BatSpeed" | "MsgSpeed" | "SpellOrder" | "Wallpaper";
 
-type Editing = { kind: "font" } | { kind: "slot"; slot: number };
+type Editing = { kind: "font" } | { kind: "window" } | { kind: "slot"; slot: number };
 
 type State = {
   page: "A" | "B";
@@ -85,6 +85,7 @@ const PAGE_B_OPTIONS: OptionRow[] = [
     kind: "color",
     values: [
       ["font", 112, 124] as const,
+      ["window", 176, 124] as const,
       ...[1, 2, 3, 4, 5, 6, 7].map((s, i) => [`slot${s}`, 180 + i * 8, 139] as const),
     ],
   },
@@ -342,12 +343,17 @@ const valuePos = (row: OptionRow, item: ValueItem): { x: number; y: number } => 
   return { x, y: yOverride ?? row.y };
 };
 
-const editedRgb = (s: State): RGB =>
-  s.editing.kind === "font" ? s.font : s.windows[s.Wallpaper][s.editing.slot - 1];
+const editedRgb = (s: State): RGB => {
+  if (s.editing.kind === "font") return s.font;
+  const slot = s.editing.kind === "window" ? 1 : s.editing.slot;
+  return s.windows[s.Wallpaper][slot - 1];
+};
 
 const currentValueOf = (row: OptionRow, s: State): string | number => {
   if (row.kind === "color") {
-    return s.editing.kind === "font" ? "font" : `slot${s.editing.slot}`;
+    if (s.editing.kind === "font") return "font";
+    if (s.editing.kind === "window") return "window";
+    return `slot${s.editing.slot}`;
   }
   if (row.kind === "slider") return editedRgb(s)[row.channel];
   return (s as any)[row.key];
@@ -361,7 +367,11 @@ const activeValueIndex = (row: OptionRow, s: State): number => {
 };
 
 const approxValueWidth = (row: OptionRow, v: string | number): number => {
-  if (row.kind === "color") return v === "font" ? 22 : 4;
+  if (row.kind === "color") {
+    if (v === "font") return 22;
+    if (v === "window") return 38;
+    return 4; // slots
+  }
   if (typeof v === "number") return 8;
   return Math.min(56, String(v).length * 7 + 4);
 };
@@ -857,7 +867,7 @@ function writeEditedRgb(s: State, rgb: RGB): State {
   if (s.editing.kind === "font") {
     return { ...s, font: rgb };
   }
-  const slot = s.editing.slot;
+  const slot = s.editing.kind === "window" ? 1 : s.editing.slot;
   const win = s.Wallpaper;
   const palette = s.windows[win].map((c, i) => (i === slot - 1 ? rgb : c));
   return { ...s, windows: { ...s.windows, [win]: palette } };
@@ -866,8 +876,9 @@ function writeEditedRgb(s: State, rgb: RGB): State {
 function applyValueSelection(s: State, row: OptionRow, val: string | number): State {
   if (row.kind === "color") {
     if (val === "font") return { ...s, editing: { kind: "font" } };
+    if (val === "window") return { ...s, editing: { kind: "window" } };
     const slot = parseInt(String(val).slice(4), 10);
-    return { ...s, editing: { kind: "slot", slot } };
+    return { ...s, editing: { kind: "slot", slot: isNaN(slot) ? 1 : slot } };
   }
   return { ...s, [row.key]: val } as State;
 }
