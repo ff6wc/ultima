@@ -733,11 +733,13 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
 
     const createdPreset: FlagPreset = {
       name: newPresetName.trim(),
+      preset_name: newPresetName.trim(),
+      preset_name_lower: newPresetName.trim().toLowerCase(),
       creator_name: creatorName.trim(),
       creator: creatorName.trim(),
       description: description.trim(),
       flags: activeFlags,
-      creator_id: 0,
+      creator_id: session?.user?.discordId || "",
       arguments: "",
       official: false,
       hidden: false,
