@@ -54,8 +54,7 @@ export const Objectives = () => {
             <div
               onClick={onAddObjective}
               title="Add New Objective"
-              className="flex flex-col items-center justify-center cursor-pointer group border-2 border-dashed border-slate-200 dark:border-slate-700/60 bg-slate-50/40 dark:bg-slate-800/10 hover:bg-slate-100/60 dark:hover:bg-slate-800/30 hover:border-blue-400 dark:hover:border-blue-500/50 transition-all duration-300 rounded-xl p-6 shadow-sm hover:shadow-md self-start"
-              style={{ maxWidth: "280px", width: "100%", height: "295px" }}
+              className="flex flex-col items-center justify-center cursor-pointer group border-2 border-dashed border-slate-200 dark:border-slate-700/60 bg-slate-50/40 dark:bg-slate-800/10 hover:bg-slate-100/60 dark:hover:bg-slate-800/30 hover:border-blue-400 dark:hover:border-blue-500/50 transition-all duration-300 rounded-xl p-6 shadow-sm hover:shadow-md w-full md:max-w-[280px] md:self-start h-[295px]"
             >
               <div className="flex items-center justify-center w-16 h-16 rounded-full border-2 border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 group-hover:scale-110 group-hover:border-blue-500/50 group-hover:shadow-[0_0_15px_rgba(59,130,246,0.2)] dark:group-hover:shadow-[0_0_15px_rgba(59,130,246,0.3)] transition-all duration-300">
                 <FaPlus className="text-slate-400 dark:text-slate-500 group-hover:text-blue-500 text-xl transition-all duration-300" />
