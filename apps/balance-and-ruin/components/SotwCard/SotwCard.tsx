@@ -8,6 +8,9 @@ type Props = {
 };
 export const SotwCard = ({ sotw, sotwId }: Props) => {
   const { seed_id, seed } = sotw;
+  const isAbsoluteUrl = seed && (seed.startsWith("http://") || seed.startsWith("https://"));
+  const href = isAbsoluteUrl ? seed : (seed_id ? `/seed/?id=${seed_id}` : seed);
+
   return (
     <div
       className={cx(
@@ -19,7 +22,7 @@ export const SotwCard = ({ sotw, sotwId }: Props) => {
       <p className="text-sm px-4">Submitted by {sotw.submitter}</p>
       <p className="text-base px-2">{sotw.description}</p>
 
-      <Link href={seed_id ? `/seed/?id=${seed_id}` : seed}>
+      <Link href={href}>
         <Button
           className="w-fit uppercase font-mono font-semibold"
           variant="primary"
