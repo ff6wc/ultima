@@ -40,7 +40,7 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
   
   // UI states
   const [adminSearch, setAdminSearch] = useState("");
-  const [adminSortField, setAdminSortField] = useState<"name" | "author" | "created_at">("name");
+  const [adminSortField, setAdminSortField] = useState<"name" | "author" | "created_at" | "downloads">("name");
   const [adminSortDir, setAdminSortDir] = useState<"asc" | "desc">("asc");
   const [selectedIds, setSelectedIds] = useState<Record<string, boolean>>({});
   
@@ -131,6 +131,8 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
           creator_id: apiPreset.creator_id || "community",
           created_timestamp: apiPreset.created_at || new Date().toISOString(),
           download_timestamp: dbOverride.download_timestamp,
+          downloads: dbOverride.downloads,
+          download_count: dbOverride.download_count,
           isApiPreset: true,
           dbRecord: dbOverride
         });
@@ -169,6 +171,8 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
           creator_id: dbPreset.owner_id || dbPreset.creator_id || "unknown",
           created_timestamp: dbPreset.created_at || dbPreset.created_timestamp || new Date().toISOString(),
           download_timestamp: dbPreset.download_timestamp,
+          downloads: dbPreset.downloads,
+          download_count: dbPreset.download_count,
           isApiPreset: false
         });
       }
@@ -202,6 +206,10 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
         cmp = (a.creator_name || "").localeCompare(b.creator_name || "");
       } else if (adminSortField === "created_at") {
         cmp = new Date(a.created_timestamp || 0).getTime() - new Date(b.created_timestamp || 0).getTime();
+      } else if (adminSortField === "downloads") {
+        const aCount = a.downloads ?? a.download_count ?? a.dbRecord?.downloads ?? a.dbRecord?.download_count ?? 0;
+        const bCount = b.downloads ?? b.download_count ?? b.dbRecord?.downloads ?? b.dbRecord?.download_count ?? 0;
+        cmp = aCount - bCount;
       }
       return adminSortDir === "asc" ? cmp : -cmp;
     });
@@ -575,15 +583,25 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem", marginBottom: "1.5rem" }}>
             <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "0.5rem" }}>
               <span className="text-slate-500 dark:text-slate-400" style={{ fontSize: "0.75rem", fontWeight: "bold", textTransform: "uppercase" }}>Sort:</span>
-              {(["name", "author", "created_at"] as const).map((f) => {
+              {(["name", "author", "downloads", "created_at"] as const).map((f) => {
                 const active = adminSortField === f;
-                const label = f === "name" ? "Name" : f === "author" ? "Author" : "Creation Date";
+                const label = 
+                  f === "name" 
+                    ? "Name" 
+                    : f === "author" 
+                      ? "Author" 
+                      : f === "downloads" 
+                        ? "Downloads" 
+                        : "Creation Date";
                 return (
                   <button
                     key={f}
                     onClick={() => {
+                      const nextDir = active 
+                        ? (adminSortDir === "asc" ? "desc" : "asc")
+                        : (f === "downloads" ? "desc" : "asc");
                       setAdminSortField(f);
-                      setAdminSortDir(active && adminSortDir === "asc" ? "desc" : "asc");
+                      setAdminSortDir(nextDir);
                     }}
                     style={{
                       padding: "0.25rem 0.6rem",
@@ -729,6 +747,21 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
 
                       {/* Preset Actions */}
                       <div style={{ display: "flex", alignItems: "center", gap: "1rem", flexShrink: 0 }}>
+                        <span 
+                          style={{ 
+                            fontSize: "0.75rem", 
+                            fontWeight: "bold", 
+                            padding: "0.15rem 0.5rem", 
+                            borderRadius: "999px",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "0.25rem",
+                          }}
+                          className="bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400 border border-blue-200 dark:border-blue-900/50"
+                          title="Total downloads on site"
+                        >
+                          📥 {preset.downloads ?? preset.download_count ?? preset.dbRecord?.downloads ?? preset.dbRecord?.download_count ?? 0}
+                        </span>
                         {showConfirm[preset.id] ? (
                           <>
                             <span style={{ color: "#f87171", fontSize: "0.8rem", fontWeight: "bold", marginRight: "0.25rem" }}>Confirm?</span>
@@ -881,8 +914,9 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                         <div className="text-slate-800 dark:text-slate-300 bg-slate-200/50 dark:bg-slate-950/60" style={{ padding: "0.75rem", borderRadius: "4px", fontSize: "0.8rem", fontFamily: "monospace", overflowX: "auto", whiteSpace: "pre-wrap", wordBreak: "break-all", border: "1px solid var(--border-light, rgba(255,255,255,0.05))" }}>
                           {preset.flags || "(No flags provided in external API)"}
                         </div>
-                        <div className="text-slate-500 dark:text-slate-400" style={{ display: "flex", gap: "1rem", marginTop: "0.75rem", fontSize: "0.75rem", fontWeight: "bold" }}>
+                        <div className="text-slate-500 dark:text-slate-400" style={{ display: "flex", gap: "1rem", marginTop: "0.75rem", fontSize: "0.75rem", fontWeight: "bold", flexWrap: "wrap" }}>
                           <span>Created: {new Date(preset.created_timestamp).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })}</span>
+                          <span>Total Downloads: {preset.downloads ?? preset.download_count ?? preset.dbRecord?.downloads ?? preset.dbRecord?.download_count ?? 0}</span>
                           {preset.download_timestamp && (
                             <span>
                               Last Downloaded:{" "}

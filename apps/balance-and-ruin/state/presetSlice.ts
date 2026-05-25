@@ -6,10 +6,13 @@ import { setFlag, setFlags } from "./flagSlice";
 export interface PresetState {
   /** Name of the currently active preset, null when none is selected or flags have been manually changed */
   activePresetName: string | null;
+  /** Name of the last selected preset, persists even when flags are manually changed, cleared on manual clear */
+  lastSelectedPresetName: string | null;
 }
 
 const initialState: PresetState = {
   activePresetName: null,
+  lastSelectedPresetName: null,
 };
 
 export const presetSlice = createSlice({
@@ -18,9 +21,11 @@ export const presetSlice = createSlice({
   reducers: {
     setActivePreset(state, action: PayloadAction<string>) {
       state.activePresetName = action.payload;
+      state.lastSelectedPresetName = action.payload;
     },
     clearActivePreset(state) {
       state.activePresetName = null;
+      state.lastSelectedPresetName = null;
     },
   },
   extraReducers: (builder) => {
@@ -47,5 +52,8 @@ export const { setActivePreset, clearActivePreset } = presetSlice.actions;
 
 export const selectActivePresetName = (state: AppState) =>
   state.preset.activePresetName;
+
+export const selectLastSelectedPresetName = (state: AppState) =>
+  state.preset.lastSelectedPresetName;
 
 export default presetSlice.reducer;

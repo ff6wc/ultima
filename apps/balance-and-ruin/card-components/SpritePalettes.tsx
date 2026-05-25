@@ -116,13 +116,15 @@ export const SpritePalettes = ({
           return (
             <React.Fragment key={idx}>
               {idx ? <Divider /> : null}
-              <div className="flex items-center gap-12 flex-grow min-w-full">
-                <FlagLabel
-                  flag="-cpal"
-                  helperText=""
-                  label={`Palette ${idx}`}
-                />
-                <div className="w-full">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 flex-grow w-full min-w-0">
+                <div className="shrink-0 sm:min-w-[120px]">
+                  <FlagLabel
+                    flag="-cpal"
+                    helperText=""
+                    label={`Palette ${idx}`}
+                  />
+                </div>
+                <div className="flex-grow w-full min-w-0">
                   <PaletteSelect
                     onChange={(val) => {
                       if (val) {

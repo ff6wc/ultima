@@ -27,7 +27,7 @@ export const FlagLabel = ({
         {ghosts.map((ghost, idx) => (
           <div
             key={idx}
-            className="invisible row-start-1 col-start-1 pointer-events-none"
+            className="invisible row-start-1 col-start-1 pointer-events-none hidden md:block"
             aria-hidden="true"
           >
             <HelperText>{ghost}</HelperText>

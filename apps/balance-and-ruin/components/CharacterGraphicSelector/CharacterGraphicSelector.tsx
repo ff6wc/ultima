@@ -173,12 +173,14 @@ export const CharacterGraphicSelector = ({
   };
 
   return (
-    <div className="flex gap-8" key={id}>
-      <div className="flex flex-col gap-3 items-center min-w-[150px]">
+    <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 w-full min-w-0" key={id}>
+      <div className="flex flex-col gap-3 items-center w-full sm:w-auto sm:min-w-[150px] shrink-0">
         {/* NAME INPUT */}
-        {Label}
+        <div className="w-full text-center sm:text-left">
+          {Label}
+        </div>
         {/* PORTRAIT + SPRITE */}
-        <div className="flex justify-evenly items-end w-full">
+        <div className="flex justify-evenly items-end w-full max-w-[200px] sm:max-w-none">
           {portraitId !== null ? (
             <PortraitDrawLoad portraitId={portraitValues[portraitId]} />
           ) : null}
@@ -194,64 +196,64 @@ export const CharacterGraphicSelector = ({
         </div>
       </div>
       {/* Selects */}
-      <div className="flex flex-col gap-3 flex-grow">
-        {/* PORTRAIT */}
-        {portraitId != null ? (
+      <div className="flex flex-col gap-3 flex-grow w-full min-w-0">
+          {/* PORTRAIT */}
+          {portraitId != null ? (
+            <Select
+              options={portraitOptions}
+              nextOnArrowKeys
+              onChange={(val) => {
+                if (val) {
+                  const pors = [...portraitValues];
+                  pors.splice(portraitId, 1, Number.parseInt(val.value));
+                  dispatch(
+                    setFlag({
+                      flag: "-cpor",
+                      value: pors.join("."),
+                    }),
+                  );
+                }
+              }}
+              value={portraitsById[portraitValues[portraitId]]}
+            />
+          ) : null}
+          {/* SPRITE */}
           <Select
-            options={portraitOptions}
             nextOnArrowKeys
             onChange={(val) => {
               if (val) {
-                const pors = [...portraitValues];
-                pors.splice(portraitId, 1, Number.parseInt(val.value));
+                const sprs = [...spriteValues];
+                sprs.splice(id, 1, Number.parseInt(val.value));
                 dispatch(
                   setFlag({
-                    flag: "-cpor",
-                    value: pors.join("."),
+                    flag: "-cspr",
+                    value: sprs.join("."),
                   }),
                 );
               }
             }}
-            value={portraitsById[portraitValues[portraitId]]}
+            options={spriteOptions}
+            value={spritesById[spriteValues[id]]}
           />
-        ) : null}
-        {/* SPRITE */}
-        <Select
-          nextOnArrowKeys
-          onChange={(val) => {
-            if (val) {
-              const sprs = [...spriteValues];
-              sprs.splice(id, 1, Number.parseInt(val.value));
-              dispatch(
-                setFlag({
-                  flag: "-cspr",
-                  value: sprs.join("."),
-                }),
-              );
-            }
-          }}
-          options={spriteOptions}
-          value={spritesById[spriteValues[id]]}
-        />
-        {/* PALETTE */}
-        <Select
-          nextOnArrowKeys
-          options={paletteOptions}
-          onChange={(val) => {
-            if (val) {
-              const pals = [...characterPaletteValues];
-              pals.splice(id, 1, Number.parseInt(val.value));
-              dispatch(
-                setFlag({
-                  flag: "-cspp",
-                  value: pals.join("."),
-                }),
-              );
-            }
-          }}
-          value={palettesById[characterPaletteValues[id]]}
-        />
+          {/* PALETTE */}
+          <Select
+            nextOnArrowKeys
+            options={paletteOptions}
+            onChange={(val) => {
+              if (val) {
+                const pals = [...characterPaletteValues];
+                pals.splice(id, 1, Number.parseInt(val.value));
+                dispatch(
+                  setFlag({
+                    flag: "-cspp",
+                    value: pals.join("."),
+                  }),
+                );
+              }
+            }}
+            value={palettesById[characterPaletteValues[id]]}
+          />
+        </div>
       </div>
-    </div>
   );
 };

@@ -15,8 +15,9 @@ import { GenerateUpload } from "~/components/GenerateUpload/GenerateUpload";
 import { FlagTextInput } from "~/components/FlagInput/FlagInput";
 import { FlagSwitch } from "~/components/FlagSwitch/FlagSwitch";
 import styles from "./GenerateCard.module.css";
-import { selectActivePresetName } from "~/state/presetSlice";
+import { selectActivePresetName, selectLastSelectedPresetName } from "~/state/presetSlice";
 import { FlagSummary } from "~/components/FlagSummary/FlagSummary";
+import { FaCopy, FaCheck } from "react-icons/fa";
 
 export type FlagsCardProps = {
   className?: string;
@@ -65,6 +66,18 @@ export const GenerateCard = ({
   const router = useRouter();
   const { data: session } = useAppSession();
   const activePresetName = useSelector(selectActivePresetName);
+  const lastSelectedPresetName = useSelector(selectLastSelectedPresetName);
+
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyFlags = () => {
+    if (typeof window !== "undefined" && navigator.clipboard) {
+      navigator.clipboard.writeText(inputFlags).then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      });
+    }
+  };
 
   const [isSavingPreset, setIsSavingPreset] = useState(false);
   const [presetName, setPresetName] = useState("");
@@ -233,10 +246,10 @@ export const GenerateCard = ({
         localStorage.setItem("seeds_generated", String(currentCount + 1));
 
         // Track most-played preset per user
-        if (activePresetName) {
+        if (lastSelectedPresetName) {
           const presetCountKey = "preset_play_counts";
           const existingCounts = JSON.parse(localStorage.getItem(presetCountKey) || "{}");
-          existingCounts[activePresetName] = (existingCounts[activePresetName] || 0) + 1;
+          existingCounts[lastSelectedPresetName] = (existingCounts[lastSelectedPresetName] || 0) + 1;
           localStorage.setItem(presetCountKey, JSON.stringify(existingCounts));
         }
       } catch (e) {
@@ -244,7 +257,7 @@ export const GenerateCard = ({
       }
 
       // Update preset download timestamp when generating a seed using a selected preset
-      if (activePresetName) {
+      if (lastSelectedPresetName) {
         const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
         const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
         fetch(`${BACKEND_URL}/api/v1/user-presets`, {
@@ -253,7 +266,7 @@ export const GenerateCard = ({
             "Content-Type": "application/json",
             ...(token ? { "Authorization": `Bearer ${token}` } : {}),
           },
-          body: JSON.stringify({ flags, presetName: activePresetName })
+          body: JSON.stringify({ flags, presetName: lastSelectedPresetName })
         }).catch(console.error);
 
         // Record download time for official/custom presets in local storage
@@ -261,7 +274,7 @@ export const GenerateCard = ({
           const discordId = (session.user as any).discordId;
           if (discordId) {
             try {
-              localStorage.setItem(`preset_real_dl:${discordId}:${activePresetName}`, new Date().toISOString());
+              localStorage.setItem(`preset_real_dl:${discordId}:${lastSelectedPresetName}`, new Date().toISOString());
             } catch (e) {
               console.error("Failed to write preset download to localStorage:", e);
             }
@@ -346,64 +359,76 @@ export const GenerateCard = ({
           placeholder="Your selected flags will appear here..."
         />
         
-        {session?.user ? (
-          <div className="mt-3">
-            {!isSavingPreset ? (
-              <button
-                className={`text-sm font-bold py-1.5 px-4 rounded shadow transition-colors ${
-                  isSaved 
-                    ? "bg-emerald-600 text-white cursor-default opacity-80" 
-                    : "bg-blue-600 hover:bg-blue-700 text-white"
-                }`}
-                onClick={() => !isSaved && setIsSavingPreset(true)}
-                disabled={isSaved}
-              >
-                {isSaved ? "✓ Preset Saved" : "Save as Preset"}
-              </button>
+        <div className="mt-3 flex justify-between items-center w-full">
+          <div>
+            {session?.user ? (
+              !isSavingPreset && (
+                <button
+                  className={`text-sm font-bold py-1.5 px-4 rounded shadow transition-colors ${
+                    isSaved 
+                      ? "bg-emerald-600 text-white cursor-default opacity-80" 
+                      : "bg-blue-600 hover:bg-blue-700 text-white"
+                  }`}
+                  onClick={() => !isSaved && setIsSavingPreset(true)}
+                  disabled={isSaved}
+                >
+                  {isSaved ? "✓ Preset Saved" : "Save as Preset"}
+                </button>
+              )
             ) : (
-              <div className="p-4 bg-slate-800 border border-slate-700 rounded-md mt-2 flex flex-col gap-3 shadow-inner">
-                <h4 className="text-sm font-bold text-blue-400 m-0">Save New Preset</h4>
-                <input
-                  type="text"
-                  value={presetName}
-                  onChange={(e) => setPresetName(e.target.value)}
-                  placeholder="Preset Name"
-                  className="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded text-sm text-white focus:outline-none focus:border-blue-500"
-                />
-                <textarea
-                  value={presetDescription}
-                  onChange={(e) => setPresetDescription(e.target.value)}
-                  placeholder="Description (Optional)"
-                  rows={2}
-                  className="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded text-sm text-white focus:outline-none focus:border-blue-500"
-                />
-                <div className="flex gap-2 justify-end mt-1">
-                  <button
-                    className="text-sm bg-slate-600 hover:bg-slate-500 text-white font-bold py-1.5 px-4 rounded transition-colors"
-                    onClick={() => {
-                      setIsSavingPreset(false);
-                      setPresetName("");
-                      setPresetDescription("");
-                    }}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    className="text-sm bg-blue-600 hover:bg-blue-700 text-white font-bold py-1.5 px-4 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    disabled={!presetName.trim() || isSubmittingPreset}
-                    onClick={handleSavePreset}
-                  >
-                    {isSubmittingPreset ? "Saving..." : "Save Preset"}
-                  </button>
-                </div>
-                {presetError && <span className="text-xs text-red-400">{presetError}</span>}
-              </div>
+              <span className="text-xs text-slate-400 block italic">
+                Log in to save these flags as a preset.
+              </span>
             )}
           </div>
-        ) : (
-          <span className="text-xs text-slate-400 mt-2 block italic">
-            Log in to save these flags as a preset.
-          </span>
+
+          <button
+            onClick={handleCopyFlags}
+            className="text-sm font-bold py-1.5 px-4 rounded shadow bg-slate-700 hover:bg-slate-600 text-white transition-colors flex items-center gap-1.5"
+          >
+            {copied ? <FaCheck /> : <FaCopy />}
+            {copied ? "Copied!" : "Copy Flags"}
+          </button>
+        </div>
+
+        {session?.user && isSavingPreset && (
+          <div className="p-4 bg-slate-800 border border-slate-700 rounded-md mt-2 flex flex-col gap-3 shadow-inner w-full">
+            <h4 className="text-sm font-bold text-blue-400 m-0">Save New Preset</h4>
+            <input
+              type="text"
+              value={presetName}
+              onChange={(e) => setPresetName(e.target.value)}
+              placeholder="Preset Name"
+              className="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded text-sm text-white focus:outline-none focus:border-blue-500"
+            />
+            <textarea
+              value={presetDescription}
+              onChange={(e) => setPresetDescription(e.target.value)}
+              placeholder="Description (Optional)"
+              rows={2}
+              className="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded text-sm text-white focus:outline-none focus:border-blue-500"
+            />
+            <div className="flex gap-2 justify-end mt-1">
+              <button
+                className="text-sm bg-slate-600 hover:bg-slate-500 text-white font-bold py-1.5 px-4 rounded transition-colors"
+                onClick={() => {
+                  setIsSavingPreset(false);
+                  setPresetName("");
+                  setPresetDescription("");
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                className="text-sm bg-blue-600 hover:bg-blue-700 text-white font-bold py-1.5 px-4 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={!presetName.trim() || isSubmittingPreset}
+                onClick={handleSavePreset}
+              >
+                {isSubmittingPreset ? "Saving..." : "Save Preset"}
+              </button>
+            </div>
+            {presetError && <span className="text-xs text-red-400">{presetError}</span>}
+          </div>
         )}
         <FlagSummary />
       </div>
