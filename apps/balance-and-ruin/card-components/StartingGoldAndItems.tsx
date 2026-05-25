@@ -148,6 +148,33 @@ export const StartingGoldAndItems = ({ items: propsItems, curateItems = false }:
             ))}
             <StartingItemsAddItemButton items={items} />
           </div>
+
+          {/* Mobile-Only Starting Items Summary Panel */}
+          <div className="flex flex-col gap-2 pt-4 border-t border-zinc-800/80 md:hidden mt-2">
+            <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-sub)]">
+              Starting Items Summary
+            </span>
+            {validItems.length > 0 ? (
+              <div className="grid grid-cols-2 gap-2">
+                {validItems.map((item, idx) => {
+                  const qty = item.min === item.max ? `${item.min}` : `${item.min}-${item.max}`;
+                  return (
+                    <div
+                      key={idx}
+                      className="flex items-center justify-between gap-1.5 px-3 py-1 bg-zinc-50/60 dark:bg-[#181d29] text-[var(--text-main)] border border-zinc-200/80 dark:border-[#38445e]/50 rounded-md shadow-sm transition-all hover:bg-zinc-100/50 dark:hover:bg-[#1f2637]"
+                    >
+                      <span className="text-sm font-normal">{item.name}</span>
+                      <span className="bg-zinc-100 dark:bg-zinc-800/60 text-[var(--text-sub)] px-1.5 py-0.5 rounded text-[10px] font-bold">
+                        x{qty}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <span className="text-xs italic text-[var(--text-sub)]">No starting items selected.</span>
+            )}
+          </div>
         </div>
 
         {/* Right Column: Sliders and numeric options + Summary at the bottom */}
@@ -174,8 +201,8 @@ export const StartingGoldAndItems = ({ items: propsItems, curateItems = false }:
               />
             </div>
 
-            {/* Starting Items Summary Panel */}
-            <div className="flex flex-col gap-2 pt-6 border-t border-zinc-800/80">
+            {/* Starting Items Summary Panel (Desktop Only) */}
+            <div className="hidden md:flex flex-col gap-2 pt-6 border-t border-zinc-800/80">
               <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-sub)]">
                 Starting Items Summary
               </span>

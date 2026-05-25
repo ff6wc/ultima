@@ -5,6 +5,10 @@
 @tailwind components;
 @tailwind utilities;
 
+* {
+  -webkit-tap-highlight-color: transparent !important;
+}
+
 html,
 body,
 body > div:first-child,
@@ -339,5 +343,78 @@ input:not([type="range"]):not([type="checkbox"]):not([type="radio"]), select, te
   .ff6wc-party-select.ff6wc-select-container .ff6wc-select__single-value {
     @apply text-neutral-600 dark:text-neutral-200;
     @apply text-lg;
+  }
+}
+
+/* Mobile high-density layout compression ("higher resolution") */
+@media (max-width: 640px) {
+  :root, html {
+    font-size: 15px !important; /* Splits the difference between original 16px and high-density 14px */
+  }
+
+  /* Reduce padding on page containers to expand card width */
+  .p-5 {
+    padding-left: 0.6rem !important;
+    padding-right: 0.6rem !important;
+  }
+
+  /* Compact Card padding & margins */
+  .WC-Card {
+    padding: 0px !important;
+    border-radius: 8px !important;
+  }
+
+  .WC-Card > div[class*="heading"] {
+    padding: 0.6rem 0.75rem !important;
+    margin-bottom: 0px !important;
+    border-radius: 8px 8px 0 0 !important;
+  }
+
+  .WC-Card > div[class*="content"] {
+    padding: 0.75rem 0.75rem !important;
+  }
+
+  /* Compress Select containers */
+  .ff6wc-select-container .ff6wc-select__control {
+    min-height: 36px !important;
+    border-radius: 8px !important;
+  }
+
+  .ff6wc-select-container .ff6wc-select__value-container {
+    padding-left: 10px !important;
+  }
+
+  .ff6wc-select-container .ff6wc-select__single-value,
+  .ff6wc-select-container .ff6wc-select__placeholder {
+    font-size: 0.825rem !apply text-xs !important;
+  }
+
+  /* Compact ranges and sliders */
+  .ff6-slider.rc-slider {
+    height: 32px !important;
+  }
+
+  .ff6-slider .rc-slider-mark {
+    top: 22px !important;
+  }
+
+  .ff6-slider .rc-slider-mark-text {
+    font-size: 0.75rem !important;
+  }
+
+  .ff6-slider .rc-slider-dot {
+    top: 14px !important;
+  }
+
+  .ff6-slider .rc-slider-handle {
+    width: 16px !important;
+    height: 16px !important;
+    top: 2px !important;
+  }
+
+  .ff6-slider .rc-slider-rail,
+  .ff6-slider .rc-slider-step,
+  .ff6-slider .rc-slider-track {
+    height: 8px !important;
   }
 }

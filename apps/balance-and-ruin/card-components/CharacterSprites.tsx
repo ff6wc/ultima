@@ -136,7 +136,7 @@ export const CharacterSprites = ({
   return (
     <Card title={"Character Sprites"}>
       <CardColumn>
-        <span className="inline-flex gap-2 flex-wrap">
+        <span className="flex justify-center sm:justify-start gap-2 flex-wrap w-full">
           <Button
             disabled={!portraitDefs.length}
             onClick={randomizePortraits}

@@ -41,6 +41,8 @@ import {
   FaBars,
   FaTimes,
   FaShieldAlt,
+  FaChevronLeft,
+  FaChevronRight,
 } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { selectShowFlags, setShowFlags } from "~/state/settingsSlice";
@@ -396,6 +398,45 @@ export const FlagCreatePage = ({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
+  const NAV_FLOW = useMemo(() => [
+    "home",
+    "presets",
+    "objectives",
+    "party",
+    "commands",
+    "battle",
+    "magic",
+    "items",
+    "misc",
+    "Graphics",
+    "settings",
+    "generate"
+  ], []);
+
+  const currentFlowIndex = NAV_FLOW.indexOf(activeTabId);
+  // Disables the Previous button on both the Home page (index 0) and the Presets page (index 1) as requested.
+  const isPreviousDisabled = currentFlowIndex <= 1;
+  const isNextDisabled = currentFlowIndex === -1 || activeTabId === "generate";
+
+  const handlePrevious = () => {
+    if (isPreviousDisabled) return;
+    const prevTabId = NAV_FLOW[currentFlowIndex - 1];
+    const idx = tabs.findIndex((t) => t.id === prevTabId);
+    if (idx !== -1) setSelectedIndex(idx);
+  };
+
+  const handleNext = () => {
+    if (isNextDisabled) return;
+    const nextTabId = NAV_FLOW[currentFlowIndex + 1];
+    const idx = tabs.findIndex((t) => t.id === nextTabId);
+    if (idx !== -1) setSelectedIndex(idx);
+  };
+
+  const handleGenerate = () => {
+    const idx = tabs.findIndex((t) => t.id === "generate");
+    if (idx !== -1) setSelectedIndex(idx);
+  };
+
   const mainContentRef = useRef<HTMLElement>(null);
 
   // Reset scroll position to top of main container whenever active tab index changes
@@ -404,6 +445,162 @@ export const FlagCreatePage = ({
       mainContentRef.current.scrollTop = 0;
     }
   }, [selectedIndex]);
+
+  // Swipe to open/close mobile sidebar drawer with real-time tracking (discord-style pull)
+  useEffect(() => {
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let activeDrag = false;
+    const drawerWidth = 260; // matching CSS width
+
+    const handleTouchStart = (e: TouchEvent) => {
+      // ALWAYS reset state first to guarantee no stuck gestures!
+      touchStartX = 0;
+      touchStartY = 0;
+      activeDrag = false;
+
+      // Fail-Safe 3: Proactively clear manual styles on touchstart if sidebar is closed.
+      // This guarantees that any stuck styles left behind from interrupted wiggles are cleared instantly on next screen contact.
+      if (!sidebarOpen) {
+        const sidebarEl = document.querySelector(`.${styles.sidebar}`) as HTMLElement;
+        const backdropEl = document.querySelector(`.${styles.sidebarBackdrop}`) as HTMLElement;
+        if (sidebarEl) sidebarEl.style.left = "";
+        if (backdropEl) {
+          backdropEl.classList.remove(styles.sidebarBackdropDragging);
+          backdropEl.style.opacity = "";
+        }
+      }
+
+      // Check if a dropdown is currently open (Fail-Safe 4)
+      if (document.querySelector('[data-dropdown-open="true"]')) {
+        return;
+      }
+
+      const target = e.target as HTMLElement;
+      try {
+        const element = target.nodeType === Node.TEXT_NODE ? target.parentElement : target;
+        if (element && typeof element.closest === "function") {
+          // Skip swipe gesture if touching interactive controls or dropdown popups/options to prevent conflict (Fail-Safe 1)
+          if (
+            element.closest("input") ||
+            element.closest("button") ||
+            element.closest("select") ||
+            element.closest("a") ||
+            element.closest('[role="slider"]') ||
+            element.closest('[class*="Slider"]') ||
+            element.closest('[class*="slider"]') ||
+            element.closest('[class*="menu"]') ||
+            element.closest('[class*="option"]') ||
+            element.closest('[class*="Option"]')
+          ) {
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn("Touchstart closest check ignored:", err);
+      }
+
+      const touch = e.changedTouches[0];
+      touchStartX = touch.clientX;
+      touchStartY = touch.clientY;
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (touchStartX === 0) return;
+
+      const touch = e.touches[0];
+      const diffX = touch.clientX - touchStartX;
+      const diffY = touch.clientY - touchStartY;
+
+      // Determine active drag if horizontal movement is dominant (Fail-Safe 2: increased threshold to 25px to prevent wiggle triggers)
+      if (!activeDrag) {
+        if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 25) {
+          if (!sidebarOpen && diffX > 0) {
+            activeDrag = true;
+          } else if (sidebarOpen && diffX < 0) {
+            activeDrag = true;
+          }
+        }
+      }
+
+      if (activeDrag) {
+        // Prevent default scrolling of parent content during pull
+        if (e.cancelable) {
+          e.preventDefault();
+        }
+
+        let newLeft = 0;
+        if (!sidebarOpen) {
+          // Closed -> Opening. Dragging right.
+          newLeft = Math.min(0, -drawerWidth + diffX);
+        } else {
+          // Open -> Closing. Dragging left.
+          newLeft = Math.max(-drawerWidth, diffX);
+        }
+
+        const percentOpen = (newLeft + drawerWidth) / drawerWidth; // 0 to 1
+
+        const sidebarEl = document.querySelector(`.${styles.sidebar}`) as HTMLElement;
+        const backdropEl = document.querySelector(`.${styles.sidebarBackdrop}`) as HTMLElement;
+
+        if (sidebarEl) {
+          sidebarEl.style.transition = "none";
+          sidebarEl.style.left = `${newLeft}px`;
+        }
+        if (backdropEl) {
+          backdropEl.classList.add(styles.sidebarBackdropDragging);
+          backdropEl.style.opacity = `${percentOpen}`;
+        }
+      }
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      if (touchStartX === 0) return;
+
+      const touch = e.changedTouches[0];
+      const diffX = touch.clientX - touchStartX;
+
+      if (activeDrag) {
+        const threshold = 100; // threshold in pixels to register transition
+        let shouldOpen = sidebarOpen;
+
+        if (!sidebarOpen) {
+          shouldOpen = diffX > threshold;
+        } else {
+          shouldOpen = diffX >= -threshold;
+        }
+
+        const sidebarEl = document.querySelector(`.${styles.sidebar}`) as HTMLElement;
+        const backdropEl = document.querySelector(`.${styles.sidebarBackdrop}`) as HTMLElement;
+
+        if (sidebarEl) {
+          sidebarEl.style.transition = "";
+          sidebarEl.style.left = "";
+        }
+        if (backdropEl) {
+          backdropEl.classList.remove(styles.sidebarBackdropDragging);
+          backdropEl.style.opacity = "";
+        }
+
+        setSidebarOpen(shouldOpen);
+      }
+      touchStartX = 0;
+      touchStartY = 0;
+      activeDrag = false;
+    };
+
+    window.addEventListener("touchstart", handleTouchStart, { passive: true });
+    window.addEventListener("touchmove", handleTouchMove, { passive: false });
+    window.addEventListener("touchend", handleTouchEnd, { passive: true });
+    window.addEventListener("touchcancel", handleTouchEnd, { passive: true });
+
+    return () => {
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("touchend", handleTouchEnd);
+      window.removeEventListener("touchcancel", handleTouchEnd);
+    };
+  }, [sidebarOpen]);
 
   const dispatch = useDispatch();
   const showFlags = useSelector(selectShowFlags);
@@ -582,12 +779,10 @@ export const FlagCreatePage = ({
             setSidebarOpen(false);
           }}
         >
-          {sidebarOpen && (
-            <div
-              className={styles.sidebarBackdrop}
-              onClick={() => setSidebarOpen(false)}
-            />
-          )}
+          <div
+            className={`${styles.sidebarBackdrop} ${sidebarOpen ? styles.sidebarBackdropOpen : ""}`}
+            onClick={() => setSidebarOpen(false)}
+          />
           {/* Sidebar */}
           <aside
             className={`${styles.sidebar} ${sidebarOpen ? styles.sidebarOpen : ""}`}
@@ -840,6 +1035,55 @@ export const FlagCreatePage = ({
                   <Tab.Panel key={`tab-panel-${id}`}>{content}</Tab.Panel>
                 ))}
               </Tab.Panels>
+            </div>
+
+            {/* Mobile Bottom Navigation Bar */}
+            <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden grid grid-cols-3 items-center p-3.5 bg-slate-900/90 dark:bg-slate-950/90 backdrop-blur-md border-t border-white/10 shadow-[0_-4px_20px_rgba(0,0,0,0.4)]">
+              <div className="justify-self-start">
+                <button
+                  type="button"
+                  onClick={handlePrevious}
+                  disabled={isPreviousDisabled}
+                  className={`flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 border select-none cursor-pointer ${
+                    isPreviousDisabled
+                      ? "bg-slate-800/40 border-slate-700/30 text-slate-500 cursor-not-allowed opacity-50"
+                      : "bg-slate-800 hover:bg-slate-700 border-slate-700 active:scale-95 text-slate-100 hover:text-white"
+                  }`}
+                >
+                  <FaChevronLeft size={12} />
+                  <span>Prev</span>
+                </button>
+              </div>
+
+              <div className="justify-self-center">
+                <button
+                  type="button"
+                  onClick={handleGenerate}
+                  className="flex items-center gap-1.5 px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 border border-[#734c22] select-none cursor-pointer text-white active:scale-95 shadow-[0_2px_10px_rgba(138,98,51,0.2)]"
+                  style={{
+                    background: "linear-gradient(180deg, #c09963 0%, #8a6233 100%)",
+                  }}
+                >
+                  <FaBolt size={12} className="text-yellow-200" />
+                  <span>Generate</span>
+                </button>
+              </div>
+
+              <div className="justify-self-end">
+                <button
+                  type="button"
+                  onClick={handleNext}
+                  disabled={isNextDisabled}
+                  className={`flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 border select-none cursor-pointer ${
+                    isNextDisabled
+                      ? "bg-slate-800/40 border-slate-700/30 text-slate-500 cursor-not-allowed opacity-50"
+                      : "bg-slate-800 hover:bg-slate-700 border-slate-700 active:scale-95 text-slate-100 hover:text-white"
+                  }`}
+                >
+                  <span>Next</span>
+                  <FaChevronRight size={12} />
+                </button>
+              </div>
             </div>
           </main>
         </Tab.Group>

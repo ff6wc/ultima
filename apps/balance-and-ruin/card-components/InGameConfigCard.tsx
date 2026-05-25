@@ -5,6 +5,7 @@ import {
   DEFAULT_FONT_COLOR,
   WINDOW_PALETTE_DEFAULTS,
 } from "~/types/inGameConfig";
+import { FaCaretUp, FaCaretDown, FaCaretLeft, FaCaretRight } from "react-icons/fa";
 
 type RGB = [number, number, number];
 
@@ -376,6 +377,16 @@ export const InGameConfigCard = () => {
     magOrder: {},
     magOrderBbox: null,
   });
+
+  const timerRef = useRef<any>(null);
+  const intervalRef = useRef<any>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, []);
   const [state, setStateRaw] = useState<State>(defaultInternalState);
   const stateRef = useRef(state);
   const [ready, setReady] = useState(false);
@@ -525,6 +536,28 @@ export const InGameConfigCard = () => {
     []
   );
 
+  const startRepeat = (dRow: number, dCol: number) => {
+    stopRepeat();
+    move(dRow, dCol);
+    canvasRef.current?.focus();
+    timerRef.current = setTimeout(() => {
+      intervalRef.current = setInterval(() => {
+        move(dRow, dCol);
+      }, 80);
+    }, 600);
+  };
+
+  const stopRepeat = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  };
+
   const selectCurrent = useCallback(() => {
     setState((s) => {
       const opts = getOptionsForPage(s.page);
@@ -536,13 +569,8 @@ export const InGameConfigCard = () => {
     });
   }, [setState]);
 
-  const handleSliderClick = (
-    e: React.MouseEvent<HTMLButtonElement>,
-    rowIdx: number,
-    channel: 0 | 1 | 2
-  ) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const relativeClick = (e.clientX - rect.left) / rect.width;
+  const updateSliderValue = (clientX: number, rect: DOMRect, rowIdx: number, channel: 0 | 1 | 2) => {
+    const relativeClick = (clientX - rect.left) / rect.width;
     const xCanvas = (SLIDER_BAR_X0 - 4) + relativeClick * (SLIDER_BAR_W31 + 8);
     const t = (xCanvas - SLIDER_BAR_X0) / SLIDER_BAR_W31;
     const v = Math.round(Math.max(0, Math.min(1, t)) * 31);
@@ -551,7 +579,60 @@ export const InGameConfigCard = () => {
       rgb[channel] = v;
       return { ...writeEditedRgb(s, rgb), cursor: rowIdx };
     });
+  };
+
+  const handleSliderMouseDown = (
+    e: React.MouseEvent<HTMLButtonElement>,
+    rowIdx: number,
+    channel: 0 | 1 | 2
+  ) => {
+    if (e.button !== 0) return; // only left click
+    e.preventDefault();
+    const button = e.currentTarget;
+    const rect = button.getBoundingClientRect();
+
+    updateSliderValue(e.clientX, rect, rowIdx, channel);
     canvasRef.current?.focus();
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      updateSliderValue(moveEvent.clientX, rect, rowIdx, channel);
+    };
+
+    const handleMouseUp = () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+  };
+
+  const handleSliderTouchStart = (
+    e: React.TouchEvent<HTMLButtonElement>,
+    rowIdx: number,
+    channel: 0 | 1 | 2
+  ) => {
+    e.preventDefault();
+    const button = e.currentTarget;
+    const rect = button.getBoundingClientRect();
+    const touch = e.touches[0];
+
+    updateSliderValue(touch.clientX, rect, rowIdx, channel);
+    canvasRef.current?.focus();
+
+    const handleTouchMove = (moveEvent: TouchEvent) => {
+      if (moveEvent.touches.length > 0) {
+        updateSliderValue(moveEvent.touches[0].clientX, rect, rowIdx, channel);
+      }
+    };
+
+    const handleTouchEnd = () => {
+      window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("touchend", handleTouchEnd);
+    };
+
+    window.addEventListener("touchmove", handleTouchMove, { passive: true });
+    window.addEventListener("touchend", handleTouchEnd);
   };
 
   const handleHitClick = (rowIdx: number, val: string | number) => {
@@ -637,8 +718,9 @@ export const InGameConfigCard = () => {
                     <button
                       key={`slider-${rIdx}`}
                       type="button"
-                      onClick={(e) => handleSliderClick(e, rIdx, row.channel)}
-                      title={`${row.key}: click to set`}
+                      onMouseDown={(e) => handleSliderMouseDown(e, rIdx, row.channel)}
+                      onTouchStart={(e) => handleSliderTouchStart(e, rIdx, row.channel)}
+                      title={`${row.key}: click and drag to set`}
                       className="absolute pointer-events-auto cursor-pointer hover:outline hover:outline-1 hover:outline-dashed hover:outline-white/40"
                       style={{
                         left: `${((SLIDER_BAR_X0 - 4) / 256) * 100}%`,
@@ -693,6 +775,74 @@ export const InGameConfigCard = () => {
                   padding: 0,
                 }}
               />
+            </div>
+          </div>
+
+          {/* D-pad Controller for Mobile Only */}
+          <div className="flex flex-col items-center mt-4 md:hidden w-full max-w-[280px]">
+            <div className="relative w-36 h-36 bg-slate-900 rounded-full border border-slate-700/80 shadow-lg flex items-center justify-center">
+              <div className="grid grid-cols-3 grid-rows-3 w-28 h-28 items-center justify-items-center">
+                {/* Row 1 */}
+                <div></div>
+                <button
+                  type="button"
+                  onPointerDown={(e) => { e.preventDefault(); startRepeat(-1, 0); }}
+                  onPointerUp={stopRepeat}
+                  onPointerLeave={stopRepeat}
+                  onPointerCancel={stopRepeat}
+                  style={{ WebkitTapHighlightColor: "transparent" }}
+                  className="w-9 h-10 bg-slate-800 hover:bg-slate-700 active:bg-slate-600 active:text-white border-t border-x border-slate-600 rounded-t-md shadow-md text-slate-400 flex items-center justify-center transition-all transform active:scale-95 cursor-pointer outline-none select-none"
+                  title="Move Up"
+                >
+                  <FaCaretUp size={20} />
+                </button>
+                <div></div>
+
+                {/* Row 2 */}
+                <button
+                  type="button"
+                  onPointerDown={(e) => { e.preventDefault(); startRepeat(0, -1); }}
+                  onPointerUp={stopRepeat}
+                  onPointerLeave={stopRepeat}
+                  onPointerCancel={stopRepeat}
+                  style={{ WebkitTapHighlightColor: "transparent" }}
+                  className="w-10 h-9 bg-slate-800 hover:bg-slate-700 active:bg-slate-600 active:text-white border-y border-l border-slate-600 rounded-l-md shadow-md text-slate-400 flex items-center justify-center transition-all transform active:scale-95 cursor-pointer outline-none select-none"
+                  title="Decrease / Previous"
+                >
+                  <FaCaretLeft size={20} />
+                </button>
+                <div className="w-9 h-9 bg-slate-800 border border-slate-700 shadow-inner flex items-center justify-center text-slate-600 select-none">
+                  <div className="w-2.5 h-2.5 bg-slate-950 rounded-full" />
+                </div>
+                <button
+                  type="button"
+                  onPointerDown={(e) => { e.preventDefault(); startRepeat(0, 1); }}
+                  onPointerUp={stopRepeat}
+                  onPointerLeave={stopRepeat}
+                  onPointerCancel={stopRepeat}
+                  style={{ WebkitTapHighlightColor: "transparent" }}
+                  className="w-10 h-9 bg-slate-800 hover:bg-slate-700 active:bg-slate-600 active:text-white border-y border-r border-slate-600 rounded-r-md shadow-md text-slate-400 flex items-center justify-center transition-all transform active:scale-95 cursor-pointer outline-none select-none"
+                  title="Increase / Next"
+                >
+                  <FaCaretRight size={20} />
+                </button>
+
+                {/* Row 3 */}
+                <div></div>
+                <button
+                  type="button"
+                  onPointerDown={(e) => { e.preventDefault(); startRepeat(1, 0); }}
+                  onPointerUp={stopRepeat}
+                  onPointerLeave={stopRepeat}
+                  onPointerCancel={stopRepeat}
+                  style={{ WebkitTapHighlightColor: "transparent" }}
+                  className="w-9 h-10 bg-slate-800 hover:bg-slate-700 active:bg-slate-600 active:text-white border-b border-x border-slate-600 rounded-b-md shadow-md text-slate-400 flex items-center justify-center transition-all transform active:scale-95 cursor-pointer outline-none select-none"
+                  title="Move Down"
+                >
+                  <FaCaretDown size={20} />
+                </button>
+                <div></div>
+              </div>
             </div>
           </div>
         </div>

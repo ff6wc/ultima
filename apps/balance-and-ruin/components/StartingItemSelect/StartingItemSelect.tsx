@@ -93,9 +93,9 @@ export const StartingItemSelect = ({
   };
 
   return (
-    <div className="flex flex-col gap-3 p-3 bg-blue-50/50 dark:bg-[#181d29] rounded-lg border border-blue-100 dark:border-[#38445e]/50 hover:border-blue-200 dark:hover:border-[#38445e]/80 transition-all shadow-md">
-      <div className="flex items-center gap-2 w-full">
-        <div className="flex-1">
+    <div className="flex flex-col gap-3 p-3 bg-blue-50/50 dark:bg-[#181d29] rounded-lg border border-blue-100 dark:border-[#38445e]/50 hover:border-blue-200 dark:hover:border-[#38445e]/80 transition-all shadow-md w-full min-w-0">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full">
+        <div className="flex-grow min-w-0">
           <Select
             options={selectOptions}
             onChange={(val) => onSelectValueChange(val)}
@@ -105,27 +105,33 @@ export const StartingItemSelect = ({
           />
         </div>
         {item.id !== -1 && (
-          <div className="flex items-center gap-1 shrink-0">
-            <Input
-              type="number"
-              className="w-14 text-center px-1"
-              min={1}
-              max={99}
-              value={item.min}
-              onChange={(e) => onMinInputChange(Number.parseInt(e.target.value))}
-            />
-            <Input
-              type="number"
-              className="w-14 text-center px-1"
-              min={1}
-              max={99}
-              value={item.max}
-              onChange={(e) => onMaxInputChange(Number.parseInt(e.target.value))}
-            />
+          <div className="flex items-center justify-between sm:justify-start gap-2 shrink-0 w-full sm:w-auto">
+            <span className="text-xs text-[var(--text-sub)] sm:hidden font-medium">Quantity:</span>
+            <div className="flex items-center gap-1.5">
+              <Input
+                type="number"
+                className="w-14 text-center px-1"
+                min={1}
+                max={99}
+                value={item.min}
+                onChange={(e) => onMinInputChange(Number.parseInt(e.target.value))}
+              />
+              <span className="text-xs text-[var(--text-sub)]">to</span>
+              <Input
+                type="number"
+                className="w-14 text-center px-1"
+                min={1}
+                max={99}
+                value={item.max}
+                onChange={(e) => onMaxInputChange(Number.parseInt(e.target.value))}
+              />
+            </div>
           </div>
         )}
         {item.id === -1 && (
-          <StartingItemsRemoveItemButton items={items} item={item} />
+          <div className="flex justify-end sm:justify-start shrink-0 w-full sm:w-auto">
+            <StartingItemsRemoveItemButton items={items} item={item} />
+          </div>
         )}
       </div>
 
