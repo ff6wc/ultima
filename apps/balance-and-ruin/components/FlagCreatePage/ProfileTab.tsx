@@ -3,14 +3,42 @@ import { signOut, signIn } from "~/hooks/useAppSession";
 import { useAppSession } from "~/hooks/useAppSession";
 import { FaDiscord, FaShieldAlt, FaSignOutAlt, FaDice, FaBookmark, FaStar } from "react-icons/fa";
 import { PageContainer } from "../PageContainer/PageContainer";
+import { useRouter } from "next/router";
+import { useDispatch } from "react-redux";
+import { setRawFlags } from "~/state/flagSlice";
+
+const getCleanPresetName = (seedType: string) => {
+  if (!seedType) return "custom";
+  let name = seedType.trim().toLowerCase();
+  
+  if (name.startsWith("preset_")) {
+    name = name.slice(7);
+  } else if (name.startsWith("preset")) {
+    name = name.slice(6);
+  }
+  
+  if (name === "true_chaos") {
+    return "true chaos";
+  }
+  
+  return name.split("_")[0];
+};
 
 export const ProfileTab = () => {
   const { data: session, status } = useAppSession();
+  const router = useRouter();
+  const dispatch = useDispatch();
   const [userPresets, setUserPresets] = useState<any[]>([]);
   const [loadingPresets, setLoadingPresets] = useState(true);
   const [expandedPresets, setExpandedPresets] = useState<Record<string, boolean>>({});
   const [isDeleting, setIsDeleting] = useState<Record<string, boolean>>({});
   const [showConfirm, setShowConfirm] = useState<Record<string, boolean>>({});
+
+  const [userSeeds, setUserSeeds] = useState<any[]>([]);
+  const [loadingSeeds, setLoadingSeeds] = useState(true);
+  const [expandedSeeds, setExpandedSeeds] = useState<Record<string, boolean>>({});
+  const [totalSeedsCount, setTotalSeedsCount] = useState<number | null>(null);
+  const [loadingCount, setLoadingCount] = useState(true);
 
   // Usage stats from localStorage
   const [seedsGenerated, setSeedsGenerated] = useState(0);
@@ -42,20 +70,42 @@ export const ProfileTab = () => {
     try {
       const count = parseInt(localStorage.getItem("seeds_generated") || "0", 10);
       setSeedsGenerated(isNaN(count) ? 0 : count);
+    } catch (e) {}
+  }, []);
 
-      const playCounts: Record<string, number> = JSON.parse(
-        localStorage.getItem("preset_play_counts") || "{}"
-      );
-      const entries = Object.entries(playCounts);
+  useEffect(() => {
+    if (userSeeds.length > 0) {
+      const counts: Record<string, number> = {};
+      
+      userSeeds.forEach((seed) => {
+        const seedType = seed.seed_type;
+        const cleanName = getCleanPresetName(seedType);
+        if (cleanName && cleanName !== "custom") {
+          const capitalized = cleanName
+            .split(" ")
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(" ");
+            
+          counts[capitalized] = (counts[capitalized] || 0) + 1;
+        }
+      });
+      
+      const entries = Object.entries(counts);
       if (entries.length > 0) {
         const [topName, topCount] = entries.reduce((best, curr) =>
           curr[1] > best[1] ? curr : best
         );
         setMostPlayedPreset(topName);
         setMostPlayedCount(topCount);
+      } else {
+        setMostPlayedPreset(null);
+        setMostPlayedCount(0);
       }
-    } catch (e) {}
-  }, []);
+    } else {
+      setMostPlayedPreset(null);
+      setMostPlayedCount(0);
+    }
+  }, [userSeeds]);
 
   const togglePreset = (id: string) => setExpandedPresets((p) => ({ ...p, [id]: !p[id] }));
 
@@ -64,9 +114,11 @@ export const ProfileTab = () => {
       const userDiscordId = (session.user as any)?.discordId;
       const token = localStorage.getItem("auth_token");
       const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+      
+      setLoadingPresets(true);
       fetch(`${backendUrl}/api/v1/user-presets?mine=true`, {
         headers: {
-          "Authorization": `Bearer ${token}`,
+          ...(token ? { "Authorization": `Bearer ${token}` } : {}),
         },
       })
         .then((res) => res.json())
@@ -90,6 +142,44 @@ export const ProfileTab = () => {
         })
         .catch((err) => console.error("Error fetching user presets:", err))
         .finally(() => setLoadingPresets(false));
+
+      if (userDiscordId) {
+        setLoadingSeeds(true);
+        setLoadingCount(true);
+        
+        // 1. Fetch latest 100 seeds for the history section
+        fetch(`${backendUrl}/api/v1/seedlist?creator_id=${userDiscordId}&limit=100`, {
+          headers: {
+            ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+          },
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (Array.isArray(data)) {
+              setUserSeeds(data);
+            }
+          })
+          .catch((err) => console.error("Error fetching user seeds:", err))
+          .finally(() => setLoadingSeeds(false));
+
+        // 2. Fetch the aggregate count of all seeds rolled
+        fetch(`${backendUrl}/api/v1/seedlist/count?creator_id=${userDiscordId}`, {
+          headers: {
+            ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+          },
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data && typeof data.count === "number") {
+              setTotalSeedsCount(data.count);
+            }
+          })
+          .catch((err) => console.error("Error fetching user seeds count:", err))
+          .finally(() => setLoadingCount(false));
+      } else {
+        setLoadingSeeds(false);
+        setLoadingCount(false);
+      }
     }
   }, [session?.user]);
 
@@ -109,7 +199,7 @@ export const ProfileTab = () => {
       const res = await fetch(`${backendUrl}/api/v1/user-presets?id=${id}`, {
         method: "DELETE",
         headers: {
-          "Authorization": `Bearer ${token}`,
+          ...(token ? { "Authorization": `Bearer ${token}` } : {}),
         },
       });
       if (res.ok) {
@@ -314,8 +404,8 @@ export const ProfileTab = () => {
             </p>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "1rem" }}>
-            {/* Seeds Generated */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1rem" }}>
+            {/* Seeds Rolled */}
             <div
               style={{
                 backgroundColor: "rgba(59, 130, 246, 0.1)",
@@ -329,12 +419,12 @@ export const ProfileTab = () => {
             >
               <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "#60a5fa", fontSize: "0.8rem", fontWeight: "bold", textTransform: "uppercase", letterSpacing: "0.5px" }}>
                 <FaDice size={14} />
-                Seeds Generated
+                Seeds Rolled
               </div>
               <div style={{ fontSize: "2.25rem", fontWeight: "bold", color: "#f1f5f9", lineHeight: 1 }}>
-                {seedsGenerated.toLocaleString()}
+                {loadingCount ? "…" : (totalSeedsCount ?? 0).toLocaleString()}
               </div>
-              <div style={{ fontSize: "0.72rem", color: "#64748b" }}>total ROMs created</div>
+              <div style={{ fontSize: "0.72rem", color: "#64748b" }}>rolled on website & discord bot</div>
             </div>
 
             {/* Presets Saved */}
@@ -381,7 +471,7 @@ export const ProfileTab = () => {
                   <div style={{ fontSize: "1.1rem", fontWeight: "bold", color: "#f1f5f9", lineHeight: 1.2, wordBreak: "break-word" }}>
                     {mostPlayedPreset}
                   </div>
-                  <div style={{ fontSize: "0.72rem", color: "#64748b" }}>{mostPlayedCount} seed{mostPlayedCount !== 1 ? "s" : ""} generated</div>
+                  <div style={{ fontSize: "0.72rem", color: "#64748b" }}>{mostPlayedCount} seed{mostPlayedCount !== 1 ? "s" : ""} (from last 100 rolled)</div>
                 </>
               ) : (
                 <div style={{ fontSize: "0.85rem", color: "#64748b", fontStyle: "italic", lineHeight: 1.4 }}>
@@ -606,7 +696,176 @@ export const ProfileTab = () => {
           )}
         </div>
 
+        {/* My Generated Seeds Card */}
+        <div
+          style={{
+            backgroundColor: "rgba(15, 23, 42, 0.95)",
+            border: "4px double #3b82f6",
+            borderRadius: "8px",
+            boxShadow: "0 8px 30px rgba(0, 0, 0, 0.4)",
+            padding: "2rem",
+            color: "#f8fafc",
+            fontFamily: "var(--font-runic, monospace)",
+          }}
+        >
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", borderBottom: "2px solid rgba(59, 130, 246, 0.4)", paddingBottom: "1rem", marginBottom: "1rem" }}>
+            <h2 style={{ margin: 0, fontSize: "1.5rem", fontWeight: "bold", letterSpacing: "1px", color: "#60a5fa" }}>
+              MY GENERATED SEEDS
+            </h2>
+            <span style={{ fontSize: "0.9rem", fontWeight: "bold", color: "#94a3b8" }}>
+              {loadingSeeds ? "…" : userSeeds.length} of {loadingCount ? "…" : (totalSeedsCount ?? 0)} Total
+            </span>
+          </div>
 
+          {loadingSeeds ? (
+            <div className="animate-pulse" style={{ color: "#94a3b8", fontSize: "0.9rem" }}>Loading seeds...</div>
+          ) : userSeeds.length === 0 ? (
+            <div style={{ color: "#94a3b8", fontSize: "0.9rem", fontStyle: "italic" }}>
+              You have not generated any seeds yet. Head over to the "Generate" tab and roll a seed!
+            </div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+              {userSeeds.map((seed, idx) => {
+                const seedId = seed.id || `seed-${idx}`;
+                const isExpanded = !!expandedSeeds[seedId];
+                // format timestamp
+                let formattedDate = "Unknown Date";
+                if (seed.timestamp) {
+                  try {
+                    formattedDate = new Date(seed.timestamp).toLocaleString(undefined, {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    });
+                  } catch (e) {}
+                }
+                return (
+                  <div key={seedId} style={{ backgroundColor: "rgba(30, 41, 59, 0.6)", padding: "0.75rem 1rem", borderRadius: "6px", border: "1px solid rgba(59, 130, 246, 0.2)" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.5rem" }}>
+                      <div style={{ display: "flex", alignItems: "baseline", gap: "0.75rem", overflow: "hidden", flex: 1, minWidth: 0 }}>
+                        <h4 style={{ margin: 0, color: "#f8fafc", fontSize: "1rem", fontWeight: "bold", whiteSpace: "nowrap" }}>
+                          Seed #{seed.id}
+                        </h4>
+                        <span style={{
+                          fontSize: "0.75rem",
+                          backgroundColor: seed.seed_type !== "ff6wc" ? "rgba(59, 130, 246, 0.2)" : "rgba(148, 163, 184, 0.1)",
+                          color: seed.seed_type !== "ff6wc" ? "#60a5fa" : "#94a3b8",
+                          border: seed.seed_type !== "ff6wc" ? "1px solid rgba(59, 130, 246, 0.3)" : "1px solid rgba(148, 163, 184, 0.2)",
+                          padding: "0.1rem 0.5rem",
+                          borderRadius: "4px",
+                          fontWeight: "bold",
+                        }}>
+                          {seed.seed_type}
+                        </span>
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+                        <button
+                          onClick={() => setExpandedSeeds(p => ({ ...p, [seedId]: !p[seedId] }))}
+                          style={{ background: "none", border: "none", color: "#60a5fa", cursor: "pointer", fontSize: "0.85rem", padding: 0, display: "flex", alignItems: "center", gap: "0.25rem", fontWeight: "bold" }}
+                          className="hover:text-blue-400"
+                        >
+                          {isExpanded ? "▼ Hide" : "▶ Show"}
+                        </button>
+                        {seed.share_url && (
+                          <a
+                            href={seed.share_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              backgroundColor: "rgba(59, 130, 246, 0.1)",
+                              border: "1px solid #3b82f6",
+                              color: "#60a5fa",
+                              padding: "0.25rem 0.5rem",
+                              borderRadius: "4px",
+                              fontSize: "0.75rem",
+                              cursor: "pointer",
+                              fontWeight: "bold",
+                              textDecoration: "none",
+                            }}
+                            className="hover:bg-blue-500 hover:text-white transition-colors"
+                          >
+                            View Seed ↗
+                          </a>
+                        )}
+                      </div>
+                    </div>
+
+                    <div style={{ fontSize: "0.75rem", color: "#64748b", fontWeight: "bold", marginTop: "0.25rem" }}>
+                      Generated: {formattedDate}
+                    </div>
+                    
+                    {isExpanded && (
+                      <div style={{ marginTop: "0.75rem", borderTop: "1px dashed rgba(148, 163, 184, 0.2)", paddingTop: "0.75rem", display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                        {seed.server_name && (
+                          <div style={{ fontSize: "0.8rem", color: "#cbd5e1" }}>
+                            <strong>Server/Host:</strong> <span style={{ fontFamily: "monospace" }}>{seed.server_name}</span>
+                          </div>
+                        )}
+                        {seed.seed && (
+                          <div style={{ fontSize: "0.8rem", color: "#cbd5e1" }}>
+                            <strong>Seed Number:</strong> <span style={{ fontFamily: "monospace" }}>{seed.seed}</span>
+                          </div>
+                        )}
+                        {seed.hash && (
+                          <div style={{ fontSize: "0.8rem", color: "#cbd5e1" }}>
+                            <strong>Sprite/Hash:</strong> <span style={{ fontFamily: "monospace" }}>{seed.hash}</span>
+                          </div>
+                        )}
+                        {seed.flagstring && (
+                          <div>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.25rem" }}>
+                              <strong style={{ fontSize: "0.8rem", color: "#cbd5e1" }}>Flags:</strong>
+                              <button
+                                onClick={() => {
+                                  if (navigator.clipboard) {
+                                    navigator.clipboard.writeText(seed.flagstring);
+                                    alert("Flags copied to clipboard!");
+                                  } else {
+                                    alert("Clipboard access is not available in this browser/context.");
+                                  }
+                                }}
+                                style={{ background: "none", border: "none", color: "#60a5fa", cursor: "pointer", fontSize: "0.75rem", padding: 0, fontWeight: "bold" }}
+                                className="hover:text-blue-400"
+                              >
+                                Copy Flags
+                              </button>
+                            </div>
+                            <div style={{ backgroundColor: "rgba(0, 0, 0, 0.4)", padding: "0.75rem", borderRadius: "4px", fontSize: "0.8rem", color: "#cbd5e1", fontFamily: "monospace", overflowX: "auto", whiteSpace: "pre-wrap", wordBreak: "break-all", border: "1px solid rgba(255,255,255,0.05)" }}>
+                              {seed.flagstring}
+                            </div>
+                          </div>
+                        )}
+                        <div style={{ display: "flex", gap: "1rem", marginTop: "0.5rem" }}>
+                          <button
+                            onClick={() => {
+                              dispatch(setRawFlags(seed.flagstring));
+                              router.push("/create?tab=generate");
+                            }}
+                            style={{
+                              backgroundColor: "#3b82f6",
+                              border: "none",
+                              color: "#ffffff",
+                              padding: "0.4rem 1rem",
+                              borderRadius: "4px",
+                              fontSize: "0.8rem",
+                              cursor: "pointer",
+                              fontWeight: "bold",
+                            }}
+                            className="hover:bg-blue-600 transition-colors"
+                          >
+                            Load Flags to Generator
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
 
       </div>
     </PageContainer>
