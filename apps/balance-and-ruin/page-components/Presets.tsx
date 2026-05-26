@@ -585,7 +585,7 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
 
   useEffect(() => {
     if (toast) {
-      const timer = setTimeout(() => setToast(null), 700);
+      const timer = setTimeout(() => setToast(null), 1500);
       return () => clearTimeout(timer);
     }
   }, [toast]);
@@ -614,6 +614,7 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
       title: "Random",
       icon: <FaDice size={22} />,
       color: "#10b981", // Emerald / Green
+      rgb: "16, 185, 129",
       glow: "rgba(16,185,129,0.15)",
       bgGradient: "linear-gradient(135deg, rgba(16,185,129,0.08) 0%, rgba(16,185,129,0.01) 100%)",
       helper: "Light randomization, perfect for quick runs",
@@ -625,6 +626,7 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
       title: "Chaos",
       icon: <FaBolt size={22} />,
       color: "#f59e0b", // Amber / Yellow
+      rgb: "245, 158, 11",
       glow: "rgba(245,158,11,0.15)",
       bgGradient: "linear-gradient(135deg, rgba(245,158,11,0.08) 0%, rgba(245,158,11,0.01) 100%)",
       helper: "More randomization, can get a little wacky",
@@ -636,6 +638,7 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
       title: "True Chaos",
       icon: <FaSkull size={22} />,
       color: "#ef4444", // Red
+      rgb: "239, 68, 68",
       glow: "rgba(239,68,68,0.15)",
       bgGradient: "linear-gradient(135deg, rgba(239,68,68,0.08) 0%, rgba(239,68,68,0.01) 100%)",
       helper: "Total randomization. Good luck!",
@@ -956,221 +959,41 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
           </p>
         </div>
 
-        {/* Style injection for micro-animations and mobile layout */}
+        {/* Style injection for slideUpFade keyframes only */}
         <style dangerouslySetInnerHTML={{ __html: `
           @keyframes slideUpFade {
             from { transform: translateY(12px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
           }
-          
-          .roll-panel {
-            display: grid !important;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)) !important;
-            gap: 1rem !important;
-            margin-top: 0.25rem !important;
-          }
-          
-          .roll-helper-mobile {
-            display: none !important;
-          }
-          
-          @media (hover: hover) {
-            .roll-card-random:hover {
-              background: linear-gradient(135deg, rgba(16,185,129,0.08) 0%, rgba(16,185,129,0.01) 100%) !important;
-              border-color: #10b981 !important;
-              transform: translateY(-4px) !important;
-              box-shadow: 0 10px 20px -5px rgba(16,185,129,0.15), 0 4px 6px -2px rgba(16,185,129,0.15) !important;
-            }
-            .roll-card-chaos:hover {
-              background: linear-gradient(135deg, rgba(245,158,11,0.08) 0%, rgba(245,158,11,0.01) 100%) !important;
-              border-color: #f59e0b !important;
-              transform: translateY(-4px) !important;
-              box-shadow: 0 10px 20px -5px rgba(245,158,11,0.15), 0 4px 6px -2px rgba(245,158,11,0.15) !important;
-            }
-            .roll-card-true_chaos:hover {
-              background: linear-gradient(135deg, rgba(239,68,68,0.08) 0%, rgba(239,68,68,0.01) 100%) !important;
-              border-color: #ef4444 !important;
-              transform: translateY(-4px) !important;
-              box-shadow: 0 10px 20px -5px rgba(239,68,68,0.15), 0 4px 6px -2px rgba(239,68,68,0.15) !important;
-            }
-            
-            .roll-card-random:hover .roll-icon-container {
-              background: rgba(0, 0, 0, 0.15) !important;
-              border-color: #10b981 !important;
-            }
-            .roll-card-chaos:hover .roll-icon-container {
-              background: rgba(0, 0, 0, 0.15) !important;
-              border-color: #f59e0b !important;
-            }
-            .roll-card-true_chaos:hover .roll-icon-container {
-              background: rgba(0, 0, 0, 0.15) !important;
-              border-color: #ef4444 !important;
-            }
-            
-            .roll-card-random:hover .roll-action {
-              color: #10b981 !important;
-            }
-            .roll-card-chaos:hover .roll-action {
-              color: #f59e0b !important;
-            }
-            .roll-card-true_chaos:hover .roll-action {
-              color: #ef4444 !important;
-            }
-            
-            .roll-card:hover .roll-action-arrow {
-              transform: translateX(4px) !important;
-            }
-            
-            .roll-card:hover .roll-glow-backdrop {
-              opacity: 0.15 !important;
-            }
-          }
-          
-          @media (max-width: 640px) {
-            .roll-panel {
-              grid-template-columns: repeat(3, 1fr) !important;
-              gap: 0.5rem !important;
-            }
-            .roll-card {
-              padding: 0.6rem 0.4rem !important;
-              min-height: 125px !important;
-              justify-content: center !important;
-              align-items: center !important;
-              text-align: center !important;
-              gap: 0.3rem !important;
-              border-radius: 10px !important;
-            }
-            .roll-header {
-              justify-content: center !important;
-              width: 100% !important;
-              margin-bottom: 0.2rem !important;
-            }
-            .roll-icon-container {
-              width: 36px !important;
-              height: 36px !important;
-              border-radius: 8px !important;
-            }
-            .roll-icon-container svg {
-              width: 18px !important;
-              height: 18px !important;
-            }
-            .roll-badge {
-              display: none !important;
-            }
-            .roll-body {
-              display: flex !important;
-              flex-direction: column !important;
-              align-items: center !important;
-              justify-content: center !important;
-              width: 100% !important;
-            }
-            .roll-title {
-              font-size: 0.8rem !important;
-              margin: 0 !important;
-              font-weight: 700 !important;
-              line-height: 1.1 !important;
-            }
-            .roll-helper {
-              display: none !important;
-            }
-            .roll-helper-mobile {
-              display: block !important;
-              font-size: 0.6rem !important;
-              color: var(--text-sub) !important;
-              margin-top: 0.15rem !important;
-              line-height: 1.1 !important;
-              opacity: 0.8 !important;
-            }
-            .roll-action {
-              display: none !important;
-            }
-            
-            /* Reset hover states on mobile to prevent sticky touch-highlights */
-            .roll-card-random:not(.rolled):hover,
-            .roll-card-chaos:not(.rolled):hover,
-            .roll-card-true_chaos:not(.rolled):hover {
-              background: var(--bg-card) !important;
-              border-color: var(--border-light) !important;
-              transform: none !important;
-              box-shadow: none !important;
-            }
-            .roll-card-random:not(.rolled):hover .roll-icon-container,
-            .roll-card-chaos:not(.rolled):hover .roll-icon-container,
-            .roll-card-true_chaos:not(.rolled):hover .roll-icon-container {
-              background: var(--bg-app) !important;
-              border-color: var(--border-light) !important;
-            }
-            .roll-card-random:not(.rolled):hover .roll-action,
-            .roll-card-chaos:not(.rolled):hover .roll-action,
-            .roll-card-true_chaos:not(.rolled):hover .roll-action {
-              color: var(--text-sub) !important;
-            }
-            .roll-card:not(.rolled):hover .roll-glow-backdrop {
-              opacity: 0 !important;
-            }
-          }
         ` }} />
 
         {/* Random / Chaos / True Chaos rolling panel */}
-        <div className="roll-panel" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "1rem", marginTop: "0.25rem" }}>
+        <div className="grid grid-cols-3 gap-2 sm:gap-4 mt-1">
           {randomRolls.map((card) => {
             const isRolled = toast && toast.type === card.id;
             return (
               <div
                 key={card.id}
                 onClick={() => handleRandomRoll(card.id as any, card.generator)}
-                className={`roll-card roll-card-${card.id} ${isRolled ? "rolled" : ""}`}
+                className={`group relative overflow-hidden cursor-pointer flex flex-col justify-between p-5 rounded-[14px] border transition-all duration-250 ease-[cubic-bezier(0.4,0,0.2,1)]
+                  ${isRolled 
+                    ? "scale-[0.98] border-[var(--card-color)] bg-[rgba(var(--card-rgb),0.12)] shadow-[0_0_15px_var(--card-glow)]" 
+                    : "border-[var(--border-light)] bg-[var(--bg-card)] hover:-translate-y-1 hover:border-[var(--card-color)] hover:bg-[linear-gradient(135deg,rgba(var(--card-rgb),0.08)_0%,rgba(var(--card-rgb),0.01)_100%)] hover:shadow-[0_10px_20px_-5px_rgba(var(--card-rgb),0.15),0_4px_6px_-2px_rgba(var(--card-rgb),0.15)] max-sm:hover:translate-y-0 max-sm:hover:border-[var(--border-light)] max-sm:hover:bg-[var(--bg-card)] max-sm:hover:shadow-none"
+                  }
+                  max-sm:p-[0.6rem_0.4rem] max-sm:min-h-[125px] max-sm:justify-center max-sm:items-center max-sm:text-center max-sm:gap-1 max-sm:rounded-xl
+                `}
                 style={{
-                  background: isRolled
-                    ? `rgba(${parseInt(card.color.slice(1,3),16)}, ${parseInt(card.color.slice(3,5),16)}, ${parseInt(card.color.slice(5,7),16)}, 0.12)`
-                    : "var(--bg-card)",
-                  border: `1px solid ${isRolled ? card.color : "var(--border-light)"}`,
-                  borderRadius: "14px",
-                  padding: "1.25rem",
-                  cursor: "pointer",
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "space-between",
-                  gap: "0.75rem",
-                  transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
-                  transform: isRolled ? "scale(0.98)" : "translateY(0)",
-                  boxShadow: isRolled
-                    ? `0 0 15px ${card.glow}`
-                    : "none",
-                  position: "relative",
-                  overflow: "hidden",
-                }}
+                  "--card-color": card.color,
+                  "--card-rgb": card.rgb,
+                  "--card-glow": card.glow,
+                } as React.CSSProperties}
               >
                 {isRolled ? (
-                  <div style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flex: 1,
-                    gap: "0.5rem",
-                    textAlign: "center",
-                    animation: "slideUpFade 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards",
-                  }}>
-                    <div style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      width: "44px",
-                      height: "44px",
-                      borderRadius: "50%",
-                      background: `rgba(${parseInt(card.color.slice(1,3),16)}, ${parseInt(card.color.slice(3,5),16)}, ${parseInt(card.color.slice(5,7),16)}, 0.2)`,
-                      color: card.color,
-                      fontSize: "1.3rem",
-                      fontWeight: "bold",
-                    }}>
+                  <div className="flex flex-col items-center justify-center flex-1 gap-2 text-center animate-[slideUpFade_0.2s_cubic-bezier(0.16,1,0.3,1)_forwards]">
+                    <div className="flex items-center justify-center w-11 h-11 rounded-full text-lg font-bold bg-[rgba(var(--card-rgb),0.2)] text-[var(--card-color)]">
                       ✓
                     </div>
-                    <span style={{
-                      fontSize: "0.95rem",
-                      fontWeight: 800,
-                      color: "var(--text-main)",
-                    }}>
+                    <span className="text-[0.95rem] font-extrabold text-[var(--text-main)]">
                       {card.id === "random" 
                         ? "Rolled Random!" 
                         : card.id === "chaos" 
@@ -1181,69 +1004,25 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
                 ) : (
                   <>
                     {/* Visual Accent/Glow backdrop on hover */}
-                    <div className="roll-glow-backdrop" style={{
-                      position: "absolute",
-                      top: "-20%",
-                      right: "-20%",
-                      width: "80px",
-                      height: "80px",
-                      borderRadius: "50%",
-                      background: card.color,
-                      filter: "blur(40px)",
-                      opacity: 0,
-                      pointerEvents: "none",
-                      transition: "opacity 0.25s ease"
-                    }} />
+                    <div className="absolute -top-[20%] -right-[20%] w-20 h-20 rounded-full bg-[var(--card-color)] blur-[40px] opacity-0 pointer-events-none transition-opacity duration-250 group-hover:opacity-[0.15] max-sm:group-hover:opacity-0" />
 
-                    <div className="roll-header" style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
-                      <div className="roll-icon-container" style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        width: "44px",
-                        height: "44px",
-                        borderRadius: "10px",
-                        background: "var(--bg-app)",
-                        border: "1px solid var(--border-light)",
-                        color: card.color,
-                        transition: "all 0.25s ease",
-                      }}>
+                    <div className="flex items-start justify-between w-full max-sm:justify-center max-sm:mb-1">
+                      <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-[var(--bg-app)] border border-[var(--border-light)] text-[var(--card-color)] transition-all duration-250 group-hover:bg-[rgba(0,0,0,0.15)] group-hover:border-[var(--card-color)] max-sm:w-9 max-sm:h-9 max-sm:rounded-lg max-sm:group-hover:bg-[var(--bg-app)] max-sm:group-hover:border-[var(--border-light)]">
                         {card.icon}
                       </div>
-                      <span className="roll-badge" style={{
-                        fontSize: "0.7rem",
-                        fontWeight: 700,
-                        textTransform: "uppercase",
-                        letterSpacing: "0.05em",
-                        color: card.color,
-                        background: `rgba(${parseInt(card.color.slice(1,3),16)}, ${parseInt(card.color.slice(3,5),16)}, ${parseInt(card.color.slice(5,7),16)}, 0.1)`,
-                        padding: "0.15rem 0.5rem",
-                        borderRadius: "6px",
-                      }}>
+                      <span className="text-[0.7rem] font-bold uppercase tracking-wider text-[var(--card-color)] bg-[rgba(var(--card-rgb),0.1)] px-2 py-0.5 rounded-md max-sm:hidden">
                         Preset Generator
                       </span>
                     </div>
 
-                    <div className="roll-body">
-                      <h3 className="roll-title" style={{
-                        fontSize: "1.1rem",
-                        fontWeight: 800,
-                        margin: "0 0 0.35rem 0",
-                        color: "var(--text-main)",
-                        transition: "color 0.2s ease"
-                      }}>
+                    <div className="flex flex-col max-sm:items-center max-sm:justify-center max-sm:w-full">
+                      <h3 className="text-lg font-extrabold m-0 mb-1.5 text-[var(--text-main)] transition-colors duration-200 max-sm:text-[0.8rem] max-sm:m-0 max-sm:font-bold max-sm:leading-[1.1]">
                         {card.title}
                       </h3>
-                      <p className="roll-helper" style={{
-                        fontSize: "0.82rem",
-                        color: "var(--text-sub)",
-                        margin: 0,
-                        lineHeight: 1.4,
-                        minHeight: "2.8rem"
-                      }}>
+                      <p className="block max-sm:hidden text-[0.82rem] text-[var(--text-sub)] m-0 leading-[1.4] min-h-[2.8rem]">
                         {card.helper}
                       </p>
-                      <p className="roll-helper-mobile">
+                      <p className="hidden max-sm:block text-[0.6rem] text-[var(--text-sub)] mt-0.5 leading-[1.1] opacity-80">
                         {card.id === "random" 
                           ? "Light randomization" 
                           : card.id === "chaos" 
@@ -1252,22 +1031,9 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
                       </p>
                     </div>
 
-                    <div className="roll-action" style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      marginTop: "0.5rem",
-                      paddingTop: "0.75rem",
-                      borderTop: "1px solid var(--border-light)",
-                      fontSize: "0.8rem",
-                      fontWeight: 700,
-                      color: "var(--text-sub)",
-                      transition: "all 0.25s ease",
-                    }}>
+                    <div className="flex max-sm:hidden items-center justify-between mt-2 pt-3 border-t border-[var(--border-light)] text-[0.8rem] font-bold text-[var(--text-sub)] transition-all duration-250 ease-in-out group-hover:text-[var(--card-color)]">
                       <span>{card.action}</span>
-                      <span className="roll-action-arrow" style={{
-                        transition: "transform 0.2s ease",
-                      }}>
+                      <span className="transition-transform duration-200 group-hover:translate-x-1">
                         →
                       </span>
                     </div>
