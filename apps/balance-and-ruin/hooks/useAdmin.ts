@@ -7,16 +7,22 @@ import { useAppSession } from "~/hooks/useAppSession";
 export function useAdmin() {
   const { data: session, status } = useAppSession();
 
+  const devAdminOverride = typeof window !== "undefined" &&
+    process.env.NEXT_PUBLIC_DEV_ADMIN_TOGGLE === "true" &&
+    localStorage.getItem("dev_admin_override") === "true";
+
   const userDiscordId = (session?.user as any)?.discordId;
   const isAdmin =
-    status === "authenticated" &&
-    !!(session?.user as any)?.isAdmin;
+    devAdminOverride || (
+      status === "authenticated" &&
+      !!(session?.user as any)?.isAdmin
+    );
 
   return {
     isAdmin,
     isLoading: status === "loading",
-    isAuthenticated: status === "authenticated",
-    user: session?.user,
-    discordId: userDiscordId,
+    isAuthenticated: status === "authenticated" || devAdminOverride,
+    user: session?.user || (devAdminOverride ? { name: "Dev Admin", email: "dev-admin@localhost", discordId: "12345" } : undefined),
+    discordId: userDiscordId || (devAdminOverride ? "12345" : undefined),
   };
 }

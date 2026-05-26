@@ -256,6 +256,31 @@ export const GenerateCard = ({
         console.error("Failed to track generation stats:", e);
       }
 
+      // Record seed in seedlist database
+      try {
+        const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
+        const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+        const host = typeof window !== "undefined" ? window.location.hostname : "";
+        const serverName = host === "ff6worldscollide.com" ? "ff6worldscollide.com" : "dev.ff6worldscollide.com";
+        const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/seed/?id=${seed_id}` : "";
+
+        fetch(`${BACKEND_URL}/api/v1/seedlist`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({
+            seed_type: lastSelectedPresetName || "ff6wc",
+            share_url: shareUrl,
+            server_name: serverName,
+            flagstring: flags,
+          }),
+        }).catch((err) => console.error("Failed to record seed to seedlist database:", err));
+      } catch (e) {
+        console.error("Failed to record seed to seedlist:", e);
+      }
+
       // Update preset download timestamp when generating a seed using a selected preset
       if (lastSelectedPresetName) {
         const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;

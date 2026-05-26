@@ -273,6 +273,12 @@ export const FlagCreatePage = ({
   const { data: session, status } = useAppSession();
   const { isAdmin } = useAdmin();
   const [profileHovered, setProfileHovered] = useState(false);
+  const [devAdminActive, setDevAdminActive] = useState(false);
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setDevAdminActive(localStorage.getItem("dev_admin_override") === "true");
+    }
+  }, []);
   const tabs: TabItem[] = useMemo(
     () =>
       [
@@ -1088,6 +1094,45 @@ export const FlagCreatePage = ({
           </main>
         </Tab.Group>
       </div>
+
+      {process.env.NEXT_PUBLIC_DEV_ADMIN_TOGGLE === "true" && (
+        <button
+          onClick={() => {
+            const next = !devAdminActive;
+            if (next) {
+              localStorage.setItem("dev_admin_override", "true");
+            } else {
+              localStorage.removeItem("dev_admin_override");
+            }
+            setDevAdminActive(next);
+            window.location.reload();
+          }}
+          style={{
+            position: "fixed",
+            bottom: "1.5rem",
+            right: "1.5rem",
+            zIndex: 9999,
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5rem",
+            padding: "0.6rem 1rem",
+            borderRadius: "999px",
+            border: `1px solid ${devAdminActive ? "#ef4444" : "#3b82f6"}`,
+            background: devAdminActive ? "rgba(239, 68, 68, 0.9)" : "rgba(59, 130, 246, 0.9)",
+            color: "white",
+            fontSize: "0.8rem",
+            fontWeight: "bold",
+            cursor: "pointer",
+            boxShadow: "0 4px 15px rgba(0,0,0,0.3)",
+            backdropFilter: "blur(4px)",
+            transition: "all 0.2s",
+          }}
+          className="hover:scale-105 active:scale-95"
+        >
+          <FaShieldAlt size={14} />
+          <span>Admin Bypass: {devAdminActive ? "ON" : "OFF"}</span>
+        </button>
+      )}
     </>
   );
 };
