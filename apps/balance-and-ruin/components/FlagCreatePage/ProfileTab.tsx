@@ -11,19 +11,17 @@ const getCleanPresetName = (seedType: string) => {
   if (!seedType) return "custom";
   let name = seedType.trim().toLowerCase();
   
-  if (name.startsWith("preset_") || name.startsWith("preset")) {
-    const tokens = name.split("_");
-    if (tokens.length > 1) {
-      name = tokens[1];
-    }
-  } else {
-    if (name === "true_chaos") {
-      name = "true chaos";
-    }
+  if (name.startsWith("preset_")) {
+    name = name.slice(7);
+  } else if (name.startsWith("preset")) {
+    name = name.slice(6);
   }
   
-  name = name.split("_")[0];
-  return name;
+  if (name === "true_chaos") {
+    return "true chaos";
+  }
+  
+  return name.split("_")[0];
 };
 
 export const ProfileTab = () => {
@@ -120,7 +118,7 @@ export const ProfileTab = () => {
       setLoadingPresets(true);
       fetch(`${backendUrl}/api/v1/user-presets?mine=true`, {
         headers: {
-          "Authorization": `Bearer ${token}`,
+          ...(token ? { "Authorization": `Bearer ${token}` } : {}),
         },
       })
         .then((res) => res.json())
@@ -152,7 +150,7 @@ export const ProfileTab = () => {
         // 1. Fetch latest 100 seeds for the history section
         fetch(`${backendUrl}/api/v1/seedlist?creator_id=${userDiscordId}&limit=100`, {
           headers: {
-            "Authorization": `Bearer ${token}`,
+            ...(token ? { "Authorization": `Bearer ${token}` } : {}),
           },
         })
           .then((res) => res.json())
@@ -167,7 +165,7 @@ export const ProfileTab = () => {
         // 2. Fetch the aggregate count of all seeds rolled
         fetch(`${backendUrl}/api/v1/seedlist/count?creator_id=${userDiscordId}`, {
           headers: {
-            "Authorization": `Bearer ${token}`,
+            ...(token ? { "Authorization": `Bearer ${token}` } : {}),
           },
         })
           .then((res) => res.json())
@@ -201,7 +199,7 @@ export const ProfileTab = () => {
       const res = await fetch(`${backendUrl}/api/v1/user-presets?id=${id}`, {
         method: "DELETE",
         headers: {
-          "Authorization": `Bearer ${token}`,
+          ...(token ? { "Authorization": `Bearer ${token}` } : {}),
         },
       });
       if (res.ok) {
@@ -734,7 +732,7 @@ export const ProfileTab = () => {
                 let formattedDate = "Unknown Date";
                 if (seed.timestamp) {
                   try {
-                    formattedDate = new Date(seed.timestamp).toLocaleDateString(undefined, {
+                    formattedDate = new Date(seed.timestamp).toLocaleString(undefined, {
                       year: "numeric",
                       month: "short",
                       day: "numeric",
@@ -821,8 +819,12 @@ export const ProfileTab = () => {
                               <strong style={{ fontSize: "0.8rem", color: "#cbd5e1" }}>Flags:</strong>
                               <button
                                 onClick={() => {
-                                  navigator.clipboard.writeText(seed.flagstring);
-                                  alert("Flags copied to clipboard!");
+                                  if (navigator.clipboard) {
+                                    navigator.clipboard.writeText(seed.flagstring);
+                                    alert("Flags copied to clipboard!");
+                                  } else {
+                                    alert("Clipboard access is not available in this browser/context.");
+                                  }
                                 }}
                                 style={{ background: "none", border: "none", color: "#60a5fa", cursor: "pointer", fontSize: "0.75rem", padding: 0, fontWeight: "bold" }}
                                 className="hover:text-blue-400"

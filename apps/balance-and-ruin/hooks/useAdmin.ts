@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useAppSession } from "~/hooks/useAppSession";
 
 /**
@@ -6,8 +7,13 @@ import { useAppSession } from "~/hooks/useAppSession";
  */
 export function useAdmin() {
   const { data: session, status } = useAppSession();
+  const [isMounted, setIsMounted] = useState(false);
 
-  const devAdminOverride = typeof window !== "undefined" &&
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  const devAdminOverride = isMounted && typeof window !== "undefined" &&
     process.env.NEXT_PUBLIC_DEV_ADMIN_TOGGLE === "true" &&
     localStorage.getItem("dev_admin_override") === "true";
 
