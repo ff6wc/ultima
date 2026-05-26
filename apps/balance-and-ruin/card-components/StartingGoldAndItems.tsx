@@ -25,7 +25,7 @@ export const StartingGoldAndItems = ({ items: propsItems, curateItems = false }:
   const scrollRef = useRef<HTMLDivElement>(null);
   const rightColumnRef = useRef<HTMLDivElement>(null);
   const leftHeaderRef = useRef<HTMLDivElement>(null);
-  const [maxHeight, setMaxHeight] = useState<number>(500);
+  const [maxHeight, setMaxHeight] = useState<number>(600);
   const prevItemsLength = useRef(items.items.length);
 
   useEffect(() => {
@@ -52,7 +52,7 @@ export const StartingGoldAndItems = ({ items: propsItems, curateItems = false }:
         const availableHeight = rightHeight - headerHeight - 16; // 16px is flex gap-4
         setMaxHeight(availableHeight > 0 ? Math.max(480, availableHeight) : 480);
       } else {
-        setMaxHeight(500);
+        setMaxHeight(600);
       }
     };
 
@@ -107,7 +107,7 @@ export const StartingGoldAndItems = ({ items: propsItems, curateItems = false }:
             ref={scrollRef}
             style={{ maxHeight: `${maxHeight}px` }}
             className={`overflow-y-auto overflow-x-hidden pr-2 flex flex-col gap-2 ${
-              items.items.length > 4 ? "pb-36" : "pb-2"
+              items.items.length > 4 ? "pb-10 md:pb-36" : "pb-2"
             }`}
           >
             {items.items.map((i: StartingItem, idx: number) => (

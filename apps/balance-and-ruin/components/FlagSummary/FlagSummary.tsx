@@ -155,8 +155,10 @@ function buildInfoRows(fv: Record<string, any>, objectives: Record<string, any>)
     .filter(Boolean);
   if (startChars.length) {
     const charList = startChars.map((c) =>
-      c === "random" || c === "randomngu"
+      c === "random"
         ? "Random"
+        : c === "randomngu"
+        ? "Random (No Gogo/Umaro)"
         : (c ?? "?").charAt(0).toUpperCase() + (c ?? "?").slice(1)
     );
     rows.push({
@@ -222,7 +224,7 @@ function buildInfoRows(fv: Record<string, any>, objectives: Record<string, any>)
     rows.push({
       label: "Excluded Commands",
       value: excludedCmds.length > 0 ? excludedCmds.join(", ") : "None",
-      highlight: true,
+      highlight: excludedCmds.length > 3,
     });
   }
 

@@ -8,7 +8,7 @@ import random from "lodash/random";
 import startCase from "lodash/startCase";
 import { useMemo } from "react";
 import { useDispatch } from "react-redux";
-import { Select, SelectOption as BaseOption } from "~/components/Select/Select";
+import { Select, SelectOption as BaseOption, AutoPanText } from "~/components/Select/Select";
 import SpriteDrawLoad from "~/components/SpriteDrawLoad/SpriteDrawLoad";
 import {
   defaultCharacterNameString,
@@ -200,16 +200,16 @@ const SpriteSelect = ({
   onChange: (selected: SelectOption | null) => void;
 }) => {
   const renderValue = (opt: SelectOption) => (
-    <span className="flex items-center gap-2 min-w-0">
+    <span className="flex items-center gap-2 min-w-0 flex-1">
       <SpriteCell option={opt} scale={3} />
-      <span className="truncate">{opt.label}</span>
+      <AutoPanText text={opt.label} className="flex-1" />
     </span>
   );
 
   const renderOption = (opt: SelectOption) => (
-    <span className="flex items-center gap-2 min-w-0">
+    <span className="flex items-center gap-2 min-w-0 flex-1">
       <SpriteCell option={opt} scale={2} />
-      <span className="truncate">{opt.label}</span>
+      <AutoPanText text={opt.label} className="flex-1" />
     </span>
   );
 

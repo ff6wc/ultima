@@ -585,7 +585,7 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
 
   useEffect(() => {
     if (toast) {
-      const timer = setTimeout(() => setToast(null), 3000);
+      const timer = setTimeout(() => setToast(null), 1500);
       return () => clearTimeout(timer);
     }
   }, [toast]);
@@ -614,6 +614,7 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
       title: "Random",
       icon: <FaDice size={22} />,
       color: "#10b981", // Emerald / Green
+      rgb: "16, 185, 129",
       glow: "rgba(16,185,129,0.15)",
       bgGradient: "linear-gradient(135deg, rgba(16,185,129,0.08) 0%, rgba(16,185,129,0.01) 100%)",
       helper: "Light randomization, perfect for quick runs",
@@ -625,6 +626,7 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
       title: "Chaos",
       icon: <FaBolt size={22} />,
       color: "#f59e0b", // Amber / Yellow
+      rgb: "245, 158, 11",
       glow: "rgba(245,158,11,0.15)",
       bgGradient: "linear-gradient(135deg, rgba(245,158,11,0.08) 0%, rgba(245,158,11,0.01) 100%)",
       helper: "More randomization, can get a little wacky",
@@ -636,9 +638,10 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
       title: "True Chaos",
       icon: <FaSkull size={22} />,
       color: "#ef4444", // Red
+      rgb: "239, 68, 68",
       glow: "rgba(239,68,68,0.15)",
       bgGradient: "linear-gradient(135deg, rgba(239,68,68,0.08) 0%, rgba(239,68,68,0.01) 100%)",
-      helper: "Total randomization, good luck",
+      helper: "Total randomization. Good luck!",
       action: "Enter the Void",
       generator: generateTrueChaos,
     },
@@ -949,14 +952,14 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
           <p
             style={{ color: "var(--text-sub)", fontSize: "0.9rem", margin: 0 }}
           >
-            Choose an event or community-created preset to load its flagset. You
-            can customize it further using the tabs on the left before
-            generation, or go straight to &ldquo;Generate&rdquo; to download a
-            seed.
+            Choose a preset to load its flagset or click one of the randomize
+            options for a new experience every time. You can customize the flags
+            further using the tabs on the left before generation, or go straight
+            to &ldquo;Generate&rdquo; to download a seed.
           </p>
         </div>
 
-        {/* Style injection for micro-animations */}
+        {/* Style injection for slideUpFade keyframes only */}
         <style dangerouslySetInnerHTML={{ __html: `
           @keyframes slideUpFade {
             from { transform: translateY(12px); opacity: 0; }
@@ -965,120 +968,77 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
         ` }} />
 
         {/* Random / Chaos / True Chaos rolling panel */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "1rem", marginTop: "0.25rem" }}>
+        <div className="grid grid-cols-3 gap-2 sm:gap-4 mt-1">
           {randomRolls.map((card) => {
-            const isHovered = hoveredCard === card.id;
+            const isRolled = toast && toast.type === card.id;
             return (
               <div
                 key={card.id}
-                onMouseEnter={() => setHoveredCard(card.id)}
-                onMouseLeave={() => setHoveredCard(null)}
                 onClick={() => handleRandomRoll(card.id as any, card.generator)}
+                className={`group relative overflow-hidden cursor-pointer flex flex-col justify-between p-5 rounded-[14px] border transition-all duration-250 ease-[cubic-bezier(0.4,0,0.2,1)]
+                  ${isRolled 
+                    ? "scale-[0.98] border-[var(--card-color)] bg-[rgba(var(--card-rgb),0.12)] shadow-[0_0_15px_var(--card-glow)]" 
+                    : "border-[var(--border-light)] bg-[var(--bg-card)] hover:-translate-y-1 hover:border-[var(--card-color)] hover:bg-[linear-gradient(135deg,rgba(var(--card-rgb),0.08)_0%,rgba(var(--card-rgb),0.01)_100%)] hover:shadow-[0_10px_20px_-5px_rgba(var(--card-rgb),0.15),0_4px_6px_-2px_rgba(var(--card-rgb),0.15)] max-sm:hover:translate-y-0 max-sm:hover:border-[var(--border-light)] max-sm:hover:bg-[var(--bg-card)] max-sm:hover:shadow-none"
+                  }
+                  max-sm:p-[0.6rem_0.4rem] max-sm:min-h-[125px] max-sm:justify-center max-sm:items-center max-sm:text-center max-sm:gap-1 max-sm:rounded-xl
+                `}
                 style={{
-                  background: isHovered ? card.bgGradient : "var(--bg-card)",
-                  border: `1px solid ${isHovered ? card.color : "var(--border-light)"}`,
-                  borderRadius: "14px",
-                  padding: "1.25rem",
-                  cursor: "pointer",
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "space-between",
-                  gap: "0.75rem",
-                  transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
-                  transform: isHovered ? "translateY(-4px)" : "translateY(0)",
-                  boxShadow: isHovered 
-                    ? `0 10px 20px -5px ${card.glow}, 0 4px 6px -2px ${card.glow}` 
-                    : "none",
-                  position: "relative",
-                  overflow: "hidden",
-                }}
+                  "--card-color": card.color,
+                  "--card-rgb": card.rgb,
+                  "--card-glow": card.glow,
+                } as React.CSSProperties}
               >
-                {/* Visual Accent/Glow backdrop on hover */}
-                {isHovered && (
-                  <div style={{
-                    position: "absolute",
-                    top: "-20%",
-                    right: "-20%",
-                    width: "80px",
-                    height: "80px",
-                    borderRadius: "50%",
-                    background: card.color,
-                    filter: "blur(40px)",
-                    opacity: 0.15,
-                    pointerEvents: "none"
-                  }} />
-                )}
-
-                <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
-                  <div style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    width: "44px",
-                    height: "44px",
-                    borderRadius: "10px",
-                    background: isHovered ? "rgba(0, 0, 0, 0.15)" : "var(--bg-app)",
-                    border: `1px solid ${isHovered ? card.color : "var(--border-light)"}`,
-                    color: card.color,
-                    transition: "all 0.25s ease",
-                  }}>
-                    {card.icon}
+                {isRolled ? (
+                  <div className="flex flex-col items-center justify-center flex-1 gap-2 text-center animate-[slideUpFade_0.2s_cubic-bezier(0.16,1,0.3,1)_forwards]">
+                    <div className="flex items-center justify-center w-11 h-11 rounded-full text-lg font-bold bg-[rgba(var(--card-rgb),0.2)] text-[var(--card-color)]">
+                      ✓
+                    </div>
+                    <span className="text-[0.95rem] font-extrabold text-[var(--text-main)]">
+                      {card.id === "random" 
+                        ? "Rolled Random!" 
+                        : card.id === "chaos" 
+                        ? "Chaos Unleashed!" 
+                        : "Void Entered!"}
+                    </span>
                   </div>
-                  <span style={{
-                    fontSize: "0.7rem",
-                    fontWeight: 700,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.05em",
-                    color: card.color,
-                    background: `rgba(${parseInt(card.color.slice(1,3),16)}, ${parseInt(card.color.slice(3,5),16)}, ${parseInt(card.color.slice(5,7),16)}, 0.1)`,
-                    padding: "0.15rem 0.5rem",
-                    borderRadius: "6px",
-                  }}>
-                    Preset Generator
-                  </span>
-                </div>
+                ) : (
+                  <>
+                    {/* Visual Accent/Glow backdrop on hover */}
+                    <div className="absolute -top-[20%] -right-[20%] w-20 h-20 rounded-full bg-[var(--card-color)] blur-[40px] opacity-0 pointer-events-none transition-opacity duration-250 group-hover:opacity-[0.15] max-sm:group-hover:opacity-0" />
 
-                <div>
-                  <h3 style={{
-                    fontSize: "1.1rem",
-                    fontWeight: 800,
-                    margin: "0 0 0.35rem 0",
-                    color: "var(--text-main)",
-                    transition: "color 0.2s ease"
-                  }}>
-                    {card.title}
-                  </h3>
-                  <p style={{
-                    fontSize: "0.82rem",
-                    color: "var(--text-sub)",
-                    margin: 0,
-                    lineHeight: 1.4,
-                    minHeight: "2.8rem"
-                  }}>
-                    {card.helper}
-                  </p>
-                </div>
+                    <div className="flex items-start justify-between w-full max-sm:justify-center max-sm:mb-1">
+                      <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-[var(--bg-app)] border border-[var(--border-light)] text-[var(--card-color)] transition-all duration-250 group-hover:bg-[rgba(0,0,0,0.15)] group-hover:border-[var(--card-color)] max-sm:w-9 max-sm:h-9 max-sm:rounded-lg max-sm:group-hover:bg-[var(--bg-app)] max-sm:group-hover:border-[var(--border-light)]">
+                        {card.icon}
+                      </div>
+                      <span className="text-[0.7rem] font-bold uppercase tracking-wider text-[var(--card-color)] bg-[rgba(var(--card-rgb),0.1)] px-2 py-0.5 rounded-md max-sm:hidden">
+                        Preset Generator
+                      </span>
+                    </div>
 
-                <div style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  marginTop: "0.5rem",
-                  paddingTop: "0.75rem",
-                  borderTop: "1px solid var(--border-light)",
-                  fontSize: "0.8rem",
-                  fontWeight: 700,
-                  color: isHovered ? card.color : "var(--text-sub)",
-                  transition: "all 0.2s ease",
-                }}>
-                  <span>{card.action}</span>
-                  <span style={{
-                    transform: isHovered ? "translateX(4px)" : "translateX(0)",
-                    transition: "transform 0.2s ease",
-                  }}>
-                    →
-                  </span>
-                </div>
+                    <div className="flex flex-col max-sm:items-center max-sm:justify-center max-sm:w-full">
+                      <h3 className="text-lg font-extrabold m-0 mb-1.5 text-[var(--text-main)] transition-colors duration-200 max-sm:text-[0.8rem] max-sm:m-0 max-sm:font-bold max-sm:leading-[1.1]">
+                        {card.title}
+                      </h3>
+                      <p className="block max-sm:hidden text-[0.82rem] text-[var(--text-sub)] m-0 leading-[1.4] min-h-[2.8rem]">
+                        {card.helper}
+                      </p>
+                      <p className="hidden max-sm:block text-[0.6rem] text-[var(--text-sub)] mt-0.5 leading-[1.1] opacity-80">
+                        {card.id === "random" 
+                          ? "Light randomization" 
+                          : card.id === "chaos" 
+                          ? "More randomization" 
+                          : "Total randomization"}
+                      </p>
+                    </div>
+
+                    <div className="flex max-sm:hidden items-center justify-between mt-2 pt-3 border-t border-[var(--border-light)] text-[0.8rem] font-bold text-[var(--text-sub)] transition-all duration-250 ease-in-out group-hover:text-[var(--card-color)]">
+                      <span>{card.action}</span>
+                      <span className="transition-transform duration-200 group-hover:translate-x-1">
+                        →
+                      </span>
+                    </div>
+                  </>
+                )}
               </div>
             );
           })}
@@ -1490,64 +1450,7 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
           </>
         )}
 
-        {/* Toast Notification */}
-        {toast && (
-          <div
-            style={{
-              position: "fixed",
-              bottom: "2.5rem",
-              right: "2.5rem",
-              padding: "0.9rem 1.4rem",
-              borderRadius: "12px",
-              background: "var(--bg-card)",
-              border: `1px solid ${
-                toast.type === "random"
-                  ? "#10b981"
-                  : toast.type === "chaos"
-                  ? "#f59e0b"
-                  : "#ef4444"
-              }`,
-              boxShadow: `0 10px 30px rgba(0,0,0,0.2), 0 0 12px ${
-                toast.type === "random"
-                  ? "rgba(16,185,129,0.15)"
-                  : toast.type === "chaos"
-                  ? "rgba(245,158,11,0.15)"
-                  : "rgba(239,68,68,0.15)"
-              }`,
-              color: "var(--text-main)",
-              display: "flex",
-              alignItems: "center",
-              gap: "0.75rem",
-              zIndex: 9999,
-              fontSize: "0.88rem",
-              fontWeight: 700,
-              animation: "slideUpFade 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards",
-            }}
-          >
-            <span
-              style={{
-                color:
-                  toast.type === "random"
-                    ? "#10b981"
-                    : toast.type === "chaos"
-                    ? "#f59e0b"
-                    : "#ef4444",
-                fontSize: "1.1rem",
-                display: "flex",
-                alignItems: "center",
-              }}
-            >
-              {toast.type === "random" ? (
-                <FaDice />
-              ) : toast.type === "chaos" ? (
-                <FaBolt />
-              ) : (
-                <FaSkull />
-              )}
-            </span>
-            <span>{toast.message}</span>
-          </div>
-        )}
+
       </div>
     </PageContainer>
   );
