@@ -19,6 +19,55 @@ import { selectActivePresetName, selectLastSelectedPresetName } from "~/state/pr
 import { FlagSummary } from "~/components/FlagSummary/FlagSummary";
 import { FaCopy, FaCheck } from "react-icons/fa";
 
+const hasSevereProfanity = (text: string): boolean => {
+  if (!text) return false;
+
+  // 1. Check with word boundaries (catches exact words with punctuation/spaces around them)
+  // Severe terms: fuck, cunt, faggot, nigger, chink, kike, dyke, tranny, retard, shit, cock
+  const severePatterns = [
+    /\bf[u*v]ck(?:s|ers?|ing)?\b/i,
+    /\bc[u*]nt[s]?\b/i,
+    /\bsh[i*!1]t[s]?\b/i,
+    /\bc[o*0]ck[s]?\b/i,
+    /\bfag[o0]t[s]?\b/i,
+    /\bnigg[e3]r[s]?\b/i,
+    /\bchink[s]?\b/i,
+    /\bkik[e3][s]?\b/i,
+    /\bdyk[e3][s]?\b/i,
+    /\btrann[y]?[s]?\b/i,
+    /\bretard(?:ed)?\b/i,
+  ];
+
+  if (severePatterns.some(pattern => pattern.test(text))) {
+    return true;
+  }
+
+  // 2. Normalize and check for strict severe terms (covers attempts to bypass with spaces or symbols)
+  const normalized = text
+    .toLowerCase()
+    .replace(/[0oO*@4vV]/g, "u")
+    .replace(/[1iIl!|]/g, "i")
+    .replace(/[3eE]/g, "e")
+    .replace(/[5sS$]/g, "s")
+    .replace(/[7tT]/g, "t")
+    .replace(/[^a-z]/g, ""); // strip all spaces, symbols, numbers
+
+  const strictSubstrings = [
+    "fuck",
+    "faggot",
+    "faggut",
+    "nigger",
+    "kike",
+    "tranny"
+  ];
+
+  if (strictSubstrings.some(word => normalized.includes(word))) {
+    return true;
+  }
+
+  return false;
+};
+
 export type FlagsCardProps = {
   className?: string;
   enableEditing?: boolean;
@@ -87,6 +136,10 @@ export const GenerateCard = ({
   const [lastSavedFlags, setLastSavedFlags] = useState<string | null>(null);
 
   const handleSavePreset = async () => {
+    if (hasSevereProfanity(presetName) || hasSevereProfanity(presetDescription)) {
+      setPresetError("Preset Name and Description must not contain inappropriate language.");
+      return;
+    }
     setIsSubmittingPreset(true);
     setPresetError(null);
     try {
@@ -198,7 +251,7 @@ export const GenerateCard = ({
     } catch (e) {
       if (newWindow) newWindow.close();
       setClientError(
-        `Validation Error: ${(e as Error).message || "Ensure you access the app via a whitelisted domain like http://dev.ff6worldscollide.com:3001 (see .env.local) instead of localhost."}`,
+        `Validation Error: ${(e as Error).message || "Ensure you access the app via a whitelisted domain like http://dev.ff6worldscollide.com:3000 (see .env.local) instead of localhost."}`,
       );
       return;
     }
