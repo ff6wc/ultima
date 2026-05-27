@@ -1,10 +1,5 @@
-import { Button, Card } from "@ff6wc/ui";
-import { CardColumn } from "~/components/CardColumn/CardColumn";
+import { Card } from "@ff6wc/ui";
 import { FlagSubflagSelect } from "~/components/FlagSubflagSelect/FlagSubflagSelect";
-import { FlagSwitch } from "~/components/FlagSwitch/FlagSwitch";
-import { FlagRange } from "~/components/FlagRange/FlagRange";
-import { useDispatch } from "react-redux";
-import { setFlag } from "~/state/flagSlice";
 
 const battleOptions = [
   {
@@ -77,53 +72,9 @@ const statueOptions = [
 ];
 
 export const Bosses = () => {
-  const dispatch = useDispatch();
-
-  const restoreOriginal = () => {
-    // null both Boss battle options to return to Original
-    dispatch(
-      setFlag({
-        flag: "-bbs",
-        value: null,
-      }),
-    );
-    dispatch(
-      setFlag({
-        flag: "-bbr",
-        value: null,
-      }),
-    );
-    // Dragon location back to original
-    dispatch(
-      setFlag({
-        flag: "-drloc",
-        value: "original",
-      }),
-    );
-    // Statue location back to original
-    dispatch(
-      setFlag({
-        flag: "-stloc",
-        value: "original",
-      }),
-    );
-    // Marshal Keep Lobos back to true
-    dispatch(
-      setFlag({
-        flag: "-bmkl",
-        value: true,
-      }),
-    );
-  };
   return (
     <Card title={"Bosses"}>
       <div className="flex flex-col gap-6 h-full">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <Button onClick={restoreOriginal} variant="primary">
-            All Original
-          </Button>
-        </div>
-
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <FlagSubflagSelect
             className="h-full justify-between"

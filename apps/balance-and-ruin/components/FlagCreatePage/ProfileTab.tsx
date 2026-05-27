@@ -24,10 +24,40 @@ const getCleanPresetName = (seedType: string) => {
   return name.split("_")[0];
 };
 
+const formatTruncatedDate = (dateStr: string) => {
+  if (!dateStr) return "";
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return "";
+    const month = d.getMonth() + 1;
+    const day = d.getDate();
+    const year = String(d.getFullYear()).slice(-2);
+    return `${month}/${day}/${year}`;
+  } catch (e) {
+    return "";
+  }
+};
+
 export const ProfileTab = () => {
   const { data: session, status } = useAppSession();
   const router = useRouter();
   const dispatch = useDispatch();
+
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  const devAdminOverride = isMounted && typeof window !== "undefined" && 
+    (process.env.NEXT_PUBLIC_DEV_ADMIN_TOGGLE === "true" || process.env.NODE_ENV === "development") && 
+    localStorage.getItem("dev_admin_override") === "true";
+
+  const activeSession = React.useMemo(() => {
+    return session || (devAdminOverride ? { user: { name: "Dev Admin", email: "dev-admin@localhost", discordId: "12345", image: null } } : null);
+  }, [session, devAdminOverride]);
+
+  const activeStatus = devAdminOverride ? "authenticated" : status;
+
   const [userPresets, setUserPresets] = useState<any[]>([]);
   const [loadingPresets, setLoadingPresets] = useState(true);
   const [expandedPresets, setExpandedPresets] = useState<Record<string, boolean>>({});
@@ -45,9 +75,9 @@ export const ProfileTab = () => {
   const [mostPlayedPreset, setMostPlayedPreset] = useState<string | null>(null);
   const [mostPlayedCount, setMostPlayedCount] = useState(0);
 
-  const isAdmin = !!(session?.user as any)?.isAdmin;
+  const isAdmin = !!(activeSession?.user as any)?.isAdmin || devAdminOverride;
 
-  const [sortBy, setSortBy] = useState<"name" | "date">("name");
+  const [sortBy, setSortBy] = useState<"name" | "date" | "downloaded">("name");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
 
   const sortedPresets = React.useMemo(() => {
@@ -58,13 +88,40 @@ export const ProfileTab = () => {
         if (nameA < nameB) return sortDir === "asc" ? -1 : 1;
         if (nameA > nameB) return sortDir === "asc" ? 1 : -1;
         return 0;
-      } else {
+      } else if (sortBy === "date") {
         const timeA = new Date(a.created_at || a.created_timestamp || 0).getTime();
         const timeB = new Date(b.created_at || b.created_timestamp || 0).getTime();
+        return sortDir === "asc" ? timeA - timeB : timeB - timeA;
+      } else {
+        const timeA = new Date(a.download_timestamp || a.last_downloaded || 0).getTime();
+        const timeB = new Date(b.download_timestamp || b.last_downloaded || 0).getTime();
         return sortDir === "asc" ? timeA - timeB : timeB - timeA;
       }
     });
   }, [userPresets, sortBy, sortDir]);
+
+  const [seedSortBy, setSeedSortBy] = useState<"date" | "tag">("date");
+  const [seedSortDir, setSeedSortDir] = useState<"asc" | "desc">("desc");
+
+  const sortedSeeds = React.useMemo(() => {
+    return [...userSeeds].sort((a, b) => {
+      if (seedSortBy === "date") {
+        const timeA = new Date(a.timestamp || 0).getTime();
+        const timeB = new Date(b.timestamp || 0).getTime();
+        return seedSortDir === "asc" ? timeA - timeB : timeB - timeA;
+      } else {
+        const tagA = (a.seed_type || "").toLowerCase();
+        const tagB = (b.seed_type || "").toLowerCase();
+        if (tagA < tagB) return seedSortDir === "asc" ? -1 : 1;
+        if (tagA > tagB) return seedSortDir === "asc" ? 1 : -1;
+        
+        // Fallback to date sorting if seed_type is identical
+        const timeA = new Date(a.timestamp || 0).getTime();
+        const timeB = new Date(b.timestamp || 0).getTime();
+        return seedSortDir === "asc" ? timeA - timeB : timeB - timeA;
+      }
+    });
+  }, [userSeeds, seedSortBy, seedSortDir]);
 
   useEffect(() => {
     try {
@@ -110,8 +167,78 @@ export const ProfileTab = () => {
   const togglePreset = (id: string) => setExpandedPresets((p) => ({ ...p, [id]: !p[id] }));
 
   useEffect(() => {
-    if (session?.user) {
-      const userDiscordId = (session.user as any)?.discordId;
+    if (activeSession?.user) {
+      if (devAdminOverride) {
+        setLoadingPresets(false);
+        setUserPresets([
+          {
+            id: "mock-preset-1",
+            name: "Standard WC League",
+            description: "Official Worlds Collide league flagset with standard progression and balanced rewards.",
+            flags: "-cg -cont -open -sbn -sbs -sbt -sd1 -sd2 -sd3 -sd4 -sd5 -sd6 -sd7 -sd8 -sd9 -sd10",
+            created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+            download_timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+            tags: ["standard", "official"],
+          },
+          {
+            id: "mock-preset-2",
+            name: "Kefka's Toybox",
+            description: "High chaos, random commands, natural magic, and stronger bosses. Pure fun!",
+            flags: "-cg -cont -open -sbn -sbs -sbt -sd1 -sd2 -sd3 -sd4 -sd5 -sd6 -sd7 -sd8 -sd9 -sd10 -rc -nm -s",
+            created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+            download_timestamp: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
+            tags: ["chaos"],
+          },
+          {
+            id: "mock-preset-3",
+            name: "True Chaos",
+            description: "Every single randomizer setting turned up to maximum distortion.",
+            flags: "-cg -cont -open -sbn -rc -nm -s -tc",
+            created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+            download_timestamp: new Date().toISOString(),
+            tags: ["true_chaos"],
+          }
+        ]);
+
+        setLoadingSeeds(false);
+        setLoadingCount(false);
+        setTotalSeedsCount(42);
+        setUserSeeds([
+          {
+            id: "8a7f92b4",
+            seed_type: "standard",
+            timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+            share_url: "http://localhost:3001/seed/?id=8a7f92b4",
+            server_name: "dev.ff6worldscollide.com",
+            seed: "192837465",
+            hash: "Locke, Celes, Sabin, Edgar",
+            flagstring: "-cg -cont -open -sbn -sbs -sbt -sd1 -sd2 -sd3 -sd4 -sd5 -sd6 -sd7 -sd8 -sd9 -sd10",
+          },
+          {
+            id: "5c8d2f10",
+            seed_type: "true_chaos",
+            timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+            share_url: "http://localhost:3001/seed/?id=5c8d2f10",
+            server_name: "dev.ff6worldscollide.com",
+            seed: "998877665",
+            hash: "Kefka, Terra, Shadow, Relm",
+            flagstring: "-cg -cont -open -sbn -rc -nm -s -tc",
+          },
+          {
+            id: "2e4b6d8a",
+            seed_type: "custom",
+            timestamp: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
+            share_url: "http://localhost:3001/seed/?id=2e4b6d8a",
+            server_name: "dev.ff6worldscollide.com",
+            seed: "554433221",
+            hash: "Cyan, Gau, Mog, Umaro",
+            flagstring: "-cg -cont -open -sbn -sbs -sbt -sd1 -sd2",
+          }
+        ]);
+        return;
+      }
+
+      const userDiscordId = (activeSession.user as any)?.discordId;
       const token = localStorage.getItem("auth_token");
       const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
       
@@ -181,7 +308,7 @@ export const ProfileTab = () => {
         setLoadingCount(false);
       }
     }
-  }, [session?.user]);
+  }, [activeSession?.user?.discordId, activeSession?.user?.email, devAdminOverride]);
 
   const handleDeletePreset = async (id: string, event?: React.MouseEvent, bypassConfirm = false) => {
     if (event) {
@@ -217,7 +344,7 @@ export const ProfileTab = () => {
     }
   };
 
-  if (status === "unauthenticated" || !session?.user) {
+  if (activeStatus === "unauthenticated" || !activeSession?.user) {
     return (
       <PageContainer columns={1}>
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "4rem 2rem", gap: "1.5rem" }}>
@@ -252,7 +379,7 @@ export const ProfileTab = () => {
     );
   }
 
-  const userDiscordId = (session.user as any)?.discordId;
+  const userDiscordId = (activeSession.user as any)?.discordId;
 
   return (
     <PageContainer columns={1}>
@@ -324,10 +451,10 @@ export const ProfileTab = () => {
                 backgroundColor: "rgba(30, 41, 59, 0.5)",
               }}
             >
-              {session.user.image ? (
+              {activeSession.user.image ? (
                 <img
-                  src={session.user.image}
-                  alt={session.user.name || "Avatar"}
+                  src={activeSession.user.image}
+                  alt={activeSession.user.name || "Avatar"}
                   style={{ width: "100%", height: "100%", objectFit: "cover" }}
                 />
               ) : (
@@ -338,11 +465,11 @@ export const ProfileTab = () => {
             {/* Text info */}
             <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", flexGrow: 1, minWidth: "200px" }}>
               <div style={{ fontSize: "1.25rem", fontWeight: "bold", color: "#f1f5f9" }}>
-                {session.user.name || "Discord User"}
+                {activeSession.user.name || "Discord User"}
               </div>
-              {session.user.email && (
+              {activeSession.user.email && (
                 <div style={{ color: "#94a3b8", fontSize: "0.85rem" }}>
-                  <strong>Email:</strong> {session.user.email}
+                  <strong>Email:</strong> {activeSession.user.email}
                 </div>
               )}
               {userDiscordId && (
@@ -506,7 +633,7 @@ export const ProfileTab = () => {
           {userPresets.length > 0 && !loadingPresets && (
             <div style={{ display: "flex", gap: "1rem", alignItems: "center", marginBottom: "1.25rem", flexWrap: "wrap", fontSize: "0.85rem", color: "#cbd5e1" }}>
               <span style={{ fontWeight: "bold", textTransform: "uppercase", color: "#94a3b8", letterSpacing: "0.5px" }}>Sort By:</span>
-              <div style={{ display: "flex", gap: "0.5rem" }}>
+              <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
                 <button
                   onClick={() => {
                     if (sortBy === "name") {
@@ -559,6 +686,32 @@ export const ProfileTab = () => {
                 >
                   Date Created {sortBy === "date" && (sortDir === "asc" ? "▲" : "▼")}
                 </button>
+                <button
+                  onClick={() => {
+                    if (sortBy === "downloaded") {
+                      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+                    } else {
+                      setSortBy("downloaded");
+                      setSortDir("desc");
+                    }
+                  }}
+                  style={{
+                    backgroundColor: sortBy === "downloaded" ? "rgba(59, 130, 246, 0.2)" : "rgba(30, 41, 59, 0.6)",
+                    border: sortBy === "downloaded" ? "1px solid #3b82f6" : "1px solid rgba(59, 130, 246, 0.2)",
+                    borderRadius: "4px",
+                    color: sortBy === "downloaded" ? "#f8fafc" : "#94a3b8",
+                    padding: "0.25rem 0.75rem",
+                    cursor: "pointer",
+                    fontWeight: "bold",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.25rem",
+                    transition: "all 0.2s",
+                  }}
+                  className="hover:border-blue-500 hover:text-white"
+                >
+                  Date Downloaded {sortBy === "downloaded" && (sortDir === "asc" ? "▲" : "▼")}
+                </button>
               </div>
             </div>
           )}
@@ -567,7 +720,7 @@ export const ProfileTab = () => {
             <div className="animate-pulse" style={{ color: "#94a3b8", fontSize: "0.9rem" }}>Loading presets...</div>
           ) : userPresets.length === 0 ? (
             <div style={{ color: "#94a3b8", fontSize: "0.9rem", fontStyle: "italic" }}>
-              You have not saved any presets yet. Generate a seed and click "Save as Preset" to see them here!
+              You have not saved any presets yet. Generate a seed and click &quot;Save as Preset&quot; to see them here!
             </div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
@@ -576,13 +729,18 @@ export const ProfileTab = () => {
                 return (
                   <div key={preset.id} style={{ backgroundColor: "rgba(30, 41, 59, 0.6)", padding: "0.75rem 1rem", borderRadius: "6px", border: "1px solid rgba(59, 130, 246, 0.2)" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <div style={{ display: "flex", alignItems: "baseline", gap: "0.75rem", overflow: "hidden", paddingRight: "1rem", flex: 1, minWidth: 0 }}>
-                        <h4 style={{ margin: 0, color: "#f8fafc", fontSize: "1rem", fontWeight: "bold", whiteSpace: "nowrap", flexShrink: 0 }}>{preset.name}</h4>
-                        {preset.description && !isExpanded && (
-                          <span style={{ color: "#94a3b8", fontSize: "0.85rem", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", flex: 1, minWidth: 0 }}>
-                            - {preset.description}
-                          </span>
-                        )}
+                      <div style={{ display: "flex", flexDirection: "column", overflow: "hidden", paddingRight: "1rem", flex: 1, minWidth: 0 }}>
+                        <div style={{ display: "flex", alignItems: "baseline", gap: "0.75rem", overflow: "hidden", width: "100%" }}>
+                          <h4 style={{ margin: 0, color: "#f8fafc", fontSize: "1rem", fontWeight: "bold", whiteSpace: "nowrap", flexShrink: 0 }}>{preset.name}</h4>
+                          {preset.description && !isExpanded && (
+                            <span style={{ color: "#94a3b8", fontSize: "0.85rem", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", flex: 1, minWidth: 0 }}>
+                              - {preset.description}
+                            </span>
+                          )}
+                        </div>
+                        <div style={{ fontSize: "0.75rem", color: "#94a3b8", marginTop: "0.1rem" }}>
+                          by {preset.creator_name || preset.creator || "You"} · {formatTruncatedDate(preset.created_at || preset.created_timestamp)}
+                        </div>
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: "1rem", flexShrink: 0 }}>
                         {showConfirm[preset.id] ? (
@@ -590,9 +748,9 @@ export const ProfileTab = () => {
                             <span style={{ color: "#f87171", fontSize: "0.8rem", fontWeight: "bold", marginRight: "0.25rem" }}>Confirm?</span>
                             <button
                               onClick={(e) => {
-                                e.stopPropagation();
-                                e.preventDefault();
-                                handleDeletePreset(preset.id, e, true);
+                                  e.stopPropagation();
+                                  e.preventDefault();
+                                  handleDeletePreset(preset.id, e, true);
                               }}
                               disabled={!!isDeleting[preset.id]}
                               style={{
@@ -667,6 +825,24 @@ export const ProfileTab = () => {
                     
                     {isExpanded && (
                       <div style={{ marginTop: "0.75rem", borderTop: "1px dashed rgba(148, 163, 184, 0.2)", paddingTop: "0.75rem" }}>
+                        {preset.tags && preset.tags.length > 0 && (
+                          <div style={{ display: "flex", gap: "0.25rem", flexWrap: "wrap", marginBottom: "0.75rem" }}>
+                            {preset.tags.map((tag: string) => (
+                              <span key={tag} style={{
+                                fontSize: "0.7rem",
+                                backgroundColor: "rgba(59, 130, 246, 0.2)",
+                                color: "#60a5fa",
+                                border: "1px solid rgba(59, 130, 246, 0.3)",
+                                padding: "0.05rem 0.4rem",
+                                borderRadius: "4px",
+                                fontWeight: "bold",
+                                textTransform: "capitalize",
+                              }}>
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                         {preset.description && (
                           <p style={{ color: "#cbd5e1", fontSize: "0.9rem", marginTop: 0, marginBottom: "0.75rem", lineHeight: "1.4", whiteSpace: "pre-wrap" }}>
                             {preset.description}
@@ -676,7 +852,7 @@ export const ProfileTab = () => {
                           {preset.flags}
                         </div>
                         <div style={{ display: "flex", gap: "1rem", marginTop: "0.75rem", fontSize: "0.75rem", color: "#64748b", fontWeight: "bold" }}>
-                          <span>Created: {new Date(preset.created_at || preset.created_timestamp).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })}</span>
+                          <span>Created: {formatTruncatedDate(preset.created_at || preset.created_timestamp)}</span>
                           {preset.download_timestamp && (
                             <span>
                               Last Downloaded:{" "}
@@ -717,15 +893,75 @@ export const ProfileTab = () => {
             </span>
           </div>
 
+          {userSeeds.length > 0 && !loadingSeeds && (
+            <div style={{ display: "flex", gap: "1rem", alignItems: "center", marginBottom: "1.25rem", flexWrap: "wrap", fontSize: "0.85rem", color: "#cbd5e1" }}>
+              <span style={{ fontWeight: "bold", textTransform: "uppercase", color: "#94a3b8", letterSpacing: "0.5px" }}>Sort By:</span>
+              <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+                <button
+                  onClick={() => {
+                    if (seedSortBy === "date") {
+                      setSeedSortDir((d) => (d === "asc" ? "desc" : "asc"));
+                    } else {
+                      setSeedSortBy("date");
+                      setSeedSortDir("desc");
+                    }
+                  }}
+                  style={{
+                    backgroundColor: seedSortBy === "date" ? "rgba(59, 130, 246, 0.2)" : "rgba(30, 41, 59, 0.6)",
+                    border: seedSortBy === "date" ? "1px solid #3b82f6" : "1px solid rgba(59, 130, 246, 0.2)",
+                    borderRadius: "4px",
+                    color: seedSortBy === "date" ? "#f8fafc" : "#94a3b8",
+                    padding: "0.25rem 0.75rem",
+                    cursor: "pointer",
+                    fontWeight: "bold",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.25rem",
+                    transition: "all 0.2s",
+                  }}
+                  className="hover:border-blue-500 hover:text-white"
+                >
+                  Date Downloaded {seedSortBy === "date" && (seedSortDir === "asc" ? "▲" : "▼")}
+                </button>
+                <button
+                  onClick={() => {
+                    if (seedSortBy === "tag") {
+                      setSeedSortDir((d) => (d === "asc" ? "desc" : "asc"));
+                    } else {
+                      setSeedSortBy("tag");
+                      setSeedSortDir("asc");
+                    }
+                  }}
+                  style={{
+                    backgroundColor: seedSortBy === "tag" ? "rgba(59, 130, 246, 0.2)" : "rgba(30, 41, 59, 0.6)",
+                    border: seedSortBy === "tag" ? "1px solid #3b82f6" : "1px solid rgba(59, 130, 246, 0.2)",
+                    borderRadius: "4px",
+                    color: seedSortBy === "tag" ? "#f8fafc" : "#94a3b8",
+                    padding: "0.25rem 0.75rem",
+                    cursor: "pointer",
+                    fontWeight: "bold",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.25rem",
+                    transition: "all 0.2s",
+                  }}
+                  className="hover:border-blue-500 hover:text-white"
+                >
+                  Preset {seedSortBy === "tag" && (seedSortDir === "asc" ? "▲" : "▼")}
+                </button>
+              </div>
+            </div>
+          )}
+
           {loadingSeeds ? (
             <div className="animate-pulse" style={{ color: "#94a3b8", fontSize: "0.9rem" }}>Loading seeds...</div>
           ) : userSeeds.length === 0 ? (
             <div style={{ color: "#94a3b8", fontSize: "0.9rem", fontStyle: "italic" }}>
-              You have not generated any seeds yet. Head over to the "Generate" tab and roll a seed!
+              You have not generated any seeds yet. Head over to the &quot;Generate&quot; tab and roll a seed!
             </div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-              {userSeeds.map((seed, idx) => {
+              {sortedSeeds.map((seed, idx) => {
                 const seedId = seed.id || `seed-${idx}`;
                 const isExpanded = !!expandedSeeds[seedId];
                 // format timestamp
@@ -746,7 +982,7 @@ export const ProfileTab = () => {
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.5rem" }}>
                       <div style={{ display: "flex", alignItems: "baseline", gap: "0.75rem", overflow: "hidden", flex: 1, minWidth: 0 }}>
                         <h4 style={{ margin: 0, color: "#f8fafc", fontSize: "1rem", fontWeight: "bold", whiteSpace: "nowrap" }}>
-                          Seed #{seed.id}
+                          #{seed.id}
                         </h4>
                         <span style={{
                           fontSize: "0.75rem",
@@ -768,27 +1004,6 @@ export const ProfileTab = () => {
                         >
                           {isExpanded ? "▼ Hide" : "▶ Show"}
                         </button>
-                        {seed.share_url && (
-                          <a
-                            href={seed.share_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{
-                              backgroundColor: "rgba(59, 130, 246, 0.1)",
-                              border: "1px solid #3b82f6",
-                              color: "#60a5fa",
-                              padding: "0.25rem 0.5rem",
-                              borderRadius: "4px",
-                              fontSize: "0.75rem",
-                              cursor: "pointer",
-                              fontWeight: "bold",
-                              textDecoration: "none",
-                            }}
-                            className="hover:bg-blue-500 hover:text-white transition-colors"
-                          >
-                            View Seed ↗
-                          </a>
-                        )}
                       </div>
                     </div>
 
@@ -799,17 +1014,17 @@ export const ProfileTab = () => {
                     {isExpanded && (
                       <div style={{ marginTop: "0.75rem", borderTop: "1px dashed rgba(148, 163, 184, 0.2)", paddingTop: "0.75rem", display: "flex", flexDirection: "column", gap: "0.75rem" }}>
                         {seed.server_name && (
-                          <div style={{ fontSize: "0.8rem", color: "#cbd5e1" }}>
+                          <div className="hidden md:block" style={{ fontSize: "0.8rem", color: "#cbd5e1" }}>
                             <strong>Server/Host:</strong> <span style={{ fontFamily: "monospace" }}>{seed.server_name}</span>
                           </div>
                         )}
                         {seed.seed && (
-                          <div style={{ fontSize: "0.8rem", color: "#cbd5e1" }}>
+                          <div className="hidden md:block" style={{ fontSize: "0.8rem", color: "#cbd5e1" }}>
                             <strong>Seed Number:</strong> <span style={{ fontFamily: "monospace" }}>{seed.seed}</span>
                           </div>
                         )}
                         {seed.hash && (
-                          <div style={{ fontSize: "0.8rem", color: "#cbd5e1" }}>
+                          <div className="hidden md:block" style={{ fontSize: "0.8rem", color: "#cbd5e1" }}>
                             <strong>Sprite/Hash:</strong> <span style={{ fontFamily: "monospace" }}>{seed.hash}</span>
                           </div>
                         )}
@@ -827,7 +1042,7 @@ export const ProfileTab = () => {
                                   }
                                 }}
                                 style={{ background: "none", border: "none", color: "#60a5fa", cursor: "pointer", fontSize: "0.75rem", padding: 0, fontWeight: "bold" }}
-                                className="hover:text-blue-400"
+                                className="hidden md:block hover:text-blue-400"
                               >
                                 Copy Flags
                               </button>
@@ -837,7 +1052,7 @@ export const ProfileTab = () => {
                             </div>
                           </div>
                         )}
-                        <div style={{ display: "flex", gap: "1rem", marginTop: "0.5rem" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "0.5rem", flexWrap: "wrap", gap: "1rem" }}>
                           <button
                             onClick={() => {
                               dispatch(setRawFlags(seed.flagstring));
@@ -855,8 +1070,30 @@ export const ProfileTab = () => {
                             }}
                             className="hover:bg-blue-600 transition-colors"
                           >
-                            Load Flags to Generator
+                            Load Flags
                           </button>
+                          {seed.share_url && (
+                            <a
+                              href={seed.share_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                backgroundColor: "rgba(59, 130, 246, 0.1)",
+                                border: "1px solid #3b82f6",
+                                color: "#60a5fa",
+                                padding: "0.4rem 1rem",
+                                borderRadius: "4px",
+                                fontSize: "0.8rem",
+                                cursor: "pointer",
+                                fontWeight: "bold",
+                                textDecoration: "none",
+                                display: "inline-block",
+                              }}
+                              className="hover:bg-blue-500 hover:text-white transition-colors"
+                            >
+                              View Seed ↗
+                            </a>
+                          )}
                         </div>
                       </div>
                     )}
