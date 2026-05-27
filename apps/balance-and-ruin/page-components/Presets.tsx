@@ -565,10 +565,12 @@ const hasSevereProfanity = (text: string): boolean => {
   if (!text) return false;
 
   // 1. Check with word boundaries (catches exact words with punctuation/spaces around them)
-  // Severe terms: fuck, cunt, faggot, nigger, chink, kike, dyke, tranny, retard
+  // Severe terms: fuck, cunt, faggot, nigger, chink, kike, dyke, tranny, retard, shit, cock
   const severePatterns = [
-    /\bf[u*]ck(?:s|ers?|ing)?\b/i,
+    /\bf[u*v]ck(?:s|ers?|ing)?\b/i,
     /\bc[u*]nt[s]?\b/i,
+    /\bsh[i*!1]t[s]?\b/i,
+    /\bc[o*0]ck[s]?\b/i,
     /\bfag[o0]t[s]?\b/i,
     /\bnigg[e3]r[s]?\b/i,
     /\bchink[s]?\b/i,
