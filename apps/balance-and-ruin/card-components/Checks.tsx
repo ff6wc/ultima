@@ -114,7 +114,7 @@ export const Checks = () => {
                 items={[
                   "Auction House", "Collapsing House", "Figaro Castle Throne",
                   "Gau's Father's House", "Kohlingen Inn", "Narshe Weapon Shop",
-                  "Sealed Gate", "South Figaro Basement", "Mt. Zozo", "Lone Wolf"
+                  "Sealed Gate", "South Figaro Basement", "Lone Wolf"
                 ]}
               />
             }
