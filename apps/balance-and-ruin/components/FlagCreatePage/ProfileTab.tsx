@@ -28,6 +28,7 @@ const formatTruncatedDate = (dateStr: string) => {
   if (!dateStr) return "";
   try {
     const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return "";
     const month = d.getMonth() + 1;
     const day = d.getDate();
     const year = String(d.getFullYear()).slice(-2);
