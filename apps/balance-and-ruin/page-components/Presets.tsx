@@ -189,6 +189,19 @@ type PresetCardProps = {
   selected: boolean;
 };
 
+const formatTruncatedDate = (dateStr: string) => {
+  if (!dateStr) return "";
+  try {
+    const d = new Date(dateStr);
+    const month = d.getMonth() + 1;
+    const day = d.getDate();
+    const year = String(d.getFullYear()).slice(-2);
+    return `${month}/${day}/${year}`;
+  } catch (e) {
+    return "";
+  }
+};
+
 const PresetCard = ({ preset, onSelect, selected }: PresetCardProps) => {
   const [expanded, setExpanded] = useState(false);
 
@@ -256,11 +269,7 @@ const PresetCard = ({ preset, onSelect, selected }: PresetCardProps) => {
             {preset.created_at && (
               <>
                 {" · "}
-                {new Date(preset.created_at).toLocaleDateString(undefined, {
-                  year: "numeric",
-                  month: "short",
-                  day: "numeric",
-                })}
+                {formatTruncatedDate(preset.created_at)}
               </>
             )}
             {preset.last_downloaded && (

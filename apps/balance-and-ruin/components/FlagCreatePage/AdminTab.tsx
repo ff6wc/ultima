@@ -18,7 +18,7 @@ import { FlagPreset } from "~/types/preset";
 const narsheFetch = (path: string, options: RequestInit = {}) => {
   const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
   const devAdminOverride = typeof window !== "undefined" && 
-    process.env.NEXT_PUBLIC_DEV_ADMIN_TOGGLE === "true" && 
+    (process.env.NEXT_PUBLIC_DEV_ADMIN_TOGGLE === "true" || process.env.NODE_ENV === "development") && 
     localStorage.getItem("dev_admin_override") === "true";
 
   const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
@@ -36,6 +36,61 @@ const narsheFetch = (path: string, options: RequestInit = {}) => {
 
 type AdminTabProps = {
   apiPresets?: Record<string, FlagPreset>;
+};
+
+const formatTruncatedDate = (dateStr: string) => {
+  if (!dateStr) return "";
+  try {
+    const d = new Date(dateStr);
+    const month = d.getMonth() + 1;
+    const day = d.getDate();
+    const year = String(d.getFullYear()).slice(-2);
+    return `${month}/${day}/${year}`;
+  } catch (e) {
+    return "";
+  }
+};
+
+const AdminPresetTitle = ({ name }: { name: string }) => {
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const textRef = React.useRef<HTMLHeadingElement>(null);
+  const [shouldScroll, setShouldScroll] = React.useState(false);
+
+  // Reset scroll detection when title changes to measure the new title
+  React.useLayoutEffect(() => {
+    setShouldScroll(false);
+  }, [name]);
+
+  React.useLayoutEffect(() => {
+    if (!shouldScroll && containerRef.current && textRef.current) {
+      const containerWidth = containerRef.current.clientWidth;
+      const textWidth = textRef.current.scrollWidth;
+      if (textWidth > containerWidth) {
+        setShouldScroll(true);
+      }
+    }
+  }, [name, shouldScroll]);
+
+  return (
+    <div ref={containerRef} style={{ display: "flex", alignItems: "baseline", gap: "0.75rem", overflow: "hidden", flex: 1, minWidth: 0 }}>
+      {/* Desktop Title: Always static with ellipsis */}
+      <h4 className="admin-desktop-title text-slate-800 dark:text-slate-100" style={{ margin: 0, fontSize: "1rem", fontWeight: "bold", whiteSpace: "nowrap", flexShrink: 0 }}>
+        {name}
+      </h4>
+
+      {/* Mobile Title Container */}
+      {!shouldScroll ? (
+        <h4 ref={textRef} className="sm:hidden text-slate-800 dark:text-slate-100" style={{ margin: 0, fontSize: "1rem", fontWeight: "bold", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", flex: 1, minWidth: 0 }}>
+          {name}
+        </h4>
+      ) : (
+        <div className="admin-title-marquee-container" style={{ flex: 1, minWidth: 0 }}>
+          <span className="admin-title-marquee-text">{name}</span>
+          <span className="admin-title-marquee-text" aria-hidden="true">{name}</span>
+        </div>
+      )}
+    </div>
+  );
 };
 
 export const AdminTab = ({ apiPresets }: AdminTabProps) => {
@@ -75,7 +130,7 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
   const [isSavingEdit, setIsSavingEdit] = useState(false);
 
   const devAdminOverride = typeof window !== "undefined" && 
-    process.env.NEXT_PUBLIC_DEV_ADMIN_TOGGLE === "true" && 
+    (process.env.NEXT_PUBLIC_DEV_ADMIN_TOGGLE === "true" || process.env.NODE_ENV === "development") && 
     localStorage.getItem("dev_admin_override") === "true";
 
   const isSuperadmin = !!(session?.user as any)?.isSuperadmin;
@@ -85,6 +140,58 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
   const activeUser = session?.user || (devAdminOverride ? { name: "Dev Admin", email: "dev-admin@localhost", discordId: "12345", image: null } : null);
 
   const fetchPresets = () => {
+    if (devAdminOverride) {
+      setLoadingPresets(false);
+      setAllPresets([
+        {
+          id: "mock-preset-1",
+          preset_name: "Standard WC League",
+          description: "Official Worlds Collide league flagset with standard progression and balanced rewards.",
+          flags: "-cg -cont -open -sbn -sbs -sbt -sd1 -sd2 -sd3 -sd4 -sd5 -sd6 -sd7 -sd8 -sd9 -sd10",
+          creator_name: "Community",
+          creator_id: "community",
+          official: true,
+          downloads: 1420,
+          created_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+          tags: ["official", "league"]
+        },
+        {
+          id: "mock-preset-2",
+          preset_name: "Kefka's Toybox",
+          description: "High chaos, random commands, natural magic, and stronger bosses. Pure fun!",
+          flags: "-cg -cont -open -sbn -sbs -sbt -sd1 -sd2 -sd3 -sd4 -sd5 -sd6 -sd7 -sd8 -sd9 -sd10 -rc -nm -s",
+          creator_name: "Terra",
+          creator_id: "terra123",
+          downloads: 850,
+          created_at: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
+          tags: ["chaos", "fun"]
+        },
+        {
+          id: "mock-preset-3",
+          preset_name: "True Chaos",
+          description: "Every single randomizer setting turned up to maximum distortion.",
+          flags: "-cg -cont -open -sbn -rc -nm -s -tc",
+          creator_name: "Locke",
+          creator_id: "locke456",
+          downloads: 310,
+          created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+          tags: ["chaos"]
+        },
+        {
+          id: "mock-preset-4",
+          preset_name: "Beginner Friendly",
+          description: "An easy-going preset with extra start items and weaker bosses. Great for learning the map.",
+          flags: "-cg -cont -open -sbn",
+          creator_name: "Mog",
+          creator_id: "mog789",
+          downloads: 120,
+          created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+          tags: ["beginner"]
+        }
+      ]);
+      return;
+    }
+
     setLoadingPresets(true);
     narsheFetch(`/user-presets?all=true&t=${Date.now()}`, { cache: "no-store" })
       .then((res) => res.json())
@@ -96,6 +203,11 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
   };
 
   const fetchTags = () => {
+    if (devAdminOverride) {
+      setCannedTags(["official", "league", "chaos", "fun", "beginner", "tournament"]);
+      return;
+    }
+
     narsheFetch("/tags")
       .then((res) => res.json())
       .then((data) => {
@@ -408,6 +520,38 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
 
   return (
     <PageContainer columns={1}>
+      <style dangerouslySetInnerHTML={{ __html: `
+        @keyframes adminTitleMarquee {
+          0%, 15% { transform: translate3d(0, 0, 0); }
+          85%, 100% { transform: translate3d(calc(-50% - 1.05rem), 0, 0); }
+        }
+        .admin-title-marquee-container {
+          display: none;
+        }
+        @media (max-width: 640px) {
+          .admin-desktop-title {
+            display: none !important;
+          }
+          .admin-title-marquee-container {
+            display: flex;
+            overflow: hidden;
+            white-space: nowrap;
+            gap: 2.1rem;
+            flex: 1;
+            min-width: 0;
+            mask-image: linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,1) 5%, rgba(0,0,0,1) 95%, rgba(0,0,0,0) 100%);
+            -webkit-mask-image: linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,1) 5%, rgba(0,0,0,1) 95%, rgba(0,0,0,0) 100%);
+          }
+          .admin-title-marquee-text {
+            display: inline-block;
+            flex-shrink: 0;
+            animation: adminTitleMarquee 15s linear infinite;
+            font-size: 1rem;
+            font-weight: bold;
+            color: var(--text-main, #f8fafc);
+          }
+        }
+      ` }} />
       <div style={{ display: "flex", flexDirection: "column", gap: "2rem", width: "100%", maxWidth: "1200px", margin: "0 auto", padding: "1rem" }}>
         
         {/* Header */}
@@ -676,18 +820,11 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                           )}
                         </div>
 
-                        <div style={{ display: "flex", alignItems: "baseline", gap: "0.75rem", overflow: "hidden", flex: 1, minWidth: 0 }}>
-                          <h4 className="text-slate-800 dark:text-slate-100" style={{ margin: 0, fontSize: "1rem", fontWeight: "bold", whiteSpace: "nowrap", flexShrink: 0 }}>
-                            {preset.name}
-                          </h4>
-                          <span className="text-slate-500 dark:text-slate-400" style={{ fontSize: "0.8rem", whiteSpace: "nowrap", flexShrink: 0 }}>
-                            by {preset.creator_name || preset.creator || "Unknown"}
-                          </span>
-                          {preset.description && !isExpanded && (
-                            <span className="text-slate-500 dark:text-slate-400" style={{ fontSize: "0.85rem", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", flex: 1, minWidth: 0 }}>
-                              - {preset.description}
-                            </span>
-                          )}
+                        <div style={{ display: "flex", flexDirection: "column", flex: 1, minWidth: 0 }}>
+                          <AdminPresetTitle name={preset.name} />
+                          <div style={{ fontSize: "0.75rem", color: "#94a3b8", marginTop: "0.1rem" }}>
+                            by {preset.creator_name || preset.creator || "Unknown"} · {formatTruncatedDate(preset.created_timestamp || preset.created_at)}
+                          </div>
                         </div>
                       </div>
 
@@ -708,134 +845,41 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                         >
                           📥 {preset.downloads ?? preset.download_count ?? preset.dbRecord?.downloads ?? preset.dbRecord?.download_count ?? 0}
                         </span>
-                        {showConfirm[preset.id] ? (
-                          <>
-                            <span style={{ color: "#f87171", fontSize: "0.8rem", fontWeight: "bold", marginRight: "0.25rem" }}>Confirm?</span>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                e.preventDefault();
-                                handleAdminDeletePreset(preset);
-                              }}
-                              disabled={!!isDeleting[preset.id]}
-                              style={{
-                                backgroundColor: "#ef4444",
-                                border: "none",
-                                color: "#ffffff",
-                                padding: "0.25rem 0.6rem",
-                                borderRadius: "4px",
-                                fontSize: "0.75rem",
-                                cursor: "pointer",
-                                fontWeight: "bold",
-                              }}
-                              className="hover:bg-red-600 transition-colors"
-                            >
-                              {isDeleting[preset.id] ? "..." : "Yes"}
-                            </button>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                e.preventDefault();
-                                setShowConfirm((p) => ({ ...p, [preset.id]: false }));
-                              }}
-                              disabled={!!isDeleting[preset.id]}
-                              style={{
-                                border: "1px solid #94a3b8",
-                                padding: "0.25rem 0.6rem",
-                                borderRadius: "4px",
-                                fontSize: "0.75rem",
-                                cursor: "pointer",
-                                fontWeight: "bold",
-                              }}
-                              className="bg-slate-200 hover:bg-slate-300 dark:bg-slate-700/60 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 transition-colors"
-                            >
-                              No
-                            </button>
-                          </>
-                        ) : (
-                          <>
-                            <button
-                              onClick={() => toggleAdminPreset(preset.id)}
-                              style={{ background: "none", border: "none", color: "#60a5fa", cursor: "pointer", fontSize: "0.85rem", padding: 0, display: "flex", alignItems: "center", gap: "0.25rem", fontWeight: "bold" }}
-                              className="hover:text-blue-400"
-                            >
-                              {isExpanded ? "▼ Hide" : "▶ Show"}
-                            </button>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                e.preventDefault();
-                                setShowConfirm((p) => ({ ...p, [preset.id]: true }));
-                              }}
-                              style={{
-                                backgroundColor: "rgba(239, 68, 68, 0.1)",
-                                border: "1px solid #ef4444",
-                                color: "#f87171",
-                                padding: "0.25rem 0.5rem",
-                                borderRadius: "4px",
-                                fontSize: "0.75rem",
-                                cursor: "pointer",
-                                fontWeight: "bold",
-                              }}
-                              className="hover:bg-red-500 hover:text-white transition-colors"
-                            >
-                              Delete
-                            </button>
-                          </>
-                        )}
+                        <button
+                          onClick={() => toggleAdminPreset(preset.id)}
+                          style={{ background: "none", border: "none", color: "#60a5fa", cursor: "pointer", fontSize: "0.85rem", padding: 0, display: "flex", alignItems: "center", gap: "0.25rem", fontWeight: "bold" }}
+                          className="hover:text-blue-400"
+                        >
+                          {isExpanded ? "▼ Hide" : "▶ Show"}
+                        </button>
                       </div>
                     </div>
 
-                    {/* Tag Toggle Buttons Sub-Row */}
-                    <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginTop: "0.5rem", paddingLeft: "1.75rem", alignItems: "center" }}>
-                      {/* Official tag toggle */}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          e.preventDefault();
-                          const isOfficial = Array.isArray(preset.tags) && preset.tags.includes("official");
-                          const nextTags = isOfficial
-                            ? (preset.tags || []).filter((t: string) => t !== "official")
-                            : [...(preset.tags || []), "official"];
-                          handleSaveTags(preset, nextTags);
-                        }}
-                        style={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          gap: "0.25rem",
-                          fontSize: "0.7rem",
-                          backgroundColor: preset.official ? "rgba(245, 158, 11, 0.25)" : "transparent",
-                          color: preset.official ? "#f59e0b" : "var(--text-sub, #64748b)",
-                          border: `1px solid ${preset.official ? "#f59e0b" : "var(--border-light, rgba(255,255,255,0.15))"}`,
-                          padding: "0.15rem 0.4rem",
-                          borderRadius: "3px",
-                          cursor: "pointer",
-                          fontWeight: "bold",
-                          transition: "all 0.15s",
-                        }}
-                      >
-                        ★ OFFICIAL
-                      </button>
-
-                      {/* Dynamic Canned Tags */}
-                      {cannedTags.map(tag => {
-                        const isActive = Array.isArray(preset.tags) && preset.tags.includes(tag);
-                        return (
+                    {/* Expanded View */}
+                    {isExpanded && (
+                      <div style={{ marginTop: "0.75rem", borderTop: "1px dashed rgba(148, 163, 184, 0.2)", paddingTop: "0.75rem", paddingLeft: "1.75rem" }}>
+                        
+                        {/* Tag Toggle Buttons Sub-Row in Expanded View */}
+                        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginBottom: "1rem", alignItems: "center" }}>
+                          {/* Official tag toggle */}
                           <button
-                            key={tag}
                             onClick={(e) => {
                               e.stopPropagation();
                               e.preventDefault();
-                              const nextTags = isActive
-                                ? (preset.tags || []).filter((t: string) => t !== tag)
-                                : [...(preset.tags || []), tag];
+                              const isOfficial = Array.isArray(preset.tags) && preset.tags.includes("official");
+                              const nextTags = isOfficial
+                                ? (preset.tags || []).filter((t: string) => t !== "official")
+                                : [...(preset.tags || []), "official"];
                               handleSaveTags(preset, nextTags);
                             }}
                             style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: "0.25rem",
                               fontSize: "0.7rem",
-                              backgroundColor: isActive ? "rgba(59, 130, 246, 0.25)" : "transparent",
-                              color: isActive ? "#60a5fa" : "var(--text-sub, #64748b)",
-                              border: `1px solid ${isActive ? "#60a5fa" : "var(--border-light, rgba(255, 255, 255, 0.15))"}`,
+                              backgroundColor: preset.official ? "rgba(245, 158, 11, 0.25)" : "transparent",
+                              color: preset.official ? "#f59e0b" : "var(--text-sub, #64748b)",
+                              border: `1px solid ${preset.official ? "#f59e0b" : "var(--border-light, rgba(255,255,255,0.15))"}`,
                               padding: "0.15rem 0.4rem",
                               borderRadius: "3px",
                               cursor: "pointer",
@@ -843,15 +887,41 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                               transition: "all 0.15s",
                             }}
                           >
-                            {tag.toUpperCase()}
+                            ★ OFFICIAL
                           </button>
-                        );
-                      })}
-                    </div>
 
-                    {/* Expanded View */}
-                    {isExpanded && (
-                      <div style={{ marginTop: "0.75rem", borderTop: "1px dashed rgba(148, 163, 184, 0.2)", paddingTop: "0.75rem", paddingLeft: "1.75rem" }}>
+                          {/* Dynamic Canned Tags */}
+                          {cannedTags.map(tag => {
+                            const isActive = Array.isArray(preset.tags) && preset.tags.includes(tag);
+                            return (
+                              <button
+                                key={tag}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  e.preventDefault();
+                                  const nextTags = isActive
+                                    ? (preset.tags || []).filter((t: string) => t !== tag)
+                                    : [...(preset.tags || []), tag];
+                                  handleSaveTags(preset, nextTags);
+                                }}
+                                style={{
+                                  fontSize: "0.7rem",
+                                  backgroundColor: isActive ? "rgba(59, 130, 246, 0.25)" : "transparent",
+                                  color: isActive ? "#60a5fa" : "var(--text-sub, #64748b)",
+                                  border: `1px solid ${isActive ? "#60a5fa" : "var(--border-light, rgba(255, 255, 255, 0.15))"}`,
+                                  padding: "0.15rem 0.4rem",
+                                  borderRadius: "3px",
+                                  cursor: "pointer",
+                                  fontWeight: "bold",
+                                  transition: "all 0.15s",
+                                }}
+                              >
+                                {tag.toUpperCase()}
+                              </button>
+                            );
+                          })}
+                        </div>
+
                         {editingPresetId === preset.id ? (
                           <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                             <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
@@ -942,10 +1012,10 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                               </p>
                             )}
                             <div className="text-slate-800 dark:text-slate-300 bg-slate-200/50 dark:bg-slate-950/60" style={{ padding: "0.75rem", borderRadius: "4px", fontSize: "0.8rem", fontFamily: "monospace", overflowX: "auto", whiteSpace: "pre-wrap", wordBreak: "break-all", border: "1px solid var(--border-light, rgba(255,255,255,0.05))" }}>
-                              {preset.flags || "(No flags provided in external API)"}
+                                {preset.flags || "(No flags provided in external API)"}
                             </div>
-                            <div className="text-slate-500 dark:text-slate-400" style={{ display: "flex", gap: "1rem", marginTop: "0.75rem", fontSize: "0.75rem", fontWeight: "bold", flexWrap: "wrap", alignItems: "center" }}>
-                              <span>Created: {new Date(preset.created_timestamp).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })}</span>
+                            <div className="text-slate-500 dark:text-slate-400" style={{ display: "flex", gap: "1rem", marginTop: "0.75rem", fontSize: "0.75rem", fontWeight: "bold", flexWrap: "wrap", alignItems: "center", width: "100%" }}>
+                              <span>Created: {formatTruncatedDate(preset.created_timestamp)}</span>
                               <span>Total Downloads: {preset.downloads ?? preset.download_count ?? preset.dbRecord?.downloads ?? preset.dbRecord?.download_count ?? 0}</span>
                               {preset.download_timestamp && (
                                 <span>
@@ -957,29 +1027,73 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                                 </span>
                               )}
                               
-                              <button
-                                onClick={() => {
-                                  setEditingPresetId(preset.id);
-                                  setEditName(preset.name);
-                                  setEditCreatorName(preset.creator_name || preset.creator || "");
-                                  setEditDescription(preset.description || "");
-                                  setEditFlags(preset.flags || "");
-                                }}
-                                style={{
-                                  backgroundColor: "rgba(59, 130, 246, 0.1)",
-                                  border: "1px solid #3b82f6",
-                                  color: "#60a5fa",
-                                  padding: "0.25rem 0.5rem",
-                                  borderRadius: "4px",
-                                  fontSize: "0.75rem",
-                                  cursor: "pointer",
-                                  fontWeight: "bold",
-                                  marginLeft: "auto",
-                                }}
-                                className="hover:bg-blue-500 hover:text-white transition-colors"
-                              >
-                                Edit Fields
-                              </button>
+                              {showConfirm[preset.id] ? (
+                                <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", marginLeft: "auto" }}>
+                                  <span style={{ color: "#f87171", fontSize: "0.75rem", fontWeight: "bold" }}>Confirm Delete?</span>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      e.preventDefault();
+                                      handleAdminDeletePreset(preset);
+                                    }}
+                                    disabled={!!isDeleting[preset.id]}
+                                    style={{
+                                      backgroundColor: "#ef4444",
+                                      border: "none",
+                                      color: "#ffffff",
+                                      padding: "0.25rem 0.6rem",
+                                      borderRadius: "4px",
+                                      fontSize: "0.75rem",
+                                      cursor: "pointer",
+                                      fontWeight: "bold",
+                                    }}
+                                    className="hover:bg-red-600 transition-colors disabled:opacity-50"
+                                  >
+                                    {isDeleting[preset.id] ? "..." : "Yes"}
+                                  </button>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      e.preventDefault();
+                                      setShowConfirm((p) => ({ ...p, [preset.id]: false }));
+                                    }}
+                                    disabled={!!isDeleting[preset.id]}
+                                    style={{
+                                      border: "1px solid #94a3b8",
+                                      padding: "0.25rem 0.6rem",
+                                      borderRadius: "4px",
+                                      fontSize: "0.75rem",
+                                      cursor: "pointer",
+                                      fontWeight: "bold",
+                                    }}
+                                    className="bg-slate-200 hover:bg-slate-300 dark:bg-slate-700/60 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 transition-colors"
+                                  >
+                                    No
+                                  </button>
+                                </div>
+                              ) : (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    e.preventDefault();
+                                    setShowConfirm((p) => ({ ...p, [preset.id]: true }));
+                                  }}
+                                  style={{
+                                    backgroundColor: "rgba(239, 68, 68, 0.1)",
+                                    border: "1px solid #ef4444",
+                                    color: "#f87171",
+                                    padding: "0.25rem 0.5rem",
+                                    borderRadius: "4px",
+                                    fontSize: "0.75rem",
+                                    cursor: "pointer",
+                                    fontWeight: "bold",
+                                    marginLeft: "auto",
+                                  }}
+                                  className="hover:bg-red-500 hover:text-white transition-colors"
+                                >
+                                  Delete Preset
+                                </button>
+                              )}
                             </div>
                           </>
                         )}
