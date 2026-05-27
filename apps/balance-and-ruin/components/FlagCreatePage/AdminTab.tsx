@@ -42,6 +42,7 @@ const formatTruncatedDate = (dateStr: string) => {
   if (!dateStr) return "";
   try {
     const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return "";
     const month = d.getMonth() + 1;
     const day = d.getDate();
     const year = String(d.getFullYear()).slice(-2);
@@ -51,17 +52,19 @@ const formatTruncatedDate = (dateStr: string) => {
   }
 };
 
+const useSafeLayoutEffect = typeof window !== "undefined" ? React.useLayoutEffect : React.useEffect;
+
 const AdminPresetTitle = ({ name }: { name: string }) => {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const textRef = React.useRef<HTMLHeadingElement>(null);
   const [shouldScroll, setShouldScroll] = React.useState(false);
 
   // Reset scroll detection when title changes to measure the new title
-  React.useLayoutEffect(() => {
+  useSafeLayoutEffect(() => {
     setShouldScroll(false);
   }, [name]);
 
-  React.useLayoutEffect(() => {
+  useSafeLayoutEffect(() => {
     if (!shouldScroll && containerRef.current && textRef.current) {
       const containerWidth = containerRef.current.clientWidth;
       const textWidth = textRef.current.scrollWidth;
@@ -95,6 +98,10 @@ const AdminPresetTitle = ({ name }: { name: string }) => {
 
 export const AdminTab = ({ apiPresets }: AdminTabProps) => {
   const { data: session } = useAppSession();
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
   
   // Local state for all database records
   const [allPresets, setAllPresets] = useState<any[]>([]);
@@ -129,7 +136,7 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
   const [editFlags, setEditFlags] = useState("");
   const [isSavingEdit, setIsSavingEdit] = useState(false);
 
-  const devAdminOverride = typeof window !== "undefined" && 
+  const devAdminOverride = isMounted && typeof window !== "undefined" && 
     (process.env.NEXT_PUBLIC_DEV_ADMIN_TOGGLE === "true" || process.env.NODE_ENV === "development") && 
     localStorage.getItem("dev_admin_override") === "true";
 
