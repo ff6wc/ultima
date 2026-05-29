@@ -1,6 +1,5 @@
 import { useDarkMode } from "@ff6wc/utils/useDarkMode";
-import { Montserrat, Open_Sans, Roboto, Roboto_Mono } from "@next/font/google";
-import localFont from "@next/font/local";
+import { Open_Sans } from "@next/font/google";
 import { cx } from "cva";
 import type { AppProps } from "next/app";
 import { AppType } from "next/app";
@@ -8,13 +7,15 @@ import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { Provider } from "react-redux";
 import { Schema } from "~/state/schemaSlice";
-import { wrapper } from "~/state/store";
+import { makeStore, wrapper } from "~/state/store";
 import "~/styles/globals.css";
+import { AppSessionProvider } from "~/hooks/useAppSession";
+import { ErrorBoundary } from "~/components/ErrorBoundary/ErrorBoundary";
 
-export const montserrat = Montserrat();
-export const roboto = Roboto({ weight: ["500", "700", "400"] });
-export const robotoMono = Roboto_Mono({ weight: ["500"] });
-export const openSans = Open_Sans({ weight: ["300", "400", "500"] });
+export const openSans = Open_Sans({
+  subsets: ["latin"],
+  weight: ["300", "400", "500"],
+});
 
 const client = new QueryClient({});
 
@@ -22,8 +23,13 @@ type Props = {
   schema: Schema;
 };
 
+
+
+export let singletonStore: any = null;
+
 const App: AppType<Props> = ({ Component, ...rest }: AppProps<Props>) => {
   const { store, props } = wrapper.useWrappedStore(rest);
+  singletonStore = store;
 
   useDarkMode();
 
@@ -35,7 +41,7 @@ const App: AppType<Props> = ({ Component, ...rest }: AppProps<Props>) => {
     <div
       className={cx(
         openSans.className,
-        "text-grey dark:text-white flex flex-col h-full"
+        "text-grey dark:text-white flex flex-col h-full",
       )}
     >
       <Provider store={store}>
@@ -43,7 +49,11 @@ const App: AppType<Props> = ({ Component, ...rest }: AppProps<Props>) => {
           <GoogleReCaptchaProvider
             reCaptchaKey={process.env.NEXT_PUBLIC_RECAPTCHA_KEY as string}
           >
-            <Component {...props.pageProps} />
+            <AppSessionProvider session={props.pageProps.session}>
+              <ErrorBoundary>
+                <Component {...props.pageProps} />
+              </ErrorBoundary>
+            </AppSessionProvider>
           </GoogleReCaptchaProvider>
         </QueryClientProvider>
       </Provider>

@@ -21,6 +21,7 @@ export type FlagSliderProps = {
   flag: string;
   helperText?: React.ReactNode;
   label: React.ReactNode;
+  hideFlag?: boolean;
 } & SliderProps<number>;
 
 export const FlagSlider = ({
@@ -31,6 +32,7 @@ export const FlagSlider = ({
   min: hardMin,
   max: hardMax,
   step: hardStep,
+  hideFlag,
   ...rest
 }: FlagSliderProps) => {
   const ref = useRef<HTMLInputElement>(null);
@@ -53,7 +55,7 @@ export const FlagSlider = ({
       setFlag({
         flag: flag,
         value: val,
-      })
+      }),
     );
   };
 
@@ -62,10 +64,10 @@ export const FlagSlider = ({
   };
 
   const min = (
-    hardMin ?? allowedValues.length ? first(allowedValues) : schemaMin ?? 0
+    (hardMin ?? allowedValues.length) ? first(allowedValues) : (schemaMin ?? 0)
   ) as number;
   const max = (
-    hardMax ?? allowedValues.length ? last(allowedValues) : schemaMax ?? 100
+    (hardMax ?? allowedValues.length) ? last(allowedValues) : (schemaMax ?? 100)
   ) as number;
 
   const step = hardStep ?? schemaStep ?? 1;
@@ -73,18 +75,24 @@ export const FlagSlider = ({
   const description = hardDescription ?? schemaDescription;
   const helperText = renderDescription(
     description,
-    value ?? schemaDefaultValue ?? min
+    value ?? schemaDefaultValue ?? min,
   );
 
   return (
     <div className={"flex flex-col gap-2"}>
-      <div className={"flex justify-between items-center gap-4"}>
-        <FlagLabel
-          flag={flag}
-          helperText={helperText ?? description}
-          label={label}
-        />
-        <div className={"flex items-center justify-center flex-shrink gap-1"}>
+      <div className={"flex flex-col sm:flex-row justify-between sm:items-center gap-4"}>
+        <div className="flex-grow min-w-0 w-full">
+          <FlagLabel
+            flag={flag}
+            helperText={helperText ?? description}
+            label={label}
+            hideFlag={hideFlag}
+          />
+        </div>
+        <div className={"flex items-center justify-between sm:justify-center flex-shrink-0 w-full sm:w-auto gap-2"}>
+          <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-sub)] sm:hidden">
+            Value:
+          </span>
           <Input
             className={"max-w-[80px]"}
             min={min}

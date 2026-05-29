@@ -1,6 +1,27 @@
-import { Montserrat, Open_Sans, Roboto, Roboto_Mono } from "@next/font/google";
+export const montserrat = {
+  className: "font-montserrat",
+  style: {
+    fontFamily: "Montserrat, sans-serif",
+  },
+};
 
-export const montserrat = Montserrat();
-export const roboto = Roboto({ weight: ["500", "700", "400"] });
-export const robotoMono = Roboto_Mono({ weight: ["500"] });
-export const openSans = Open_Sans({ weight: ["300", "400", "500"] });
+export const roboto = {
+  className: "font-roboto",
+  style: {
+    fontFamily: "Roboto, sans-serif",
+  },
+};
+
+export const robotoMono = {
+  className: "font-mono",
+  style: {
+    fontFamily: "'Roboto Mono', monospace",
+  },
+};
+
+export const openSans = {
+  className: "font-sans",
+  style: {
+    fontFamily: "sans-serif",
+  },
+};

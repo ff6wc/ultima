@@ -6,6 +6,7 @@ import { InputLabel } from "~/components/InputLabel/InputLabel";
 import { Select, SelectOption } from "~/components/Select/Select";
 import { setRawFlags } from "~/state/flagSlice";
 import { setRawObjectives } from "~/state/objectiveSlice";
+import { setRawStartingItems } from "~/state/itemSlice";
 
 export type PresetsCardProps = {
   presets: SelectOption[];
@@ -28,6 +29,7 @@ export const PresetsCard = ({ presets }: PresetsCardProps) => {
               setSelected(option);
               dispatch(setRawFlags(option.value));
               dispatch(setRawObjectives(option.value));
+              dispatch(setRawStartingItems(option.value));
             }
           }}
           value={selected}
