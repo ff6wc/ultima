@@ -1,5 +1,6 @@
 import { Button, DiscordButton, Link } from "@ff6wc/ui";
 import { cx } from "cva";
+import { useEffect, useState } from "react";
 import { SeedOfTheWeek } from "~/types/sotw";
 
 type Props = {
@@ -8,8 +9,20 @@ type Props = {
 };
 export const SotwCard = ({ sotw, sotwId }: Props) => {
   const { seed_id, seed } = sotw;
-  const isAbsoluteUrl = seed && (seed.startsWith("http://") || seed.startsWith("https://"));
-  const href = isAbsoluteUrl ? seed : (seed_id ? `/seed/?id=${seed_id}` : seed);
+  const [href, setHref] = useState(seed_id ? `/seed/?id=${seed_id}` : seed);
+
+  useEffect(() => {
+    if (seed) {
+      try {
+        const seedUrl = new URL(seed);
+        if (seedUrl.hostname !== window.location.hostname) {
+          setHref(seed);
+        }
+      } catch (e) {
+        // Fallback or ignore invalid URL
+      }
+    }
+  }, [seed, seed_id]);
 
   return (
     <div
