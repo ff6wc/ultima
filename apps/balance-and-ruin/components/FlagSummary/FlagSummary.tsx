@@ -434,6 +434,8 @@ function analyzeDifficulty(
   if (activeScaleFlag) {
     if (activeScaleFlag === "-lst") {
       scaleFactor = Math.max(1.0, 2.0 / (scaleMult || 2.0));
+    } else if (activeScaleFlag === "-lsa" || activeScaleFlag === "-lsh") {
+      scaleFactor = Math.max(1.0, scaleMult / 1.0);
     } else {
       scaleFactor = Math.max(1.0, scaleMult / 2.0);
     }
@@ -590,24 +592,68 @@ function analyzeDifficulty(
           bullets.push({ text: `Enemy scaling every ${mult} min.`, severity: "info" });
         }
       } else {
-        if (mult < 1.0) {
-          bullets.push({ text: `Enemy scaling ${mult}× — enemies are much weaker than standard`, severity: "easy" });
-          delta -= 12;
-        } else if (mult < 2.0) {
-          bullets.push({ text: `Enemy scaling ${mult}× ${lbl} — easier than the 2× standard`, severity: "easy" });
-          delta -= 6;
-        } else if (mult >= 4.0) {
-          bullets.push({ text: `Enemy scaling ${mult}× ${lbl} — extreme difficulty`, severity: "hard" });
-          delta += 25;
-        } else if (mult >= 3.0) {
-          bullets.push({ text: `Enemy scaling ${mult}× ${lbl} — harder than standard 2×`, severity: "hard" });
-          delta += 15;
-        } else if (mult > 2.5) {
-          bullets.push({ text: `Enemy scaling ${mult}× ${lbl} — slightly above standard`, severity: "medium" });
-          delta += 8;
+        if (activeScalingFlag === "-lsa" || activeScalingFlag === "-lsh") {
+          // -lsa and -lsh have standard mult = 1.0, and scale exponentially for higher values
+          const isCappedUnder40 = msl < 40;
+          
+          if (mult <= 0.5) {
+            bullets.push({ text: `Enemy scaling ${mult}× ${lbl} — easier than the 1× standard`, severity: "easy" });
+            delta -= 6;
+          } else if (mult === 1.0) {
+            bullets.push({ text: `Enemy scaling ${mult}× ${lbl} — standard level scaling`, severity: "info" });
+            // standard 1.0 = 0 delta
+          } else {
+            // mult > 1.0: gets exponentially harder
+            // 1.5 is pretty hard, 2.0 is very hard
+            let scalingDelta = 0;
+            let severity: BulletSeverity = "medium";
+            
+            if (mult <= 1.5) {
+              scalingDelta = 12;
+              severity = "medium";
+            } else if (mult <= 2.0) {
+              scalingDelta = 22;
+              severity = "hard";
+            } else {
+              scalingDelta = 35;
+              severity = "hard";
+            }
+            
+            if (isCappedUnder40) {
+              // Max scale level cap under 40 limits the challenge (tapered by 40%), but it is still harder
+              scalingDelta = Math.round(scalingDelta * 0.6);
+              bullets.push({ 
+                text: `Enemy scaling ${mult}× ${lbl} — very challenging, partially limited by low level cap (${msl})`, 
+                severity: severity 
+              });
+            } else {
+              bullets.push({ 
+                text: `Enemy scaling ${mult}× ${lbl} — extremely challenging, enemies scale aggressively with level`, 
+                severity: severity 
+              });
+            }
+            delta += scalingDelta;
+          }
         } else {
-          // 2.0–2.5 = standard — always show as info
-          bullets.push({ text: `Enemy scaling ${mult}× ${lbl}`, severity: "info" });
+          if (mult < 1.0) {
+            bullets.push({ text: `Enemy scaling ${mult}× — enemies are much weaker than standard`, severity: "easy" });
+            delta -= 12;
+          } else if (mult < 2.0) {
+            bullets.push({ text: `Enemy scaling ${mult}× ${lbl} — easier than the 2× standard`, severity: "easy" });
+            delta -= 6;
+          } else if (mult >= 4.0) {
+            bullets.push({ text: `Enemy scaling ${mult}× ${lbl} — extreme difficulty`, severity: "hard" });
+            delta += 25;
+          } else if (mult >= 3.0) {
+            bullets.push({ text: `Enemy scaling ${mult}× ${lbl} — harder than standard 2×`, severity: "hard" });
+            delta += 15;
+          } else if (mult > 2.5) {
+            bullets.push({ text: `Enemy scaling ${mult}× ${lbl} — slightly above standard`, severity: "medium" });
+            delta += 8;
+          } else {
+            // 2.0–2.5 = standard — always show as info
+            bullets.push({ text: `Enemy scaling ${mult}× ${lbl}`, severity: "info" });
+          }
         }
       }
 
