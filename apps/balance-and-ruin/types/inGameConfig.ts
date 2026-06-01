@@ -31,16 +31,16 @@ export const WINDOW_PALETTE_DEFAULTS: Record<string, [number, number, number][]>
   window8: [[20, 12, 13], [25, 24, 22], [20, 19, 16], [26, 17, 0], [25, 13, 0], [20, 11, 0], [4, 4, 4]],
 };
 
-export const DEFAULT_FONT_COLOR: [number, number, number] = [0, 28, 27];
+export const DEFAULT_FONT_COLOR: [number, number, number] = [31, 31, 31];
 
 export const DEFAULT_IN_GAME_CONFIG: InGameConfig = {
   batMode: "wait",
-  batSpeed: 3,
-  msgSpeed: 3,
+  batSpeed: 6,
+  msgSpeed: 1,
   cmdSet: "window",
   gauge: "on",
   sound: "stereo",
-  cursor: "reset",
+  cursor: "memory",
   reequip: "optimum",
 
   spellOrder: 1,
