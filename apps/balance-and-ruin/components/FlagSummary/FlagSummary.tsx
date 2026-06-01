@@ -995,8 +995,8 @@ function analyzeDifficulty(
   // Open World
   if (hasFlag(fv, "-open")) { bullets.push({ text: "Open world — all events accessible from the start", severity: "easy" }); delta -= 5; }
 
-  // Final score = BASE (standard) + deviations
-  let score = Math.max(0, BASE_SCORE + delta);
+  // Final score = BASE (standard) + deviations (rounded to nearest whole number)
+  let score = Math.round(Math.max(0, BASE_SCORE + delta));
 
   let label: string;
   let color: string;
