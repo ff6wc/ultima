@@ -509,7 +509,12 @@ function analyzeDifficulty(
       }
 
       if (kefkaObjRaw[0]?.obj?.conditions) {
-        for (const cond of kefkaObjRaw[0].obj.conditions) {
+        const conditions = kefkaObjRaw[0].obj.conditions;
+        const totalCondsCount = conditions.length;
+        // Scale positive deviations if players only need to meet a subset of total conditions
+        const conditionRatio = totalCondsCount > 0 ? Math.min(1.0, kefkaRequired / totalCondsCount) : 1.0;
+
+        for (const cond of conditions) {
           const valNum = cond.values && cond.values.length > 1
             ? parseInt(String(cond.values[1]), 10)
             : (cond.values?.[0] !== undefined ? parseInt(String(cond.values[0]), 10) : NaN);
@@ -517,21 +522,21 @@ function analyzeDifficulty(
             if (cond.id === COND_CHARACTERS || cond.id === "2") {
               const diff = valNum - 6; // 6 is standard baseline
               if (diff > 0) {
-                kefkaDelta += diff * 1.5 * envMult; // low base impact (1.5), scaled by environment
+                kefkaDelta += diff * 1.5 * envMult * conditionRatio; // low base impact (1.5), scaled by environment & ratio
               } else {
                 kefkaDelta += diff * 2.0; // Less is easier
               }
             } else if (cond.id === COND_ESPERS || cond.id === "4") {
               const diff = valNum - 9; // 9 is standard baseline
               if (diff > 0) {
-                kefkaDelta += diff * 0.8 * envMult; // low base impact (0.8), scaled by environment
+                kefkaDelta += diff * 0.8 * envMult * conditionRatio; // low base impact (0.8), scaled by environment & ratio
               } else {
                 kefkaDelta += diff * 1.0; // Less is easier
               }
             } else if (cond.id === COND_DRAGONS || cond.id === "6") {
               const diff = valNum - 0; // 0 is standard
               if (diff > 0) {
-                kefkaDelta += diff * 2.0 * envMult; // low base impact (2.0), scaled by environment
+                kefkaDelta += diff * 2.0 * envMult * conditionRatio; // low base impact (2.0), scaled by environment & ratio
               }
             }
           }
@@ -1054,8 +1059,8 @@ function analyzeDifficulty(
     delta += 8;
   }
   if (hasFlag(fv, "-sn")) {
-    bullets.push({ text: "Start naked — recruited characters have no starting equipment", severity: "hard" });
-    delta += 10;
+    bullets.push({ text: "Start naked — recruited characters have no starting equipment", severity: "info" });
+    delta += 2;
   }
 
   // Starting Gold
