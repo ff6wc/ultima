@@ -7,7 +7,7 @@ const FlagCreatePage = dynamic<any>(
   () => import("../components/FlagCreatePage/FlagCreatePage").then((mod) => mod.FlagCreatePage),
   { ssr: false }
 );
-import { setRawFlags } from "~/state/flagSlice";
+import { setRawFlags, applyPersistedGraphics } from "~/state/flagSlice";
 import { setRawObjectives } from "~/state/objectiveSlice";
 import { setRawStartingItems, initItemMetadata } from "~/state/itemSlice";
 import { setObjectiveMetadata } from "~/state/objectiveSlice";
@@ -75,6 +75,9 @@ const Create = () => {
               dispatch(setRawObjectives(preset.flags));
               dispatch(setRawStartingItems(preset.flags));
             }
+            // Always restore persisted graphics — runs unconditionally so
+            // even if "ultros league" is not found, the restore still fires.
+            applyPersistedGraphics(dispatch);
           }
         }
       }
@@ -108,6 +111,7 @@ const Create = () => {
           dispatch(setRawObjectives(preset.flags));
           dispatch(setRawStartingItems(preset.flags));
         }
+        applyPersistedGraphics(dispatch);
       })
       .catch((err) => {
         console.warn("Failed to fetch presets from API, trying fallback fetch:", err);
@@ -123,6 +127,7 @@ const Create = () => {
               dispatch(setRawObjectives(preset.flags));
               dispatch(setRawStartingItems(preset.flags));
             }
+            applyPersistedGraphics(dispatch);
           })
           .catch((fallbackErr) => {
             console.error("Failed to fetch fallback presets:", fallbackErr);

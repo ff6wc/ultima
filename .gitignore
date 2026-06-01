@@ -36,3 +36,8 @@ yarn-error.log*
 
 # local db
 apps/db/
+
+# chrome debug profile & local scratch files
+chrome-debug-profile/
+scratch/
+test-results/
