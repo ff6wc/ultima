@@ -6,6 +6,8 @@ import { PageContainer } from "../PageContainer/PageContainer";
 import { useRouter } from "next/router";
 import { useDispatch } from "react-redux";
 import { setRawFlags } from "~/state/flagSlice";
+import { setRawObjectives } from "~/state/objectiveSlice";
+import { setRawStartingItems } from "~/state/itemSlice";
 
 const getCleanPresetName = (seedType: string) => {
   if (!seedType) return "custom";
@@ -1056,6 +1058,8 @@ export const ProfileTab = () => {
                           <button
                             onClick={() => {
                               dispatch(setRawFlags(seed.flagstring));
+                              dispatch(setRawObjectives(seed.flagstring));
+                              dispatch(setRawStartingItems(seed.flagstring));
                               router.push("/create?tab=generate");
                             }}
                             style={{
