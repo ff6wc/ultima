@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { HiChevronDown, HiChevronUp } from "react-icons/hi2";
-import { selectFlagValues } from "~/state/flagSlice";
+import { selectFlagValues, selectRawFlags } from "~/state/flagSlice";
 import { selectObjectives } from "~/state/objectiveSlice";
 import { selectActivePresetName } from "~/state/presetSlice";
 import styles from "./FlagSummary.module.css";
@@ -403,14 +403,13 @@ function buildInfoRows(fv: Record<string, any>, objectives: Record<string, any>)
 const BASE_SCORE = 20;
 
 // Configuration map for preset-specific difficulty overrides
-const PRESET_DIFFICULTY_OVERRIDES: Record<string, { score: number; label: string; color: string }> = {
-  "atma series": { score: 20, label: "Standard", color: "#3b82f6" },
-};
+const PRESET_DIFFICULTY_OVERRIDES: Record<string, { score: number; label: string; color: string }> = {};
 
 function analyzeDifficulty(
   fv: Record<string, any>,
   objectives: Record<string, any>,
-  activePresetName: string | null
+  activePresetName: string | null,
+  rawFlags?: string
 ): { score: number; label: string; color: string; bullets: Bullet[] } {
   const bullets: Bullet[] = [];
   let delta = 0; // points above/below the standard baseline
@@ -454,18 +453,19 @@ function analyzeDifficulty(
 
       if (kefkaObjRaw[0]?.obj?.conditions) {
         for (const cond of kefkaObjRaw[0].obj.conditions) {
-          const val = cond.values?.[0];
-          const valNum = val !== undefined ? parseInt(String(val), 10) : NaN;
+          const valNum = cond.values && cond.values.length > 1
+            ? parseInt(String(cond.values[1]), 10)
+            : (cond.values?.[0] !== undefined ? parseInt(String(cond.values[0]), 10) : NaN);
           if (!isNaN(valNum)) {
             if (cond.id === COND_CHARACTERS || cond.id === "2") {
-              const diff = valNum - 6; // 6 is standard
+              const diff = valNum - 6; // 6 is standard baseline
               if (diff > 0) {
                 kefkaDelta += diff * 4.5; // More is harder
               } else {
                 kefkaDelta += diff * 2.0; // Less is easier
               }
             } else if (cond.id === COND_ESPERS || cond.id === "4") {
-              const diff = valNum - 9; // 9 is standard
+              const diff = valNum - 9; // 9 is standard baseline
               if (diff > 0) {
                 kefkaDelta += diff * 2.5; // More is harder
               } else {
@@ -887,8 +887,13 @@ function analyzeDifficulty(
     bullets.push({ text: "Relic equipability is tiered random — higher tier relics are less likely to be equipable", severity: "medium" });
     delta += 8;
   } else if (hasFlag(fv, "-ierr") || hasFlag(fv, "-ierbr") || hasFlag(fv, "-ieror") || hasFlag(fv, "-iersr")) {
-    bullets.push({ text: "Relic availability randomized", severity: "info" });
-    delta += 3;
+    const v = flagNum(fv, "-ieror") || flagNum(fv, "-iersr");
+    if (v !== null && v === 33) {
+      // 33% is standard baseline (Atma Series)
+    } else {
+      bullets.push({ text: "Relic availability randomized", severity: "info" });
+      delta += 3;
+    }
   }
 
   // ── Challenge flags ──
@@ -947,6 +952,7 @@ export const FlagSummary = () => {
   const flagValues = useSelector(selectFlagValues) as Record<string, any>;
   const objectives = useSelector(selectObjectives) as Record<string, any>;
   const activePresetName = useSelector(selectActivePresetName);
+  const rawFlags = useSelector(selectRawFlags);
 
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -964,7 +970,7 @@ export const FlagSummary = () => {
   };
 
   const infoRows = buildInfoRows(flagValues, objectives);
-  const { score, label, color, bullets } = analyzeDifficulty(flagValues, objectives, activePresetName);
+  const { score, label, color, bullets } = analyzeDifficulty(flagValues, objectives, activePresetName, rawFlags);
 
   const severityIcon: Record<BulletSeverity, string> = {
     hard: "⚠️", medium: "◆", easy: "✓", info: "ℹ",
