@@ -756,35 +756,44 @@ function analyzeDifficulty(
     const xgMult = flagNum(fv, activeXgFlag);
     if (xgMult !== null) {
       if (activeXgFlag === "-xgt") {
-        if (xgMult === 0.5) {
-          bullets.push({ text: `Enemy XP/GP yield scaling every ${xgMult} min. — extremely fast reward scaling`, severity: "hard" });
-          delta += 12;
-        } else if (xgMult === 1.0) {
-          bullets.push({ text: `Enemy XP/GP yield scaling every ${xgMult} min. — fast reward scaling`, severity: "hard" });
-          delta += 8;
-        } else if (xgMult === 1.5) {
-          bullets.push({ text: `Enemy XP/GP yield scaling every ${xgMult} min. — fast reward scaling`, severity: "medium" });
-          delta += 4;
-        } else if (xgMult === 3.0) {
-          bullets.push({ text: `Enemy XP/GP yield scaling every ${xgMult} min. — slow reward scaling`, severity: "easy" });
-          delta -= 2;
-        } else if (xgMult === 3.5) {
-          bullets.push({ text: `Enemy XP/GP yield scaling every ${xgMult} min. — slow reward scaling`, severity: "easy" });
-          delta -= 4;
-        } else if (xgMult === 4.0) {
-          bullets.push({ text: `Enemy XP/GP yield scaling every ${xgMult} min. — very slow reward scaling`, severity: "easy" });
-          delta -= 6;
-        } else if (xgMult === 4.5) {
-          bullets.push({ text: `Enemy XP/GP yield scaling every ${xgMult} min. — very slow reward scaling`, severity: "easy" });
-          delta -= 7;
-        } else if (xgMult >= 5.0) {
-          bullets.push({ text: `Enemy XP/GP yield scaling every ${xgMult} min. — extremely slow reward scaling`, severity: "easy" });
+        // Time elapsed: smaller values = faster reward growth = easier
+        if (xgMult <= 0.5) {
+          bullets.push({ text: `Enemy XP/GP yield scaling every ${xgMult} min. — extremely fast reward scaling, game is much easier`, severity: "easy" });
+          delta -= 12;
+        } else if (xgMult <= 1.0) {
+          bullets.push({ text: `Enemy XP/GP yield scaling every ${xgMult} min. — very fast reward scaling, game is easier`, severity: "easy" });
           delta -= 8;
+        } else if (xgMult <= 1.5) {
+          bullets.push({ text: `Enemy XP/GP yield scaling every ${xgMult} min. — fast reward scaling, game is slightly easier`, severity: "easy" });
+          delta -= 4;
+        } else if (xgMult >= 5.0) {
+          bullets.push({ text: `Enemy XP/GP yield scaling every ${xgMult} min. — extremely slow reward scaling, grinding is tedious`, severity: "hard" });
+          delta += 12;
+        } else if (xgMult >= 4.0) {
+          bullets.push({ text: `Enemy XP/GP yield scaling every ${xgMult} min. — very slow reward scaling, grinding is slow`, severity: "hard" });
+          delta += 8;
+        } else if (xgMult >= 3.0) {
+          bullets.push({ text: `Enemy XP/GP yield scaling every ${xgMult} min. — slow reward scaling`, severity: "medium" });
+          delta += 4;
+        } else {
+          bullets.push({ text: `Enemy XP/GP yield scaling every ${xgMult} min.`, severity: "info" });
         }
       } else {
-        if (xgMult < 1.0) { bullets.push({ text: `Enemy XP/GP yield ${xgMult}× — very low rewards`, severity: "hard" }); delta += 10; }
-        else if (xgMult < 2.0) { bullets.push({ text: `Enemy XP/GP yield ${xgMult}× — below the 2× standard`, severity: "medium" }); delta += 5; }
-        else if (xgMult > 4.0) { bullets.push({ text: `Enemy XP/GP yield ${xgMult}× — generous rewards`, severity: "easy" }); delta -= 8; }
+        // Multiplier based scaling (standard is 2.0x)
+        const lbl = SCALING_LABEL[activeXgFlag] ?? "";
+        if (xgMult < 1.0) {
+          bullets.push({ text: `Enemy XP/GP yield ${xgMult}× ${lbl} — extremely low rewards, grinding is very hard`, severity: "hard" });
+          delta += 12;
+        } else if (xgMult < 2.0) {
+          bullets.push({ text: `Enemy XP/GP yield ${xgMult}× ${lbl} — below standard 2×, grinding is slower`, severity: "medium" });
+          delta += 6;
+        } else if (xgMult > 2.0) {
+          const ease = Math.min(18, xgMult > 4.0 ? (xgMult - 2.0) * 4.5 : (xgMult - 2.0) * 3.5);
+          bullets.push({ text: `Enemy XP/GP yield ${xgMult}× ${lbl} — generous rewards make game easier`, severity: "easy" });
+          delta -= ease;
+        } else {
+          bullets.push({ text: `Enemy XP/GP yield ${xgMult}× ${lbl}`, severity: "info" });
+        }
       }
     }
   }
