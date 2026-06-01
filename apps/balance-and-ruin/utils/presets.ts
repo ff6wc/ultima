@@ -11,7 +11,7 @@ export const normalizePresets = (data: any): Record<string, FlagPreset> => {
         const siMatch = flags.match(/-si\s+([^\s]+)/);
         if (siMatch) {
           const siValue = siMatch[1];
-          const parts = siValue.split(".");
+          const parts = siValue?.split(".") || [];
           const items: { id: string; min: string; max: string }[] = [];
           for (let i = 0; i < parts.length; i += 3) {
             if (parts[i]) {

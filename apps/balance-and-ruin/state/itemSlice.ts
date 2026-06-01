@@ -93,7 +93,7 @@ export const itemSlice = createSlice({
                     let tempItems: StartingItems = {
                         items: tempItemsArray
                     }
-                    const values = value.split(".");
+                    const values = value?.split(".") || [];
                     let nextConditionIdx = 0;
                     values.forEach((val, idx) => {
                         if (idx !== nextConditionIdx) {
