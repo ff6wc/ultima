@@ -315,8 +315,16 @@ function buildInfoRows(fv: Record<string, any>, objectives: Record<string, any>)
   if (hasFlag(fv, "-sie")) {
     shopParts.push("Empty");
   } else {
-    const sisr = flagNum(fv, "-sisr");
-    shopParts.push(`${sisr ?? 0}% inventory randomized`);
+    if (hasFlag(fv, "-sirt")) {
+      shopParts.push("Random tiered");
+    } else {
+      const sisr = flagNum(fv, "-sisr");
+      if (sisr === null || sisr === 0) {
+        shopParts.push("Original");
+      } else {
+        shopParts.push(`${sisr}% inventory randomized`);
+      }
+    }
     const sprp = flagNumArr(fv, "-sprp");
     if (sprp && (sprp[0] !== 75 || sprp[1] !== 125))
       shopParts.push(`prices ${sprp[0]}–${sprp[1]}%`);
@@ -338,7 +346,11 @@ function buildInfoRows(fv: Record<string, any>, objectives: Record<string, any>)
     chestParts.push("Tiered random");
   } else {
     const ccsr = flagNum(fv, "-ccsr");
-    chestParts.push(`${ccsr ?? 0}% randomized`);
+    if (ccsr === null || ccsr === 0) {
+      chestParts.push("Original");
+    } else {
+      chestParts.push(`${ccsr}% randomized`);
+    }
   }
   const chrm = flagNumArr(fv, "-chrm");
   if (chrm && chrm[0] > 0) chestParts.push(`${chrm[0]}% monster chests`);
