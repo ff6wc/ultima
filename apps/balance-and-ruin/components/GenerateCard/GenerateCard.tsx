@@ -222,11 +222,13 @@ export const GenerateCard = ({
         let originalFlags = undefined;
         try {
           const parsed = JSON.parse(text);
-          if (parsed.errors) {
-            errMsg = parsed.errors.join(", ");
+          if (parsed && typeof parsed === "object") {
+            if (parsed.errors) {
+              errMsg = Array.isArray(parsed.errors) ? parsed.errors.join(", ") : String(parsed.errors);
+            }
+            stderr = parsed.stderr;
+            originalFlags = parsed.flags;
           }
-          stderr = parsed.stderr;
-          originalFlags = parsed.flags;
         } catch (e) {
           // ignore parsing error, use generic fallback text
         }
@@ -596,10 +598,12 @@ ${((clientError || error) as any).stderr}`}
                   <button
                     onClick={() => {
                       const reportText = `[Seed Generation Error Report]\nFlags: ${((clientError || error) as any).flags || flags || "Unknown"}\nError Detail:\n${((clientError || error) as any).stderr}`;
-                      navigator.clipboard.writeText(reportText).then(() => {
-                        setCopiedReport(true);
-                        setTimeout(() => setCopiedReport(false), 2000);
-                      });
+                      if (typeof window !== "undefined" && navigator.clipboard) {
+                        navigator.clipboard.writeText(reportText).then(() => {
+                          setCopiedReport(true);
+                          setTimeout(() => setCopiedReport(false), 2000);
+                        });
+                      }
                     }}
                     className="absolute top-2 right-2 text-xs font-bold py-1 px-2.5 rounded shadow bg-slate-800 hover:bg-slate-700 text-white transition-colors"
                   >
