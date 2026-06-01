@@ -1012,8 +1012,15 @@ function analyzeDifficulty(
   // Open World
   if (hasFlag(fv, "-open")) { bullets.push({ text: "Open world — all events accessible from the start", severity: "easy" }); delta -= 5; }
 
-  // Final score = BASE (standard) + deviations (rounded to nearest whole number)
-  let score = Math.round(Math.max(0, BASE_SCORE + delta));
+  // Final score = BASE (standard) + deviations
+  const rawScore = Math.max(0, BASE_SCORE + delta);
+
+  // Dampen/compress high challenge scores to avoid runaway ballooning above 100+
+  let score = rawScore;
+  if (rawScore > 22) {
+    score = 22 + Math.pow(rawScore - 22, 0.68) * 2.6;
+  }
+  score = Math.round(score);
 
   let label: string;
   let color: string;
