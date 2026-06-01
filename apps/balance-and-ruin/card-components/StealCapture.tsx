@@ -6,8 +6,6 @@ import {
 } from "~/components/FlagSubflagSelect/FlagSubflagSelect";
 import { FlagSwitch } from "~/components/FlagSwitch/FlagSwitch";
 import { FlagSlider } from "~/components/FlagSlider/FlagSlider";
-import { BetaLabel } from "~/components/BetaLabel/BetaLabel";
-import { FlagRange } from "~/components/FlagRange/FlagRange";
 
 const stealOptions: SubflagOption[] = [
   {
@@ -26,18 +24,6 @@ const stealOptions: SubflagOption[] = [
   },
 ];
 
-const stealRandomOptions: SubflagOption[] = [
-  {
-    defaultValue: 10,
-    flag: "-ss",
-    helperText: "Shuffle Items Stolen with given percent randomized",
-    label: "Shuffle + Random",
-    Renderable: ({ children }) => (
-      <FlagSlider flag="-ss" helperText="" label={children} />
-    ),
-  }
-];
-
 const dropRandomOptions: SubflagOption[] = [
   {
     defaultValue: 10,
@@ -46,7 +32,7 @@ const dropRandomOptions: SubflagOption[] = [
       "Shuffle Items Stolen and Dropped with given percent randomized",
     label: "Shuffle + Random",
     Renderable: ({ children }) => (
-      <FlagSlider flag="-sd" helperText="" label={children} />
+      <FlagSlider flag="-ssd" helperText="" label={children} />
     ),
   },
 ];
@@ -68,15 +54,6 @@ export const StealCapture = () => {
           flag="-fc"
           helperText="When enabled, multi-steal can give more than one item, and weapon specials can now proc using the Capture command"
           label="Fix Capture Bugs"
-        />
-
-        <FlagSubflagSelect
-          options={stealRandomOptions}
-          nullable={{
-            description: "Steals are original",
-            label: "Original",
-          }}
-          label="Steals"
         />
 
         <FlagSubflagSelect
@@ -103,3 +80,4 @@ export const StealCapture = () => {
     </Card>
   );
 };
+
