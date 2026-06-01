@@ -838,14 +838,18 @@ function analyzeDifficulty(
     delta += 6;
   } else {
     const sisr = flagNum(fv, "-sisr") ?? 0;
-    const shopSev: BulletSeverity = sisr > 60 ? "medium" : "info";
+    const shopSev: BulletSeverity = sisr > 60 ? "easy" : "info";
     bullets.push({
       text: sisr === 0
         ? "Shops: standard inventory (no randomization)"
         : `Shops: ${sisr}% inventory randomized`,
       severity: shopSev,
     });
-    if (sisr !== 20) delta += sisr > 60 ? 4 : 0; // standard sisr=20, no delta
+    if (sisr === 0) {
+      delta += 2; // standard sisr=20, no randomization is harder
+    } else if (sisr > 60) {
+      delta -= 4; // high randomization is easier
+    }
   }
 
   // ── ALWAYS-SHOW: Chest randomization ──
@@ -857,9 +861,18 @@ function analyzeDifficulty(
     delta += 4;
   } else {
     const ccsr = flagNum(fv, "-ccsr") ?? 0;
-    bullets.push({ text: `Chests: ${ccsr}% contents randomized`, severity: "info" });
-    // standard ccsr=20, small deltas for big deviations only
-    if (ccsr > 80) delta -= 2;
+    const chestSev: BulletSeverity = ccsr > 60 ? "easy" : "info";
+    bullets.push({
+      text: ccsr === 0
+        ? "Chests: standard contents (no randomization)"
+        : `Chests: ${ccsr}% contents randomized`,
+      severity: chestSev,
+    });
+    if (ccsr === 0) {
+      delta += 2; // standard ccsr=20, no randomization is harder
+    } else if (ccsr > 60) {
+      delta -= 4; // high randomization is easier
+    }
   }
 
   // Chest monsters
