@@ -439,6 +439,12 @@ export const GenerateCard = ({
   const dispatch = useDispatch();
   const [inputFlags, setInputFlags] = useState("");
 
+  // Extract error object once to avoid repeated `(clientError || error) as any` casts
+  const activeError = (clientError || error) as any;
+  const activeErrorMessage = activeError?.message || activeError?.toString();
+  const activeErrorStderr = activeError?.stderr;
+  const activeErrorFlags = activeError?.flags || flags || "Unknown";
+
   useEffect(() => {
     setInputFlags(flags);
   }, [flags]);
@@ -575,10 +581,10 @@ export const GenerateCard = ({
           {isMutating ? "Generating..." : "Generate ROM"}
         </button>
 
-        {(clientError || error) && (
+        {activeError && (
           <div className={styles.error}>
-            <div>{((clientError || error) as any).message || (clientError || error)?.toString()}</div>
-            {((clientError || error) as any).stderr && (
+            <div>{activeErrorMessage}</div>
+            {activeErrorStderr && (
               <div className="mt-4 p-4 bg-slate-900 border border-red-950 rounded-md text-left flex flex-col gap-3 shadow-inner">
                 <div className="text-xs font-bold text-red-400 uppercase tracking-wider">
                   System Error Log (wc.py)
@@ -591,13 +597,13 @@ export const GenerateCard = ({
                 <div className="relative">
                   <pre className="p-3 bg-slate-950 border border-slate-800 rounded font-mono text-xs overflow-x-auto text-red-300 max-h-60 leading-normal select-all">
                     {`[Seed Generation Error Report]
-Flags: ${((clientError || error) as any).flags || flags || "Unknown"}
+Flags: ${activeErrorFlags}
 Error Detail:
-${((clientError || error) as any).stderr}`}
+${activeErrorStderr}`}
                   </pre>
                   <button
                     onClick={() => {
-                      const reportText = `[Seed Generation Error Report]\nFlags: ${((clientError || error) as any).flags || flags || "Unknown"}\nError Detail:\n${((clientError || error) as any).stderr}`;
+                      const reportText = `[Seed Generation Error Report]\nFlags: ${activeErrorFlags}\nError Detail:\n${activeErrorStderr}`;
                       if (typeof window !== "undefined" && navigator.clipboard) {
                         navigator.clipboard.writeText(reportText).then(() => {
                           setCopiedReport(true);
