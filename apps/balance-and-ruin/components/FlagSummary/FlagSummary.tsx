@@ -445,11 +445,54 @@ function analyzeDifficulty(
           : ` · KT Skip: ${ktRequired} condition(s)`
         : "";
 
+    // Calculate environmental coupling factors
+    const activeScaleFlag = SCALING_FLAGS.find((f) => hasFlag(fv, f));
+    const scaleMult = activeScaleFlag ? (flagNum(fv, activeScaleFlag) ?? 2.0) : 2.0;
+
+    let scaleFactor = 1.0;
+    if (activeScaleFlag) {
+      if (activeScaleFlag === "-lst") {
+        scaleFactor = Math.max(1.0, 2.0 / (scaleMult || 2.0));
+      } else {
+        scaleFactor = Math.max(1.0, scaleMult / 2.0);
+      }
+    } else {
+      scaleFactor = 0.5; // No scaling is much easier
+    }
+
+    const xpm = flagNum(fv, "-xpm") ?? 1;
+    const partyXpSplit = !hasFlag(fv, "-nxppd");
+    const xpmBaseline = partyXpSplit ? 7 : 3;
+
+    let xpFactor = 1.0;
+    if (xpm < xpmBaseline) {
+      xpFactor = xpmBaseline / Math.max(0.5, xpm);
+    } else if (xpm > xpmBaseline) {
+      xpFactor = Math.max(0.2, xpmBaseline / xpm);
+    }
+
+    const msl = flagNum(fv, "-msl") ?? 40;
+    let mslFactor = 1.0;
+    if (msl > 40) {
+      mslFactor = msl / 40.0;
+    } else if (msl < 40) {
+      mslFactor = Math.max(0.5, msl / 40.0);
+    }
+
+    // Safely cap environmental multiplier
+    const envMult = Math.min(15.0, scaleFactor * xpFactor * mslFactor);
+
     // Calculate detailed objective difficulty points
     let kefkaDelta = 0;
     if (kefkaRequired > 0) {
       // 3.5 points per required condition as baseline deviation from standard (2 conditions)
-      kefkaDelta += (kefkaRequired - 2) * 3.5;
+      // High requirements are magnified in harsh environments
+      const reqDiff = kefkaRequired - 2;
+      if (reqDiff > 0) {
+        kefkaDelta += reqDiff * 3.5 * envMult;
+      } else {
+        kefkaDelta += reqDiff * 3.5;
+      }
 
       if (kefkaObjRaw[0]?.obj?.conditions) {
         for (const cond of kefkaObjRaw[0].obj.conditions) {
@@ -460,21 +503,21 @@ function analyzeDifficulty(
             if (cond.id === COND_CHARACTERS || cond.id === "2") {
               const diff = valNum - 6; // 6 is standard baseline
               if (diff > 0) {
-                kefkaDelta += diff * 4.5; // More is harder
+                kefkaDelta += diff * 1.5 * envMult; // low base impact (1.5), scaled by environment
               } else {
                 kefkaDelta += diff * 2.0; // Less is easier
               }
             } else if (cond.id === COND_ESPERS || cond.id === "4") {
               const diff = valNum - 9; // 9 is standard baseline
               if (diff > 0) {
-                kefkaDelta += diff * 2.5; // More is harder
+                kefkaDelta += diff * 0.8 * envMult; // low base impact (0.8), scaled by environment
               } else {
                 kefkaDelta += diff * 1.0; // Less is easier
               }
             } else if (cond.id === COND_DRAGONS || cond.id === "6") {
               const diff = valNum - 0; // 0 is standard
               if (diff > 0) {
-                kefkaDelta += diff * 6.0; // More is harder
+                kefkaDelta += diff * 2.0 * envMult; // low base impact (2.0), scaled by environment
               }
             }
           }
@@ -643,13 +686,29 @@ function analyzeDifficulty(
   }
 
   // ── XP Multiplier ── (3× = standard; 7× if party XP split)
-  const xpm = flagNum(fv, "-xpm");
+  const xpm = flagNum(fv, "-xpm") ?? 1;
   const partyXpSplit = !hasFlag(fv, "-nxppd");
   const xpmBaseline = partyXpSplit ? 7 : 3;
+
   if (partyXpSplit) {
     bullets.push({ text: "Party XP divided among survivors — effective XP baseline shifts to ~7×", severity: "hard" });
     delta += 12;
   }
+
+  // Boss XP Challenge
+  if (!hasFlag(fv, "-be")) {
+    bullets.push({ text: "Boss experience disabled — bosses award 0 XP (makes game more challenging)", severity: "hard" });
+    delta += 15;
+  }
+
+  // Check if reward scaling is set very low
+  const isXgceLow = hasFlag(fv, "-xgce") && (flagNum(fv, "-xgce") ?? 0) < 2;
+  const isXgcedLow = hasFlag(fv, "-xgced") && (flagNum(fv, "-xgced") ?? 0) < 2;
+  const isXgtLow = hasFlag(fv, "-xgt") && (flagNum(fv, "-xgt") ?? 0) < 2;
+  const isXgaLow = hasFlag(fv, "-xga") && (flagNum(fv, "-xga") ?? 0) < 1;
+  const isXghLow = hasFlag(fv, "-xgh") && (flagNum(fv, "-xgh") ?? 0) < 1;
+  const isXgScalingVeryLow = isXgceLow || isXgcedLow || isXgtLow || isXgaLow || isXghLow;
+
   if (xpm !== null) {
     const xpmDiff = xpm - xpmBaseline;
     if (xpmDiff < 0) {
@@ -664,21 +723,29 @@ function analyzeDifficulty(
         delta += 10;
       }
     } else if (xpmDiff > 0) {
-      if (xpmDiff >= 20) {
-        bullets.push({ text: `XP multiplier ${xpm}× is overwhelmingly high — leveling is virtually instant`, severity: "easy" });
-        delta -= 38;
-      } else if (xpmDiff >= 12) {
-        bullets.push({ text: `XP multiplier ${xpm}× is extremely high — extremely fast leveling`, severity: "easy" });
-        delta -= 28;
-      } else if (xpmDiff >= 6) {
-        bullets.push({ text: `XP multiplier ${xpm}× is very high — fast leveling`, severity: "easy" });
-        delta -= 20;
-      } else if (xpmDiff >= 3) {
-        bullets.push({ text: `XP multiplier ${xpm}× is above baseline — fast leveling`, severity: "easy" });
-        delta -= 12;
-      } else if (xpmDiff >= 1) {
-        bullets.push({ text: `XP multiplier ${xpm}× is slightly above baseline — faster leveling`, severity: "easy" });
-        delta -= 6;
+      if (!partyXpSplit) {
+        // Without split party XP (baseline is 3)
+        if (isXgScalingVeryLow || !hasFlag(fv, "-be")) {
+          const minimalEase = Math.min(5, xpmDiff * 0.5);
+          bullets.push({ text: `XP multiplier ${xpm}× (mitigated by low reward scaling or disabled boss XP) — standard leveling advantage`, severity: "info" });
+          delta -= minimalEase;
+        } else {
+          // Exponential easing for fast XP (no split)
+          const ease = Math.min(45, Math.pow(xpmDiff, 0.7) * 8 + xpmDiff * 1.5);
+          bullets.push({ text: `XP multiplier ${xpm}× with no split XP — leveling is extremely fast, game is exponentially easier`, severity: "easy" });
+          delta -= ease;
+        }
+      } else {
+        // With split party XP (baseline is 7)
+        if (isXgScalingVeryLow || !hasFlag(fv, "-be")) {
+          const minimalEase = Math.min(4, xpmDiff * 0.3);
+          bullets.push({ text: `XP multiplier ${xpm}× with split XP (mitigated by low scaling or disabled boss XP)`, severity: "info" });
+          delta -= minimalEase;
+        } else {
+          const ease = Math.min(30, xpmDiff * 1.5);
+          bullets.push({ text: `XP multiplier ${xpm}× with split XP — leveling is faster than baseline`, severity: "easy" });
+          delta -= ease;
+        }
       }
     }
   }
