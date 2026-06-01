@@ -414,6 +414,43 @@ function analyzeDifficulty(
   const bullets: Bullet[] = [];
   let delta = 0; // points above/below the standard baseline
 
+  // Calculate environmental coupling factors
+  const activeScaleFlag = SCALING_FLAGS.find((f) => hasFlag(fv, f));
+  const scaleMult = activeScaleFlag ? (flagNum(fv, activeScaleFlag) ?? 2.0) : 2.0;
+
+  let scaleFactor = 1.0;
+  if (activeScaleFlag) {
+    if (activeScaleFlag === "-lst") {
+      scaleFactor = Math.max(1.0, 2.0 / (scaleMult || 2.0));
+    } else {
+      scaleFactor = Math.max(1.0, scaleMult / 2.0);
+    }
+  } else {
+    scaleFactor = 0.5; // No scaling is much easier
+  }
+
+  const xpm = flagNum(fv, "-xpm") ?? 1;
+  const partyXpSplit = !hasFlag(fv, "-nxppd");
+  const xpmBaseline = partyXpSplit ? 7 : 3;
+
+  let xpFactor = 1.0;
+  if (xpm < xpmBaseline) {
+    xpFactor = xpmBaseline / Math.max(0.5, xpm);
+  } else if (xpm > xpmBaseline) {
+    xpFactor = Math.max(0.2, xpmBaseline / xpm);
+  }
+
+  const msl = flagNum(fv, "-msl") ?? 40;
+  let mslFactor = 1.0;
+  if (msl > 40) {
+    mslFactor = msl / 40.0;
+  } else if (msl < 40) {
+    mslFactor = Math.max(0.5, msl / 40.0);
+  }
+
+  // Safely cap environmental multiplier
+  const envMult = Math.min(15.0, scaleFactor * xpFactor * mslFactor);
+
   // ── ALWAYS-SHOW: Final Kefka conditions ──
   const kefkaObjRaw = Object.values(objectives)
     .filter((o: any) => o?.result?.id === RESULT_FINAL_KEFKA)
@@ -444,43 +481,6 @@ function analyzeDifficulty(
           ? ` · KT Skip: ${ktRequired} of (${ktConds})`
           : ` · KT Skip: ${ktRequired} condition(s)`
         : "";
-
-    // Calculate environmental coupling factors
-    const activeScaleFlag = SCALING_FLAGS.find((f) => hasFlag(fv, f));
-    const scaleMult = activeScaleFlag ? (flagNum(fv, activeScaleFlag) ?? 2.0) : 2.0;
-
-    let scaleFactor = 1.0;
-    if (activeScaleFlag) {
-      if (activeScaleFlag === "-lst") {
-        scaleFactor = Math.max(1.0, 2.0 / (scaleMult || 2.0));
-      } else {
-        scaleFactor = Math.max(1.0, scaleMult / 2.0);
-      }
-    } else {
-      scaleFactor = 0.5; // No scaling is much easier
-    }
-
-    const xpm = flagNum(fv, "-xpm") ?? 1;
-    const partyXpSplit = !hasFlag(fv, "-nxppd");
-    const xpmBaseline = partyXpSplit ? 7 : 3;
-
-    let xpFactor = 1.0;
-    if (xpm < xpmBaseline) {
-      xpFactor = xpmBaseline / Math.max(0.5, xpm);
-    } else if (xpm > xpmBaseline) {
-      xpFactor = Math.max(0.2, xpmBaseline / xpm);
-    }
-
-    const msl = flagNum(fv, "-msl") ?? 40;
-    let mslFactor = 1.0;
-    if (msl > 40) {
-      mslFactor = msl / 40.0;
-    } else if (msl < 40) {
-      mslFactor = Math.max(0.5, msl / 40.0);
-    }
-
-    // Safely cap environmental multiplier
-    const envMult = Math.min(15.0, scaleFactor * xpFactor * mslFactor);
 
     // Calculate detailed objective difficulty points
     let kefkaDelta = 0;
@@ -600,11 +600,19 @@ function analyzeDifficulty(
       }
 
       // Max scale level — only call out if non-standard (standard = 40)
-      const msl = flagNum(fv, "-msl");
-      if (msl !== null && msl !== 40) {
-        if (msl < 30) { bullets.push({ text: `Enemy level cap: ${msl} — late-game is much easier`, severity: "easy" }); delta -= 8; }
-        else if (msl === 99) { bullets.push({ text: "No enemy level cap — scaling continues to 99", severity: "medium" }); delta += 5; }
-        else { bullets.push({ text: `Enemy level cap: ${msl}`, severity: "info" }); }
+      if (msl !== 40) {
+        if (msl < 30) {
+          bullets.push({ text: `Enemy level cap: ${msl} — late-game is much easier`, severity: "easy" });
+          delta -= 8;
+        } else if (msl > 40) {
+          const mslDiff = msl - 40;
+          // Dynamically scale difficulty: higher enemy level scaling magnifying cap difficulty
+          const mslDelta = mslDiff * 0.1 * Math.max(0.6, scaleFactor);
+          bullets.push({ text: `Enemy level cap: ${msl} — higher cap increases difficulty`, severity: "medium" });
+          delta += mslDelta;
+        } else {
+          bullets.push({ text: `Enemy level cap: ${msl}`, severity: "info" });
+        }
       }
     }
   } else {
@@ -686,9 +694,6 @@ function analyzeDifficulty(
   }
 
   // ── XP Multiplier ── (3× = standard; 7× if party XP split)
-  const xpm = flagNum(fv, "-xpm") ?? 1;
-  const partyXpSplit = !hasFlag(fv, "-nxppd");
-  const xpmBaseline = partyXpSplit ? 7 : 3;
 
   if (partyXpSplit) {
     bullets.push({ text: "Party XP divided among survivors — effective XP baseline shifts to ~7×", severity: "hard" });
