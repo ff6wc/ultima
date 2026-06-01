@@ -988,9 +988,26 @@ function analyzeDifficulty(
   }
 
   // Starting Gold
-  const gp = flagNum(fv, "-gp");
-  if (gp !== null && gp <= 0) { bullets.push({ text: "Starting with no gold", severity: "hard" }); delta += 6; }
-  else if (gp !== null && gp >= 50000) { bullets.push({ text: `Starting with ${gp.toLocaleString()} gold — strong economic advantage`, severity: "easy" }); delta -= 5; }
+  const gpVal = flagNum(fv, "-gp") ?? 5000;
+  if (gpVal <= 0) {
+    bullets.push({ text: "Starting with no gold — severe economic disadvantage", severity: "hard" });
+    delta += 6;
+  } else if (gpVal > 5000) {
+    const emptyShops = hasFlag(fv, "-sie");
+    const isPricesRandom = hasFlag(fv, "-sprv") || hasFlag(fv, "-sprp");
+    
+    let gpEase = Math.min(15, Math.log10(gpVal / 5000) * 6.5);
+    if (emptyShops) {
+      gpEase = 0;
+      bullets.push({ text: `Starting with ${gpVal.toLocaleString()} gold (completely neutralized by empty shops)`, severity: "info" });
+    } else if (isPricesRandom) {
+      gpEase = gpEase * 0.5; // Tapers benefit by 50%
+      bullets.push({ text: `Starting with ${gpVal.toLocaleString()} gold — economic advantage (tapered by random prices)`, severity: "easy" });
+    } else {
+      bullets.push({ text: `Starting with ${gpVal.toLocaleString()} gold — strong economic advantage`, severity: "easy" });
+    }
+    delta -= gpEase;
+  }
 
   // Open World
   if (hasFlag(fv, "-open")) { bullets.push({ text: "Open world — all events accessible from the start", severity: "easy" }); delta -= 5; }
