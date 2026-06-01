@@ -151,7 +151,7 @@ export function applyInGameConfig(patchedInput: Uint8Array | ArrayBuffer) {
   }
 
   // 4. Patch global Font Color (2 bytes)
-  const fontColor = config.fontColor || [0, 28, 27];
+  const fontColor = config.fontColor || [31, 31, 31];
   const val = (fontColor[2] << 10) | (fontColor[1] << 5) | fontColor[0];
   const low = val & 0xFF;
   const high = (val >> 8) & 0xFF;

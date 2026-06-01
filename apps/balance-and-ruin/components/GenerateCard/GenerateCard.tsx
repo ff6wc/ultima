@@ -103,6 +103,7 @@ export const GenerateCard = ({
   const [romSelectError, setRomSelectError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [clientError, setClientError] = useState<string | null>(null);
+  const [copiedReport, setCopiedReport] = useState(false);
 
   const ext = romName.slice(romName.length - 7, romName.length);
   const displayRomName = !romName
@@ -215,8 +216,27 @@ export const GenerateCard = ({
       );
 
       if (result.status !== 200) {
-        const error = await result.text();
-        throw new Error(`Error creating seed: ${error}`);
+        const text = await result.text().catch(() => "");
+        let errMsg = `Error creating seed: ${text || result.statusText}`;
+        let stderr = undefined;
+        let originalFlags = undefined;
+        try {
+          const parsed = JSON.parse(text);
+          if (parsed && typeof parsed === "object") {
+            if (parsed.errors) {
+              errMsg = Array.isArray(parsed.errors) ? parsed.errors.join(", ") : String(parsed.errors);
+            }
+            stderr = parsed.stderr;
+            originalFlags = parsed.flags;
+          }
+        } catch (e) {
+          // ignore parsing error, use generic fallback text
+        }
+        
+        const customErr = new Error(errMsg) as any;
+        customErr.stderr = stderr;
+        customErr.flags = originalFlags;
+        throw customErr;
       }
 
       const data = await result.json();
@@ -419,6 +439,12 @@ export const GenerateCard = ({
   const dispatch = useDispatch();
   const [inputFlags, setInputFlags] = useState("");
 
+  // Extract error object once to avoid repeated `(clientError || error) as any` casts
+  const activeError = (clientError || error) as any;
+  const activeErrorMessage = activeError?.message || activeError?.toString();
+  const activeErrorStderr = activeError?.stderr;
+  const activeErrorFlags = activeError?.flags || flags || "Unknown";
+
   useEffect(() => {
     setInputFlags(flags);
   }, [flags]);
@@ -555,9 +581,43 @@ export const GenerateCard = ({
           {isMutating ? "Generating..." : "Generate ROM"}
         </button>
 
-        {(clientError || error) && (
+        {activeError && (
           <div className={styles.error}>
-            {(clientError || error)?.toString()}
+            <div>{activeErrorMessage}</div>
+            {activeErrorStderr && (
+              <div className="mt-4 p-4 bg-slate-900 border border-red-950 rounded-md text-left flex flex-col gap-3 shadow-inner">
+                <div className="text-xs font-bold text-red-400 uppercase tracking-wider">
+                  System Error Log (wc.py)
+                </div>
+                
+                <div className="text-sm text-slate-300 block italic leading-relaxed">
+                  Please report this issue in the <a href="https://discord.com/channels/666661907628949504/666811452350398493" target="_blank" rel="noreferrer" className="text-blue-400 underline hover:text-blue-300 font-bold">#bug-reports</a> channel on the Discord. You can copy the diagnostic details block below to include in your report.
+                </div>
+
+                <div className="relative">
+                  <pre className="p-3 bg-slate-950 border border-slate-800 rounded font-mono text-xs overflow-x-auto text-red-300 max-h-60 leading-normal select-all">
+                    {`[Seed Generation Error Report]
+Flags: ${activeErrorFlags}
+Error Detail:
+${activeErrorStderr}`}
+                  </pre>
+                  <button
+                    onClick={() => {
+                      const reportText = `[Seed Generation Error Report]\nFlags: ${activeErrorFlags}\nError Detail:\n${activeErrorStderr}`;
+                      if (typeof window !== "undefined" && navigator.clipboard) {
+                        navigator.clipboard.writeText(reportText).then(() => {
+                          setCopiedReport(true);
+                          setTimeout(() => setCopiedReport(false), 2000);
+                        });
+                      }
+                    }}
+                    className="absolute top-2 right-2 text-xs font-bold py-1 px-2.5 rounded shadow bg-slate-800 hover:bg-slate-700 text-white transition-colors"
+                  >
+                    {copiedReport ? "✓ Copied!" : "Copy Report Details"}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
