@@ -443,9 +443,9 @@ export const GenerateCard = ({
 
   // Extract error object once to avoid repeated `(clientError || error) as any` casts
   const activeError = (clientError || error) as any;
-  const activeErrorMessage = typeof clientError === "string" ? clientError : (activeError?.message || activeError?.toString());
-  const activeErrorStderr = (clientError as any)?.stderr || (error as any)?.stderr;
-  const activeErrorFlags = (clientError as any)?.flags || (error as any)?.flags || flags || "Unknown";
+  const activeErrorMessage = activeError?.message || activeError?.toString();
+  const activeErrorStderr = activeError?.stderr;
+  const activeErrorFlags = activeError?.flags || flags || "Unknown";
 
   useEffect(() => {
     setInputFlags(flags);
