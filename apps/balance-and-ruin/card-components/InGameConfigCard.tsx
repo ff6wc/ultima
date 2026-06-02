@@ -63,7 +63,7 @@ const TOGGLE_DEFAULTS = {
   Reequip: DEFAULT_IN_GAME_CONFIG.reequip,
   SpellOrder: DEFAULT_IN_GAME_CONFIG.spellOrder,
   Wallpaper: DEFAULT_IN_GAME_CONFIG.wallpaper,
-};
+} as const;
 
 const PAGE_A_OPTIONS: OptionRow[] = [
   { key: "BatMode", y: 44, values: [["active", 112], ["wait", 176]] },
