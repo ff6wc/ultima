@@ -117,10 +117,7 @@ export const GraphicsOptionsCard = ({
         <div className="hidden sm:block h-6 w-px bg-slate-200 dark:bg-slate-700" />
 
         {/* Save Graphics Settings Toggle */}
-        <label
-          htmlFor="gfx-persist-toggle"
-          className="flex items-center gap-3 cursor-pointer select-none group"
-        >
+        <div className="flex items-center gap-3 select-none group">
           {/* Toggle pill */}
           <button
             id="gfx-persist-toggle"
@@ -139,13 +136,16 @@ export const GraphicsOptionsCard = ({
               }`}
             />
           </button>
-          <div className="flex flex-col">
+          <label
+            htmlFor="gfx-persist-toggle"
+            className="flex flex-col cursor-pointer"
+          >
             <span className="text-sm font-medium text-slate-700 dark:text-slate-200 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
               Save Graphics Settings
             </span>
             <HelperText>Settings will persist across reloads</HelperText>
-          </div>
-        </label>
+          </label>
+        </div>
       </div>
     </Card>
   );
