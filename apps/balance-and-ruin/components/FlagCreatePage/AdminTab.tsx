@@ -887,6 +887,68 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                           <div style={{ fontSize: "0.75rem", color: "#94a3b8", marginTop: "0.1rem" }}>
                             by {preset.creator_name || preset.creator || "Unknown"} · {formatTruncatedDate(preset.created_timestamp || preset.created_at)}
                           </div>
+                          {/* Tag Toggle Buttons Sub-Row in Collapsed View */}
+                          <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginTop: "0.4rem", alignItems: "center" }}>
+                            {/* Official tag toggle */}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                e.preventDefault();
+                                const isOfficial = Array.isArray(preset.tags) && preset.tags.includes("official");
+                                const nextTags = isOfficial
+                                  ? (preset.tags || []).filter((t: string) => t !== "official")
+                                  : [...(preset.tags || []), "official"];
+                                handleSaveTags(preset, nextTags);
+                              }}
+                              style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "0.25rem",
+                                fontSize: "0.7rem",
+                                backgroundColor: preset.official ? "rgba(245, 158, 11, 0.25)" : "transparent",
+                                color: preset.official ? "#f59e0b" : "var(--text-sub, #64748b)",
+                                border: `1px solid ${preset.official ? "#f59e0b" : "var(--border-light, rgba(255,255,255,0.15))"}`,
+                                padding: "0.15rem 0.4rem",
+                                borderRadius: "3px",
+                                cursor: "pointer",
+                                fontWeight: "bold",
+                                transition: "all 0.15s",
+                              }}
+                            >
+                              ★ OFFICIAL
+                            </button>
+
+                            {/* Dynamic Canned Tags */}
+                            {cannedTags.filter(tag => tag !== "official").map(tag => {
+                              const isActive = Array.isArray(preset.tags) && preset.tags.includes(tag);
+                              return (
+                                <button
+                                  key={tag}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    e.preventDefault();
+                                    const nextTags = isActive
+                                      ? (preset.tags || []).filter((t: string) => t !== tag)
+                                      : [...(preset.tags || []), tag];
+                                    handleSaveTags(preset, nextTags);
+                                  }}
+                                  style={{
+                                    fontSize: "0.7rem",
+                                    backgroundColor: isActive ? "rgba(59, 130, 246, 0.25)" : "transparent",
+                                    color: isActive ? "#60a5fa" : "var(--text-sub, #64748b)",
+                                    border: `1px solid ${isActive ? "#60a5fa" : "var(--border-light, rgba(255, 255, 255, 0.15))"}`,
+                                    padding: "0.15rem 0.4rem",
+                                    borderRadius: "3px",
+                                    cursor: "pointer",
+                                    fontWeight: "bold",
+                                    transition: "all 0.15s",
+                                  }}
+                                >
+                                  {tag.toUpperCase()}
+                                </button>
+                              );
+                            })}
+                          </div>
                         </div>
                       </div>
 
@@ -920,69 +982,6 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                     {/* Expanded View */}
                     {isExpanded && (
                       <div style={{ marginTop: "0.75rem", borderTop: "1px dashed rgba(148, 163, 184, 0.2)", paddingTop: "0.75rem", paddingLeft: "1.75rem" }}>
-                        
-                        {/* Tag Toggle Buttons Sub-Row in Expanded View */}
-                        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginBottom: "1rem", alignItems: "center" }}>
-                          {/* Official tag toggle */}
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              e.preventDefault();
-                              const isOfficial = Array.isArray(preset.tags) && preset.tags.includes("official");
-                              const nextTags = isOfficial
-                                ? (preset.tags || []).filter((t: string) => t !== "official")
-                                : [...(preset.tags || []), "official"];
-                              handleSaveTags(preset, nextTags);
-                            }}
-                            style={{
-                              display: "inline-flex",
-                              alignItems: "center",
-                              gap: "0.25rem",
-                              fontSize: "0.7rem",
-                              backgroundColor: preset.official ? "rgba(245, 158, 11, 0.25)" : "transparent",
-                              color: preset.official ? "#f59e0b" : "var(--text-sub, #64748b)",
-                              border: `1px solid ${preset.official ? "#f59e0b" : "var(--border-light, rgba(255,255,255,0.15))"}`,
-                              padding: "0.15rem 0.4rem",
-                              borderRadius: "3px",
-                              cursor: "pointer",
-                              fontWeight: "bold",
-                              transition: "all 0.15s",
-                            }}
-                          >
-                            ★ OFFICIAL
-                          </button>
-
-                          {/* Dynamic Canned Tags */}
-                          {cannedTags.map(tag => {
-                            const isActive = Array.isArray(preset.tags) && preset.tags.includes(tag);
-                            return (
-                              <button
-                                key={tag}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  e.preventDefault();
-                                  const nextTags = isActive
-                                    ? (preset.tags || []).filter((t: string) => t !== tag)
-                                    : [...(preset.tags || []), tag];
-                                  handleSaveTags(preset, nextTags);
-                                }}
-                                style={{
-                                  fontSize: "0.7rem",
-                                  backgroundColor: isActive ? "rgba(59, 130, 246, 0.25)" : "transparent",
-                                  color: isActive ? "#60a5fa" : "var(--text-sub, #64748b)",
-                                  border: `1px solid ${isActive ? "#60a5fa" : "var(--border-light, rgba(255, 255, 255, 0.15))"}`,
-                                  padding: "0.15rem 0.4rem",
-                                  borderRadius: "3px",
-                                  cursor: "pointer",
-                                  fontWeight: "bold",
-                                  transition: "all 0.15s",
-                                }}
-                              >
-                                {tag.toUpperCase()}
-                              </button>
-                            );
-                          })}
-                        </div>
 
                         {editingPresetId === preset.id ? (
                           <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
