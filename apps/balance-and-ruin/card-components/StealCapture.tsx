@@ -1,4 +1,5 @@
 import { Card } from "@ff6wc/ui";
+import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { CardColumn } from "~/components/CardColumn/CardColumn";
 import { FlagLabel } from "~/components/FlagLabel/FlagLabel";
@@ -46,8 +47,15 @@ export const StealCapture = () => {
   const ss = useFlagValueSelector<number | null>("-ss");
   const sd = useFlagValueSelector<number | null>("-sd");
 
-  const isShuffleAndRandom =
-    (ss !== null && ss !== undefined) || (sd !== null && sd !== undefined);
+  const isShuffleAndRandom = ss != null || sd != null;
+
+  useEffect(() => {
+    if (ss != null && sd == null) {
+      dispatch(setFlag({ flag: "-sd", value: 10 }));
+    } else if (sd != null && ss == null) {
+      dispatch(setFlag({ flag: "-ss", value: 10 }));
+    }
+  }, [ss, sd, dispatch]);
 
   const activeOption = isShuffleAndRandom
     ? dropdownOptions[1]
