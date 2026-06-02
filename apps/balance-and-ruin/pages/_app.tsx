@@ -30,6 +30,9 @@ export let singletonStore: any = null;
 const App: AppType<Props> = ({ Component, ...rest }: AppProps<Props>) => {
   const { store, props } = wrapper.useWrappedStore(rest);
   singletonStore = store;
+  if (typeof window !== "undefined") {
+    (window as any).__store__ = store;
+  }
 
   useDarkMode();
 
