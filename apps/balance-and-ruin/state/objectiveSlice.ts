@@ -146,7 +146,17 @@ export const objectiveSlice = createSlice({
         ([flag, value]) => {
           const values = value?.split(".") || DEFAULT_OBJECTIVE_VALUE.split(".");
           const resultId = values[0];
-          const metadata = state.metadataById.results[resultId];
+          let metadata = state.metadataById.results[resultId];
+          if (!metadata) {
+            metadata = {
+              id: Number.parseInt(resultId) || 0,
+              name: "Unknown",
+              value_range: [],
+              group: "Other",
+              format_string: "Unknown Objective",
+            };
+            state.metadataById.results[resultId] = metadata;
+          }
           const hasRange = Boolean(metadata.value_range);
 
           // result id, condition min/max
@@ -206,8 +216,9 @@ export const objectiveSlice = createSlice({
             hasRange ? values[4] : values[2],
           );
 
-          const { group, id, format_string } =
-            state.metadataById.results[Number.parseInt(resultId)];
+          const resultMetadata =
+            state.metadataById.results[Number.parseInt(resultId)] || metadata;
+          const { group, id, format_string } = resultMetadata;
 
           const result: ObjectiveResult = {
             group,
@@ -282,8 +293,15 @@ export const objectiveSlice = createSlice({
         return;
       }
 
-      const { format_string, group, id } =
-        state.metadataById.results[2] || state.metadata.objectives[0];
+      const fallbackObjective = state.metadataById.results[2] ||
+        state.metadata.objectives[0] || {
+          id: 2,
+          name: "Unlock Final Kefka",
+          value_range: [],
+          group: "Other",
+          format_string: "Unknown Objective",
+        };
+      const { format_string, group, id } = fallbackObjective;
 
       state.objectivesByFlag[action.payload.flag] = {
         conditions: [],
