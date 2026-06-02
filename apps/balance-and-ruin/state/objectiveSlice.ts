@@ -147,7 +147,7 @@ export const objectiveSlice = createSlice({
           const values = value?.split(".") || DEFAULT_OBJECTIVE_VALUE.split(".");
           const resultId = values[0];
           const metadata = state.metadataById.results[resultId];
-          const hasRange = Boolean(metadata.value_range);
+          const hasRange = Boolean(metadata?.value_range);
 
           // result id, condition min/max
           const conditions: ObjectiveCondition[] = [];
@@ -206,13 +206,11 @@ export const objectiveSlice = createSlice({
             hasRange ? values[4] : values[2],
           );
 
-          const { group, id, format_string } =
-            state.metadataById.results[Number.parseInt(resultId)];
-
+          const resultMetadata = state.metadataById.results[Number.parseInt(resultId)];
           const result: ObjectiveResult = {
-            group,
-            label: format_string,
-            id: id.toString(),
+            group: resultMetadata?.group || "",
+            label: resultMetadata?.format_string || "",
+            id: resultMetadata?.id?.toString() || resultId || "",
             value: hasRange
               ? [Number.parseInt(values[1]), Number.parseInt(values[2])]
               : undefined,
