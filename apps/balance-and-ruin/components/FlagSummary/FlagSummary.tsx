@@ -726,7 +726,7 @@ function analyzeDifficulty(
 
   // ── Ability Scaling ── (lower = harder; 2.0-2.5 = standard, skip)
   if (hasFlag(fv, "-ase") || hasFlag(fv, "-asr")) {
-    const asMult = flagNum(fv, "-ase") || flagNum(fv, "-asr");
+    const asMult = flagNum(fv, "-ase") ?? flagNum(fv, "-asr");
     if (asMult !== null) {
       if (asMult === 0.5) {
         bullets.push({ text: `Ability scaling is extremely fast (${asMult}×) — enemies gain powerful spells very early`, severity: "hard" });
@@ -1044,7 +1044,7 @@ function analyzeDifficulty(
     bullets.push({ text: "Relic equipability is tiered random — higher tier relics are less likely to be equipable", severity: "medium" });
     delta += 8;
   } else if (hasFlag(fv, "-ierr") || hasFlag(fv, "-ierbr") || hasFlag(fv, "-ieror") || hasFlag(fv, "-iersr")) {
-    const v = flagNum(fv, "-ieror") || flagNum(fv, "-iersr");
+    const v = flagNum(fv, "-ieror") ?? flagNum(fv, "-iersr");
     if (v !== null && v === 33) {
       // 33% is standard baseline (Atma Series)
     } else {

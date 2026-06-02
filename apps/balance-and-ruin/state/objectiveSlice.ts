@@ -217,7 +217,7 @@ export const objectiveSlice = createSlice({
           );
 
           const resultMetadata =
-            state.metadataById.results[Number.parseInt(resultId)] || metadata;
+            state.metadataById.results[resultId] || metadata;
           const { group, id, format_string } = resultMetadata;
 
           const result: ObjectiveResult = {
