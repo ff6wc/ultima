@@ -919,7 +919,7 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                             </button>
 
                             {/* Dynamic Canned Tags */}
-                            {cannedTags.map(tag => {
+                            {cannedTags.filter(tag => tag !== "official").map(tag => {
                               const isActive = Array.isArray(preset.tags) && preset.tags.includes(tag);
                               return (
                                 <button
