@@ -9,6 +9,7 @@ import {
 import useSWR from "swr";
 import { SpritePalettes } from "~/card-components/SpritePalettes";
 import { OtherSprites } from "~/card-components/OtherSprites";
+import { GraphicsOptionsCard } from "~/card-components/GraphicsOptionsCard";
 
 export const Graphics = () => {
   const { data } = useSWR<CharacterSpritesProps>(["/api/sprites"], async () => {
@@ -23,6 +24,14 @@ export const Graphics = () => {
 
   return (
     <PageContainer columns={2} className="!items-stretch">
+      <GridItem size="full">
+        <GraphicsOptionsCard
+          palettes={palettes}
+          portraits={portraits}
+          sprites={sprites}
+        />
+      </GridItem>
+
       <GridItem size="full" className="h-full [&>*]:h-full">
         <CharacterSprites
           palettes={palettes}

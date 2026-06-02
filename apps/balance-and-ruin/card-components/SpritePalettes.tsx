@@ -107,7 +107,11 @@ export const SpritePalettes = ({
           >
             Randomize Palettes
           </Button>
-          <Button onClick={restoreDefault} variant="primary">
+          <Button
+            onClick={restoreDefault}
+            variant="default"
+            className="w-[180px] !bg-white dark:!bg-slate-900 !border-slate-200 dark:!border-slate-700 !text-slate-800 dark:!text-slate-100 hover:!bg-slate-50 dark:hover:!bg-slate-800 shadow-sm transition-all duration-200"
+          >
             Default
           </Button>
         </span>

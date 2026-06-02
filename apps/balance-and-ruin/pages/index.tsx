@@ -7,7 +7,7 @@ const FlagCreatePage = dynamic<any>(
   () => import("../components/FlagCreatePage/FlagCreatePage").then((mod) => mod.FlagCreatePage),
   { ssr: false }
 );
-import { setRawFlags } from "~/state/flagSlice";
+import { setRawFlags, applyPersistedGraphics } from "~/state/flagSlice";
 import { setObjectiveMetadata, setRawObjectives } from "~/state/objectiveSlice";
 import { setRawStartingItems, initItemMetadata } from "~/state/itemSlice";
 import { RawFlagMetadata, setSchema } from "~/state/schemaSlice";
@@ -58,6 +58,7 @@ const HomeLandingPage = () => {
               dispatch(setRawObjectives(preset.flags));
               dispatch(setRawStartingItems(preset.flags));
             }
+            applyPersistedGraphics(dispatch);
           }
         }
       }
@@ -91,6 +92,7 @@ const HomeLandingPage = () => {
           dispatch(setRawObjectives(preset.flags));
           dispatch(setRawStartingItems(preset.flags));
         }
+        applyPersistedGraphics(dispatch);
       })
       .catch((err) => {
         console.warn("Failed to fetch presets from API, trying fallback fetch:", err);
@@ -106,6 +108,7 @@ const HomeLandingPage = () => {
               dispatch(setRawObjectives(preset.flags));
               dispatch(setRawStartingItems(preset.flags));
             }
+            applyPersistedGraphics(dispatch);
           })
           .catch((fallbackErr) => {
             console.error("Failed to fetch fallback presets:", fallbackErr);
