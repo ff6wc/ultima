@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { HiChevronDown, HiChevronUp } from "react-icons/hi2";
-import { selectFlagValues } from "~/state/flagSlice";
+import { selectFlagValues, selectRawFlags } from "~/state/flagSlice";
 import { selectObjectives } from "~/state/objectiveSlice";
 import { selectActivePresetName } from "~/state/presetSlice";
 import styles from "./FlagSummary.module.css";
@@ -315,8 +315,16 @@ function buildInfoRows(fv: Record<string, any>, objectives: Record<string, any>)
   if (hasFlag(fv, "-sie")) {
     shopParts.push("Empty");
   } else {
-    const sisr = flagNum(fv, "-sisr");
-    shopParts.push(`${sisr ?? 0}% inventory randomized`);
+    if (hasFlag(fv, "-sirt")) {
+      shopParts.push("Random tiered");
+    } else {
+      const sisr = flagNum(fv, "-sisr");
+      if (sisr === null || sisr === 0) {
+        shopParts.push("Original");
+      } else {
+        shopParts.push(`${sisr}% inventory randomized`);
+      }
+    }
     const sprp = flagNumArr(fv, "-sprp");
     if (sprp && (sprp[0] !== 75 || sprp[1] !== 125))
       shopParts.push(`prices ${sprp[0]}–${sprp[1]}%`);
@@ -338,7 +346,11 @@ function buildInfoRows(fv: Record<string, any>, objectives: Record<string, any>)
     chestParts.push("Tiered random");
   } else {
     const ccsr = flagNum(fv, "-ccsr");
-    chestParts.push(`${ccsr ?? 0}% randomized`);
+    if (ccsr === null || ccsr === 0) {
+      chestParts.push("Original");
+    } else {
+      chestParts.push(`${ccsr}% randomized`);
+    }
   }
   const chrm = flagNumArr(fv, "-chrm");
   if (chrm && chrm[0] > 0) chestParts.push(`${chrm[0]}% monster chests`);
@@ -403,17 +415,55 @@ function buildInfoRows(fv: Record<string, any>, objectives: Record<string, any>)
 const BASE_SCORE = 20;
 
 // Configuration map for preset-specific difficulty overrides
-const PRESET_DIFFICULTY_OVERRIDES: Record<string, { score: number; label: string; color: string }> = {
-  "atma series": { score: 20, label: "Standard", color: "#3b82f6" },
-};
+const PRESET_DIFFICULTY_OVERRIDES: Record<string, { score: number; label: string; color: string }> = {};
 
 function analyzeDifficulty(
   fv: Record<string, any>,
   objectives: Record<string, any>,
-  activePresetName: string | null
+  activePresetName: string | null,
+  rawFlags?: string
 ): { score: number; label: string; color: string; bullets: Bullet[] } {
   const bullets: Bullet[] = [];
   let delta = 0; // points above/below the standard baseline
+
+  // Calculate environmental coupling factors
+  const activeScaleFlag = SCALING_FLAGS.find((f) => hasFlag(fv, f));
+  const scaleMult = activeScaleFlag ? (flagNum(fv, activeScaleFlag) ?? 2.0) : 2.0;
+
+  let scaleFactor = 1.0;
+  if (activeScaleFlag) {
+    if (activeScaleFlag === "-lst") {
+      scaleFactor = Math.max(1.0, 2.0 / (scaleMult || 2.0));
+    } else if (activeScaleFlag === "-lsa" || activeScaleFlag === "-lsh") {
+      scaleFactor = Math.max(1.0, scaleMult / 1.0);
+    } else {
+      scaleFactor = Math.max(1.0, scaleMult / 2.0);
+    }
+  } else {
+    scaleFactor = 0.5; // No scaling is much easier
+  }
+
+  const xpm = flagNum(fv, "-xpm") ?? 1;
+  const partyXpSplit = !hasFlag(fv, "-nxppd");
+  const xpmBaseline = partyXpSplit ? 7 : 3;
+
+  let xpFactor = 1.0;
+  if (xpm < xpmBaseline) {
+    xpFactor = xpmBaseline / Math.max(0.5, xpm);
+  } else if (xpm > xpmBaseline) {
+    xpFactor = Math.max(0.2, xpmBaseline / xpm);
+  }
+
+  const msl = flagNum(fv, "-msl") ?? 40;
+  let mslFactor = 1.0;
+  if (msl > 40) {
+    mslFactor = msl / 40.0;
+  } else if (msl < 40) {
+    mslFactor = Math.max(0.5, msl / 40.0);
+  }
+
+  // Safely cap environmental multiplier
+  const envMult = Math.min(15.0, scaleFactor * xpFactor * mslFactor);
 
   // ── ALWAYS-SHOW: Final Kefka conditions ──
   const kefkaObjRaw = Object.values(objectives)
@@ -450,31 +500,43 @@ function analyzeDifficulty(
     let kefkaDelta = 0;
     if (kefkaRequired > 0) {
       // 3.5 points per required condition as baseline deviation from standard (2 conditions)
-      kefkaDelta += (kefkaRequired - 2) * 3.5;
+      // High requirements are magnified in harsh environments
+      const reqDiff = kefkaRequired - 2;
+      if (reqDiff > 0) {
+        kefkaDelta += reqDiff * 3.5 * envMult;
+      } else {
+        kefkaDelta += reqDiff * 3.5;
+      }
 
       if (kefkaObjRaw[0]?.obj?.conditions) {
-        for (const cond of kefkaObjRaw[0].obj.conditions) {
-          const val = cond.values?.[0];
-          const valNum = val !== undefined ? parseInt(String(val), 10) : NaN;
+        const conditions = kefkaObjRaw[0].obj.conditions;
+        const totalCondsCount = conditions.length;
+        // Scale positive deviations if players only need to meet a subset of total conditions
+        const conditionRatio = totalCondsCount > 0 ? Math.min(1.0, kefkaRequired / totalCondsCount) : 1.0;
+
+        for (const cond of conditions) {
+          const valNum = cond.values && cond.values.length > 1
+            ? parseInt(String(cond.values[1]), 10)
+            : (cond.values?.[0] !== undefined ? parseInt(String(cond.values[0]), 10) : NaN);
           if (!isNaN(valNum)) {
             if (cond.id === COND_CHARACTERS || cond.id === "2") {
-              const diff = valNum - 6; // 6 is standard
+              const diff = valNum - 6; // 6 is standard baseline
               if (diff > 0) {
-                kefkaDelta += diff * 4.5; // More is harder
+                kefkaDelta += diff * 1.5 * envMult * conditionRatio; // low base impact (1.5), scaled by environment & ratio
               } else {
                 kefkaDelta += diff * 2.0; // Less is easier
               }
             } else if (cond.id === COND_ESPERS || cond.id === "4") {
-              const diff = valNum - 9; // 9 is standard
+              const diff = valNum - 9; // 9 is standard baseline
               if (diff > 0) {
-                kefkaDelta += diff * 2.5; // More is harder
+                kefkaDelta += diff * 0.8 * envMult * conditionRatio; // low base impact (0.8), scaled by environment & ratio
               } else {
                 kefkaDelta += diff * 1.0; // Less is easier
               }
             } else if (cond.id === COND_DRAGONS || cond.id === "6") {
               const diff = valNum - 0; // 0 is standard
               if (diff > 0) {
-                kefkaDelta += diff * 6.0; // More is harder
+                kefkaDelta += diff * 2.0 * envMult * conditionRatio; // low base impact (2.0), scaled by environment & ratio
               }
             }
           }
@@ -535,33 +597,85 @@ function analyzeDifficulty(
           bullets.push({ text: `Enemy scaling every ${mult} min.`, severity: "info" });
         }
       } else {
-        if (mult < 1.0) {
-          bullets.push({ text: `Enemy scaling ${mult}× — enemies are much weaker than standard`, severity: "easy" });
-          delta -= 12;
-        } else if (mult < 2.0) {
-          bullets.push({ text: `Enemy scaling ${mult}× ${lbl} — easier than the 2× standard`, severity: "easy" });
-          delta -= 6;
-        } else if (mult >= 4.0) {
-          bullets.push({ text: `Enemy scaling ${mult}× ${lbl} — extreme difficulty`, severity: "hard" });
-          delta += 25;
-        } else if (mult >= 3.0) {
-          bullets.push({ text: `Enemy scaling ${mult}× ${lbl} — harder than standard 2×`, severity: "hard" });
-          delta += 15;
-        } else if (mult > 2.5) {
-          bullets.push({ text: `Enemy scaling ${mult}× ${lbl} — slightly above standard`, severity: "medium" });
-          delta += 8;
+        if (activeScalingFlag === "-lsa" || activeScalingFlag === "-lsh") {
+          // -lsa and -lsh have standard mult = 1.0, and scale exponentially for higher values
+          const isCappedUnder40 = msl < 40;
+          
+          if (mult <= 0.5) {
+            bullets.push({ text: `Enemy scaling ${mult}× ${lbl} — easier than the 1× standard`, severity: "easy" });
+            delta -= 6;
+          } else if (mult === 1.0) {
+            bullets.push({ text: `Enemy scaling ${mult}× ${lbl} — standard level scaling`, severity: "info" });
+            // standard 1.0 = 0 delta
+          } else {
+            // mult > 1.0: gets exponentially harder
+            // 1.5 is pretty hard, 2.0 is very hard
+            let scalingDelta = 0;
+            let severity: BulletSeverity = "medium";
+            
+            if (mult <= 1.5) {
+              scalingDelta = 12;
+              severity = "medium";
+            } else if (mult <= 2.0) {
+              scalingDelta = 22;
+              severity = "hard";
+            } else {
+              scalingDelta = 35;
+              severity = "hard";
+            }
+            
+            if (isCappedUnder40) {
+              // Max scale level cap under 40 limits the challenge (tapered by 40%), but it is still harder
+              scalingDelta = Math.round(scalingDelta * 0.6);
+              bullets.push({ 
+                text: `Enemy scaling ${mult}× ${lbl} — very challenging, partially limited by low level cap (${msl})`, 
+                severity: severity 
+              });
+            } else {
+              bullets.push({ 
+                text: `Enemy scaling ${mult}× ${lbl} — extremely challenging, enemies scale aggressively with level`, 
+                severity: severity 
+              });
+            }
+            delta += scalingDelta;
+          }
         } else {
-          // 2.0–2.5 = standard — always show as info
-          bullets.push({ text: `Enemy scaling ${mult}× ${lbl}`, severity: "info" });
+          if (mult < 1.0) {
+            bullets.push({ text: `Enemy scaling ${mult}× — enemies are much weaker than standard`, severity: "easy" });
+            delta -= 12;
+          } else if (mult < 2.0) {
+            bullets.push({ text: `Enemy scaling ${mult}× ${lbl} — easier than the 2× standard`, severity: "easy" });
+            delta -= 6;
+          } else if (mult >= 4.0) {
+            bullets.push({ text: `Enemy scaling ${mult}× ${lbl} — extreme difficulty`, severity: "hard" });
+            delta += 25;
+          } else if (mult >= 3.0) {
+            bullets.push({ text: `Enemy scaling ${mult}× ${lbl} — harder than standard 2×`, severity: "hard" });
+            delta += 15;
+          } else if (mult > 2.5) {
+            bullets.push({ text: `Enemy scaling ${mult}× ${lbl} — slightly above standard`, severity: "medium" });
+            delta += 8;
+          } else {
+            // 2.0–2.5 = standard — always show as info
+            bullets.push({ text: `Enemy scaling ${mult}× ${lbl}`, severity: "info" });
+          }
         }
       }
 
       // Max scale level — only call out if non-standard (standard = 40)
-      const msl = flagNum(fv, "-msl");
-      if (msl !== null && msl !== 40) {
-        if (msl < 30) { bullets.push({ text: `Enemy level cap: ${msl} — late-game is much easier`, severity: "easy" }); delta -= 8; }
-        else if (msl === 99) { bullets.push({ text: "No enemy level cap — scaling continues to 99", severity: "medium" }); delta += 5; }
-        else { bullets.push({ text: `Enemy level cap: ${msl}`, severity: "info" }); }
+      if (msl !== 40) {
+        if (msl < 30) {
+          bullets.push({ text: `Enemy level cap: ${msl} — late-game is much easier`, severity: "easy" });
+          delta -= 8;
+        } else if (msl > 40) {
+          const mslDiff = msl - 40;
+          // Dynamically scale difficulty: higher enemy level scaling magnifying cap difficulty
+          const mslDelta = mslDiff * 0.1 * Math.max(0.6, scaleFactor);
+          bullets.push({ text: `Enemy level cap: ${msl} — higher cap increases difficulty`, severity: "medium" });
+          delta += mslDelta;
+        } else {
+          bullets.push({ text: `Enemy level cap: ${msl}`, severity: "info" });
+        }
       }
     }
   } else {
@@ -612,7 +726,7 @@ function analyzeDifficulty(
 
   // ── Ability Scaling ── (lower = harder; 2.0-2.5 = standard, skip)
   if (hasFlag(fv, "-ase") || hasFlag(fv, "-asr")) {
-    const asMult = flagNum(fv, "-ase") || flagNum(fv, "-asr");
+    const asMult = flagNum(fv, "-ase") ?? flagNum(fv, "-asr");
     if (asMult !== null) {
       if (asMult === 0.5) {
         bullets.push({ text: `Ability scaling is extremely fast (${asMult}×) — enemies gain powerful spells very early`, severity: "hard" });
@@ -643,14 +757,27 @@ function analyzeDifficulty(
   }
 
   // ── XP Multiplier ── (3× = standard; 7× if party XP split)
-  const xpm = flagNum(fv, "-xpm");
-  const partyXpSplit = !hasFlag(fv, "-nxppd");
-  const xpmBaseline = partyXpSplit ? 7 : 3;
+
   if (partyXpSplit) {
     bullets.push({ text: "Party XP divided among survivors — effective XP baseline shifts to ~7×", severity: "hard" });
     delta += 12;
   }
-  if (xpm !== null) {
+
+  // Boss XP Challenge
+  if (!hasFlag(fv, "-be")) {
+    bullets.push({ text: "Boss experience disabled — bosses award 0 XP (makes game more challenging)", severity: "hard" });
+    delta += 15;
+  }
+
+  // Check if reward scaling is set very low
+  const isXgceLow = hasFlag(fv, "-xgce") && (flagNum(fv, "-xgce") ?? 0) < 2;
+  const isXgcedLow = hasFlag(fv, "-xgced") && (flagNum(fv, "-xgced") ?? 0) < 2;
+  const isXgtLow = hasFlag(fv, "-xgt") && (flagNum(fv, "-xgt") ?? 0) < 2;
+  const isXgaLow = hasFlag(fv, "-xga") && (flagNum(fv, "-xga") ?? 0) < 1;
+  const isXghLow = hasFlag(fv, "-xgh") && (flagNum(fv, "-xgh") ?? 0) < 1;
+  const isXgScalingVeryLow = isXgceLow || isXgcedLow || isXgtLow || isXgaLow || isXghLow;
+
+  if (flagNum(fv, "-xpm") !== null) {
     const xpmDiff = xpm - xpmBaseline;
     if (xpmDiff < 0) {
       if (xpmDiff <= -4) {
@@ -664,21 +791,29 @@ function analyzeDifficulty(
         delta += 10;
       }
     } else if (xpmDiff > 0) {
-      if (xpmDiff >= 20) {
-        bullets.push({ text: `XP multiplier ${xpm}× is overwhelmingly high — leveling is virtually instant`, severity: "easy" });
-        delta -= 38;
-      } else if (xpmDiff >= 12) {
-        bullets.push({ text: `XP multiplier ${xpm}× is extremely high — extremely fast leveling`, severity: "easy" });
-        delta -= 28;
-      } else if (xpmDiff >= 6) {
-        bullets.push({ text: `XP multiplier ${xpm}× is very high — fast leveling`, severity: "easy" });
-        delta -= 20;
-      } else if (xpmDiff >= 3) {
-        bullets.push({ text: `XP multiplier ${xpm}× is above baseline — fast leveling`, severity: "easy" });
-        delta -= 12;
-      } else if (xpmDiff >= 1) {
-        bullets.push({ text: `XP multiplier ${xpm}× is slightly above baseline — faster leveling`, severity: "easy" });
-        delta -= 6;
+      if (!partyXpSplit) {
+        // Without split party XP (baseline is 3)
+        if (isXgScalingVeryLow || !hasFlag(fv, "-be")) {
+          const minimalEase = Math.min(5, xpmDiff * 0.5);
+          bullets.push({ text: `XP multiplier ${xpm}× (mitigated by low reward scaling or disabled boss XP) — standard leveling advantage`, severity: "info" });
+          delta -= minimalEase;
+        } else {
+          // Exponential easing for fast XP (no split)
+          const ease = Math.min(45, Math.pow(xpmDiff, 0.7) * 8 + xpmDiff * 1.5);
+          bullets.push({ text: `XP multiplier ${xpm}× with no split XP — leveling is extremely fast, game is exponentially easier`, severity: "easy" });
+          delta -= ease;
+        }
+      } else {
+        // With split party XP (baseline is 7)
+        if (isXgScalingVeryLow || !hasFlag(fv, "-be")) {
+          const minimalEase = Math.min(4, xpmDiff * 0.3);
+          bullets.push({ text: `XP multiplier ${xpm}× with split XP (mitigated by low scaling or disabled boss XP)`, severity: "info" });
+          delta -= minimalEase;
+        } else {
+          const ease = Math.min(30, xpmDiff * 1.5);
+          bullets.push({ text: `XP multiplier ${xpm}× with split XP — leveling is faster than baseline`, severity: "easy" });
+          delta -= ease;
+        }
       }
     }
   }
@@ -689,35 +824,44 @@ function analyzeDifficulty(
     const xgMult = flagNum(fv, activeXgFlag);
     if (xgMult !== null) {
       if (activeXgFlag === "-xgt") {
-        if (xgMult === 0.5) {
-          bullets.push({ text: `Enemy XP/GP yield scaling every ${xgMult} min. — extremely fast reward scaling`, severity: "hard" });
-          delta += 12;
-        } else if (xgMult === 1.0) {
-          bullets.push({ text: `Enemy XP/GP yield scaling every ${xgMult} min. — fast reward scaling`, severity: "hard" });
-          delta += 8;
-        } else if (xgMult === 1.5) {
-          bullets.push({ text: `Enemy XP/GP yield scaling every ${xgMult} min. — fast reward scaling`, severity: "medium" });
-          delta += 4;
-        } else if (xgMult === 3.0) {
-          bullets.push({ text: `Enemy XP/GP yield scaling every ${xgMult} min. — slow reward scaling`, severity: "easy" });
-          delta -= 2;
-        } else if (xgMult === 3.5) {
-          bullets.push({ text: `Enemy XP/GP yield scaling every ${xgMult} min. — slow reward scaling`, severity: "easy" });
-          delta -= 4;
-        } else if (xgMult === 4.0) {
-          bullets.push({ text: `Enemy XP/GP yield scaling every ${xgMult} min. — very slow reward scaling`, severity: "easy" });
-          delta -= 6;
-        } else if (xgMult === 4.5) {
-          bullets.push({ text: `Enemy XP/GP yield scaling every ${xgMult} min. — very slow reward scaling`, severity: "easy" });
-          delta -= 7;
-        } else if (xgMult >= 5.0) {
-          bullets.push({ text: `Enemy XP/GP yield scaling every ${xgMult} min. — extremely slow reward scaling`, severity: "easy" });
+        // Time elapsed: smaller values = faster reward growth = easier
+        if (xgMult <= 0.5) {
+          bullets.push({ text: `Enemy XP/GP yield scaling every ${xgMult} min. — extremely fast reward scaling, game is much easier`, severity: "easy" });
+          delta -= 12;
+        } else if (xgMult <= 1.0) {
+          bullets.push({ text: `Enemy XP/GP yield scaling every ${xgMult} min. — very fast reward scaling, game is easier`, severity: "easy" });
           delta -= 8;
+        } else if (xgMult <= 1.5) {
+          bullets.push({ text: `Enemy XP/GP yield scaling every ${xgMult} min. — fast reward scaling, game is slightly easier`, severity: "easy" });
+          delta -= 4;
+        } else if (xgMult >= 5.0) {
+          bullets.push({ text: `Enemy XP/GP yield scaling every ${xgMult} min. — extremely slow reward scaling, grinding is tedious`, severity: "hard" });
+          delta += 12;
+        } else if (xgMult >= 4.0) {
+          bullets.push({ text: `Enemy XP/GP yield scaling every ${xgMult} min. — very slow reward scaling, grinding is slow`, severity: "hard" });
+          delta += 8;
+        } else if (xgMult >= 3.0) {
+          bullets.push({ text: `Enemy XP/GP yield scaling every ${xgMult} min. — slow reward scaling`, severity: "medium" });
+          delta += 4;
+        } else {
+          bullets.push({ text: `Enemy XP/GP yield scaling every ${xgMult} min.`, severity: "info" });
         }
       } else {
-        if (xgMult < 1.0) { bullets.push({ text: `Enemy XP/GP yield ${xgMult}× — very low rewards`, severity: "hard" }); delta += 10; }
-        else if (xgMult < 2.0) { bullets.push({ text: `Enemy XP/GP yield ${xgMult}× — below the 2× standard`, severity: "medium" }); delta += 5; }
-        else if (xgMult > 4.0) { bullets.push({ text: `Enemy XP/GP yield ${xgMult}× — generous rewards`, severity: "easy" }); delta -= 8; }
+        // Multiplier based scaling (standard is 2.0x)
+        const lbl = SCALING_LABEL[activeXgFlag] ?? "";
+        if (xgMult < 1.0) {
+          bullets.push({ text: `Enemy XP/GP yield ${xgMult}× ${lbl} — extremely low rewards, grinding is very hard`, severity: "hard" });
+          delta += 12;
+        } else if (xgMult < 2.0) {
+          bullets.push({ text: `Enemy XP/GP yield ${xgMult}× ${lbl} — below standard 2×, grinding is slower`, severity: "medium" });
+          delta += 6;
+        } else if (xgMult > 2.0) {
+          const ease = Math.min(18, xgMult > 4.0 ? (xgMult - 2.0) * 4.5 : (xgMult - 2.0) * 3.5);
+          bullets.push({ text: `Enemy XP/GP yield ${xgMult}× ${lbl} — generous rewards make game easier`, severity: "easy" });
+          delta -= ease;
+        } else {
+          bullets.push({ text: `Enemy XP/GP yield ${xgMult}× ${lbl}`, severity: "info" });
+        }
       }
     }
   }
@@ -745,14 +889,18 @@ function analyzeDifficulty(
     delta += 6;
   } else {
     const sisr = flagNum(fv, "-sisr") ?? 0;
-    const shopSev: BulletSeverity = sisr > 60 ? "medium" : "info";
+    const shopSev: BulletSeverity = sisr > 60 ? "easy" : "info";
     bullets.push({
       text: sisr === 0
         ? "Shops: standard inventory (no randomization)"
         : `Shops: ${sisr}% inventory randomized`,
       severity: shopSev,
     });
-    if (sisr !== 20) delta += sisr > 60 ? 4 : 0; // standard sisr=20, no delta
+    if (sisr === 0) {
+      delta += 2; // standard sisr=20, no randomization is harder
+    } else if (sisr > 60) {
+      delta -= 4; // high randomization is easier
+    }
   }
 
   // ── ALWAYS-SHOW: Chest randomization ──
@@ -764,9 +912,18 @@ function analyzeDifficulty(
     delta += 4;
   } else {
     const ccsr = flagNum(fv, "-ccsr") ?? 0;
-    bullets.push({ text: `Chests: ${ccsr}% contents randomized`, severity: "info" });
-    // standard ccsr=20, small deltas for big deviations only
-    if (ccsr > 80) delta -= 2;
+    const chestSev: BulletSeverity = ccsr > 60 ? "easy" : "info";
+    bullets.push({
+      text: ccsr === 0
+        ? "Chests: standard contents (no randomization)"
+        : `Chests: ${ccsr}% contents randomized`,
+      severity: chestSev,
+    });
+    if (ccsr === 0) {
+      delta += 2; // standard ccsr=20, no randomization is harder
+    } else if (ccsr > 60) {
+      delta -= 4; // high randomization is easier
+    }
   }
 
   // Chest monsters
@@ -887,8 +1044,13 @@ function analyzeDifficulty(
     bullets.push({ text: "Relic equipability is tiered random — higher tier relics are less likely to be equipable", severity: "medium" });
     delta += 8;
   } else if (hasFlag(fv, "-ierr") || hasFlag(fv, "-ierbr") || hasFlag(fv, "-ieror") || hasFlag(fv, "-iersr")) {
-    bullets.push({ text: "Relic availability randomized", severity: "info" });
-    delta += 3;
+    const v = flagNum(fv, "-ieror") ?? flagNum(fv, "-iersr");
+    if (v !== null && v === 33) {
+      // 33% is standard baseline (Atma Series)
+    } else {
+      bullets.push({ text: "Relic availability randomized", severity: "info" });
+      delta += 3;
+    }
   }
 
   // ── Challenge flags ──
@@ -897,20 +1059,44 @@ function analyzeDifficulty(
     delta += 8;
   }
   if (hasFlag(fv, "-sn")) {
-    bullets.push({ text: "Start naked — recruited characters have no starting equipment", severity: "hard" });
-    delta += 10;
+    bullets.push({ text: "Start naked — recruited characters have no starting equipment", severity: "info" });
+    delta += 2;
   }
 
   // Starting Gold
-  const gp = flagNum(fv, "-gp");
-  if (gp !== null && gp <= 0) { bullets.push({ text: "Starting with no gold", severity: "hard" }); delta += 6; }
-  else if (gp !== null && gp >= 50000) { bullets.push({ text: `Starting with ${gp.toLocaleString()} gold — strong economic advantage`, severity: "easy" }); delta -= 5; }
+  const gpVal = flagNum(fv, "-gp") ?? 5000;
+  if (gpVal <= 0) {
+    bullets.push({ text: "Starting with no gold — severe economic disadvantage", severity: "hard" });
+    delta += 6;
+  } else if (gpVal > 5000) {
+    const emptyShops = hasFlag(fv, "-sie");
+    const isPricesRandom = hasFlag(fv, "-sprv") || hasFlag(fv, "-sprp");
+    
+    let gpEase = Math.min(15, Math.log10(gpVal / 5000) * 6.5);
+    if (emptyShops) {
+      gpEase = 0;
+      bullets.push({ text: `Starting with ${gpVal.toLocaleString()} gold (completely neutralized by empty shops)`, severity: "info" });
+    } else if (isPricesRandom) {
+      gpEase = gpEase * 0.5; // Tapers benefit by 50%
+      bullets.push({ text: `Starting with ${gpVal.toLocaleString()} gold — economic advantage (tapered by random prices)`, severity: "easy" });
+    } else {
+      bullets.push({ text: `Starting with ${gpVal.toLocaleString()} gold — strong economic advantage`, severity: "easy" });
+    }
+    delta -= gpEase;
+  }
 
   // Open World
   if (hasFlag(fv, "-open")) { bullets.push({ text: "Open world — all events accessible from the start", severity: "easy" }); delta -= 5; }
 
   // Final score = BASE (standard) + deviations
-  let score = Math.max(0, BASE_SCORE + delta);
+  const rawScore = Math.max(0, BASE_SCORE + delta);
+
+  // Dampen/compress high challenge scores to avoid runaway ballooning above 100+
+  let score = rawScore;
+  if (rawScore > 22) {
+    score = 22 + Math.pow(rawScore - 22, 0.68) * 2.6;
+  }
+  score = Math.round(score);
 
   let label: string;
   let color: string;
@@ -947,6 +1133,7 @@ export const FlagSummary = () => {
   const flagValues = useSelector(selectFlagValues) as Record<string, any>;
   const objectives = useSelector(selectObjectives) as Record<string, any>;
   const activePresetName = useSelector(selectActivePresetName);
+  const rawFlags = useSelector(selectRawFlags);
 
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -964,7 +1151,7 @@ export const FlagSummary = () => {
   };
 
   const infoRows = buildInfoRows(flagValues, objectives);
-  const { score, label, color, bullets } = analyzeDifficulty(flagValues, objectives, activePresetName);
+  const { score, label, color, bullets } = analyzeDifficulty(flagValues, objectives, activePresetName, rawFlags);
 
   const severityIcon: Record<BulletSeverity, string> = {
     hard: "⚠️", medium: "◆", easy: "✓", info: "ℹ",

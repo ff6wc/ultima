@@ -62,21 +62,69 @@ export const flagSlice = createSlice({
       if (action.payload.value === null) {
         delete state.flagValues[action.payload.flag];
         state.rawFlags = valuesToString(state.flagValues);
+        if (
+          typeof window !== "undefined" &&
+          localStorage.getItem("gfx_persist_enabled") === "true" &&
+          ["-name", "-cpal", "-cpor", "-cspr", "-cspp"].includes(action.payload.flag)
+        ) {
+          localStorage.removeItem(`gfx_${action.payload.flag.slice(1)}`);
+        }
         return;
       }
       state.flagValues[action.payload.flag] = action.payload.value;
       state.rawFlags = valuesToString(state.flagValues);
+
+      if (
+        typeof window !== "undefined" &&
+        localStorage.getItem("gfx_persist_enabled") === "true" &&
+        ["-name", "-cpal", "-cpor", "-cspr", "-cspp"].includes(action.payload.flag)
+      ) {
+        const lsKey = `gfx_${action.payload.flag.slice(1)}`;
+        const lsVal = action.payload.value as string;
+        localStorage.setItem(lsKey, lsVal);
+      }
     },
     setFlags: (state, action: PayloadAction<Record<string, FlagValue>>) => {
       Object.keys(action.payload).forEach((key) => {
-        state.flagValues[key] = action.payload.value;
+        state.flagValues[key] = action.payload[key];
+        if (
+          typeof window !== "undefined" &&
+          localStorage.getItem("gfx_persist_enabled") === "true" &&
+          ["-name", "-cpal", "-cpor", "-cspr", "-cspp"].includes(key)
+        ) {
+          localStorage.setItem(`gfx_${key.slice(1)}`, action.payload[key] as string);
+        }
       });
 
       state.rawFlags = valuesToString(state.flagValues);
     },
     setRawFlags: (state, action: PayloadAction<string>) => {
-      state.rawFlags = action.payload;
-      state.flagValues = flagsToData(action.payload);
+      const newFlagValues = flagsToData(action.payload);
+      const GRAPHICS_FLAGS = ["-name", "-cpal", "-cpor", "-cspr", "-cspp"] as const;
+
+      // For user-triggered preset changes: if persist is enabled and the preset
+      // explicitly includes a graphics flag, save that value to localStorage.
+      // For flags NOT in the preset, do nothing here — restorePersistedGraphics
+      // is called separately on initial page load to pull values from localStorage.
+      if (typeof window !== "undefined" && localStorage.getItem("gfx_persist_enabled") === "true") {
+        for (const flag of GRAPHICS_FLAGS) {
+          if (flag in newFlagValues) {
+            const val = newFlagValues[flag];
+            if (val !== null && val !== undefined) {
+              localStorage.setItem(`gfx_${flag.slice(1)}`, val as string);
+            }
+          }
+        }
+      }
+
+      GRAPHICS_FLAGS.forEach((flag) => {
+        if (!(flag in newFlagValues) && state.flagValues[flag] !== undefined) {
+          newFlagValues[flag] = state.flagValues[flag];
+        }
+      });
+
+      state.flagValues = newFlagValues;
+      state.rawFlags = valuesToString(state.flagValues);
     },
   },
   extraReducers: {
@@ -90,6 +138,36 @@ export const flagSlice = createSlice({
 });
 
 export const { setFlag, setFlags, setRawFlags } = flagSlice.actions;
+
+/**
+ * Plain function (NOT a Redux reducer) that restores persisted graphics flags
+ * from localStorage by dispatching individual setFlag actions.
+ *
+ * Must be called from a React useEffect (client-side only). Because it is
+ * regular JS — not a reducer — it is 100% guaranteed to run in the browser
+ * where localStorage exists, regardless of Next.js SSR/hydration order.
+ */
+export const applyPersistedGraphics = (
+  dispatch: (action: ReturnType<typeof setFlag>) => void,
+) => {
+  if (typeof window === "undefined") return;
+  if (localStorage.getItem("gfx_persist_enabled") !== "true") return;
+
+  const GRAPHICS_FLAGS = [
+    ["-name", "gfx_name"],
+    ["-cpal", "gfx_cpal"],
+    ["-cpor", "gfx_cpor"],
+    ["-cspr", "gfx_cspr"],
+    ["-cspp", "gfx_cspp"],
+  ] as const;
+
+  GRAPHICS_FLAGS.forEach(([flag, lsKey]) => {
+    const saved = localStorage.getItem(lsKey);
+    if (saved !== null) {
+      dispatch(setFlag({ flag, value: saved }));
+    }
+  });
+};
 
 export const selectFlagValues = (state: AppState) => state.flag.flagValues;
 export const selectFlagValue =

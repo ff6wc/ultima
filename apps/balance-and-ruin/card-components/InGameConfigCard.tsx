@@ -53,17 +53,17 @@ const WINDOW_DEFAULTS: Record<number, RGB[]> = {
 const FONT_DEFAULT: RGB = [...DEFAULT_FONT_COLOR] as RGB;
 
 const TOGGLE_DEFAULTS = {
-  BatMode: "wait" as const,
-  BatSpeed: 3,
-  MsgSpeed: 3,
-  Command: "window" as const,
-  Gauge: "on" as const,
-  Sound: "stereo" as const,
-  Cursor: "reset" as const,
-  Reequip: "optimum" as const,
-  SpellOrder: 1,
-  Wallpaper: 1,
-};
+  BatMode: DEFAULT_IN_GAME_CONFIG.batMode,
+  BatSpeed: DEFAULT_IN_GAME_CONFIG.batSpeed,
+  MsgSpeed: DEFAULT_IN_GAME_CONFIG.msgSpeed,
+  Command: DEFAULT_IN_GAME_CONFIG.cmdSet,
+  Gauge: DEFAULT_IN_GAME_CONFIG.gauge,
+  Sound: DEFAULT_IN_GAME_CONFIG.sound,
+  Cursor: DEFAULT_IN_GAME_CONFIG.cursor,
+  Reequip: DEFAULT_IN_GAME_CONFIG.reequip,
+  SpellOrder: DEFAULT_IN_GAME_CONFIG.spellOrder,
+  Wallpaper: DEFAULT_IN_GAME_CONFIG.wallpaper,
+} as const;
 
 const PAGE_A_OPTIONS: OptionRow[] = [
   { key: "BatMode", y: 44, values: [["active", 112], ["wait", 176]] },
