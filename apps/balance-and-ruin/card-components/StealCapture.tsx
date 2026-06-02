@@ -1,11 +1,15 @@
 import { Card } from "@ff6wc/ui";
+import { useDispatch } from "react-redux";
 import { CardColumn } from "~/components/CardColumn/CardColumn";
+import { FlagLabel } from "~/components/FlagLabel/FlagLabel";
 import {
   FlagSubflagSelect,
   SubflagOption,
 } from "~/components/FlagSubflagSelect/FlagSubflagSelect";
 import { FlagSwitch } from "~/components/FlagSwitch/FlagSwitch";
 import { FlagSlider } from "~/components/FlagSlider/FlagSlider";
+import { Select, SelectOption } from "~/components/Select/Select";
+import { setFlag, useFlagValueSelector } from "~/state/flagSlice";
 
 const stealOptions: SubflagOption[] = [
   {
@@ -24,20 +28,41 @@ const stealOptions: SubflagOption[] = [
   },
 ];
 
-const dropRandomOptions: SubflagOption[] = [
+const dropdownOptions: SelectOption[] = [
   {
-    defaultValue: 10,
-    flag: "-ssd",
-    helperText:
-      "Shuffle Items Stolen and Dropped with given percent randomized",
+    value: "original",
+    label: "Original",
+    helperText: "Drops are original",
+  },
+  {
+    value: "shuffle_random",
     label: "Shuffle + Random",
-    Renderable: ({ children }) => (
-      <FlagSlider flag="-ssd" helperText="" label={children} />
-    ),
+    helperText: "Shuffle items stolen and dropped with randomized percent",
   },
 ];
 
 export const StealCapture = () => {
+  const dispatch = useDispatch();
+  const ss = useFlagValueSelector<number | null>("-ss");
+  const sd = useFlagValueSelector<number | null>("-sd");
+
+  const isShuffleAndRandom =
+    (ss !== null && ss !== undefined) || (sd !== null && sd !== undefined);
+
+  const activeOption = isShuffleAndRandom
+    ? dropdownOptions[1]
+    : dropdownOptions[0];
+
+  const handleDropdownChange = (selected: SelectOption | null) => {
+    if (selected?.value === "original") {
+      dispatch(setFlag({ flag: "-ss", value: null }));
+      dispatch(setFlag({ flag: "-sd", value: null }));
+    } else if (selected?.value === "shuffle_random") {
+      dispatch(setFlag({ flag: "-ss", value: ss ?? 10 }));
+      dispatch(setFlag({ flag: "-sd", value: sd ?? 10 }));
+    }
+  };
+
   return (
     <Card title={"Steal/Capture"}>
       <CardColumn>
@@ -56,26 +81,39 @@ export const StealCapture = () => {
           label="Fix Capture Bugs"
         />
 
-        <FlagSubflagSelect
-          options={dropRandomOptions}
-          nullable={{
-            description: "Drops are original",
-            label: "Original",
-          }}
-          label="Steals & Drops"
-        />
+        <div className="flex flex-col gap-2">
+          <FlagLabel
+            flag="-ss"
+            hideFlag={true}
+            label="Steals & Drops"
+            helperText={
+              isShuffleAndRandom
+                ? "Shuffle items stolen and dropped with randomized percent"
+                : "Drops are original"
+            }
+          />
+          <Select
+            options={dropdownOptions}
+            value={activeOption}
+            onChange={handleDropdownChange}
+          />
+        </div>
 
-        <FlagSlider
-          flag="-ss"
-          label="Shuffle Stolen Items"
-          helperText="Shuffle items stolen with randomized percent"
-        />
+        {isShuffleAndRandom && (
+          <>
+            <FlagSlider
+              flag="-ss"
+              label="Shuffle Stolen Items"
+              helperText="Shuffle items stolen with randomized percent"
+            />
 
-        <FlagSlider
-          flag="-sd"
-          label="Shuffle Dropped Items"
-          helperText="Shuffle items dropped with randomized percent"
-        />
+            <FlagSlider
+              flag="-sd"
+              label="Shuffle Dropped Items"
+              helperText="Shuffle items dropped with randomized percent"
+            />
+          </>
+        )}
       </CardColumn>
     </Card>
   );
