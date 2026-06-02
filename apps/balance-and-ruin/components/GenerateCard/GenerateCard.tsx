@@ -5,6 +5,8 @@ import { MdClear, MdFileUpload } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
 import useSWRMutation from "swr/mutation";
 import { getFlagValue, selectFlagValues, setRawFlags } from "~/state/flagSlice";
+import { setRawObjectives } from "~/state/objectiveSlice";
+import { setRawStartingItems } from "~/state/itemSlice";
 import JSZip from "jszip";
 import { useRouter } from "next/router";
 import { selectSchema } from "~/state/schemaSlice";
@@ -457,8 +459,25 @@ export const GenerateCard = ({
         <h3 className={styles.stepTitle}>Step 1: Review Flags</h3>
         <textarea
           className={styles.textarea}
-          onBlur={(e) => dispatch(setRawFlags(e.target.value))}
+          onBlur={(e) => {
+            const val = e.target.value;
+            dispatch(setRawFlags(val));
+            dispatch(setRawObjectives(val));
+            dispatch(setRawStartingItems(val));
+          }}
           onChange={(e) => setInputFlags(e.target.value)}
+          onPaste={(e) => {
+            const pastedText = e.clipboardData.getData("text");
+            dispatch(setRawFlags(pastedText));
+            dispatch(setRawObjectives(pastedText));
+            dispatch(setRawStartingItems(pastedText));
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              e.currentTarget.blur();
+            }
+          }}
           value={inputFlags}
           placeholder="Your selected flags will appear here..."
         />
