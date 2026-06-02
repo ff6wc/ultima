@@ -777,7 +777,7 @@ function analyzeDifficulty(
   const isXghLow = hasFlag(fv, "-xgh") && (flagNum(fv, "-xgh") ?? 0) < 1;
   const isXgScalingVeryLow = isXgceLow || isXgcedLow || isXgtLow || isXgaLow || isXghLow;
 
-  if (xpm !== null) {
+  if (flagNum(fv, "-xpm") !== null) {
     const xpmDiff = xpm - xpmBaseline;
     if (xpmDiff < 0) {
       if (xpmDiff <= -4) {
