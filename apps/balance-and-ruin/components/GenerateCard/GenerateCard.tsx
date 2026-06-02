@@ -467,16 +467,11 @@ export const GenerateCard = ({
           }}
           onChange={(e) => setInputFlags(e.target.value)}
           onPaste={(e) => {
+            e.preventDefault();
             const pastedText = e.clipboardData.getData("text");
             dispatch(setRawFlags(pastedText));
             dispatch(setRawObjectives(pastedText));
             dispatch(setRawStartingItems(pastedText));
-          }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              e.currentTarget.blur();
-            }
           }}
           value={inputFlags}
           placeholder="Your selected flags will appear here..."
