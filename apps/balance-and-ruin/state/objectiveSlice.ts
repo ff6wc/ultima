@@ -221,9 +221,9 @@ export const objectiveSlice = createSlice({
           const { group, id, format_string } = resultMetadata;
 
           const result: ObjectiveResult = {
-            group,
-            label: format_string,
-            id: id.toString(),
+            group: resultMetadata?.group || "",
+            label: resultMetadata?.format_string || "",
+            id: resultMetadata?.id?.toString() || resultId || "",
             value: hasRange
               ? [Number.parseInt(values[1]), Number.parseInt(values[2])]
               : undefined,
