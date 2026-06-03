@@ -728,11 +728,6 @@ export const FlagCreatePage = ({
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
       const data = imageData.data;
 
-      // Lighter blue color: #93c5fd
-      const targetR = 147;
-      const targetG = 197;
-      const targetB = 253;
-
       for (let i = 0; i < data.length; i += 4) {
         const r = data[i];
         const g = data[i + 1];
@@ -743,9 +738,26 @@ export const FlagCreatePage = ({
           // Detect gold/yellow pixels (center icon and "final fantasy vi randomizer" text)
           const isGold = (r > b + 30) && (g > b + 15);
           if (isGold) {
-            // Calculate brightness factor relative to average gold brightness to preserve highlights/shading
+            const pixelIndex = i / 4;
+            const y = Math.floor(pixelIndex / canvas.width);
+            const yRel = y / canvas.height;
+
+            let targetR = 191;
+            let targetG = 219;
+            let targetB = 254;
+            let divisor = 135; // Brighten the top logo icon
+
+            if (yRel >= 0.58) {
+              // Darken the text banner area below the logo to keep it readable and crisp
+              targetR = 120;
+              targetG = 175;
+              targetB = 255;
+              divisor = 200; // Less bright, higher contrast for thin text
+            }
+
+            // Calculate brightness factor and apply the appropriate divisor
             const brightness = (r + g + b) / 3;
-            const factor = brightness / 180;
+            const factor = brightness / divisor;
             data[i] = Math.min(255, targetR * factor);
             data[i + 1] = Math.min(255, targetG * factor);
             data[i + 2] = Math.min(255, targetB * factor);
