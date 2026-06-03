@@ -750,14 +750,17 @@ export const FlagCreatePage = ({
               let targetG = 219;
               let targetB = 254;
 
-              // Check if this pixel is part of the banner (lower section, excluding center logo area)
-              const isBanner = yRel >= 0.70 && (xRel < 0.38 || xRel > 0.62);
+              // Check if this pixel is part of the banner
+              // Outside the center, banner starts at yRel >= 0.68.
+              // In the center (where the toes are), banner starts at yRel >= 0.76.
+              const bannerThreshold = (xRel >= 0.44 && xRel <= 0.56) ? 0.76 : 0.68;
+              const isBanner = yRel >= bannerThreshold;
 
               if (isBanner) {
-                // Apply a darker shade of blue (#60a5fa) to the whole horizontal banner instead of the fade
-                data[i] = 96;
-                data[i + 1] = 165;
-                data[i + 2] = 250;
+                // Revert to the lighter blue shade (#93c5fd) for the whole horizontal banner
+                data[i] = 147;
+                data[i + 1] = 197;
+                data[i + 2] = 253;
               } else {
                 // Brighten the top logo icon
                 const divisor = 135;
