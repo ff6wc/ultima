@@ -309,7 +309,7 @@ export const FlagCreatePage = ({
           label: "Home",
           id: "home",
           Icon: HiOutlineHome,
-          content: <Home />,
+          content: <Home logoSrc={processedLogo || undefined} />,
         },
         {
           label: "Presets",
@@ -746,7 +746,7 @@ export const FlagCreatePage = ({
             let targetG = 219;
             let targetB = 254;
 
-            if (yRel >= 0.58) {
+            if (yRel >= 0.65) {
               // Apply a darker shade of blue (#60a5fa) to the whole horizontal banner instead of the fade
               data[i] = 96;
               data[i + 1] = 165;
