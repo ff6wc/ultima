@@ -757,10 +757,10 @@ export const FlagCreatePage = ({
               const isBanner = yRel >= bannerThreshold;
 
               if (isBanner) {
-                // Revert to the lighter blue shade (#93c5fd) for the whole horizontal banner
-                data[i] = 147;
-                data[i + 1] = 197;
-                data[i + 2] = 253;
+                // Match the horizontal banner to the current generate button color (#60a5fa)
+                data[i] = 96;
+                data[i + 1] = 165;
+                data[i + 2] = 250;
               } else {
                 // Brighten the top logo icon
                 const divisor = 135;
