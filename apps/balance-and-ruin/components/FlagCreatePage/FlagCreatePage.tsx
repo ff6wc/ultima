@@ -728,10 +728,10 @@ export const FlagCreatePage = ({
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
       const data = imageData.data;
 
-      // Light blue color we're using on the main banner / landing page: #60a5fa
-      const targetR = 96;
-      const targetG = 165;
-      const targetB = 250;
+      // Lighter blue color: #93c5fd
+      const targetR = 147;
+      const targetG = 197;
+      const targetB = 253;
 
       for (let i = 0; i < data.length; i += 4) {
         const r = data[i];
