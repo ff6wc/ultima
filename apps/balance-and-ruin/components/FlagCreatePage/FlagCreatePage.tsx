@@ -745,22 +745,21 @@ export const FlagCreatePage = ({
             let targetR = 191;
             let targetG = 219;
             let targetB = 254;
-            let divisor = 135; // Brighten the top logo icon
 
             if (yRel >= 0.58) {
-              // Darken the text banner area below the logo to keep it readable and crisp
-              targetR = 120;
-              targetG = 175;
-              targetB = 255;
-              divisor = 200; // Less bright, higher contrast for thin text
+              // Apply that same color to the whole horizontal banner instead of the fade
+              data[i] = targetR;
+              data[i + 1] = targetG;
+              data[i + 2] = targetB;
+            } else {
+              // Brighten the top logo icon
+              const divisor = 135;
+              const brightness = (r + g + b) / 3;
+              const factor = brightness / divisor;
+              data[i] = Math.min(255, targetR * factor);
+              data[i + 1] = Math.min(255, targetG * factor);
+              data[i + 2] = Math.min(255, targetB * factor);
             }
-
-            // Calculate brightness factor and apply the appropriate divisor
-            const brightness = (r + g + b) / 3;
-            const factor = brightness / divisor;
-            data[i] = Math.min(255, targetR * factor);
-            data[i + 1] = Math.min(255, targetG * factor);
-            data[i + 2] = Math.min(255, targetB * factor);
           }
         }
       }
