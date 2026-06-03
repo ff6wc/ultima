@@ -9,7 +9,7 @@ const AUTH_ENABLED = process.env.NEXT_PUBLIC_AUTH_ENABLED !== "false";
 import React, { useEffect, useMemo, useState, useRef } from "react";
 
 import type { IconType } from "react-icons";
-import { BsStars } from "react-icons/bs";
+import { BsStars, BsBoxSeam } from "react-icons/bs";
 import {
   GiBrokenWall,
   GiDrinkMe,
@@ -316,7 +316,7 @@ export const FlagCreatePage = ({
         {
           label: "Presets",
           id: "presets",
-          Icon: FaBook,
+          Icon: BsBoxSeam,
           content: <Presets presets={presets} />,
         },
         {
