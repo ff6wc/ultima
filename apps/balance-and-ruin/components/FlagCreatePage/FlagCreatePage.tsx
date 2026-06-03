@@ -747,10 +747,10 @@ export const FlagCreatePage = ({
             let targetB = 254;
 
             if (yRel >= 0.58) {
-              // Apply a slightly darker shade of blue (#93c5fd) to the whole horizontal banner instead of the fade
-              data[i] = 147;
-              data[i + 1] = 197;
-              data[i + 2] = 253;
+              // Apply a darker shade of blue (#60a5fa) to the whole horizontal banner instead of the fade
+              data[i] = 96;
+              data[i + 1] = 165;
+              data[i + 2] = 250;
             } else {
               // Brighten the top logo icon
               const divisor = 135;
