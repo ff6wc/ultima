@@ -19,17 +19,19 @@ const AnimatedBox = ({ size = 22, className, ...props }: AnimatedBoxProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>;
     const handleAnimate = () => {
       setIsOpen(true);
-      const timer = setTimeout(() => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
         setIsOpen(false);
       }, 800);
-      return () => clearTimeout(timer);
     };
 
     window.addEventListener("animate-preset-box", handleAnimate);
     return () => {
       window.removeEventListener("animate-preset-box", handleAnimate);
+      clearTimeout(timer);
     };
   }, []);
 
@@ -318,7 +320,7 @@ const TAB_TITLES_MAP: Record<string, string[]> = {
   ],
 };
 
-const TargetWithArrow = ({ size = 22, ...props }: { size?: number | string; [key: string]: any }) => (
+const TargetWithArrow = ({ size = 22, ...props }: React.SVGProps<SVGSVGElement> & { size?: number | string }) => (
   <svg
     viewBox="0 0 100 100"
     width={size}
@@ -769,10 +771,16 @@ export const FlagCreatePage = ({
 
 
   useEffect(() => {
+    if (theme === "dark") {
+      setProcessedLogo(null);
+      return;
+    }
+    let active = true;
     const img = new window.Image();
     img.src = "/logo-transparent.png";
     img.onload = () => {
       try {
+        if (!active) return;
         if (img.naturalWidth === 0 || img.naturalHeight === 0) return;
         const canvas = document.createElement("canvas");
         canvas.width = img.naturalWidth;
@@ -789,7 +797,7 @@ export const FlagCreatePage = ({
           const b = data[i + 2];
           const a = data[i + 3];
 
-          if (a > 0 && theme === "light") {
+          if (a > 0) {
             // Detect gold/yellow pixels (center icon and "final fantasy vi randomizer" text)
             const isGold = (r > b + 30) && (g > b + 15);
             if (isGold) {
@@ -827,10 +835,15 @@ export const FlagCreatePage = ({
           }
         }
         ctx.putImageData(imageData, 0, 0);
-        setProcessedLogo(canvas.toDataURL("image/png"));
+        if (active) {
+          setProcessedLogo(canvas.toDataURL("image/png"));
+        }
       } catch (err) {
         console.error("Failed to process logo:", err);
       }
+    };
+    return () => {
+      active = false;
     };
   }, [theme]);
 
