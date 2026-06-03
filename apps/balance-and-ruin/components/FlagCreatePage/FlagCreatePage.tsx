@@ -9,7 +9,60 @@ const AUTH_ENABLED = process.env.NEXT_PUBLIC_AUTH_ENABLED !== "false";
 import React, { useEffect, useMemo, useState, useRef } from "react";
 
 import type { IconType } from "react-icons";
-import { BsStars, BsBoxSeam } from "react-icons/bs";
+import { BsStars } from "react-icons/bs";
+
+interface AnimatedBoxProps extends React.SVGProps<SVGSVGElement> {
+  size?: number | string;
+}
+
+const AnimatedBox = ({ size = 22, className, ...props }: AnimatedBoxProps) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    const handleAnimate = () => {
+      setIsOpen(true);
+      const timer = setTimeout(() => {
+        setIsOpen(false);
+      }, 800);
+      return () => clearTimeout(timer);
+    };
+
+    window.addEventListener("animate-preset-box", handleAnimate);
+    return () => {
+      window.removeEventListener("animate-preset-box", handleAnimate);
+    };
+  }, []);
+
+  // Single lid: morph path matching the reference image's back-left hinge + tuck flap style
+  const lidD = isOpen
+    ? "M 1.8 3.5 L 7.5 1.2 L 9.5 -2.5 L 9.0 -3.2 L 3.3 -0.9 L 3.8 -0.2 Z"
+    : "M 1.8 3.5 L 7.5 1.2 L 13.2 3.5 L 13.2 3.5 L 7.5 5.8 L 7.5 5.8 Z";
+
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={size}
+      height={size}
+      viewBox="0 0 16 16"
+      fill="currentColor"
+      className={className}
+      style={{ display: "inline-block", verticalAlign: "middle" }}
+      {...props}
+    >
+      {/* Box bottom panels and outlines */}
+      <path d="M 7.5 14.762 V 6.838 L 1 4.239 v 7.923 Z" />
+      <path d="M 8.5 14.762 V 6.838 L 15 4.239 v 7.923 Z" />
+      
+      {/* Animating hingeing lid */}
+      <path
+        d={lidD}
+        style={{
+          transition: "d 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+        }}
+      />
+    </svg>
+  );
+};
 import {
   GiBrokenWall,
   GiDrinkMe,
@@ -316,7 +369,7 @@ export const FlagCreatePage = ({
         {
           label: "Presets",
           id: "presets",
-          Icon: BsBoxSeam,
+          Icon: AnimatedBox as any,
           content: <Presets presets={presets} />,
         },
         {
