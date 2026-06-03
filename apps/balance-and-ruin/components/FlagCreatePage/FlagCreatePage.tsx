@@ -719,52 +719,57 @@ export const FlagCreatePage = ({
     const img = new window.Image();
     img.src = "/logo-transparent.png";
     img.onload = () => {
-      const canvas = document.createElement("canvas");
-      canvas.width = img.naturalWidth;
-      canvas.height = img.naturalHeight;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return;
-      ctx.drawImage(img, 0, 0);
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const data = imageData.data;
+      try {
+        if (img.naturalWidth === 0 || img.naturalHeight === 0) return;
+        const canvas = document.createElement("canvas");
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
+        ctx.drawImage(img, 0, 0);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
 
-      for (let i = 0; i < data.length; i += 4) {
-        const r = data[i];
-        const g = data[i + 1];
-        const b = data[i + 2];
-        const a = data[i + 3];
+        for (let i = 0; i < data.length; i += 4) {
+          const r = data[i];
+          const g = data[i + 1];
+          const b = data[i + 2];
+          const a = data[i + 3];
 
-        if (a > 0 && theme === "light") {
-          // Detect gold/yellow pixels (center icon and "final fantasy vi randomizer" text)
-          const isGold = (r > b + 30) && (g > b + 15);
-          if (isGold) {
-            const pixelIndex = i / 4;
-            const y = Math.floor(pixelIndex / canvas.width);
-            const yRel = y / canvas.height;
+          if (a > 0 && theme === "light") {
+            // Detect gold/yellow pixels (center icon and "final fantasy vi randomizer" text)
+            const isGold = (r > b + 30) && (g > b + 15);
+            if (isGold) {
+              const pixelIndex = i / 4;
+              const y = Math.floor(pixelIndex / canvas.width);
+              const yRel = y / canvas.height;
 
-            let targetR = 191;
-            let targetG = 219;
-            let targetB = 254;
+              let targetR = 191;
+              let targetG = 219;
+              let targetB = 254;
 
-            if (yRel >= 0.65) {
-              // Apply a darker shade of blue (#60a5fa) to the whole horizontal banner instead of the fade
-              data[i] = 96;
-              data[i + 1] = 165;
-              data[i + 2] = 250;
-            } else {
-              // Brighten the top logo icon
-              const divisor = 135;
-              const brightness = (r + g + b) / 3;
-              const factor = brightness / divisor;
-              data[i] = Math.min(255, targetR * factor);
-              data[i + 1] = Math.min(255, targetG * factor);
-              data[i + 2] = Math.min(255, targetB * factor);
+              if (yRel >= 0.65) {
+                // Apply a darker shade of blue (#60a5fa) to the whole horizontal banner instead of the fade
+                data[i] = 96;
+                data[i + 1] = 165;
+                data[i + 2] = 250;
+              } else {
+                // Brighten the top logo icon
+                const divisor = 135;
+                const brightness = (r + g + b) / 3;
+                const factor = brightness / divisor;
+                data[i] = Math.min(255, targetR * factor);
+                data[i + 1] = Math.min(255, targetG * factor);
+                data[i + 2] = Math.min(255, targetB * factor);
+              }
             }
           }
         }
+        ctx.putImageData(imageData, 0, 0);
+        setProcessedLogo(canvas.toDataURL("image/png"));
+      } catch (err) {
+        console.error("Failed to process logo:", err);
       }
-      ctx.putImageData(imageData, 0, 0);
-      setProcessedLogo(canvas.toDataURL("image/png"));
     };
   }, [theme]);
 
