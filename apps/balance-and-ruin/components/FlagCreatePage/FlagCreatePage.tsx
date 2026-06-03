@@ -717,7 +717,7 @@ export const FlagCreatePage = ({
 
   useEffect(() => {
     const img = new window.Image();
-    img.src = "/logo.png";
+    img.src = "/logo-transparent.png";
     img.onload = () => {
       const canvas = document.createElement("canvas");
       canvas.width = img.naturalWidth;
@@ -727,22 +727,35 @@ export const FlagCreatePage = ({
       ctx.drawImage(img, 0, 0);
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
       const data = imageData.data;
-      for (let i = 0; i < data.length; i += 4) {
-        const r = data[i],
-          g = data[i + 1],
-          b = data[i + 2];
-        // A pixel is PART of the background grid if AND ONLY IF Blue is strictly dominant over Red AND Green.
-        // This trivially preserves White (R=G=B), Gray (R=G=B), and Gold (R>B, G>B).
-        const isBlueDominant = b > r && b > g;
 
-        if (isBlueDominant) {
-          data[i + 3] = 0; // Wipe background transparency
+      // Light blue color we're using on the main banner / landing page: #60a5fa
+      const targetR = 96;
+      const targetG = 165;
+      const targetB = 250;
+
+      for (let i = 0; i < data.length; i += 4) {
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+        const a = data[i + 3];
+
+        if (a > 0 && theme === "light") {
+          // Detect gold/yellow pixels (center icon and "final fantasy vi randomizer" text)
+          const isGold = (r > b + 30) && (g > b + 15);
+          if (isGold) {
+            // Calculate brightness factor relative to average gold brightness to preserve highlights/shading
+            const brightness = (r + g + b) / 3;
+            const factor = brightness / 180;
+            data[i] = Math.min(255, targetR * factor);
+            data[i + 1] = Math.min(255, targetG * factor);
+            data[i + 2] = Math.min(255, targetB * factor);
+          }
         }
       }
       ctx.putImageData(imageData, 0, 0);
       setProcessedLogo(canvas.toDataURL("image/png"));
     };
-  }, []);
+  }, [theme]);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("app-theme") as "light" | "dark";
@@ -846,7 +859,7 @@ export const FlagCreatePage = ({
                   }}
                 >
                   <img
-                    src="/logo-transparent.png"
+                    src={processedLogo || "/logo-transparent.png"}
                     alt="Final Fantasy VI Randomizer"
                     style={{
                       objectFit: "contain",
