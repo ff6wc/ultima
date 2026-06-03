@@ -293,6 +293,8 @@ export const FlagCreatePage = ({
   version,
 }: PageProps) => {
   const router = useRouter();
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [processedLogo, setProcessedLogo] = useState<string | null>(null);
   const { data: session, status } = useAppSession();
   const { isAdmin } = useAdmin();
   const [profileHovered, setProfileHovered] = useState(false);
@@ -712,8 +714,6 @@ export const FlagCreatePage = ({
     };
   }, [searchQuery, selectedIndex]);
 
-  const [theme, setTheme] = useState<"light" | "dark">("light");
-  const [processedLogo, setProcessedLogo] = useState<string | null>(null);
 
   useEffect(() => {
     const img = new window.Image();
