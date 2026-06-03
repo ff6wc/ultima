@@ -741,14 +741,19 @@ export const FlagCreatePage = ({
             const isGold = (r > b + 30) && (g > b + 15);
             if (isGold) {
               const pixelIndex = i / 4;
+              const x = pixelIndex % canvas.width;
               const y = Math.floor(pixelIndex / canvas.width);
+              const xRel = x / canvas.width;
               const yRel = y / canvas.height;
 
               let targetR = 191;
               let targetG = 219;
               let targetB = 254;
 
-              if (yRel >= 0.70) {
+              // Check if this pixel is part of the banner (lower section, excluding center logo area)
+              const isBanner = yRel >= 0.70 && (xRel < 0.38 || xRel > 0.62);
+
+              if (isBanner) {
                 // Apply a darker shade of blue (#60a5fa) to the whole horizontal banner instead of the fade
                 data[i] = 96;
                 data[i + 1] = 165;
