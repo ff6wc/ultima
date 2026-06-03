@@ -102,6 +102,16 @@ div#__next > div {
   --text-input: #333333;
   --border-input: #C5D0E8;
   --bg-menu: #FFFFFF;
+
+  /* Generate Button (Light Mode: Premium Light Blue) */
+  --bg-generate-start: #93c5fd;
+  --bg-generate-end: #60a5fa;
+  --border-generate: #3b82f6;
+  --bg-generate-hover-start: #a8d1ff;
+  --bg-generate-hover-end: #70b3ff;
+  --bg-generate-active-start: #60a5fa;
+  --bg-generate-active-end: #2563eb;
+  --shadow-generate-hover: rgba(96, 165, 250, 0.35);
 }
 
 .dark {
@@ -118,6 +128,16 @@ div#__next > div {
   --text-input: #e2e8f0;
   --border-input: #38445e;
   --bg-menu: #283146;
+
+  /* Generate Button (Dark Mode: Sophisticated Burnished Gold-Bronze) */
+  --bg-generate-start: #c09963;
+  --bg-generate-end: #8a6233;
+  --border-generate: #734c22;
+  --bg-generate-hover-start: #d3ab75;
+  --bg-generate-hover-end: #9d7342;
+  --bg-generate-active-start: #8a6233;
+  --bg-generate-active-end: #5c3d1d;
+  --shadow-generate-hover: rgba(138, 98, 51, 0.3);
 }
 
 body {

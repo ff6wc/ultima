@@ -133,25 +133,25 @@
   gap: 0.85rem;
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
-  background: linear-gradient(180deg, #c09963 0%, #8a6233 100%); /* Sophisticated burnished gold-bronze */
+  background: linear-gradient(180deg, var(--bg-generate-start) 0%, var(--bg-generate-end) 100%);
   color: white; /* Inverted: White text */
   font-weight: 600;
   cursor: pointer;
-  border: 1px solid #734c22; /* Rich bronze border */
+  border: 1px solid var(--border-generate);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.15); /* Soft, subtle gloss */
   transition: all 0.2s ease;
   font-size: 1.1rem;
 }
 
 .generateBtn:hover {
-  background: linear-gradient(180deg, #d3ab75 0%, #9d7342 100%); /* Subtle glowing highlight */
-  border-color: #8a6233;
+  background: linear-gradient(180deg, var(--bg-generate-hover-start) 0%, var(--bg-generate-hover-end) 100%);
+  border-color: var(--border-generate);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(138, 98, 51, 0.3), 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px var(--shadow-generate-hover), 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .generateBtn[aria-selected="true"] {
-  background: linear-gradient(180deg, #8a6233 0%, #5c3d1d 100%); /* Deep burnished bronze active state */
+  background: linear-gradient(180deg, var(--bg-generate-active-start) 0%, var(--bg-generate-active-end) 100%);
   color: white; /* White text when active */
   font-weight: 700;
   border: 1px solid #ffffff;
