@@ -1125,9 +1125,11 @@ export const FlagCreatePage = ({
                 <button
                   type="button"
                   onClick={handleGenerate}
-                  className="flex items-center gap-1.5 px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 border border-[#734c22] select-none cursor-pointer text-white active:scale-95 shadow-[0_2px_10px_rgba(138,98,51,0.2)]"
+                  className="flex items-center gap-1.5 px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 border select-none cursor-pointer text-white active:scale-95"
                   style={{
-                    background: "linear-gradient(180deg, #c09963 0%, #8a6233 100%)",
+                    background: "linear-gradient(180deg, var(--bg-generate-start) 0%, var(--bg-generate-end) 100%)",
+                    borderColor: "var(--border-generate)",
+                    boxShadow: "0 2px 10px var(--shadow-generate-hover)",
                   }}
                 >
                   <FaBolt size={12} className="text-yellow-200" />
