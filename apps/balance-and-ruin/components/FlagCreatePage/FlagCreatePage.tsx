@@ -9,6 +9,7 @@ const AUTH_ENABLED = process.env.NEXT_PUBLIC_AUTH_ENABLED !== "false";
 import React, { useEffect, useMemo, useState, useRef } from "react";
 
 import type { IconType } from "react-icons";
+import { BsStars } from "react-icons/bs";
 import {
   GiBrokenWall,
   GiDrinkMe,
@@ -19,6 +20,7 @@ import {
   GiRetroController,
   GiWizardStaff,
   GiSprout,
+  GiCrossedSwords,
 } from "react-icons/gi";
 import {
   HiCog,
@@ -263,6 +265,27 @@ const TAB_TITLES_MAP: Record<string, string[]> = {
   ],
 };
 
+const TargetWithArrow = ({ size = 22, ...props }: { size?: number | string; [key: string]: any }) => (
+  <svg
+    viewBox="0 0 100 100"
+    width={size}
+    height={size}
+    fill="currentColor"
+    {...props}
+  >
+    {/* Outer Ring */}
+    <circle cx="50" cy="50" r="38" stroke="currentColor" strokeWidth="6" fill="none" />
+    {/* Middle Ring */}
+    <circle cx="50" cy="50" r="24" stroke="currentColor" strokeWidth="6" fill="none" />
+    {/* Center Bullseye */}
+    <circle cx="50" cy="50" r="10" fill="currentColor" />
+    {/* Arrow Shaft (starts in center, extends to top right) */}
+    <line x1="50" y1="50" x2="80" y2="20" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" />
+    {/* Arrow Fletching/Feathers */}
+    <path d="M 74 26 L 88 12 L 84 8 L 70 22 Z M 78 22 L 92 8 L 88 4 L 74 18 Z" fill="currentColor" />
+  </svg>
+);
+
 export const FlagCreatePage = ({
   objectives,
   presets,
@@ -297,7 +320,7 @@ export const FlagCreatePage = ({
         {
           label: "Objectives",
           id: "objectives",
-          Icon: HiOutlineViewList,
+          Icon: TargetWithArrow,
           content: <Objectives />,
         },
         {
@@ -315,13 +338,13 @@ export const FlagCreatePage = ({
         {
           label: "Battle",
           id: "battle",
-          Icon: GiGladius,
+          Icon: GiCrossedSwords,
           content: <Battle />,
         },
         {
           label: "Magic",
           id: "magic",
-          Icon: GiElectric,
+          Icon: BsStars,
           content: <Magic />,
         },
         {
