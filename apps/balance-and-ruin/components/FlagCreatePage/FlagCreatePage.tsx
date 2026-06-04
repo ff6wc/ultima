@@ -349,8 +349,8 @@ export const FlagCreatePage = ({
 }: PageProps) => {
   const router = useRouter();
   const [theme, setTheme] = useState<"light" | "dark">("light");
-  const [processedLogo, setProcessedLogo] = useState<string | null>(null);
   const { data: session, status } = useAppSession();
+  const logoSrc = theme === "dark" ? "/logo-transparent.png" : "/logo-light.png";
   const { isAdmin } = useAdmin();
   const [profileHovered, setProfileHovered] = useState(false);
   const [devAdminActive, setDevAdminActive] = useState(false);
@@ -366,7 +366,7 @@ export const FlagCreatePage = ({
           label: "Home",
           id: "home",
           Icon: HiOutlineHome,
-          content: <Home logoSrc={processedLogo || undefined} />,
+          content: <Home logoSrc={logoSrc} />,
         },
         {
           label: "Presets",
@@ -476,7 +476,7 @@ export const FlagCreatePage = ({
           content: <SotwTab />,
         },
       ].filter((z) => !!z) as TabItem[],
-    [presets, isAdmin],
+    [presets, isAdmin, logoSrc],
   );
 
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -770,82 +770,7 @@ export const FlagCreatePage = ({
   }, [searchQuery, selectedIndex]);
 
 
-  useEffect(() => {
-    if (theme === "dark") {
-      setProcessedLogo(null);
-      return;
-    }
-    let active = true;
-    const img = new window.Image();
-    img.src = "/logo-transparent.png";
-    img.onload = () => {
-      try {
-        if (!active) return;
-        if (img.naturalWidth === 0 || img.naturalHeight === 0) return;
-        const canvas = document.createElement("canvas");
-        canvas.width = img.naturalWidth;
-        canvas.height = img.naturalHeight;
-        const ctx = canvas.getContext("2d");
-        if (!ctx) return;
-        ctx.drawImage(img, 0, 0);
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const data = imageData.data;
 
-        for (let i = 0; i < data.length; i += 4) {
-          const r = data[i];
-          const g = data[i + 1];
-          const b = data[i + 2];
-          const a = data[i + 3];
-
-          if (a > 0) {
-            // Detect gold/yellow pixels (center icon and "final fantasy vi randomizer" text)
-            const isGold = (r > b + 30) && (g > b + 15);
-            if (isGold) {
-              const pixelIndex = i / 4;
-              const x = pixelIndex % canvas.width;
-              const y = Math.floor(pixelIndex / canvas.width);
-              const xRel = x / canvas.width;
-              const yRel = y / canvas.height;
-
-              let targetR = 191;
-              let targetG = 219;
-              let targetB = 254;
-
-              // Check if this pixel is part of the banner
-              // Outside the center, banner starts at yRel >= 0.68.
-              // In the center (where the toes are), banner starts at yRel >= 0.76.
-              const bannerThreshold = (xRel >= 0.44 && xRel <= 0.56) ? 0.76 : 0.68;
-              const isBanner = yRel >= bannerThreshold;
-
-              if (isBanner) {
-                // Match the horizontal banner to the current generate button color (#60a5fa)
-                data[i] = 96;
-                data[i + 1] = 165;
-                data[i + 2] = 250;
-              } else {
-                // Brighten the top logo icon
-                const divisor = 135;
-                const brightness = (r + g + b) / 3;
-                const factor = brightness / divisor;
-                data[i] = Math.min(255, targetR * factor);
-                data[i + 1] = Math.min(255, targetG * factor);
-                data[i + 2] = Math.min(255, targetB * factor);
-              }
-            }
-          }
-        }
-        ctx.putImageData(imageData, 0, 0);
-        if (active) {
-          setProcessedLogo(canvas.toDataURL("image/png"));
-        }
-      } catch (err) {
-        console.error("Failed to process logo:", err);
-      }
-    };
-    return () => {
-      active = false;
-    };
-  }, [theme]);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("app-theme") as "light" | "dark";
@@ -949,7 +874,7 @@ export const FlagCreatePage = ({
                   }}
                 >
                   <img
-                    src={processedLogo || "/logo-transparent.png"}
+                    src={logoSrc}
                     alt="Final Fantasy VI Randomizer"
                     style={{
                       objectFit: "contain",
