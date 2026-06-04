@@ -657,6 +657,9 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
       dispatch(setRawFlags(rolledFlags));
       dispatch(setRawObjectives(rolledFlags));
       dispatch(setRawStartingItems(rolledFlags));
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("animate-preset-box"));
+      }
       
       const typeLabel = type === "random" ? "Random" : type === "chaos" ? "Chaos" : "True Chaos";
       setToast({
@@ -978,6 +981,9 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
     dispatch(setRawFlags(preset.flags));
     dispatch(setRawObjectives(preset.flags));
     dispatch(setRawStartingItems(preset.flags));
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("animate-preset-box"));
+    }
   };
 
   const handleClear = () => {

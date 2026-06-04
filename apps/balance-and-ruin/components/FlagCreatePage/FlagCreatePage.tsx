@@ -9,6 +9,62 @@ const AUTH_ENABLED = process.env.NEXT_PUBLIC_AUTH_ENABLED !== "false";
 import React, { useEffect, useMemo, useState, useRef } from "react";
 
 import type { IconType } from "react-icons";
+import { BsStars } from "react-icons/bs";
+
+interface AnimatedBoxProps extends React.SVGProps<SVGSVGElement> {
+  size?: number | string;
+}
+
+const AnimatedBox = ({ size = 22, className, ...props }: AnimatedBoxProps) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>;
+    const handleAnimate = () => {
+      setIsOpen(true);
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        setIsOpen(false);
+      }, 800);
+    };
+
+    window.addEventListener("animate-preset-box", handleAnimate);
+    return () => {
+      window.removeEventListener("animate-preset-box", handleAnimate);
+      clearTimeout(timer);
+    };
+  }, []);
+
+  // Single lid: morph path matching the reference image's back-left hinge + tuck flap style
+  const lidD = isOpen
+    ? "M 1.8 3.5 L 7.5 1.2 L 9.5 -2.5 L 9.0 -3.2 L 3.3 -0.9 L 3.8 -0.2 Z"
+    : "M 1.8 3.5 L 7.5 1.2 L 13.2 3.5 L 13.2 3.5 L 7.5 5.8 L 7.5 5.8 Z";
+
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={size}
+      height={size}
+      viewBox="0 0 16 16"
+      fill="currentColor"
+      className={className}
+      style={{ display: "inline-block", verticalAlign: "middle" }}
+      {...props}
+    >
+      {/* Box bottom panels and outlines */}
+      <path d="M 7.5 14.762 V 6.838 L 1 4.239 v 7.923 Z" />
+      <path d="M 8.5 14.762 V 6.838 L 15 4.239 v 7.923 Z" />
+      
+      {/* Animating hingeing lid */}
+      <path
+        d={lidD}
+        style={{
+          transition: "d 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+        }}
+      />
+    </svg>
+  );
+};
 import {
   GiBrokenWall,
   GiDrinkMe,
@@ -19,6 +75,7 @@ import {
   GiRetroController,
   GiWizardStaff,
   GiSprout,
+  GiCrossedSwords,
 } from "react-icons/gi";
 import {
   HiCog,
@@ -263,6 +320,27 @@ const TAB_TITLES_MAP: Record<string, string[]> = {
   ],
 };
 
+const TargetWithArrow = ({ size = 22, ...props }: React.SVGProps<SVGSVGElement> & { size?: number | string }) => (
+  <svg
+    viewBox="0 0 100 100"
+    width={size}
+    height={size}
+    fill="currentColor"
+    {...props}
+  >
+    {/* Outer Ring */}
+    <circle cx="50" cy="50" r="38" stroke="currentColor" strokeWidth="6" fill="none" />
+    {/* Middle Ring */}
+    <circle cx="50" cy="50" r="24" stroke="currentColor" strokeWidth="6" fill="none" />
+    {/* Center Bullseye */}
+    <circle cx="50" cy="50" r="10" fill="currentColor" />
+    {/* Arrow Shaft (starts in center, extends to top right) */}
+    <line x1="50" y1="50" x2="80" y2="20" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" />
+    {/* Arrow Fletching/Feathers */}
+    <path d="M 74 26 L 88 12 L 84 8 L 70 22 Z M 78 22 L 92 8 L 88 4 L 74 18 Z" fill="currentColor" />
+  </svg>
+);
+
 export const FlagCreatePage = ({
   objectives,
   presets,
@@ -270,7 +348,9 @@ export const FlagCreatePage = ({
   version,
 }: PageProps) => {
   const router = useRouter();
+  const [theme, setTheme] = useState<"light" | "dark">("light");
   const { data: session, status } = useAppSession();
+  const logoSrc = theme === "dark" ? "/logo-transparent.png" : "/logo-light.png";
   const { isAdmin } = useAdmin();
   const [profileHovered, setProfileHovered] = useState(false);
   const [devAdminActive, setDevAdminActive] = useState(false);
@@ -286,18 +366,18 @@ export const FlagCreatePage = ({
           label: "Home",
           id: "home",
           Icon: HiOutlineHome,
-          content: <Home />,
+          content: <Home logoSrc={logoSrc} />,
         },
         {
           label: "Presets",
           id: "presets",
-          Icon: FaBook,
+          Icon: AnimatedBox as any,
           content: <Presets presets={presets} />,
         },
         {
           label: "Objectives",
           id: "objectives",
-          Icon: HiOutlineViewList,
+          Icon: TargetWithArrow,
           content: <Objectives />,
         },
         {
@@ -315,13 +395,13 @@ export const FlagCreatePage = ({
         {
           label: "Battle",
           id: "battle",
-          Icon: GiGladius,
+          Icon: GiCrossedSwords,
           content: <Battle />,
         },
         {
           label: "Magic",
           id: "magic",
-          Icon: GiElectric,
+          Icon: BsStars,
           content: <Magic />,
         },
         {
@@ -396,7 +476,7 @@ export const FlagCreatePage = ({
           content: <SotwTab />,
         },
       ].filter((z) => !!z) as TabItem[],
-    [presets, isAdmin],
+    [presets, isAdmin, logoSrc],
   );
 
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -689,37 +769,8 @@ export const FlagCreatePage = ({
     };
   }, [searchQuery, selectedIndex]);
 
-  const [theme, setTheme] = useState<"light" | "dark">("light");
-  const [processedLogo, setProcessedLogo] = useState<string | null>(null);
 
-  useEffect(() => {
-    const img = new window.Image();
-    img.src = "/logo.png";
-    img.onload = () => {
-      const canvas = document.createElement("canvas");
-      canvas.width = img.naturalWidth;
-      canvas.height = img.naturalHeight;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return;
-      ctx.drawImage(img, 0, 0);
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const data = imageData.data;
-      for (let i = 0; i < data.length; i += 4) {
-        const r = data[i],
-          g = data[i + 1],
-          b = data[i + 2];
-        // A pixel is PART of the background grid if AND ONLY IF Blue is strictly dominant over Red AND Green.
-        // This trivially preserves White (R=G=B), Gray (R=G=B), and Gold (R>B, G>B).
-        const isBlueDominant = b > r && b > g;
 
-        if (isBlueDominant) {
-          data[i + 3] = 0; // Wipe background transparency
-        }
-      }
-      ctx.putImageData(imageData, 0, 0);
-      setProcessedLogo(canvas.toDataURL("image/png"));
-    };
-  }, []);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("app-theme") as "light" | "dark";
@@ -823,7 +874,7 @@ export const FlagCreatePage = ({
                   }}
                 >
                   <img
-                    src="/logo-transparent.png"
+                    src={logoSrc}
                     alt="Final Fantasy VI Randomizer"
                     style={{
                       objectFit: "contain",
@@ -1065,9 +1116,11 @@ export const FlagCreatePage = ({
                 <button
                   type="button"
                   onClick={handleGenerate}
-                  className="flex items-center gap-1.5 px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 border border-[#734c22] select-none cursor-pointer text-white active:scale-95 shadow-[0_2px_10px_rgba(138,98,51,0.2)]"
+                  className="flex items-center gap-1.5 px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 border select-none cursor-pointer text-white active:scale-95"
                   style={{
-                    background: "linear-gradient(180deg, #c09963 0%, #8a6233 100%)",
+                    background: "linear-gradient(180deg, var(--bg-generate-start) 0%, var(--bg-generate-end) 100%)",
+                    borderColor: "var(--border-generate)",
+                    boxShadow: "0 2px 10px var(--shadow-generate-hover)",
                   }}
                 >
                   <FaBolt size={12} className="text-yellow-200" />
