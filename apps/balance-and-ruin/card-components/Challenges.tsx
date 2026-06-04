@@ -7,11 +7,7 @@ export const Challenges = () => {
   return (
     <Card title={"Challenges"}>
       <CardColumn>
-        <FlagSwitch
-          flag="-pd"
-          helperText="No Life spells, Fenix Downs unavailable (except from starting items). Buckets/inns/tents/events do not revive characters. Phoenix casts Life 3 instead of Life"
-          label="Permadeath"
-        />
+        <FlagSwitch flag="-pd" label="Permadeath" />
         <FlagSwitch flag="-bnds" label="Normalize & Distort Boss Stats" />
         <FlagSwitch
           flag="-srp3"
