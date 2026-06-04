@@ -5,7 +5,7 @@ import { PageContainer } from "~/components/PageContainer/PageContainer";
 const WIKI_URL = "https://wiki.ff6worldscollide.com/wiki/Main_Page";
 const DISCORD_URL = "https://discord.gg/5MPeng5";
 
-export const Home = ({ logoSrc }: { logoSrc?: string }) => {
+export const Home = () => {
   return (
     <PageContainer columns={1} className="max-w-4xl mx-auto py-4">
       {/* Supermassive Hero Banner */}
@@ -21,9 +21,9 @@ export const Home = ({ logoSrc }: { logoSrc?: string }) => {
         {/* Supermassive centered logo */}
         <div className="relative z-10 flex flex-col items-center gap-4 select-none">
           <img
-            src={logoSrc || "/logo-transparent.png"}
+            src="/logo-transparent.png"
             alt="FF6WC Logo"
-            className={`h-36 md:h-48 w-auto transition-all filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.5)] ${logoSrc ? "" : "invert dark:invert-0"}`}
+            className="h-36 md:h-48 w-auto invert dark:invert-0 transition-all filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.5)]"
           />
         </div>
       </div>

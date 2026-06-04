@@ -350,7 +350,7 @@ export const FlagCreatePage = ({
   const router = useRouter();
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const { data: session, status } = useAppSession();
-  const logoSrc = theme === "dark" ? "/logo-transparent.png" : "/logo-light.png";
+  const logoSrc = theme === "dark" ? "/logo-transparent.png" : "/logo-light.png?v=2";
   const { isAdmin } = useAdmin();
   const [profileHovered, setProfileHovered] = useState(false);
   const [devAdminActive, setDevAdminActive] = useState(false);
@@ -366,7 +366,7 @@ export const FlagCreatePage = ({
           label: "Home",
           id: "home",
           Icon: HiOutlineHome,
-          content: <Home logoSrc={logoSrc} />,
+          content: <Home />,
         },
         {
           label: "Presets",
