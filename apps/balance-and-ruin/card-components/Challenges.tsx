@@ -14,7 +14,16 @@ export const Challenges = () => {
           helperText="Allow Phunbaba 3 to be shuffled and randomized (Otherwise he will only appear in Mobliz WOR)"
           label="Add Phunbaba 3 to Boss Pool"
         />
-        <FlagSwitch flag="-nosaves" label="Ironmog Mode" />
+        <FlagSwitch
+          flag="-nosaves"
+          helperText="You cannot save (save points still work for Tents/Sleeping Bags)"
+          label="Ironmog Mode"
+        />
+        <FlagSwitch
+          flag="-hf"
+          helperText="No log, no flags menu"
+          label="Hide Flags"
+        />
       </CardColumn>
     </Card>
   );
