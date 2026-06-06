@@ -23,7 +23,7 @@ export const Home = () => {
           <img
             src="/logo-transparent.png?v=2"
             alt="FF6WC Logo"
-            className="h-36 md:h-48 w-auto transition-all filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.5)]"
+            className="h-36 md:h-48 w-auto invert dark:invert-0 transition-all filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.5)]"
           />
         </div>
       </div>
