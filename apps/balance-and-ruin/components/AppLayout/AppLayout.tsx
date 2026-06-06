@@ -17,7 +17,7 @@ export const AppLayout = ({ children, title }: AppLayoutProps) => {
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const { data: session, status } = useAppSession();
   const [profileHovered, setProfileHovered] = useState(false);
-  const logoSrc = theme === "dark" ? "/logo-transparent.png" : "/logo-light.png?v=2";
+  const logoSrc = theme === "dark" ? "/logo-transparent.png?v=2" : "/logo-light.png?v=2";
 
   useEffect(() => {
     const saved = localStorage.getItem("app-theme") as "light" | "dark";
