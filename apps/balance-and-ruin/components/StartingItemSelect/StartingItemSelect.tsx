@@ -22,7 +22,7 @@ export const StartingItemSelect = ({
 }: StartingItemSelectProps) => {
   const { id, name } = item;
 
-  const meta = orderBy(useSelector(selectItemById), i => i.name);
+  const meta = orderBy(useSelector(selectItemById), (i) => i.name);
 
   const onRangeValueChange = (value: number[]) => {
     const idx = items.items.indexOf(item);
@@ -49,7 +49,7 @@ export const StartingItemSelect = ({
       console.error(
         "item not found within list of starting items",
         items,
-        item
+        item,
       );
       return;
     }
@@ -67,18 +67,18 @@ export const StartingItemSelect = ({
   };
 
   const selectOptions = useMemo(() => {
-    return Object.values(meta)
-      .filter(v => !v.hideable || !curateItems)
-      .map<SelectOption>((value) => ({
-        label: value.name,
-        value: value.id.toString(),
-      })) ?? [];
+    return (
+      Object.values(meta)
+        .filter((v) => !v.hideable || !curateItems)
+        .map<SelectOption>((value) => ({
+          label: value.name,
+          value: value.id.toString(),
+        })) ?? []
+    );
   }, [meta, curateItems]);
 
   const getSelectedValueOption = () =>
-    selectOptions.find(
-      ({ value }) => value === item.id?.toString()
-    ) || null;
+    selectOptions.find(({ value }) => value === item.id?.toString()) || null;
 
   const onMinInputChange = (val: number) => {
     const parsed = Math.max(1, Math.min(99, val || 1));
@@ -106,7 +106,9 @@ export const StartingItemSelect = ({
         </div>
         {item.id !== -1 && (
           <div className="flex items-center justify-between sm:justify-start gap-2 shrink-0 w-full sm:w-auto">
-            <span className="text-xs text-[var(--text-sub)] sm:hidden font-medium">Quantity:</span>
+            <span className="text-xs text-[var(--text-sub)] sm:hidden font-medium">
+              Quantity:
+            </span>
             <div className="flex items-center gap-1.5">
               <Input
                 type="number"
@@ -114,7 +116,9 @@ export const StartingItemSelect = ({
                 min={1}
                 max={99}
                 value={item.min}
-                onChange={(e) => onMinInputChange(Number.parseInt(e.target.value))}
+                onChange={(e) =>
+                  onMinInputChange(Number.parseInt(e.target.value))
+                }
               />
               <span className="text-xs text-[var(--text-sub)]">to</span>
               <Input
@@ -123,7 +127,9 @@ export const StartingItemSelect = ({
                 min={1}
                 max={99}
                 value={item.max}
-                onChange={(e) => onMaxInputChange(Number.parseInt(e.target.value))}
+                onChange={(e) =>
+                  onMaxInputChange(Number.parseInt(e.target.value))
+                }
               />
             </div>
           </div>

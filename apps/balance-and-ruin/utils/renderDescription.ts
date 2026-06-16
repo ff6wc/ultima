@@ -14,8 +14,7 @@ export const renderDescription = (
   }
   if (Array.isArray(value)) {
     const arr = value as any[];
-    const isIdenticalRange =
-      arr.length > 0 && arr.every((v) => v === arr[0]);
+    const isIdenticalRange = arr.length > 0 && arr.every((v) => v === arr[0]);
     const displayValue = isIdenticalRange ? arr[0] : arr.join("-");
     return Mustache.render(template, displayValue);
   }

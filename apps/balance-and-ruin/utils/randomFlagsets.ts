@@ -40,21 +40,36 @@ export function generateRandom(): string {
 
   let kt = "";
   if (stno) {
-    kt = " -oa 2.2.2.2." + [ktcr1, ktcr2, "4", kter1, kter2, "6", ktdr1, ktdr2].join(".");
+    kt =
+      " -oa 2.2.2.2." +
+      [ktcr1, ktcr2, "4", kter1, kter2, "6", ktdr1, ktdr2].join(".");
   } else {
-    kt = " -oa 2.2.2.2." + [ktcr1, ktcr2, "4", kter1, kter2, "6", ktdr1, ktdr2].join(".");
-    kt += " -ob 3.2.2.2." + [stcr1, stcr2, "4", ster1, ster2, "6", stdr1, stdr2].join(".");
+    kt =
+      " -oa 2.2.2.2." +
+      [ktcr1, ktcr2, "4", kter1, kter2, "6", ktdr1, ktdr2].join(".");
+    kt +=
+      " -ob 3.2.2.2." +
+      [stcr1, stcr2, "4", ster1, ster2, "6", stdr1, stdr2].join(".");
   }
 
-  const objectives = weightedChoice([" -oc 0.1.1.1.r", " -oc 0.1.1.1.r -od 0.1.1.1.r"], [4, 1]);
+  const objectives = weightedChoice(
+    [" -oc 0.1.1.1.r", " -oc 0.1.1.1.r -od 0.1.1.1.r"],
+    [4, 1],
+  );
   const game = settings + kt + objectives;
 
   // -----PARTY-----
   // STARTING PARTY
   const sc1 = choice([" -sc1 random", " -sc1 randomngu"]);
   const sc2 = choice([" -sc2 random", " -sc2 randomngu"]);
-  const sc3 = weightedChoice([" -sc3 random", " -sc3 randomngu", ""], [1, 1, 5]);
-  const sc4 = weightedChoice([" -sc4 random", " -sc4 randomngu", ""], [0, 0, 1]);
+  const sc3 = weightedChoice(
+    [" -sc3 random", " -sc3 randomngu", ""],
+    [1, 1, 5],
+  );
+  const sc4 = weightedChoice(
+    [" -sc4 random", " -sc4 randomngu", ""],
+    [0, 0, 1],
+  );
   const sparty = sc1 + sc2 + sc3 + sc4;
 
   // SWORDTECHS
@@ -116,8 +131,12 @@ export function generateRandom(): string {
   // COMMANDS
   const scc = weightedChoice([" -scc", ""], [1, 10]);
   const com = weightedChoice(
-    [" -com 99999999999999999999999999", "", " -com 98989898989898989898989898"],
-    [2, 1, 13]
+    [
+      " -com 99999999999999999999999999",
+      "",
+      " -com 98989898989898989898989898",
+    ],
+    [2, 1, 13],
   );
   const recskills = [
     "10",
@@ -155,7 +174,7 @@ export function generateRandom(): string {
   }
   let rec3 = "";
   if (weightedChoice([true, false], [0, 1])) {
-    const available = recskills.filter(s => !usedRecs.has(s));
+    const available = recskills.filter((s) => !usedRecs.has(s));
     if (available.length > 0) {
       const chosen = choice(available);
       rec3 = " -rec3 " + chosen;
@@ -164,7 +183,7 @@ export function generateRandom(): string {
   }
   let rec4 = "";
   if (weightedChoice([true, false], [0, 1])) {
-    const available = recskills.filter(s => !usedRecs.has(s));
+    const available = recskills.filter((s) => !usedRecs.has(s));
     if (available.length > 0) {
       const chosen = choice(available);
       rec4 = " -rec4 " + chosen;
@@ -173,7 +192,8 @@ export function generateRandom(): string {
   }
   const commands = scc + com + rec1 + rec2 + rec3 + rec4;
 
-  const party = sparty + swdtech + blitz + lores + rage + dance + cstats + commands + steal;
+  const party =
+    sparty + swdtech + blitz + lores + rage + dance + cstats + commands + steal;
 
   // -----BATTLE-----
   const xpm = " -xpm " + weightedChoice([2, 3, 4], [1, 10, 1]);
@@ -199,25 +219,56 @@ export function generateRandom(): string {
   const b_ai = dgne + wnz + mmnu + cmd;
 
   // SCALING
-  const scale_opt = ["0.5", "1", "1.5", "2", "2.5", "3", "3.5", "4", "4.5", "5"];
-  const lspf = " -lsced " + weightedChoice(scale_opt, [0, 1, 1, 10, 2, 1, 0, 0, 0, 0]);
-  const lsaf = " -lsa " + weightedChoice(scale_opt, [0, 13, 1, 0, 0, 0, 0, 0, 0, 0]);
-  const lshf = " -lsh " + weightedChoice(scale_opt, [0, 13, 1, 0, 0, 0, 0, 0, 0, 0]);
-  const lstf = " -lst " + weightedChoice(scale_opt, [0, 1, 5, 10, 1, 0, 0, 0, 0, 0]);
-  const hmpf = " -hmced " + weightedChoice(scale_opt, [0, 1, 1, 10, 2, 1, 0, 0, 0, 0]);
-  const hmaf = " -hma " + weightedChoice(scale_opt, [0, 13, 1, 0, 0, 0, 0, 0, 0, 0]);
-  const hmhf = " -hmh " + weightedChoice(scale_opt, [0, 13, 1, 0, 0, 0, 0, 0, 0, 0]);
-  const hmtf = " -hmt " + weightedChoice(scale_opt, [0, 1, 5, 10, 1, 0, 0, 0, 0, 0]);
-  const xgpf = " -xgced " + weightedChoice(scale_opt, [0, 1, 1, 10, 2, 1, 0, 0, 0, 0]);
-  const xgaf = " -xga " + weightedChoice(scale_opt, [0, 13, 1, 0, 0, 0, 0, 0, 0, 0]);
-  const xghf = " -xgh " + weightedChoice(scale_opt, [0, 13, 1, 0, 0, 0, 0, 0, 0, 0]);
-  const xgtf = " -xgt " + weightedChoice(scale_opt, [0, 1, 5, 10, 1, 0, 0, 0, 0, 0]);
-  const asrf = " -asr " + weightedChoice(scale_opt, [0, 0, 1, 10, 2, 1, 0, 0, 0, 0]);
-  const asef = " -ase " + weightedChoice(scale_opt, [0, 0, 1, 10, 2, 1, 0, 0, 0, 0]);
+  const scale_opt = [
+    "0.5",
+    "1",
+    "1.5",
+    "2",
+    "2.5",
+    "3",
+    "3.5",
+    "4",
+    "4.5",
+    "5",
+  ];
+  const lspf =
+    " -lsced " + weightedChoice(scale_opt, [0, 1, 1, 10, 2, 1, 0, 0, 0, 0]);
+  const lsaf =
+    " -lsa " + weightedChoice(scale_opt, [0, 13, 1, 0, 0, 0, 0, 0, 0, 0]);
+  const lshf =
+    " -lsh " + weightedChoice(scale_opt, [0, 13, 1, 0, 0, 0, 0, 0, 0, 0]);
+  const lstf =
+    " -lst " + weightedChoice(scale_opt, [0, 1, 5, 10, 1, 0, 0, 0, 0, 0]);
+  const hmpf =
+    " -hmced " + weightedChoice(scale_opt, [0, 1, 1, 10, 2, 1, 0, 0, 0, 0]);
+  const hmaf =
+    " -hma " + weightedChoice(scale_opt, [0, 13, 1, 0, 0, 0, 0, 0, 0, 0]);
+  const hmhf =
+    " -hmh " + weightedChoice(scale_opt, [0, 13, 1, 0, 0, 0, 0, 0, 0, 0]);
+  const hmtf =
+    " -hmt " + weightedChoice(scale_opt, [0, 1, 5, 10, 1, 0, 0, 0, 0, 0]);
+  const xgpf =
+    " -xgced " + weightedChoice(scale_opt, [0, 1, 1, 10, 2, 1, 0, 0, 0, 0]);
+  const xgaf =
+    " -xga " + weightedChoice(scale_opt, [0, 13, 1, 0, 0, 0, 0, 0, 0, 0]);
+  const xghf =
+    " -xgh " + weightedChoice(scale_opt, [0, 13, 1, 0, 0, 0, 0, 0, 0, 0]);
+  const xgtf =
+    " -xgt " + weightedChoice(scale_opt, [0, 1, 5, 10, 1, 0, 0, 0, 0, 0]);
+  const asrf =
+    " -asr " + weightedChoice(scale_opt, [0, 0, 1, 10, 2, 1, 0, 0, 0, 0]);
+  const asef =
+    " -ase " + weightedChoice(scale_opt, [0, 0, 1, 10, 2, 1, 0, 0, 0, 0]);
 
   const lscale = weightedChoice([lspf, lsaf, lshf, lstf, ""], [15, 2, 2, 1, 0]);
-  const hmscale = weightedChoice([hmpf, hmaf, hmhf, hmtf, ""], [15, 2, 2, 1, 0]);
-  const xgscale = weightedChoice([xgpf, xgaf, xghf, xgtf, ""], [15, 2, 2, 1, 0]);
+  const hmscale = weightedChoice(
+    [hmpf, hmaf, hmhf, hmtf, ""],
+    [15, 2, 2, 1, 0],
+  );
+  const xgscale = weightedChoice(
+    [xgpf, xgaf, xghf, xgtf, ""],
+    [15, 2, 2, 1, 0],
+  );
   const ascale = weightedChoice([asrf, asef, ""], [1, 13, 0]);
   const msl = " -msl " + randint(40, 60);
   const sfb = weightedChoice([" -sfb", ""], [0, 1]);
@@ -225,7 +276,10 @@ export function generateRandom(): string {
   const scaling = lscale + hmscale + xgscale + ascale + msl + sfb + sed;
 
   // ENCOUNTERS
-  const renc = weightedChoice(["", " -res", " -rer " + randint(0, 10)], [1, 10, 10]);
+  const renc = weightedChoice(
+    ["", " -res", " -rer " + randint(0, 10)],
+    [1, 10, 10],
+  );
   const fenc = weightedChoice(["", " -fer " + randint(0, 10)], [1, 13]);
   const escr = " -escr 100";
   const encounters = renc + fenc + escr;
@@ -237,8 +291,14 @@ export function generateRandom(): string {
   const esr1 = randint(1, 3);
   const esr2 = randint(esr1, 5);
   const esr = " -esr " + esr1 + " " + esr2;
-  const ess = weightedChoice(["", esr, " -esrr", " -ess", " -essrr", " -esrt"], [1, 13, 2, 2, 2, 3]);
-  const ebonus = weightedChoice(["", " -ebr " + randint(67, 100), " -ebs"], [1, 10, 2]);
+  const ess = weightedChoice(
+    ["", esr, " -esrr", " -ess", " -essrr", " -esrt"],
+    [1, 13, 2, 2, 2, 3],
+  );
+  const ebonus = weightedChoice(
+    ["", " -ebr " + randint(67, 100), " -ebs"],
+    [1, 10, 2],
+  );
   const emprp1 = randint(75, 100);
   const emprp2 = randint(emprp1, 125);
   const emprv1 = randint(25, 75);
@@ -289,7 +349,10 @@ export function generateRandom(): string {
   const ierbr = " -ierbr " + randint(7, 14);
   const ieror = " -ieror " + randint(33, 100);
   const iersr = " -iersr " + randint(33, 100);
-  const requip = weightedChoice(["", ierr, ierbr, ieror, iersr], [1, 1, 1, 13, 1]);
+  const requip = weightedChoice(
+    ["", ierr, ierbr, ieror, iersr],
+    [1, 1, 1, 13, 1],
+  );
   const csb1 = randint(1, 32);
   const csb2 = randint(csb1, 32);
   const csb = " -csb " + csb1 + " " + csb2;
@@ -317,7 +380,10 @@ export function generateRandom(): string {
   const shops = shopinv + shopprices + ssf + sdm + npi + snbr + snes + snsb;
 
   // CHESTS
-  const ccontents = weightedChoice(["", " -ccrt", " -cce", " -ccsr " + randint(20, 40)], [1, 3, 0, 13]);
+  const ccontents = weightedChoice(
+    ["", " -ccrt", " -cce", " -ccsr " + randint(20, 40)],
+    [1, 3, 0, 13],
+  );
   const cms = weightedChoice(["", " -cms"], [0, 1]);
   const chests = ccontents + cms;
 
@@ -413,10 +479,16 @@ export function generateChaos(): string {
 
   let kt = "";
   if (stno) {
-    kt = " -oa 2.2.2.2." + [ktcr1, ktcr2, "4", kter1, kter2, "6", ktdr1, ktdr2].join(".");
+    kt =
+      " -oa 2.2.2.2." +
+      [ktcr1, ktcr2, "4", kter1, kter2, "6", ktdr1, ktdr2].join(".");
   } else {
-    kt = " -oa 2.2.2.2." + [ktcr1, ktcr2, "4", kter1, kter2, "6", ktdr1, ktdr2].join(".");
-    kt += " -ob 3.2.2.2." + [stcr1, stcr2, "4", ster1, ster2, "6", stdr1, stdr2].join(".");
+    kt =
+      " -oa 2.2.2.2." +
+      [ktcr1, ktcr2, "4", kter1, kter2, "6", ktdr1, ktdr2].join(".");
+    kt +=
+      " -ob 3.2.2.2." +
+      [stcr1, stcr2, "4", ster1, ster2, "6", stdr1, stdr2].join(".");
   }
 
   let objectives = choice([
@@ -432,7 +504,10 @@ export function generateChaos(): string {
   // STARTING PARTY
   const sc1 = choice([" -sc1 random", " -sc1 randomngu"]);
   const sc2 = choice([" -sc2 random", " -sc2 randomngu"]);
-  const sc3 = weightedChoice([" -sc3 random", " -sc3 randomngu", ""], [1, 1, 5]);
+  const sc3 = weightedChoice(
+    [" -sc3 random", " -sc3 randomngu", ""],
+    [1, 1, 5],
+  );
   let sc4 = "";
   if (sc3 === "") {
     sc4 = weightedChoice([" -sc3 random", " -sc3 randomngu", ""], [1, 1, 10]);
@@ -504,8 +579,12 @@ export function generateChaos(): string {
   // COMMANDS
   const scc = weightedChoice([" -scc", ""], [1, 5]);
   const com = weightedChoice(
-    [" -com 99999999999999999999999999", "", " -com 98989898989898989898989898"],
-    [7, 1, 7]
+    [
+      " -com 99999999999999999999999999",
+      "",
+      " -com 98989898989898989898989898",
+    ],
+    [7, 1, 7],
   );
   const recskills = [
     "10",
@@ -543,7 +622,7 @@ export function generateChaos(): string {
   }
   let rec3 = "";
   if (weightedChoice([true, false], [1, 10])) {
-    const available = recskills.filter(s => !usedRecs.has(s));
+    const available = recskills.filter((s) => !usedRecs.has(s));
     if (available.length > 0) {
       const chosen = choice(available);
       rec3 = " -rec3 " + chosen;
@@ -552,7 +631,7 @@ export function generateChaos(): string {
   }
   let rec4 = "";
   if (weightedChoice([true, false], [1, 10])) {
-    const available = recskills.filter(s => !usedRecs.has(s));
+    const available = recskills.filter((s) => !usedRecs.has(s));
     if (available.length > 0) {
       const chosen = choice(available);
       rec4 = " -rec4 " + chosen;
@@ -561,7 +640,7 @@ export function generateChaos(): string {
   }
   let rec5 = "";
   if (weightedChoice([true, false], [1, 10])) {
-    const available = recskills.filter(s => !usedRecs.has(s));
+    const available = recskills.filter((s) => !usedRecs.has(s));
     if (available.length > 0) {
       const chosen = choice(available);
       rec5 = " -rec5 " + chosen;
@@ -570,19 +649,35 @@ export function generateChaos(): string {
   }
   const commands = scc + com + rec1 + rec2 + rec3 + rec4 + rec5;
 
-  const party = sparty + swdtech + blitz + lores + rage + dance + cstats + commands + steal + scis;
+  const party =
+    sparty +
+    swdtech +
+    blitz +
+    lores +
+    rage +
+    dance +
+    cstats +
+    commands +
+    steal +
+    scis;
 
   // -----BATTLE-----
   const xpm = " -xpm " + weightedChoice([2, 3, 4, 5, 6], [2, 10, 6, 3, 1]);
-  const gpm = " -gpm " + weightedChoice([3, 4, 5, 6, 7, 8, 9, 10], [1, 2, 10, 6, 3, 2, 1, 1]);
-  const mpm = " -mpm " + weightedChoice([3, 4, 5, 6, 7, 8, 9, 10], [1, 2, 10, 6, 3, 2, 1, 1]);
+  const gpm =
+    " -gpm " +
+    weightedChoice([3, 4, 5, 6, 7, 8, 9, 10], [1, 2, 10, 6, 3, 2, 1, 1]);
+  const mpm =
+    " -mpm " +
+    weightedChoice([3, 4, 5, 6, 7, 8, 9, 10], [1, 2, 10, 6, 3, 2, 1, 1]);
   const nxppd = weightedChoice([" -nxppd", ""], [7, 1]);
   const xpmpgp = xpm + gpm + mpm + nxppd;
 
   // BOSSES
   const bb = weightedChoice([" -bbr", " -bbs", ""], [5, 10, 1]);
-  let bmbd = " -drloc " + weightedChoice(["original", "shuffle", "mix"], [1, 5, 1]);
-  bmbd += " -stloc " + weightedChoice(["original", "shuffle", "mix"], [1, 2, 5]);
+  let bmbd =
+    " -drloc " + weightedChoice(["original", "shuffle", "mix"], [1, 5, 1]);
+  bmbd +=
+    " -stloc " + weightedChoice(["original", "shuffle", "mix"], [1, 2, 5]);
   const srp3 = weightedChoice([" -srp3", ""], [1, 10]);
   const bnds = weightedChoice([" -bnds", ""], [1, 8]);
   const be = weightedChoice([" -be", ""], [13, 1]);
@@ -597,21 +692,46 @@ export function generateChaos(): string {
   const b_ai = dgne + wnz + mmnu + cmd;
 
   // SCALING
-  const scale_opt = ["0.5", "1", "1.5", "2", "2.5", "3", "3.5", "4", "4.5", "5"];
-  const lspf = " -lsced " + weightedChoice(scale_opt, [0, 1, 1, 10, 5, 3, 1, 0, 0, 0]);
-  const lsaf = " -lsa " + weightedChoice(scale_opt, [0, 10, 3, 2, 1, 0, 0, 0, 0, 0]);
-  const lshf = " -lsh " + weightedChoice(scale_opt, [0, 10, 3, 2, 1, 0, 0, 0, 0, 0]);
-  const lstf = " -lst " + weightedChoice(scale_opt, [0, 1, 5, 10, 1, 0, 0, 0, 0, 0]);
-  const hmpf = " -hmced " + weightedChoice(scale_opt, [0, 1, 1, 10, 5, 3, 1, 0, 0, 0]);
-  const hmaf = " -hma " + weightedChoice(scale_opt, [0, 10, 3, 2, 1, 0, 0, 0, 0, 0]);
-  const hmhf = " -hmh " + weightedChoice(scale_opt, [0, 10, 3, 2, 1, 0, 0, 0, 0, 0]);
-  const hmtf = " -hmt " + weightedChoice(scale_opt, [0, 1, 5, 10, 1, 0, 0, 0, 0, 0]);
-  const xgpf = " -xgced " + weightedChoice(scale_opt, [0, 1, 1, 10, 5, 3, 1, 0, 0, 0]);
-  const xgaf = " -xga " + weightedChoice(scale_opt, [0, 10, 3, 2, 1, 0, 0, 0, 0, 0]);
-  const xghf = " -xgh " + weightedChoice(scale_opt, [0, 10, 3, 2, 1, 0, 0, 0, 0, 0]);
-  const xgtf = " -xgt " + weightedChoice(scale_opt, [0, 1, 5, 10, 1, 0, 0, 0, 0, 0]);
-  const asrf = " -asr " + weightedChoice(scale_opt, [0, 0, 3, 10, 2, 1, 0, 0, 0, 0]);
-  const asef = " -ase " + weightedChoice(scale_opt, [0, 0, 3, 10, 2, 1, 0, 0, 0, 0]);
+  const scale_opt = [
+    "0.5",
+    "1",
+    "1.5",
+    "2",
+    "2.5",
+    "3",
+    "3.5",
+    "4",
+    "4.5",
+    "5",
+  ];
+  const lspf =
+    " -lsced " + weightedChoice(scale_opt, [0, 1, 1, 10, 5, 3, 1, 0, 0, 0]);
+  const lsaf =
+    " -lsa " + weightedChoice(scale_opt, [0, 10, 3, 2, 1, 0, 0, 0, 0, 0]);
+  const lshf =
+    " -lsh " + weightedChoice(scale_opt, [0, 10, 3, 2, 1, 0, 0, 0, 0, 0]);
+  const lstf =
+    " -lst " + weightedChoice(scale_opt, [0, 1, 5, 10, 1, 0, 0, 0, 0, 0]);
+  const hmpf =
+    " -hmced " + weightedChoice(scale_opt, [0, 1, 1, 10, 5, 3, 1, 0, 0, 0]);
+  const hmaf =
+    " -hma " + weightedChoice(scale_opt, [0, 10, 3, 2, 1, 0, 0, 0, 0, 0]);
+  const hmhf =
+    " -hmh " + weightedChoice(scale_opt, [0, 10, 3, 2, 1, 0, 0, 0, 0, 0]);
+  const hmtf =
+    " -hmt " + weightedChoice(scale_opt, [0, 1, 5, 10, 1, 0, 0, 0, 0, 0]);
+  const xgpf =
+    " -xgced " + weightedChoice(scale_opt, [0, 1, 1, 10, 5, 3, 1, 0, 0, 0]);
+  const xgaf =
+    " -xga " + weightedChoice(scale_opt, [0, 10, 3, 2, 1, 0, 0, 0, 0, 0]);
+  const xghf =
+    " -xgh " + weightedChoice(scale_opt, [0, 10, 3, 2, 1, 0, 0, 0, 0, 0]);
+  const xgtf =
+    " -xgt " + weightedChoice(scale_opt, [0, 1, 5, 10, 1, 0, 0, 0, 0, 0]);
+  const asrf =
+    " -asr " + weightedChoice(scale_opt, [0, 0, 3, 10, 2, 1, 0, 0, 0, 0]);
+  const asef =
+    " -ase " + weightedChoice(scale_opt, [0, 0, 3, 10, 2, 1, 0, 0, 0, 0]);
 
   const lscale = weightedChoice([lspf, lsaf, lshf, lstf, ""], [7, 2, 2, 1, 0]);
   const hmscale = weightedChoice([hmpf, hmaf, hmhf, hmtf, ""], [7, 2, 2, 1, 0]);
@@ -623,7 +743,10 @@ export function generateChaos(): string {
   const scaling = lscale + hmscale + xgscale + ascale + msl + sfb + sed;
 
   // ENCOUNTERS
-  const renc = weightedChoice(["", " -res", " -rer " + randint(0, 33)], [1, 10, 10]);
+  const renc = weightedChoice(
+    ["", " -res", " -rer " + randint(0, 33)],
+    [1, 10, 10],
+  );
   const fenc = weightedChoice(["", " -fer " + randint(0, 33)], [1, 10]);
   const escr = " -escr " + randint(75, 100);
   const encounters = renc + fenc + escr;
@@ -635,8 +758,14 @@ export function generateChaos(): string {
   const esr1 = randint(1, 3);
   const esr2 = randint(esr1, 5);
   const esr = " -esr " + esr1 + " " + esr2;
-  const ess = weightedChoice(["", esr, " -esrr", " -ess", " -essrr", " -esrt"], [1, 7, 2, 2, 2, 3]);
-  const ebonus = weightedChoice(["", " -ebr " + randint(67, 100), " -ebs"], [1, 7, 3]);
+  const ess = weightedChoice(
+    ["", esr, " -esrr", " -ess", " -essrr", " -esrt"],
+    [1, 7, 2, 2, 2, 3],
+  );
+  const ebonus = weightedChoice(
+    ["", " -ebr " + randint(67, 100), " -ebs"],
+    [1, 7, 3],
+  );
   const emprp1 = randint(50, 125);
   const emprp2 = randint(emprp1, 150);
   const emprv1 = randint(50, 99);
@@ -703,7 +832,10 @@ export function generateChaos(): string {
   const ierbr = " -ierbr " + randint(4, 10);
   const ieror = " -ieror " + randint(15, 75);
   const iersr = " -iersr " + randint(15, 75);
-  const requip = weightedChoice(["", ierr, ierbr, ieror, iersr], [1, 2, 2, 7, 2]);
+  const requip = weightedChoice(
+    ["", ierr, ierbr, ieror, iersr],
+    [1, 2, 2, 7, 2],
+  );
   const csb1 = randint(1, 32);
   const csb2 = randint(csb1, 32);
   const csb = " -csb " + csb1 + " " + csb2;
@@ -733,7 +865,7 @@ export function generateChaos(): string {
   // CHESTS
   const ccontents = weightedChoice(
     ["", " -ccrt", " -cce", " -ccsr " + randint(10, 80)],
-    [1, 6, 1, 13]
+    [1, 6, 1, 13],
   );
   const cms = weightedChoice(["", " -cms"], [1, 13]);
   const chests = ccontents + cms;
@@ -751,7 +883,10 @@ export function generateChaos(): string {
   const cr = " -crr " + crper;
   const crvr1 = randint(20, 80);
   const crvr2 = randint(crvr1, 150);
-  const visible = weightedChoice(["", " -crvr " + crvr1 + " " + crvr2], [1, 10]);
+  const visible = weightedChoice(
+    ["", " -crvr " + crvr1 + " " + crvr2],
+    [1, 10],
+  );
   const rmenu = weightedChoice(["", " -crm"], [1, 13]);
   const colo = co + cr + visible + rmenu;
 
@@ -797,7 +932,7 @@ export function generateChaos(): string {
   }
   const rls = weightedChoice(
     ["", " -rls all", " -rls grey", " -rls black", " -rls white"],
-    [13, 1, 1, 1, 1]
+    [13, 1, 1, 1, 1],
   );
   const nfp = weightedChoice(["", " -nfce"], [7, 1]);
   const pd = weightedChoice(["", " -pd"], [13, 1]);
@@ -844,14 +979,42 @@ export function generateTrueChaos(): string {
 
   let kt = "";
   if (stno) {
-    kt = " -oa 2.2.2.2." + [ktcr1, ktcr2, "4", kter1, kter2, "6", ktdr1, ktdr2].join(".");
+    kt =
+      " -oa 2.2.2.2." +
+      [ktcr1, ktcr2, "4", kter1, kter2, "6", ktdr1, ktdr2].join(".");
   } else {
-    kt = " -oa 2.2.2.2." + [ktcr1, ktcr2, "4", kter1, kter2, "6", ktdr1, ktdr2].join(".");
-    kt += " -ob 3.2.2.2." + [stcr1, stcr2, "4", ster1, ster2, "6", stdr1, stdr2].join(".");
+    kt =
+      " -oa 2.2.2.2." +
+      [ktcr1, ktcr2, "4", kter1, kter2, "6", ktdr1, ktdr2].join(".");
+    kt +=
+      " -ob 3.2.2.2." +
+      [stcr1, stcr2, "4", ster1, ster2, "6", stdr1, stdr2].join(".");
   }
 
   const objectivesList = [
-    "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y"
+    "c",
+    "d",
+    "e",
+    "f",
+    "g",
+    "h",
+    "i",
+    "j",
+    "k",
+    "l",
+    "m",
+    "n",
+    "o",
+    "p",
+    "q",
+    "r",
+    "s",
+    "t",
+    "u",
+    "v",
+    "w",
+    "x",
+    "y",
   ];
   let objectives = "";
   for (const x of objectivesList) {
@@ -931,13 +1094,80 @@ export function generateTrueChaos(): string {
 
   // COMMANDS
   const skills = [
-    "10", "06", "14", "19", "24", "26", "22", "12", "03", "28", "16", "11", "27", "13", "15", "05", "07", "08", "09", "23", "97", "98", "99", "00", "29"
+    "10",
+    "06",
+    "14",
+    "19",
+    "24",
+    "26",
+    "22",
+    "12",
+    "03",
+    "28",
+    "16",
+    "11",
+    "27",
+    "13",
+    "15",
+    "05",
+    "07",
+    "08",
+    "09",
+    "23",
+    "97",
+    "98",
+    "99",
+    "00",
+    "29",
   ];
   const nmskills = [
-    "10", "06", "14", "19", "24", "26", "22", "12", "28", "16", "11", "27", "13", "15", "05", "07", "08", "09", "23", "97", "98", "99", "00", "29"
+    "10",
+    "06",
+    "14",
+    "19",
+    "24",
+    "26",
+    "22",
+    "12",
+    "28",
+    "16",
+    "11",
+    "27",
+    "13",
+    "15",
+    "05",
+    "07",
+    "08",
+    "09",
+    "23",
+    "97",
+    "98",
+    "99",
+    "00",
+    "29",
   ];
   const recskills = [
-    "10", "06", "14", "19", "24", "26", "22", "12", "03", "28", "16", "11", "27", "13", "15", "05", "07", "08", "09", "23", "29"
+    "10",
+    "06",
+    "14",
+    "19",
+    "24",
+    "26",
+    "22",
+    "12",
+    "03",
+    "28",
+    "16",
+    "11",
+    "27",
+    "13",
+    "15",
+    "05",
+    "07",
+    "08",
+    "09",
+    "23",
+    "29",
   ];
   const scc = choice([" -scc", ""]);
   let mcount = 0;
@@ -961,7 +1191,7 @@ export function generateTrueChaos(): string {
   const usedRecs = new Set<string>();
   let rec1 = "";
   if (choice([true, false])) {
-    const available = recskills.filter(s => !usedRecs.has(s));
+    const available = recskills.filter((s) => !usedRecs.has(s));
     if (available.length > 0) {
       const chosen = choice(available);
       rec1 = " -rec1 " + chosen;
@@ -970,7 +1200,7 @@ export function generateTrueChaos(): string {
   }
   let rec2 = "";
   if (choice([true, false])) {
-    const available = recskills.filter(s => !usedRecs.has(s));
+    const available = recskills.filter((s) => !usedRecs.has(s));
     if (available.length > 0) {
       const chosen = choice(available);
       rec2 = " -rec2 " + chosen;
@@ -979,7 +1209,7 @@ export function generateTrueChaos(): string {
   }
   let rec3 = "";
   if (choice([true, false])) {
-    const available = recskills.filter(s => !usedRecs.has(s));
+    const available = recskills.filter((s) => !usedRecs.has(s));
     if (available.length > 0) {
       const chosen = choice(available);
       rec3 = " -rec3 " + chosen;
@@ -988,7 +1218,7 @@ export function generateTrueChaos(): string {
   }
   let rec4 = "";
   if (choice([true, false])) {
-    const available = recskills.filter(s => !usedRecs.has(s));
+    const available = recskills.filter((s) => !usedRecs.has(s));
     if (available.length > 0) {
       const chosen = choice(available);
       rec4 = " -rec4 " + chosen;
@@ -997,7 +1227,7 @@ export function generateTrueChaos(): string {
   }
   let rec5 = "";
   if (choice([true, false])) {
-    const available = recskills.filter(s => !usedRecs.has(s));
+    const available = recskills.filter((s) => !usedRecs.has(s));
     if (available.length > 0) {
       const chosen = choice(available);
       rec5 = " -rec5 " + chosen;
@@ -1006,7 +1236,8 @@ export function generateTrueChaos(): string {
   }
   const commands = scc + com + rec1 + rec2 + rec3 + rec4 + rec5;
 
-  const party = sparty + swdtech + blitz + lores + rage + dance + cstats + commands + steal;
+  const party =
+    sparty + swdtech + blitz + lores + rage + dance + cstats + commands + steal;
 
   // -----BATTLE-----
   const iList: number[] = [];
@@ -1038,7 +1269,18 @@ export function generateTrueChaos(): string {
   const b_ai = dgne + wnz + mmnu + cmd;
 
   // SCALING
-  const scale_opt = ["0.5", "1", "1.5", "2", "2.5", "3", "3.5", "4", "4.5", "5"];
+  const scale_opt = [
+    "0.5",
+    "1",
+    "1.5",
+    "2",
+    "2.5",
+    "3",
+    "3.5",
+    "4",
+    "4.5",
+    "5",
+  ];
   const lspf = " -lsced " + choice(scale_opt);
   const lsaf = " -lsa " + choice(scale_opt);
   const lshf = " -lsh " + choice(scale_opt);
@@ -1157,7 +1399,10 @@ export function generateTrueChaos(): string {
 
   // CHESTS
   const ccontents = choice([
-    "", " -ccrt", " -cce", " -ccsr " + randint(0, 100)
+    "",
+    " -ccrt",
+    " -cce",
+    " -ccsr " + randint(0, 100),
   ]);
   const cms = choice(["", " -cms"]);
   const chests = ccontents + cms;
@@ -1189,7 +1434,16 @@ export function generateTrueChaos(): string {
   const scan = choice(["", " -scan"]);
   const etimers = choice(["", " -etr", " -etn"]);
   const ychoices = [
-    " -ymascot", " -ycreature", " -yimperial", " -ymain", " -yreflect", " -ystone", " -ysketch", " -yrandom", " -yremove", ""
+    " -ymascot",
+    " -ycreature",
+    " -yimperial",
+    " -ymain",
+    " -yreflect",
+    " -ystone",
+    " -ysketch",
+    " -yrandom",
+    " -yremove",
+    "",
   ];
   const ychoice = choice(ychoices);
   const flashes = choice(["", " -frm", " -frw"]);

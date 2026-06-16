@@ -147,16 +147,19 @@ export const SeedDetails = ({ seedId }: SeedDetailsProps) => {
     try {
       const generateResult = await trigger({ flags: seed.flags, reCAPTCHA });
       if (!generateResult) {
-        throw new Error("Generate script finished without producing a payload.");
+        throw new Error(
+          "Generate script finished without producing a payload.",
+        );
       }
 
       const { filename, patch, seed_id, log } = generateResult;
 
-      const [{ XDelta3Decoder }, { base64ToByteArray }, { applyInGameConfig }] = await Promise.all([
-        import("~/utils/xdelta3_decoder"),
-        import("~/utils/base64ToByteArray"),
-        import("~/utils/romUtils"),
-      ]);
+      const [{ XDelta3Decoder }, { base64ToByteArray }, { applyInGameConfig }] =
+        await Promise.all([
+          import("~/utils/xdelta3_decoder"),
+          import("~/utils/base64ToByteArray"),
+          import("~/utils/romUtils"),
+        ]);
 
       // Perform standard base ROM patching stream using standard decoder logic
       const patched = XDelta3Decoder.decode(
@@ -179,17 +182,28 @@ export const SeedDetails = ({ seedId }: SeedDetailsProps) => {
 
       // Record seed in seedlist database
       try {
-        const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
-        const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-        const host = typeof window !== "undefined" ? window.location.hostname : "";
-        const serverName = host === "ff6worldscollide.com" ? "ff6worldscollide.com" : "dev.ff6worldscollide.com";
-        const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/seed/?id=${seed_id}` : "";
+        const token =
+          typeof window !== "undefined"
+            ? localStorage.getItem("auth_token")
+            : null;
+        const BACKEND_URL =
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+        const host =
+          typeof window !== "undefined" ? window.location.hostname : "";
+        const serverName =
+          host === "ff6worldscollide.com"
+            ? "ff6worldscollide.com"
+            : "dev.ff6worldscollide.com";
+        const shareUrl =
+          typeof window !== "undefined"
+            ? `${window.location.origin}/seed/?id=${seed_id}`
+            : "";
 
         fetch(`${BACKEND_URL}/api/v1/seedlist`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
           body: JSON.stringify({
             seed_type: (seed as any)?.seed_type || "ff6wc",
@@ -197,7 +211,9 @@ export const SeedDetails = ({ seedId }: SeedDetailsProps) => {
             server_name: serverName,
             flagstring: seed.flags,
           }),
-        }).catch((err) => console.error("Failed to record seed to seedlist database:", err));
+        }).catch((err) =>
+          console.error("Failed to record seed to seedlist database:", err),
+        );
       } catch (e) {
         console.error("Failed to record seed to seedlist:", e);
       }
@@ -224,11 +240,12 @@ export const SeedDetails = ({ seedId }: SeedDetailsProps) => {
     try {
       const { filename, patch, log } = seed;
 
-      const [{ XDelta3Decoder }, { base64ToByteArray }, { applyInGameConfig }] = await Promise.all([
-        import("~/utils/xdelta3_decoder"),
-        import("~/utils/base64ToByteArray"),
-        import("~/utils/romUtils"),
-      ]);
+      const [{ XDelta3Decoder }, { base64ToByteArray }, { applyInGameConfig }] =
+        await Promise.all([
+          import("~/utils/xdelta3_decoder"),
+          import("~/utils/base64ToByteArray"),
+          import("~/utils/romUtils"),
+        ]);
 
       // Perform standard base ROM patching stream using standard decoder logic
       const patched = XDelta3Decoder.decode(
@@ -345,7 +362,10 @@ export const SeedDetails = ({ seedId }: SeedDetailsProps) => {
                   {copied ? (
                     <HiCheck size={14} className="text-green-600" />
                   ) : (
-                    <HiClipboardCopy size={14} className="text-slate-600 dark:text-slate-300" />
+                    <HiClipboardCopy
+                      size={14}
+                      className="text-slate-600 dark:text-slate-300"
+                    />
                   )}
                   <span>{copied ? "Copied!" : "Copy Flags"}</span>
                 </button>
@@ -380,14 +400,22 @@ export const SeedDetails = ({ seedId }: SeedDetailsProps) => {
                 <h4 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                   Step 2: Select v1.0 US ROM file by clicking the input below
                 </h4>
-                
+
                 {romData ? (
                   <div className="flex items-center flex-wrap gap-x-4 gap-y-2 bg-slate-50 dark:bg-slate-800/40 py-2.5 px-4 border border-slate-200 dark:border-slate-800 rounded-lg">
                     <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-green-500/10 text-green-500 border border-green-500/20">
                       Valid ROM
                     </span>
                     <span className="text-sm text-slate-600 dark:text-slate-300 flex-grow">
-                      ROM named <strong className="font-mono underline text-slate-800 dark:text-white font-medium" title={romName}>{displayRomName}</strong> was previously uploaded and validated. To select another ROM, click Clear ROM.
+                      ROM named{" "}
+                      <strong
+                        className="font-mono underline text-slate-800 dark:text-white font-medium"
+                        title={romName}
+                      >
+                        {displayRomName}
+                      </strong>{" "}
+                      was previously uploaded and validated. To select another
+                      ROM, click Clear ROM.
                     </span>
                     <button
                       onClick={clearRomValues}
@@ -403,7 +431,8 @@ export const SeedDetails = ({ seedId }: SeedDetailsProps) => {
                         Waiting for ROM upload
                       </span>
                       <span className="text-sm text-slate-500 dark:text-slate-400 hidden sm:inline">
-                        Once you have selected a valid ROM it will be reused for future visits.
+                        Once you have selected a valid ROM it will be reused for
+                        future visits.
                       </span>
                     </div>
                     <button
@@ -476,4 +505,3 @@ export const SeedDetails = ({ seedId }: SeedDetailsProps) => {
     </div>
   );
 };
-

@@ -43,7 +43,8 @@ export class ErrorBoundary extends Component<Props, State> {
             width: "100%",
             alignItems: "center",
             justifyContent: "center",
-            background: "radial-gradient(circle at center, #0f172a 0%, #020617 100%)",
+            background:
+              "radial-gradient(circle at center, #0f172a 0%, #020617 100%)",
             color: "#f8fafc",
             fontFamily: "var(--font-runic, monospace)",
             padding: "2rem",
@@ -59,7 +60,8 @@ export class ErrorBoundary extends Component<Props, State> {
               border: "2px double #ef4444",
               borderRadius: "12px",
               padding: "2.5rem 2rem",
-              boxShadow: "0 20px 50px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(239, 68, 68, 0.05)",
+              boxShadow:
+                "0 20px 50px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(239, 68, 68, 0.05)",
               textAlign: "center",
               display: "flex",
               flexDirection: "column",
@@ -107,7 +109,8 @@ export class ErrorBoundary extends Component<Props, State> {
                   fontFamily: "sans-serif",
                 }}
               >
-                The application encountered an unexpected runtime state. Your local presets and active configurations remain safe.
+                The application encountered an unexpected runtime state. Your
+                local presets and active configurations remain safe.
               </p>
             </div>
 

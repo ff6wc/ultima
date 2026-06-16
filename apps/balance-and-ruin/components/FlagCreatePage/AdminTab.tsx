@@ -16,18 +16,22 @@ import { PageContainer } from "../PageContainer/PageContainer";
 import { FlagPreset } from "~/types/preset";
 
 const narsheFetch = (path: string, options: RequestInit = {}) => {
-  const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
-  const devAdminOverride = typeof window !== "undefined" && 
-    (process.env.NEXT_PUBLIC_DEV_ADMIN_TOGGLE === "true" || process.env.NODE_ENV === "development") && 
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
+  const devAdminOverride =
+    typeof window !== "undefined" &&
+    (process.env.NEXT_PUBLIC_DEV_ADMIN_TOGGLE === "true" ||
+      process.env.NODE_ENV === "development") &&
     localStorage.getItem("dev_admin_override") === "true";
 
   const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
   const url = `${backendUrl}/api/v1${path}`;
-  const isLocalApi = backendUrl.includes("localhost") || backendUrl.includes("127.0.0.1");
+  const isLocalApi =
+    backendUrl.includes("localhost") || backendUrl.includes("127.0.0.1");
 
   const headers = {
     "Content-Type": "application/json",
-    ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...(devAdminOverride && isLocalApi ? { "X-Dev-Bypass-Admin": "true" } : {}),
     ...(options.headers || {}),
   };
@@ -57,7 +61,7 @@ const hasSevereProfanity = (text: string): boolean => {
     /\bretard(?:ed)?\b/i,
   ];
 
-  if (severePatterns.some(pattern => pattern.test(text))) {
+  if (severePatterns.some((pattern) => pattern.test(text))) {
     return true;
   }
 
@@ -77,10 +81,10 @@ const hasSevereProfanity = (text: string): boolean => {
     "faggut",
     "nigger",
     "kike",
-    "tranny"
+    "tranny",
   ];
 
-  if (strictSubstrings.some(word => normalized.includes(word))) {
+  if (strictSubstrings.some((word) => normalized.includes(word))) {
     return true;
   }
 
@@ -101,7 +105,8 @@ const formatTruncatedDate = (dateStr: string) => {
   }
 };
 
-const useSafeLayoutEffect = typeof window !== "undefined" ? React.useLayoutEffect : React.useEffect;
+const useSafeLayoutEffect =
+  typeof window !== "undefined" ? React.useLayoutEffect : React.useEffect;
 
 const AdminPresetTitle = ({ name }: { name: string }) => {
   const containerRef = React.useRef<HTMLDivElement>(null);
@@ -124,21 +129,58 @@ const AdminPresetTitle = ({ name }: { name: string }) => {
   }, [name, shouldScroll]);
 
   return (
-    <div ref={containerRef} style={{ display: "flex", alignItems: "baseline", gap: "0.75rem", overflow: "hidden", flex: 1, minWidth: 0 }}>
+    <div
+      ref={containerRef}
+      style={{
+        display: "flex",
+        alignItems: "baseline",
+        gap: "0.75rem",
+        overflow: "hidden",
+        flex: 1,
+        minWidth: 0,
+      }}
+    >
       {/* Desktop Title: Always static with ellipsis */}
-      <h4 className="admin-desktop-title text-slate-800 dark:text-slate-100" style={{ margin: 0, fontSize: "1rem", fontWeight: "bold", whiteSpace: "nowrap", flexShrink: 0 }}>
+      <h4
+        className="admin-desktop-title text-slate-800 dark:text-slate-100"
+        style={{
+          margin: 0,
+          fontSize: "1rem",
+          fontWeight: "bold",
+          whiteSpace: "nowrap",
+          flexShrink: 0,
+        }}
+      >
         {name}
       </h4>
 
       {/* Mobile Title Container */}
       {!shouldScroll ? (
-        <h4 ref={textRef} className="sm:hidden text-slate-800 dark:text-slate-100" style={{ margin: 0, fontSize: "1rem", fontWeight: "bold", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", flex: 1, minWidth: 0 }}>
+        <h4
+          ref={textRef}
+          className="sm:hidden text-slate-800 dark:text-slate-100"
+          style={{
+            margin: 0,
+            fontSize: "1rem",
+            fontWeight: "bold",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            flex: 1,
+            minWidth: 0,
+          }}
+        >
           {name}
         </h4>
       ) : (
-        <div className="admin-title-marquee-container" style={{ flex: 1, minWidth: 0 }}>
+        <div
+          className="admin-title-marquee-container"
+          style={{ flex: 1, minWidth: 0 }}
+        >
           <span className="admin-title-marquee-text">{name}</span>
-          <span className="admin-title-marquee-text" aria-hidden="true">{name}</span>
+          <span className="admin-title-marquee-text" aria-hidden="true">
+            {name}
+          </span>
         </div>
       )}
     </div>
@@ -151,31 +193,38 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
   useEffect(() => {
     setIsMounted(true);
   }, []);
-  
+
   // Local state for all database records
   const [allPresets, setAllPresets] = useState<any[]>([]);
   const [loadingPresets, setLoadingPresets] = useState(true);
-  
+
   // UI states
   const [adminSearch, setAdminSearch] = useState("");
-  const [adminSortField, setAdminSortField] = useState<"name" | "author" | "created_at" | "downloads">("name");
+  const [adminSortField, setAdminSortField] = useState<
+    "name" | "author" | "created_at" | "downloads"
+  >("name");
   const [adminSortDir, setAdminSortDir] = useState<"asc" | "desc">("asc");
   const [selectedIds, setSelectedIds] = useState<Record<string, boolean>>({});
-  
+
   const [showConfirm, setShowConfirm] = useState<Record<string, boolean>>({});
   const [isDeleting, setIsDeleting] = useState<Record<string, boolean>>({});
   const [lastSelectedId, setLastSelectedId] = useState<string | null>(null);
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
-  
+
   // Pagination / Page Limit for performance with ~400 presets
   const [visibleCount, setVisibleCount] = useState(10);
-  
-  const [adminExpandedPresets, setAdminExpandedPresets] = useState<Record<string, boolean>>({});
-  
+
+  const [adminExpandedPresets, setAdminExpandedPresets] = useState<
+    Record<string, boolean>
+  >({});
+
   // Tags Administration
   const [cannedTags, setCannedTags] = useState<string[]>([]);
   const [newTagName, setNewTagName] = useState("");
-  const [editingTag, setEditingTag] = useState<{old: string, new: string} | null>(null);
+  const [editingTag, setEditingTag] = useState<{
+    old: string;
+    new: string;
+  } | null>(null);
 
   // Editing individual presets
   const [editingPresetId, setEditingPresetId] = useState<string | null>(null);
@@ -185,15 +234,28 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
   const [editFlags, setEditFlags] = useState("");
   const [isSavingEdit, setIsSavingEdit] = useState(false);
 
-  const devAdminOverride = isMounted && typeof window !== "undefined" && 
-    (process.env.NEXT_PUBLIC_DEV_ADMIN_TOGGLE === "true" || process.env.NODE_ENV === "development") && 
+  const devAdminOverride =
+    isMounted &&
+    typeof window !== "undefined" &&
+    (process.env.NEXT_PUBLIC_DEV_ADMIN_TOGGLE === "true" ||
+      process.env.NODE_ENV === "development") &&
     localStorage.getItem("dev_admin_override") === "true";
 
   const isSuperadmin = !!(session?.user as any)?.isSuperadmin;
 
-  const isAdmin = !!(session?.user as any)?.isAdmin || isSuperadmin || devAdminOverride;
+  const isAdmin =
+    !!(session?.user as any)?.isAdmin || isSuperadmin || devAdminOverride;
 
-  const activeUser = session?.user || (devAdminOverride ? { name: "Dev Admin", email: "dev-admin@localhost", discordId: "12345", image: null } : null);
+  const activeUser =
+    session?.user ||
+    (devAdminOverride
+      ? {
+          name: "Dev Admin",
+          email: "dev-admin@localhost",
+          discordId: "12345",
+          image: null,
+        }
+      : null);
 
   const fetchPresets = () => {
     if (devAdminOverride) {
@@ -202,48 +264,62 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
         {
           id: "mock-preset-1",
           preset_name: "Standard WC League",
-          description: "Official Worlds Collide league flagset with standard progression and balanced rewards.",
-          flags: "-cg -cont -open -sbn -sbs -sbt -sd1 -sd2 -sd3 -sd4 -sd5 -sd6 -sd7 -sd8 -sd9 -sd10",
+          description:
+            "Official Worlds Collide league flagset with standard progression and balanced rewards.",
+          flags:
+            "-cg -cont -open -sbn -sbs -sbt -sd1 -sd2 -sd3 -sd4 -sd5 -sd6 -sd7 -sd8 -sd9 -sd10",
           creator_name: "Community",
           creator_id: "community",
           official: true,
           downloads: 1420,
-          created_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-          tags: ["official", "league"]
+          created_at: new Date(
+            Date.now() - 30 * 24 * 60 * 60 * 1000,
+          ).toISOString(),
+          tags: ["official", "league"],
         },
         {
           id: "mock-preset-2",
           preset_name: "Kefka's Toybox",
-          description: "High chaos, random commands, natural magic, and stronger bosses. Pure fun!",
-          flags: "-cg -cont -open -sbn -sbs -sbt -sd1 -sd2 -sd3 -sd4 -sd5 -sd6 -sd7 -sd8 -sd9 -sd10 -rc -nm -s",
+          description:
+            "High chaos, random commands, natural magic, and stronger bosses. Pure fun!",
+          flags:
+            "-cg -cont -open -sbn -sbs -sbt -sd1 -sd2 -sd3 -sd4 -sd5 -sd6 -sd7 -sd8 -sd9 -sd10 -rc -nm -s",
           creator_name: "Terra",
           creator_id: "terra123",
           downloads: 850,
-          created_at: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
-          tags: ["chaos", "fun"]
+          created_at: new Date(
+            Date.now() - 15 * 24 * 60 * 60 * 1000,
+          ).toISOString(),
+          tags: ["chaos", "fun"],
         },
         {
           id: "mock-preset-3",
           preset_name: "True Chaos",
-          description: "Every single randomizer setting turned up to maximum distortion.",
+          description:
+            "Every single randomizer setting turned up to maximum distortion.",
           flags: "-cg -cont -open -sbn -rc -nm -s -tc",
           creator_name: "Locke",
           creator_id: "locke456",
           downloads: 310,
-          created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-          tags: ["chaos"]
+          created_at: new Date(
+            Date.now() - 5 * 24 * 60 * 60 * 1000,
+          ).toISOString(),
+          tags: ["chaos"],
         },
         {
           id: "mock-preset-4",
           preset_name: "Beginner Friendly",
-          description: "An easy-going preset with extra start items and weaker bosses. Great for learning the map.",
+          description:
+            "An easy-going preset with extra start items and weaker bosses. Great for learning the map.",
           flags: "-cg -cont -open -sbn",
           creator_name: "Mog",
           creator_id: "mog789",
           downloads: 120,
-          created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-          tags: ["beginner"]
-        }
+          created_at: new Date(
+            Date.now() - 2 * 24 * 60 * 60 * 1000,
+          ).toISOString(),
+          tags: ["beginner"],
+        },
       ]);
       return;
     }
@@ -260,7 +336,14 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
 
   const fetchTags = () => {
     if (devAdminOverride) {
-      setCannedTags(["official", "league", "chaos", "fun", "beginner", "tournament"]);
+      setCannedTags([
+        "official",
+        "league",
+        "chaos",
+        "fun",
+        "beginner",
+        "tournament",
+      ]);
       return;
     }
 
@@ -282,7 +365,7 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
   // Combine database presets and API presets, merging overrides in real-time
   const mergedPresets = useMemo(() => {
     const apiArray = Object.values(apiPresets || {});
-    
+
     // Create a map of db overrides by lowercase name for easy lookup
     const dbMap = new Map<string, any>();
     allPresets.forEach((p) => {
@@ -290,7 +373,11 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
       if (name) {
         const key = name.toLowerCase();
         const existing = dbMap.get(key);
-        const isNewOverride = p.owner_id === "override" || p.creator_id === "override" || p.official || p.is_official;
+        const isNewOverride =
+          p.owner_id === "override" ||
+          p.creator_id === "override" ||
+          p.official ||
+          p.is_official;
         if (!existing || isNewOverride) {
           dbMap.set(key, p);
         }
@@ -305,9 +392,8 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
       const lowercaseName = apiPreset.name.toLowerCase();
       const dbOverride = dbMap.get(lowercaseName);
       processedDbNames.add(lowercaseName);
-      
+
       if (dbOverride) {
-        
         // Skip if marked as deleted in database
         if (dbOverride.deleted) {
           return;
@@ -318,19 +404,22 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
           ...apiPreset,
           id: dbOverride.id || apiPreset.name, // Use database id if it exists, else name
           tags: dbOverride.tags || apiPreset.tags || [],
-          official: dbOverride.is_official !== undefined
-            ? dbOverride.is_official
-            : (dbOverride.official !== undefined 
-                ? dbOverride.official 
-                : (apiPreset.official || (dbOverride.tags && dbOverride.tags.includes("official")))),
-          creator_name: apiPreset.creator_name || apiPreset.creator || "Community",
+          official:
+            dbOverride.is_official !== undefined
+              ? dbOverride.is_official
+              : dbOverride.official !== undefined
+                ? dbOverride.official
+                : apiPreset.official ||
+                  (dbOverride.tags && dbOverride.tags.includes("official")),
+          creator_name:
+            apiPreset.creator_name || apiPreset.creator || "Community",
           creator_id: apiPreset.creator_id || "community",
           created_timestamp: apiPreset.created_at || new Date().toISOString(),
           download_timestamp: dbOverride.download_timestamp,
           downloads: dbOverride.downloads,
           download_count: dbOverride.download_count,
           isApiPreset: true,
-          dbRecord: dbOverride
+          dbRecord: dbOverride,
         });
       } else {
         combined.push({
@@ -338,10 +427,11 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
           id: apiPreset.name, // If no db record yet, identify by name
           tags: apiPreset.tags || [],
           official: !!apiPreset.official,
-          creator_name: apiPreset.creator_name || apiPreset.creator || "Community",
+          creator_name:
+            apiPreset.creator_name || apiPreset.creator || "Community",
           creator_id: apiPreset.creator_id || "community",
           created_timestamp: apiPreset.created_at || new Date().toISOString(),
-          isApiPreset: true
+          isApiPreset: true,
         });
       }
     });
@@ -360,16 +450,22 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
           description: dbPreset.description || "",
           flags: dbPreset.flags || "",
           tags: dbPreset.tags || [],
-          official: dbPreset.is_official !== undefined
-            ? dbPreset.is_official
-            : (!!dbPreset.official || (Array.isArray(dbPreset.tags) && dbPreset.tags.includes("official"))),
+          official:
+            dbPreset.is_official !== undefined
+              ? dbPreset.is_official
+              : !!dbPreset.official ||
+                (Array.isArray(dbPreset.tags) &&
+                  dbPreset.tags.includes("official")),
           creator_name: dbPreset.creator_name || dbPreset.owner_id || "Unknown",
           creator_id: dbPreset.owner_id || dbPreset.creator_id || "unknown",
-          created_timestamp: dbPreset.created_at || dbPreset.created_timestamp || new Date().toISOString(),
+          created_timestamp:
+            dbPreset.created_at ||
+            dbPreset.created_timestamp ||
+            new Date().toISOString(),
           download_timestamp: dbPreset.download_timestamp,
           downloads: dbPreset.downloads,
           download_count: dbPreset.download_count,
-          isApiPreset: false
+          isApiPreset: false,
         });
       }
     });
@@ -381,12 +477,16 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
   const filteredPresets = useMemo(() => {
     const term = adminSearch.toLowerCase().trim();
     if (!term) return mergedPresets;
-    
+
     return mergedPresets.filter((p) => {
       const nameMatch = p.name.toLowerCase().includes(term);
       const descMatch = (p.description || "").toLowerCase().includes(term);
-      const creatorMatch = (p.creator_name || p.creator || "").toLowerCase().includes(term);
-      const tagMatch = (p.tags || []).some((t: string) => t.toLowerCase().includes(term));
+      const creatorMatch = (p.creator_name || p.creator || "")
+        .toLowerCase()
+        .includes(term);
+      const tagMatch = (p.tags || []).some((t: string) =>
+        t.toLowerCase().includes(term),
+      );
       return nameMatch || descMatch || creatorMatch || tagMatch;
     });
   }, [mergedPresets, adminSearch]);
@@ -401,10 +501,22 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
       } else if (adminSortField === "author") {
         cmp = (a.creator_name || "").localeCompare(b.creator_name || "");
       } else if (adminSortField === "created_at") {
-        cmp = new Date(a.created_timestamp || 0).getTime() - new Date(b.created_timestamp || 0).getTime();
+        cmp =
+          new Date(a.created_timestamp || 0).getTime() -
+          new Date(b.created_timestamp || 0).getTime();
       } else if (adminSortField === "downloads") {
-        const aCount = a.downloads ?? a.download_count ?? a.dbRecord?.downloads ?? a.dbRecord?.download_count ?? 0;
-        const bCount = b.downloads ?? b.download_count ?? b.dbRecord?.downloads ?? b.dbRecord?.download_count ?? 0;
+        const aCount =
+          a.downloads ??
+          a.download_count ??
+          a.dbRecord?.downloads ??
+          a.dbRecord?.download_count ??
+          0;
+        const bCount =
+          b.downloads ??
+          b.download_count ??
+          b.dbRecord?.downloads ??
+          b.dbRecord?.download_count ??
+          0;
         cmp = aCount - bCount;
       }
       return adminSortDir === "asc" ? cmp : -cmp;
@@ -414,23 +526,26 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
 
   // Actions
   const handleAdminDeletePreset = async (preset: any) => {
-    const isMultiSelected = Object.keys(selectedIds).filter(id => selectedIds[id]).length > 1;
+    const isMultiSelected =
+      Object.keys(selectedIds).filter((id) => selectedIds[id]).length > 1;
     if (isMultiSelected && selectedIds[preset.id]) {
       return handleBulkDelete(preset.id);
     }
 
-    setIsDeleting(prev => ({ ...prev, [preset.id]: true }));
-    const identifier = preset.isApiPreset ? { name: preset.name } : { id: preset.id };
-    
+    setIsDeleting((prev) => ({ ...prev, [preset.id]: true }));
+    const identifier = preset.isApiPreset
+      ? { name: preset.name }
+      : { id: preset.id };
+
     try {
       const res = await narsheFetch("/user-presets", {
         method: "DELETE",
-        body: JSON.stringify(identifier)
+        body: JSON.stringify(identifier),
       });
       if (res.ok) {
-        setShowConfirm(prev => ({ ...prev, [preset.id]: false }));
+        setShowConfirm((prev) => ({ ...prev, [preset.id]: false }));
         if (selectedIds[preset.id]) {
-          setSelectedIds(prev => ({ ...prev, [preset.id]: false }));
+          setSelectedIds((prev) => ({ ...prev, [preset.id]: false }));
         }
         fetchPresets();
       } else {
@@ -440,7 +555,7 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
       console.error(e);
       alert("Error occurred deleting preset.");
     } finally {
-      setIsDeleting(prev => ({ ...prev, [preset.id]: false }));
+      setIsDeleting((prev) => ({ ...prev, [preset.id]: false }));
     }
   };
 
@@ -451,10 +566,10 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
         body: JSON.stringify({
           id: preset.isApiPreset ? undefined : preset.id,
           name: preset.name,
-          tags: tagsArray
-        })
+          tags: tagsArray,
+        }),
       });
-      
+
       if (res.ok) {
         fetchPresets();
       } else {
@@ -473,7 +588,9 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
     }
 
     if (hasSevereProfanity(editName) || hasSevereProfanity(editDescription)) {
-      alert("Preset Name and Description must not contain inappropriate language.");
+      alert(
+        "Preset Name and Description must not contain inappropriate language.",
+      );
       return;
     }
 
@@ -488,9 +605,9 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
           creator_name: editCreatorName.trim(),
           description: editDescription.trim(),
           flags: editFlags.trim(),
-        })
+        }),
       });
-      
+
       if (res.ok) {
         setEditingPresetId(null);
         fetchPresets();
@@ -509,7 +626,7 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
   const handleBulkDelete = async (confirmId?: string) => {
     const selectedPresets = mergedPresets.filter((p) => selectedIds[p.id]);
     if (selectedPresets.length === 0) return;
-    
+
     if (confirmId) {
       setIsDeleting((prev) => ({ ...prev, [confirmId]: true }));
     } else {
@@ -517,14 +634,18 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
     }
 
     try {
-      const ids = selectedPresets.filter((p) => !p.isApiPreset).map((p) => String(p.id));
-      const names = selectedPresets.filter((p) => p.isApiPreset).map((p) => String(p.name));
-      
+      const ids = selectedPresets
+        .filter((p) => !p.isApiPreset)
+        .map((p) => String(p.id));
+      const names = selectedPresets
+        .filter((p) => p.isApiPreset)
+        .map((p) => String(p.name));
+
       const res = await narsheFetch("/user-presets", {
         method: "DELETE",
-        body: JSON.stringify({ ids, names })
+        body: JSON.stringify({ ids, names }),
       });
-      
+
       if (res.ok) {
         setSelectedIds({});
         setShowConfirm({});
@@ -570,7 +691,14 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
   if (!activeUser || !isAdmin) {
     return (
       <PageContainer columns={1}>
-        <div style={{ color: "#ef4444", fontWeight: "bold", padding: "2rem", textAlign: "center" }}>
+        <div
+          style={{
+            color: "#ef4444",
+            fontWeight: "bold",
+            padding: "2rem",
+            textAlign: "center",
+          }}
+        >
           Access Denied: Administrative Privileges Required.
         </div>
       </PageContainer>
@@ -582,7 +710,9 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
 
   return (
     <PageContainer columns={1}>
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
         @keyframes adminTitleMarquee {
           0%, 15% { transform: translate3d(0, 0, 0); }
           85%, 100% { transform: translate3d(calc(-50% - 1.05rem), 0, 0); }
@@ -613,24 +743,58 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
             color: var(--text-main, #f8fafc);
           }
         }
-      ` }} />
-      <div style={{ display: "flex", flexDirection: "column", gap: "2rem", width: "100%", maxWidth: "1200px", margin: "0 auto", padding: "1rem" }}>
-        
+      `,
+        }}
+      />
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "2rem",
+          width: "100%",
+          maxWidth: "1200px",
+          margin: "0 auto",
+          padding: "1rem",
+        }}
+      >
         {/* Header */}
-        <div style={{ display: "flex", alignItems: "center", gap: "1rem", borderBottom: "2px solid rgba(239, 68, 68, 0.4)", paddingBottom: "1rem" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "1rem",
+            borderBottom: "2px solid rgba(239, 68, 68, 0.4)",
+            paddingBottom: "1rem",
+          }}
+        >
           <FaShieldAlt style={{ color: "#ef4444", fontSize: "2rem" }} />
           <div>
-            <h2 style={{ margin: 0, fontSize: "1.75rem", fontWeight: "bold", letterSpacing: "1px", color: "#f87171", fontFamily: "var(--font-runic, monospace)" }}>
+            <h2
+              style={{
+                margin: 0,
+                fontSize: "1.75rem",
+                fontWeight: "bold",
+                letterSpacing: "1px",
+                color: "#f87171",
+                fontFamily: "var(--font-runic, monospace)",
+              }}
+            >
               ADMIN PANEL
             </h2>
-            <p style={{ margin: "0.25rem 0 0 0", color: "#94a3b8", fontSize: "0.85rem" }}>
+            <p
+              style={{
+                margin: "0.25rem 0 0 0",
+                color: "#94a3b8",
+                fontSize: "0.85rem",
+              }}
+            >
               System configuration & secure administrative dashboard
             </p>
           </div>
         </div>
 
         {/* Active Admin Session Card (Full Width) */}
-        <div 
+        <div
           style={{
             border: "4px double #3b82f6",
             borderRadius: "8px",
@@ -639,26 +803,69 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
           }}
           className="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100"
         >
-          <h3 className="text-slate-800 dark:text-slate-100" style={{ margin: "0 0 1.25rem 0", fontSize: "1.25rem", fontWeight: "bold", display: "flex", alignItems: "center", gap: "0.5rem", borderBottom: "2px solid rgba(59, 130, 246, 0.4)", paddingBottom: "1rem" }}>
+          <h3
+            className="text-slate-800 dark:text-slate-100"
+            style={{
+              margin: "0 0 1.25rem 0",
+              fontSize: "1.25rem",
+              fontWeight: "bold",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              borderBottom: "2px solid rgba(59, 130, 246, 0.4)",
+              paddingBottom: "1rem",
+            }}
+          >
             <span>👑</span> Active Admin Session
           </h3>
-          
-          <div style={{ display: "flex", alignItems: "center", gap: "1.5rem", flexWrap: "wrap" }}>
+
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "1.5rem",
+              flexWrap: "wrap",
+            }}
+          >
             {activeUser.image && (
-              <img 
-                src={activeUser.image} 
-                alt="Avatar" 
-                style={{ width: "80px", height: "80px", borderRadius: "50%", border: "3px solid #3b82f6", objectFit: "cover", boxShadow: "0 0 15px rgba(59, 130, 246, 0.3)" }}
+              <img
+                src={activeUser.image}
+                alt="Avatar"
+                style={{
+                  width: "80px",
+                  height: "80px",
+                  borderRadius: "50%",
+                  border: "3px solid #3b82f6",
+                  objectFit: "cover",
+                  boxShadow: "0 0 15px rgba(59, 130, 246, 0.3)",
+                }}
               />
             )}
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", flexGrow: 1 }}>
-              <div className="text-slate-800 dark:text-slate-100" style={{ fontSize: "1.25rem", fontWeight: "bold" }}>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "0.5rem",
+                flexGrow: 1,
+              }}
+            >
+              <div
+                className="text-slate-800 dark:text-slate-100"
+                style={{ fontSize: "1.25rem", fontWeight: "bold" }}
+              >
                 {activeUser.name}
               </div>
-              <div className="text-slate-500 dark:text-slate-400" style={{ fontSize: "0.85rem", fontFamily: "monospace" }}>
-                <strong>Discord ID:</strong> {(activeUser as any).discordId || "N/A"}
+              <div
+                className="text-slate-500 dark:text-slate-400"
+                style={{ fontSize: "0.85rem", fontFamily: "monospace" }}
+              >
+                <strong>Discord ID:</strong>{" "}
+                {(activeUser as any).discordId || "N/A"}
               </div>
-              <div className="text-slate-500 dark:text-slate-400" style={{ fontSize: "0.85rem" }}>
+              <div
+                className="text-slate-500 dark:text-slate-400"
+                style={{ fontSize: "0.85rem" }}
+              >
                 <strong>Email:</strong> {activeUser.email}
               </div>
             </div>
@@ -676,18 +883,49 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
           }}
           className="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100"
         >
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", borderBottom: "2px solid rgba(239, 68, 68, 0.4)", paddingBottom: "1rem", marginBottom: "1.5rem" }}>
-            <h2 style={{ margin: 0, fontSize: "1.5rem", fontWeight: "bold", letterSpacing: "1px", color: "#f87171" }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "baseline",
+              borderBottom: "2px solid rgba(239, 68, 68, 0.4)",
+              paddingBottom: "1rem",
+              marginBottom: "1.5rem",
+            }}
+          >
+            <h2
+              style={{
+                margin: 0,
+                fontSize: "1.5rem",
+                fontWeight: "bold",
+                letterSpacing: "1px",
+                color: "#f87171",
+              }}
+            >
               PRESETS - ADMIN
             </h2>
-            <span className="text-slate-500 dark:text-slate-400" style={{ fontSize: "1rem", fontWeight: "bold" }}>
+            <span
+              className="text-slate-500 dark:text-slate-400"
+              style={{ fontSize: "1rem", fontWeight: "bold" }}
+            >
               Total: {mergedPresets.length} (Filtered: {sortedPresets.length})
             </span>
           </div>
 
           {/* Search Input */}
           <div style={{ position: "relative", marginBottom: "1rem" }}>
-            <FaSearch size={14} className="text-slate-400 dark:text-slate-500" style={{ position: "absolute", left: "0.75rem", top: "50%", transform: "translateY(-50%)", pointerEvents: "none", zIndex: 10 }} />
+            <FaSearch
+              size={14}
+              className="text-slate-400 dark:text-slate-500"
+              style={{
+                position: "absolute",
+                left: "0.75rem",
+                top: "50%",
+                transform: "translateY(-50%)",
+                pointerEvents: "none",
+                zIndex: 10,
+              }}
+            />
             <input
               type="text"
               placeholder="Search presets by name, author, tags, or description..."
@@ -702,7 +940,7 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                 borderRadius: "6px",
                 fontSize: "0.9rem",
                 outline: "none",
-                boxShadow: "none"
+                boxShadow: "none",
               }}
               className="placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-red-500 dark:focus:border-red-500 transition-all border border-[var(--border-input)]"
             />
@@ -722,7 +960,7 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                   cursor: "pointer",
                   fontSize: "0.85rem",
                   lineHeight: 1,
-                  zIndex: 10
+                  zIndex: 10,
                 }}
                 className="text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 transition-colors"
               >
@@ -732,53 +970,101 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
           </div>
 
           {/* Sort Controls & Select All */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem", marginBottom: "1.5rem" }}>
-            <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "0.5rem" }}>
-              <span className="text-slate-500 dark:text-slate-400" style={{ fontSize: "0.75rem", fontWeight: "bold", textTransform: "uppercase" }}>Sort:</span>
-              {(["name", "author", "downloads", "created_at"] as const).map((f) => {
-                const active = adminSortField === f;
-                const label = 
-                  f === "name" 
-                    ? "Name" 
-                    : f === "author" 
-                      ? "Author" 
-                      : f === "downloads" 
-                        ? "Downloads" 
-                        : "Creation Date";
-                return (
-                  <button
-                    key={f}
-                    onClick={() => {
-                      const nextDir = active 
-                        ? (adminSortDir === "asc" ? "desc" : "asc")
-                        : (f === "downloads" ? "desc" : "asc");
-                      setAdminSortField(f);
-                      setAdminSortDir(nextDir);
-                    }}
-                    style={{
-                      padding: "0.25rem 0.6rem",
-                      borderRadius: "999px",
-                      border: active ? "1px solid #ef4444" : "1px solid var(--border-light, rgba(255,255,255,0.1))",
-                      background: active ? "rgba(239,68,68,0.15)" : "transparent",
-                      color: active ? "#f87171" : "#94a3b8",
-                      fontSize: "0.75rem",
-                      fontWeight: active ? "bold" : "normal",
-                      cursor: "pointer",
-                      transition: "all 0.15s",
-                    }}
-                  >
-                    {label} {active && (adminSortDir === "asc" ? <FaSortAmountUp style={{ display: "inline", marginLeft: "0.2rem" }} /> : <FaSortAmountDown style={{ display: "inline", marginLeft: "0.2rem" }} />)}
-                  </button>
-                );
-              })}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              flexWrap: "wrap",
+              gap: "1rem",
+              marginBottom: "1.5rem",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                flexWrap: "wrap",
+                gap: "0.5rem",
+              }}
+            >
+              <span
+                className="text-slate-500 dark:text-slate-400"
+                style={{
+                  fontSize: "0.75rem",
+                  fontWeight: "bold",
+                  textTransform: "uppercase",
+                }}
+              >
+                Sort:
+              </span>
+              {(["name", "author", "downloads", "created_at"] as const).map(
+                (f) => {
+                  const active = adminSortField === f;
+                  const label =
+                    f === "name"
+                      ? "Name"
+                      : f === "author"
+                        ? "Author"
+                        : f === "downloads"
+                          ? "Downloads"
+                          : "Creation Date";
+                  return (
+                    <button
+                      key={f}
+                      onClick={() => {
+                        const nextDir = active
+                          ? adminSortDir === "asc"
+                            ? "desc"
+                            : "asc"
+                          : f === "downloads"
+                            ? "desc"
+                            : "asc";
+                        setAdminSortField(f);
+                        setAdminSortDir(nextDir);
+                      }}
+                      style={{
+                        padding: "0.25rem 0.6rem",
+                        borderRadius: "999px",
+                        border: active
+                          ? "1px solid #ef4444"
+                          : "1px solid var(--border-light, rgba(255,255,255,0.1))",
+                        background: active
+                          ? "rgba(239,68,68,0.15)"
+                          : "transparent",
+                        color: active ? "#f87171" : "#94a3b8",
+                        fontSize: "0.75rem",
+                        fontWeight: active ? "bold" : "normal",
+                        cursor: "pointer",
+                        transition: "all 0.15s",
+                      }}
+                    >
+                      {label}{" "}
+                      {active &&
+                        (adminSortDir === "asc" ? (
+                          <FaSortAmountUp
+                            style={{ display: "inline", marginLeft: "0.2rem" }}
+                          />
+                        ) : (
+                          <FaSortAmountDown
+                            style={{ display: "inline", marginLeft: "0.2rem" }}
+                          />
+                        ))}
+                    </button>
+                  );
+                },
+              )}
             </div>
 
             {/* Bulk Actions UI */}
-            <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
+            <div
+              style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}
+            >
               <button
                 onClick={handleSelectAll}
                 style={{
-                  border: "1px solid var(--border-light, rgba(255, 255, 255, 0.1))",
+                  border:
+                    "1px solid var(--border-light, rgba(255, 255, 255, 0.1))",
                   padding: "0.3rem 0.75rem",
                   borderRadius: "4px",
                   fontSize: "0.75rem",
@@ -787,17 +1073,26 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                 }}
                 className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 transition-colors"
               >
-                {sortedPresets.every((p) => selectedIds[p.id]) ? "Deselect All" : "Select All"}
+                {sortedPresets.every((p) => selectedIds[p.id])
+                  ? "Deselect All"
+                  : "Select All"}
               </button>
 
-              {Object.keys(selectedIds).filter((id) => selectedIds[id]).length > 0 && (
+              {Object.keys(selectedIds).filter((id) => selectedIds[id]).length >
+                0 && (
                 <button
                   onClick={() => {
-                    let confirmId = lastSelectedId && selectedIds[lastSelectedId] 
-                      ? lastSelectedId 
-                      : Object.keys(selectedIds).find(id => selectedIds[id]);
+                    let confirmId =
+                      lastSelectedId && selectedIds[lastSelectedId]
+                        ? lastSelectedId
+                        : Object.keys(selectedIds).find(
+                            (id) => selectedIds[id],
+                          );
                     if (confirmId) {
-                      setShowConfirm(prev => ({ ...prev, [confirmId as string]: true }));
+                      setShowConfirm((prev) => ({
+                        ...prev,
+                        [confirmId as string]: true,
+                      }));
                     }
                   }}
                   style={{
@@ -816,18 +1111,37 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                   className="hover:bg-red-500 hover:text-white transition-colors"
                 >
                   <FaTrash size={10} />
-                  <span>Delete ({Object.keys(selectedIds).filter((id) => selectedIds[id]).length})</span>
+                  <span>
+                    Delete (
+                    {
+                      Object.keys(selectedIds).filter((id) => selectedIds[id])
+                        .length
+                    }
+                    )
+                  </span>
                 </button>
               )}
             </div>
           </div>
 
           {loadingPresets && allPresets.length === 0 ? (
-            <div className="animate-pulse text-slate-500 dark:text-slate-400" style={{ fontSize: "0.9rem" }}>Loading database presets...</div>
+            <div
+              className="animate-pulse text-slate-500 dark:text-slate-400"
+              style={{ fontSize: "0.9rem" }}
+            >
+              Loading database presets...
+            </div>
           ) : sortedPresets.length === 0 ? (
-            <div className="text-slate-500 dark:text-slate-400" style={{ fontSize: "0.9rem", fontStyle: "italic" }}>No matching presets found in system.</div>
+            <div
+              className="text-slate-500 dark:text-slate-400"
+              style={{ fontSize: "0.9rem", fontStyle: "italic" }}
+            >
+              No matching presets found in system.
+            </div>
           ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
+            >
               {visiblePresets.map((preset) => {
                 const isExpanded = !!adminExpandedPresets[preset.id];
                 const isSelected = !!selectedIds[preset.id];
@@ -837,13 +1151,33 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                     style={{
                       padding: "0.75rem 1rem",
                       borderRadius: "6px",
-                      border: isSelected ? "1px solid #ef4444" : "1px solid var(--border-light, rgba(255, 255, 255, 0.08))",
+                      border: isSelected
+                        ? "1px solid #ef4444"
+                        : "1px solid var(--border-light, rgba(255, 255, 255, 0.08))",
                     }}
-                    className={isSelected ? "bg-red-500/5 dark:bg-red-500/10 text-slate-800 dark:text-slate-100" : "bg-slate-100 hover:bg-slate-200/50 dark:bg-slate-800/40 dark:hover:bg-slate-800/60 text-slate-800 dark:text-slate-100 transition-colors"}
+                    className={
+                      isSelected
+                        ? "bg-red-500/5 dark:bg-red-500/10 text-slate-800 dark:text-slate-100"
+                        : "bg-slate-100 hover:bg-slate-200/50 dark:bg-slate-800/40 dark:hover:bg-slate-800/60 text-slate-800 dark:text-slate-100 transition-colors"
+                    }
                   >
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <div style={{ display: "flex", alignItems: "center", flex: 1, minWidth: 0, paddingRight: "1rem" }}>
-                        <div 
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          flex: 1,
+                          minWidth: 0,
+                          paddingRight: "1rem",
+                        }}
+                      >
+                        <div
                           role="checkbox"
                           aria-checked={isSelected}
                           tabIndex={0}
@@ -852,7 +1186,7 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                               e.preventDefault();
                               setSelectedIds((prev) => ({
                                 ...prev,
-                                [preset.id]: !isSelected
+                                [preset.id]: !isSelected,
                               }));
                               if (!isSelected) {
                                 setLastSelectedId(preset.id);
@@ -863,40 +1197,81 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                             e.stopPropagation();
                             setSelectedIds((prev) => ({
                               ...prev,
-                              [preset.id]: !isSelected
+                              [preset.id]: !isSelected,
                             }));
                             if (!isSelected) {
                               setLastSelectedId(preset.id);
                             }
                           }}
                           className={`w-5 h-5 rounded border flex items-center justify-center cursor-pointer transition-all mr-3 flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-red-500
-                            ${isSelected 
-                              ? "bg-red-500 border-red-500 text-white shadow-sm" 
-                              : "border-slate-300 dark:border-slate-600 hover:border-red-400 dark:hover:border-red-500 bg-white dark:bg-slate-900"
+                            ${
+                              isSelected
+                                ? "bg-red-500 border-red-500 text-white shadow-sm"
+                                : "border-slate-300 dark:border-slate-600 hover:border-red-400 dark:hover:border-red-500 bg-white dark:bg-slate-900"
                             }`}
                         >
                           {isSelected && (
-                            <svg className="w-3.5 h-3.5 fill-current stroke-current" viewBox="0 0 24 24">
-                              <path strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" stroke="currentColor" fill="none" />
+                            <svg
+                              className="w-3.5 h-3.5 fill-current stroke-current"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeWidth="3"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M5 13l4 4L19 7"
+                                stroke="currentColor"
+                                fill="none"
+                              />
                             </svg>
                           )}
                         </div>
 
-                        <div style={{ display: "flex", flexDirection: "column", flex: 1, minWidth: 0 }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            flex: 1,
+                            minWidth: 0,
+                          }}
+                        >
                           <AdminPresetTitle name={preset.name} />
-                          <div style={{ fontSize: "0.75rem", color: "#94a3b8", marginTop: "0.1rem" }}>
-                            by {preset.creator_name || preset.creator || "Unknown"} · {formatTruncatedDate(preset.created_timestamp || preset.created_at)}
+                          <div
+                            style={{
+                              fontSize: "0.75rem",
+                              color: "#94a3b8",
+                              marginTop: "0.1rem",
+                            }}
+                          >
+                            by{" "}
+                            {preset.creator_name || preset.creator || "Unknown"}{" "}
+                            ·{" "}
+                            {formatTruncatedDate(
+                              preset.created_timestamp || preset.created_at,
+                            )}
                           </div>
                           {/* Tag Toggle Buttons Sub-Row in Collapsed View */}
-                          <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginTop: "0.4rem", alignItems: "center" }}>
+                          <div
+                            style={{
+                              display: "flex",
+                              gap: "0.5rem",
+                              flexWrap: "wrap",
+                              marginTop: "0.4rem",
+                              alignItems: "center",
+                            }}
+                          >
                             {/* Official tag toggle */}
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
                                 e.preventDefault();
-                                const isOfficial = Array.isArray(preset.tags) && preset.tags.includes("official");
+                                const isOfficial =
+                                  Array.isArray(preset.tags) &&
+                                  preset.tags.includes("official");
                                 const nextTags = isOfficial
-                                  ? (preset.tags || []).filter((t: string) => t !== "official")
+                                  ? (preset.tags || []).filter(
+                                      (t: string) => t !== "official",
+                                    )
                                   : [...(preset.tags || []), "official"];
                                 handleSaveTags(preset, nextTags);
                               }}
@@ -905,8 +1280,12 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                                 alignItems: "center",
                                 gap: "0.25rem",
                                 fontSize: "0.7rem",
-                                backgroundColor: preset.official ? "rgba(245, 158, 11, 0.25)" : "transparent",
-                                color: preset.official ? "#f59e0b" : "var(--text-sub, #64748b)",
+                                backgroundColor: preset.official
+                                  ? "rgba(245, 158, 11, 0.25)"
+                                  : "transparent",
+                                color: preset.official
+                                  ? "#f59e0b"
+                                  : "var(--text-sub, #64748b)",
                                 border: `1px solid ${preset.official ? "#f59e0b" : "var(--border-light, rgba(255,255,255,0.15))"}`,
                                 padding: "0.15rem 0.4rem",
                                 borderRadius: "3px",
@@ -919,46 +1298,63 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                             </button>
 
                             {/* Dynamic Canned Tags */}
-                            {cannedTags.filter(tag => tag !== "official").map(tag => {
-                              const isActive = Array.isArray(preset.tags) && preset.tags.includes(tag);
-                              return (
-                                <button
-                                  key={tag}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    e.preventDefault();
-                                    const nextTags = isActive
-                                      ? (preset.tags || []).filter((t: string) => t !== tag)
-                                      : [...(preset.tags || []), tag];
-                                    handleSaveTags(preset, nextTags);
-                                  }}
-                                  style={{
-                                    fontSize: "0.7rem",
-                                    backgroundColor: isActive ? "rgba(59, 130, 246, 0.25)" : "transparent",
-                                    color: isActive ? "#60a5fa" : "var(--text-sub, #64748b)",
-                                    border: `1px solid ${isActive ? "#60a5fa" : "var(--border-light, rgba(255, 255, 255, 0.15))"}`,
-                                    padding: "0.15rem 0.4rem",
-                                    borderRadius: "3px",
-                                    cursor: "pointer",
-                                    fontWeight: "bold",
-                                    transition: "all 0.15s",
-                                  }}
-                                >
-                                  {tag.toUpperCase()}
-                                </button>
-                              );
-                            })}
+                            {cannedTags
+                              .filter((tag) => tag !== "official")
+                              .map((tag) => {
+                                const isActive =
+                                  Array.isArray(preset.tags) &&
+                                  preset.tags.includes(tag);
+                                return (
+                                  <button
+                                    key={tag}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      e.preventDefault();
+                                      const nextTags = isActive
+                                        ? (preset.tags || []).filter(
+                                            (t: string) => t !== tag,
+                                          )
+                                        : [...(preset.tags || []), tag];
+                                      handleSaveTags(preset, nextTags);
+                                    }}
+                                    style={{
+                                      fontSize: "0.7rem",
+                                      backgroundColor: isActive
+                                        ? "rgba(59, 130, 246, 0.25)"
+                                        : "transparent",
+                                      color: isActive
+                                        ? "#60a5fa"
+                                        : "var(--text-sub, #64748b)",
+                                      border: `1px solid ${isActive ? "#60a5fa" : "var(--border-light, rgba(255, 255, 255, 0.15))"}`,
+                                      padding: "0.15rem 0.4rem",
+                                      borderRadius: "3px",
+                                      cursor: "pointer",
+                                      fontWeight: "bold",
+                                      transition: "all 0.15s",
+                                    }}
+                                  >
+                                    {tag.toUpperCase()}
+                                  </button>
+                                );
+                              })}
                           </div>
                         </div>
                       </div>
 
                       {/* Preset Actions */}
-                      <div style={{ display: "flex", alignItems: "center", gap: "1rem", flexShrink: 0 }}>
-                        <span 
-                          style={{ 
-                            fontSize: "0.75rem", 
-                            fontWeight: "bold", 
-                            padding: "0.15rem 0.5rem", 
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "1rem",
+                          flexShrink: 0,
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontSize: "0.75rem",
+                            fontWeight: "bold",
+                            padding: "0.15rem 0.5rem",
                             borderRadius: "999px",
                             display: "inline-flex",
                             alignItems: "center",
@@ -967,11 +1363,27 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                           className="bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400 border border-blue-200 dark:border-blue-900/50"
                           title="Total downloads on site"
                         >
-                          📥 {preset.downloads ?? preset.download_count ?? preset.dbRecord?.downloads ?? preset.dbRecord?.download_count ?? 0}
+                          📥{" "}
+                          {preset.downloads ??
+                            preset.download_count ??
+                            preset.dbRecord?.downloads ??
+                            preset.dbRecord?.download_count ??
+                            0}
                         </span>
                         <button
                           onClick={() => toggleAdminPreset(preset.id)}
-                          style={{ background: "none", border: "none", color: "#60a5fa", cursor: "pointer", fontSize: "0.85rem", padding: 0, display: "flex", alignItems: "center", gap: "0.25rem", fontWeight: "bold" }}
+                          style={{
+                            background: "none",
+                            border: "none",
+                            color: "#60a5fa",
+                            cursor: "pointer",
+                            fontSize: "0.85rem",
+                            padding: 0,
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "0.25rem",
+                            fontWeight: "bold",
+                          }}
                           className="hover:text-blue-400"
                         >
                           {isExpanded ? "▼ Hide" : "▶ Show"}
@@ -981,56 +1393,167 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
 
                     {/* Expanded View */}
                     {isExpanded && (
-                      <div style={{ marginTop: "0.75rem", borderTop: "1px dashed rgba(148, 163, 184, 0.2)", paddingTop: "0.75rem", paddingLeft: "1.75rem" }}>
-
+                      <div
+                        style={{
+                          marginTop: "0.75rem",
+                          borderTop: "1px dashed rgba(148, 163, 184, 0.2)",
+                          paddingTop: "0.75rem",
+                          paddingLeft: "1.75rem",
+                        }}
+                      >
                         {editingPresetId === preset.id ? (
-                          <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                            <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
-                              <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem", flex: 1, minWidth: "200px" }}>
-                                <label style={{ fontSize: "0.75rem", fontWeight: "bold", color: "#f87171" }}>Preset Name *</label>
-                                <input 
+                          <div
+                            style={{
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: "1rem",
+                            }}
+                          >
+                            <div
+                              style={{
+                                display: "flex",
+                                gap: "1rem",
+                                flexWrap: "wrap",
+                              }}
+                            >
+                              <div
+                                style={{
+                                  display: "flex",
+                                  flexDirection: "column",
+                                  gap: "0.25rem",
+                                  flex: 1,
+                                  minWidth: "200px",
+                                }}
+                              >
+                                <label
+                                  style={{
+                                    fontSize: "0.75rem",
+                                    fontWeight: "bold",
+                                    color: "#f87171",
+                                  }}
+                                >
+                                  Preset Name *
+                                </label>
+                                <input
                                   type="text"
                                   value={editName}
                                   onChange={(e) => setEditName(e.target.value)}
-                                  style={{ padding: "0.5rem", borderRadius: "4px", fontSize: "0.85rem", width: "100%" }}
+                                  style={{
+                                    padding: "0.5rem",
+                                    borderRadius: "4px",
+                                    fontSize: "0.85rem",
+                                    width: "100%",
+                                  }}
                                   className="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 border border-[var(--border-input)]"
                                 />
                               </div>
-                              <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem", flex: 1, minWidth: "200px" }}>
-                                <label style={{ fontSize: "0.75rem", fontWeight: "bold", color: "#f87171" }}>Creator Name</label>
-                                <input 
+                              <div
+                                style={{
+                                  display: "flex",
+                                  flexDirection: "column",
+                                  gap: "0.25rem",
+                                  flex: 1,
+                                  minWidth: "200px",
+                                }}
+                              >
+                                <label
+                                  style={{
+                                    fontSize: "0.75rem",
+                                    fontWeight: "bold",
+                                    color: "#f87171",
+                                  }}
+                                >
+                                  Creator Name
+                                </label>
+                                <input
                                   type="text"
                                   value={editCreatorName}
-                                  onChange={(e) => setEditCreatorName(e.target.value)}
-                                  style={{ padding: "0.5rem", borderRadius: "4px", fontSize: "0.85rem", width: "100%" }}
+                                  onChange={(e) =>
+                                    setEditCreatorName(e.target.value)
+                                  }
+                                  style={{
+                                    padding: "0.5rem",
+                                    borderRadius: "4px",
+                                    fontSize: "0.85rem",
+                                    width: "100%",
+                                  }}
                                   className="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 border border-[var(--border-input)]"
                                 />
                               </div>
                             </div>
 
-                            <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
-                              <label style={{ fontSize: "0.75rem", fontWeight: "bold", color: "#f87171" }}>Description</label>
-                              <textarea 
+                            <div
+                              style={{
+                                display: "flex",
+                                flexDirection: "column",
+                                gap: "0.25rem",
+                              }}
+                            >
+                              <label
+                                style={{
+                                  fontSize: "0.75rem",
+                                  fontWeight: "bold",
+                                  color: "#f87171",
+                                }}
+                              >
+                                Description
+                              </label>
+                              <textarea
                                 value={editDescription}
-                                onChange={(e) => setEditDescription(e.target.value)}
+                                onChange={(e) =>
+                                  setEditDescription(e.target.value)
+                                }
                                 rows={3}
-                                style={{ padding: "0.5rem", borderRadius: "4px", fontSize: "0.85rem", width: "100%", resize: "vertical" }}
+                                style={{
+                                  padding: "0.5rem",
+                                  borderRadius: "4px",
+                                  fontSize: "0.85rem",
+                                  width: "100%",
+                                  resize: "vertical",
+                                }}
                                 className="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 border border-[var(--border-input)]"
                               />
                             </div>
 
-                            <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
-                              <label style={{ fontSize: "0.75rem", fontWeight: "bold", color: "#f87171" }}>Flags *</label>
-                              <textarea 
+                            <div
+                              style={{
+                                display: "flex",
+                                flexDirection: "column",
+                                gap: "0.25rem",
+                              }}
+                            >
+                              <label
+                                style={{
+                                  fontSize: "0.75rem",
+                                  fontWeight: "bold",
+                                  color: "#f87171",
+                                }}
+                              >
+                                Flags *
+                              </label>
+                              <textarea
                                 value={editFlags}
                                 onChange={(e) => setEditFlags(e.target.value)}
                                 rows={4}
-                                style={{ padding: "0.5rem", borderRadius: "4px", fontSize: "0.8rem", width: "100%", fontFamily: "monospace", resize: "vertical" }}
+                                style={{
+                                  padding: "0.5rem",
+                                  borderRadius: "4px",
+                                  fontSize: "0.8rem",
+                                  width: "100%",
+                                  fontFamily: "monospace",
+                                  resize: "vertical",
+                                }}
                                 className="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 border border-[var(--border-input)]"
                               />
                             </div>
 
-                            <div style={{ display: "flex", gap: "0.75rem", marginTop: "0.25rem" }}>
+                            <div
+                              style={{
+                                display: "flex",
+                                gap: "0.75rem",
+                                marginTop: "0.25rem",
+                              }}
+                            >
                               <button
                                 onClick={() => handleSaveEdit(preset)}
                                 disabled={isSavingEdit}
@@ -1068,29 +1591,91 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                         ) : (
                           <>
                             {preset.description && (
-                              <p className="text-slate-700 dark:text-slate-300" style={{ fontSize: "0.9rem", marginTop: 0, marginBottom: "0.75rem", lineHeight: "1.4", whiteSpace: "pre-wrap" }}>
+                              <p
+                                className="text-slate-700 dark:text-slate-300"
+                                style={{
+                                  fontSize: "0.9rem",
+                                  marginTop: 0,
+                                  marginBottom: "0.75rem",
+                                  lineHeight: "1.4",
+                                  whiteSpace: "pre-wrap",
+                                }}
+                              >
                                 {preset.description}
                               </p>
                             )}
-                            <div className="text-slate-800 dark:text-slate-300 bg-slate-200/50 dark:bg-slate-950/60" style={{ padding: "0.75rem", borderRadius: "4px", fontSize: "0.8rem", fontFamily: "monospace", overflowX: "auto", whiteSpace: "pre-wrap", wordBreak: "break-all", border: "1px solid var(--border-light, rgba(255,255,255,0.05))" }}>
-                                {preset.flags || "(No flags provided in external API)"}
+                            <div
+                              className="text-slate-800 dark:text-slate-300 bg-slate-200/50 dark:bg-slate-950/60"
+                              style={{
+                                padding: "0.75rem",
+                                borderRadius: "4px",
+                                fontSize: "0.8rem",
+                                fontFamily: "monospace",
+                                overflowX: "auto",
+                                whiteSpace: "pre-wrap",
+                                wordBreak: "break-all",
+                                border:
+                                  "1px solid var(--border-light, rgba(255,255,255,0.05))",
+                              }}
+                            >
+                              {preset.flags ||
+                                "(No flags provided in external API)"}
                             </div>
-                            <div className="text-slate-500 dark:text-slate-400" style={{ display: "flex", gap: "1rem", marginTop: "0.75rem", fontSize: "0.75rem", fontWeight: "bold", flexWrap: "wrap", alignItems: "center", width: "100%" }}>
-                              <span>Created: {formatTruncatedDate(preset.created_timestamp)}</span>
-                              <span>Total Downloads: {preset.downloads ?? preset.download_count ?? preset.dbRecord?.downloads ?? preset.dbRecord?.download_count ?? 0}</span>
+                            <div
+                              className="text-slate-500 dark:text-slate-400"
+                              style={{
+                                display: "flex",
+                                gap: "1rem",
+                                marginTop: "0.75rem",
+                                fontSize: "0.75rem",
+                                fontWeight: "bold",
+                                flexWrap: "wrap",
+                                alignItems: "center",
+                                width: "100%",
+                              }}
+                            >
+                              <span>
+                                Created:{" "}
+                                {formatTruncatedDate(preset.created_timestamp)}
+                              </span>
+                              <span>
+                                Total Downloads:{" "}
+                                {preset.downloads ??
+                                  preset.download_count ??
+                                  preset.dbRecord?.downloads ??
+                                  preset.dbRecord?.download_count ??
+                                  0}
+                              </span>
                               {preset.download_timestamp && (
                                 <span>
                                   Last Downloaded:{" "}
-                                  {new Date(preset.download_timestamp).toLocaleDateString(undefined, {
+                                  {new Date(
+                                    preset.download_timestamp,
+                                  ).toLocaleDateString(undefined, {
                                     month: "short",
                                     day: "numeric",
                                   })}
                                 </span>
                               )}
-                              
+
                               {showConfirm[preset.id] ? (
-                                <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", marginLeft: "auto" }}>
-                                  <span style={{ color: "#f87171", fontSize: "0.75rem", fontWeight: "bold" }}>Confirm Delete?</span>
+                                <div
+                                  style={{
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    gap: "0.5rem",
+                                    marginLeft: "auto",
+                                  }}
+                                >
+                                  <span
+                                    style={{
+                                      color: "#f87171",
+                                      fontSize: "0.75rem",
+                                      fontWeight: "bold",
+                                    }}
+                                  >
+                                    Confirm Delete?
+                                  </span>
                                   <button
                                     onClick={(e) => {
                                       e.stopPropagation();
@@ -1116,7 +1701,10 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       e.preventDefault();
-                                      setShowConfirm((p) => ({ ...p, [preset.id]: false }));
+                                      setShowConfirm((p) => ({
+                                        ...p,
+                                        [preset.id]: false,
+                                      }));
                                     }}
                                     disabled={!!isDeleting[preset.id]}
                                     style={{
@@ -1137,7 +1725,10 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     e.preventDefault();
-                                    setShowConfirm((p) => ({ ...p, [preset.id]: true }));
+                                    setShowConfirm((p) => ({
+                                      ...p,
+                                      [preset.id]: true,
+                                    }));
                                   }}
                                   style={{
                                     backgroundColor: "rgba(239, 68, 68, 0.1)",
@@ -1168,7 +1759,15 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
 
           {/* Load More Button for Pagination */}
           {sortedPresets.length > visibleCount && (
-            <div style={{ display: "flex", justifyContent: "center", gap: "1rem", flexWrap: "wrap", marginTop: "1rem" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                gap: "1rem",
+                flexWrap: "wrap",
+                marginTop: "1rem",
+              }}
+            >
               <button
                 onClick={handleLoadMore}
                 style={{
@@ -1180,7 +1779,7 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                   fontSize: "0.85rem",
                   fontWeight: "bold",
                   cursor: "pointer",
-                  transition: "all 0.2s"
+                  transition: "all 0.2s",
                 }}
                 className="hover:bg-red-500 hover:text-white"
               >
@@ -1197,7 +1796,7 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                   fontSize: "0.85rem",
                   fontWeight: "bold",
                   cursor: "pointer",
-                  transition: "all 0.2s"
+                  transition: "all 0.2s",
                 }}
                 className="hover:bg-blue-600 hover:text-white"
               >
@@ -1218,108 +1817,248 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
           }}
           className="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100"
         >
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", borderBottom: "2px solid rgba(139, 92, 246, 0.4)", paddingBottom: "1rem", marginBottom: "1.5rem" }}>
-            <h2 style={{ margin: 0, fontSize: "1.5rem", fontWeight: "bold", letterSpacing: "1px", color: "#a78bfa" }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "baseline",
+              borderBottom: "2px solid rgba(139, 92, 246, 0.4)",
+              paddingBottom: "1rem",
+              marginBottom: "1.5rem",
+            }}
+          >
+            <h2
+              style={{
+                margin: 0,
+                fontSize: "1.5rem",
+                fontWeight: "bold",
+                letterSpacing: "1px",
+                color: "#a78bfa",
+              }}
+            >
               TAGS ADMINISTRATION
             </h2>
-            <span className="text-slate-500 dark:text-slate-400" style={{ fontSize: "1rem", fontWeight: "bold" }}>
+            <span
+              className="text-slate-500 dark:text-slate-400"
+              style={{ fontSize: "1rem", fontWeight: "bold" }}
+            >
               {cannedTags.length} Active Tags
             </span>
           </div>
-          
-          <div style={{ display: "flex", gap: "1rem", alignItems: "center", marginBottom: "1.5rem", flexWrap: "wrap" }}>
-            <input 
-              type="text" 
-              value={newTagName} 
-              onChange={e => setNewTagName(e.target.value)} 
-              placeholder="Enter new tag name..." 
-              style={{ padding: "0.6rem 1rem", borderRadius: "4px", border: "1px solid rgba(139, 92, 246, 0.5)", flexGrow: 1, outline: "none", fontSize: "0.9rem" }} 
+
+          <div
+            style={{
+              display: "flex",
+              gap: "1rem",
+              alignItems: "center",
+              marginBottom: "1.5rem",
+              flexWrap: "wrap",
+            }}
+          >
+            <input
+              type="text"
+              value={newTagName}
+              onChange={(e) => setNewTagName(e.target.value)}
+              placeholder="Enter new tag name..."
+              style={{
+                padding: "0.6rem 1rem",
+                borderRadius: "4px",
+                border: "1px solid rgba(139, 92, 246, 0.5)",
+                flexGrow: 1,
+                outline: "none",
+                fontSize: "0.9rem",
+              }}
               className="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-600"
             />
-            <button 
+            <button
               onClick={async () => {
-                if(!newTagName.trim()) return;
+                if (!newTagName.trim()) return;
                 try {
-                  const res = await narsheFetch("/tags", { method: "POST", body: JSON.stringify({tag: newTagName}) });
+                  const res = await narsheFetch("/tags", {
+                    method: "POST",
+                    body: JSON.stringify({ tag: newTagName }),
+                  });
                   if (!res.ok) throw new Error(await res.text());
                   setNewTagName("");
                   fetchTags();
-                } catch(e: any) {
+                } catch (e: any) {
                   alert(`Failed to add tag: ${e.message}`);
                 }
               }}
-              style={{ backgroundColor: "#8b5cf6", border: "none", color: "white", padding: "0.6rem 1.5rem", borderRadius: "4px", fontWeight: "bold", cursor: "pointer", fontSize: "0.9rem" }}
+              style={{
+                backgroundColor: "#8b5cf6",
+                border: "none",
+                color: "white",
+                padding: "0.6rem 1.5rem",
+                borderRadius: "4px",
+                fontWeight: "bold",
+                cursor: "pointer",
+                fontSize: "0.9rem",
+              }}
               className="hover:bg-purple-600 transition-colors"
             >
               + Create Tag
             </button>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))", gap: "1rem" }}>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))",
+              gap: "1rem",
+            }}
+          >
             {cannedTags.length === 0 ? (
-              <div style={{ color: "#94a3b8", fontStyle: "italic", fontSize: "0.9rem" }}>No custom tags created yet.</div>
-            ) : cannedTags.map(tag => (
-              <div 
-                key={tag} 
-                style={{ 
-                  display: "flex", 
-                  justifyContent: "space-between", 
-                  alignItems: "center", 
-                  padding: "0.75rem 1rem", 
-                  borderRadius: "6px", 
+              <div
+                style={{
+                  color: "#94a3b8",
+                  fontStyle: "italic",
+                  fontSize: "0.9rem",
                 }}
-                className="bg-slate-100 dark:bg-slate-800/40 text-slate-800 dark:text-slate-200 border border-purple-200 dark:border-purple-900/30"
               >
-                {editingTag?.old === tag ? (
-                  <div style={{ display: "flex", gap: "0.5rem", width: "100%" }}>
-                    <input 
-                      type="text" 
-                      value={editingTag.new} 
-                      onChange={e => setEditingTag({ ...editingTag, new: e.target.value })} 
-                      style={{ padding: "0.25rem", borderRadius: "3px", flexGrow: 1, minWidth: 0 }} 
-                      className="bg-slate-100 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-800 dark:text-slate-100" 
-                    />
-                    <button onClick={async () => {
-                      if (!editingTag.new.trim()) return;
-                      try {
-                        const res = await narsheFetch("/tags", { method: "PUT", body: JSON.stringify({ oldTag: editingTag.old, newTag: editingTag.new }) });
-                        if (!res.ok) throw new Error(await res.text());
-                        setEditingTag(null);
-                        fetchTags();
-                        fetchPresets(); // Refresh presets since tags may have changed
-                      } catch (e: any) {
-                        alert(`Failed to rename tag: ${e.message}`);
-                      }
-                    }} style={{ color: "#10b981", background: "none", border: "none", cursor: "pointer", fontWeight: "bold", fontSize: "0.8rem" }}>Save</button>
-                    <button onClick={() => setEditingTag(null)} style={{ color: "#ef4444", background: "none", border: "none", cursor: "pointer", fontSize: "0.8rem" }}>✕</button>
-                  </div>
-                ) : (
-                  <>
-                    <span className="text-purple-700 dark:text-purple-200" style={{ fontWeight: "bold", textTransform: "uppercase", fontSize: "0.85rem" }}>{tag}</span>
-                    <div style={{ display: "flex", gap: "0.75rem" }}>
-                      <button onClick={() => setEditingTag({old: tag, new: tag})} style={{ background: "none", border: "none", color: "#60a5fa", cursor: "pointer", fontSize: "0.85rem", fontWeight: "bold" }} className="hover:text-blue-400">Edit</button>
-                      <button onClick={async () => {
-                        if(confirm(`Are you sure you want to delete the tag "${tag}"? It will be removed from all presets.`)) {
-                          try {
-                            const res = await narsheFetch("/tags", { method: "DELETE", body: JSON.stringify({tag}) });
-                            if (!res.ok) throw new Error(await res.text());
-                            fetchTags();
-                            fetchPresets();
-                          } catch (e: any) {
-                            alert(`Failed to delete tag: ${e.message}`);
-                          }
-                        }
-                      }} style={{ background: "none", border: "none", color: "#f87171", cursor: "pointer", fontSize: "0.85rem", fontWeight: "bold" }} className="hover:text-red-400">Delete</button>
-                    </div>
-                  </>
-                )}
+                No custom tags created yet.
               </div>
-            ))}
+            ) : (
+              cannedTags.map((tag) => (
+                <div
+                  key={tag}
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    padding: "0.75rem 1rem",
+                    borderRadius: "6px",
+                  }}
+                  className="bg-slate-100 dark:bg-slate-800/40 text-slate-800 dark:text-slate-200 border border-purple-200 dark:border-purple-900/30"
+                >
+                  {editingTag?.old === tag ? (
+                    <div
+                      style={{ display: "flex", gap: "0.5rem", width: "100%" }}
+                    >
+                      <input
+                        type="text"
+                        value={editingTag.new}
+                        onChange={(e) =>
+                          setEditingTag({ ...editingTag, new: e.target.value })
+                        }
+                        style={{
+                          padding: "0.25rem",
+                          borderRadius: "3px",
+                          flexGrow: 1,
+                          minWidth: 0,
+                        }}
+                        className="bg-slate-100 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-800 dark:text-slate-100"
+                      />
+                      <button
+                        onClick={async () => {
+                          if (!editingTag.new.trim()) return;
+                          try {
+                            const res = await narsheFetch("/tags", {
+                              method: "PUT",
+                              body: JSON.stringify({
+                                oldTag: editingTag.old,
+                                newTag: editingTag.new,
+                              }),
+                            });
+                            if (!res.ok) throw new Error(await res.text());
+                            setEditingTag(null);
+                            fetchTags();
+                            fetchPresets(); // Refresh presets since tags may have changed
+                          } catch (e: any) {
+                            alert(`Failed to rename tag: ${e.message}`);
+                          }
+                        }}
+                        style={{
+                          color: "#10b981",
+                          background: "none",
+                          border: "none",
+                          cursor: "pointer",
+                          fontWeight: "bold",
+                          fontSize: "0.8rem",
+                        }}
+                      >
+                        Save
+                      </button>
+                      <button
+                        onClick={() => setEditingTag(null)}
+                        style={{
+                          color: "#ef4444",
+                          background: "none",
+                          border: "none",
+                          cursor: "pointer",
+                          fontSize: "0.8rem",
+                        }}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <span
+                        className="text-purple-700 dark:text-purple-200"
+                        style={{
+                          fontWeight: "bold",
+                          textTransform: "uppercase",
+                          fontSize: "0.85rem",
+                        }}
+                      >
+                        {tag}
+                      </span>
+                      <div style={{ display: "flex", gap: "0.75rem" }}>
+                        <button
+                          onClick={() => setEditingTag({ old: tag, new: tag })}
+                          style={{
+                            background: "none",
+                            border: "none",
+                            color: "#60a5fa",
+                            cursor: "pointer",
+                            fontSize: "0.85rem",
+                            fontWeight: "bold",
+                          }}
+                          className="hover:text-blue-400"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={async () => {
+                            if (
+                              confirm(
+                                `Are you sure you want to delete the tag "${tag}"? It will be removed from all presets.`,
+                              )
+                            ) {
+                              try {
+                                const res = await narsheFetch("/tags", {
+                                  method: "DELETE",
+                                  body: JSON.stringify({ tag }),
+                                });
+                                if (!res.ok) throw new Error(await res.text());
+                                fetchTags();
+                                fetchPresets();
+                              } catch (e: any) {
+                                alert(`Failed to delete tag: ${e.message}`);
+                              }
+                            }
+                          }}
+                          style={{
+                            background: "none",
+                            border: "none",
+                            color: "#f87171",
+                            cursor: "pointer",
+                            fontSize: "0.85rem",
+                            fontWeight: "bold",
+                          }}
+                          className="hover:text-red-400"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              ))
+            )}
           </div>
         </div>
-
-
-
       </div>
     </PageContainer>
   );

@@ -33,7 +33,7 @@ export const StartingItemsRemoveItemButton = ({
       setFlag({
         flag: "-si",
         value: startingItemsToString(newItems),
-      })
+      }),
     );
   };
 
@@ -49,4 +49,3 @@ export const StartingItemsRemoveItemButton = ({
     </button>
   );
 };
-

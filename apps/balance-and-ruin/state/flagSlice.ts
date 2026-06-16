@@ -65,7 +65,9 @@ export const flagSlice = createSlice({
         if (
           typeof window !== "undefined" &&
           localStorage.getItem("gfx_persist_enabled") === "true" &&
-          ["-name", "-cpal", "-cpor", "-cspr", "-cspp"].includes(action.payload.flag)
+          ["-name", "-cpal", "-cpor", "-cspr", "-cspp"].includes(
+            action.payload.flag,
+          )
         ) {
           localStorage.removeItem(`gfx_${action.payload.flag.slice(1)}`);
         }
@@ -77,7 +79,9 @@ export const flagSlice = createSlice({
       if (
         typeof window !== "undefined" &&
         localStorage.getItem("gfx_persist_enabled") === "true" &&
-        ["-name", "-cpal", "-cpor", "-cspr", "-cspp"].includes(action.payload.flag)
+        ["-name", "-cpal", "-cpor", "-cspr", "-cspp"].includes(
+          action.payload.flag,
+        )
       ) {
         const lsKey = `gfx_${action.payload.flag.slice(1)}`;
         const lsVal = action.payload.value as string;
@@ -92,7 +96,10 @@ export const flagSlice = createSlice({
           localStorage.getItem("gfx_persist_enabled") === "true" &&
           ["-name", "-cpal", "-cpor", "-cspr", "-cspp"].includes(key)
         ) {
-          localStorage.setItem(`gfx_${key.slice(1)}`, action.payload[key] as string);
+          localStorage.setItem(
+            `gfx_${key.slice(1)}`,
+            action.payload[key] as string,
+          );
         }
       });
 
@@ -100,13 +107,22 @@ export const flagSlice = createSlice({
     },
     setRawFlags: (state, action: PayloadAction<string>) => {
       const newFlagValues = flagsToData(action.payload);
-      const GRAPHICS_FLAGS = ["-name", "-cpal", "-cpor", "-cspr", "-cspp"] as const;
+      const GRAPHICS_FLAGS = [
+        "-name",
+        "-cpal",
+        "-cpor",
+        "-cspr",
+        "-cspp",
+      ] as const;
 
       // For user-triggered preset changes: if persist is enabled and the preset
       // explicitly includes a graphics flag, save that value to localStorage.
       // For flags NOT in the preset, do nothing here — restorePersistedGraphics
       // is called separately on initial page load to pull values from localStorage.
-      if (typeof window !== "undefined" && localStorage.getItem("gfx_persist_enabled") === "true") {
+      if (
+        typeof window !== "undefined" &&
+        localStorage.getItem("gfx_persist_enabled") === "true"
+      ) {
         for (const flag of GRAPHICS_FLAGS) {
           if (flag in newFlagValues) {
             const val = newFlagValues[flag];

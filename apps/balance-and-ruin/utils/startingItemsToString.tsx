@@ -4,7 +4,7 @@ import { isValidItem } from "~/utils/isValidItem";
 export const startingItemsToString = (si: StartingItems) => {
   const { items } = si;
 
-  const validItems = items.filter(i => isValidItem(i))
+  const validItems = items.filter((i) => isValidItem(i));
   const itemsString = validItems.length
     ? validItems
         .map((c) => {

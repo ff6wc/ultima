@@ -24,11 +24,12 @@ export const MusicSeedCard = ({ className, seed, ...rest }: SeedCardProps) => {
     }
     const { filename, patch, seed_id, log: spoiler_log } = seed;
 
-    const [{ XDelta3Decoder }, { base64ToByteArray }, { applyInGameConfig }] = await Promise.all([
-      import("~/utils/xdelta3_decoder"),
-      import("~/utils/base64ToByteArray"),
-      import("~/utils/romUtils"),
-    ]);
+    const [{ XDelta3Decoder }, { base64ToByteArray }, { applyInGameConfig }] =
+      await Promise.all([
+        import("~/utils/xdelta3_decoder"),
+        import("~/utils/base64ToByteArray"),
+        import("~/utils/romUtils"),
+      ]);
 
     const patched = XDelta3Decoder.decode(
       base64ToByteArray(patch),

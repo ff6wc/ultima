@@ -5,14 +5,28 @@ import {
   DEFAULT_FONT_COLOR,
   WINDOW_PALETTE_DEFAULTS,
 } from "~/types/inGameConfig";
-import { FaCaretUp, FaCaretDown, FaCaretLeft, FaCaretRight } from "react-icons/fa";
+import {
+  FaCaretUp,
+  FaCaretDown,
+  FaCaretLeft,
+  FaCaretRight,
+} from "react-icons/fa";
 
 type RGB = [number, number, number];
 
-type BinaryKey = "BatMode" | "Command" | "Gauge" | "Sound" | "Cursor" | "Reequip";
+type BinaryKey =
+  | "BatMode"
+  | "Command"
+  | "Gauge"
+  | "Sound"
+  | "Cursor"
+  | "Reequip";
 type NumericKey = "BatSpeed" | "MsgSpeed" | "SpellOrder" | "Wallpaper";
 
-type Editing = { kind: "font" } | { kind: "window" } | { kind: "slot"; slot: number };
+type Editing =
+  | { kind: "font" }
+  | { kind: "window" }
+  | { kind: "slot"; slot: number };
 
 type State = {
   page: "A" | "B";
@@ -32,12 +46,20 @@ type State = {
   cursor: number;
 };
 
-type ValueItem = readonly [string | number, number] | readonly [string | number, number, number];
+type ValueItem =
+  | readonly [string | number, number]
+  | readonly [string | number, number, number];
 
 type OptionRow =
   | { key: string; y: number; kind?: undefined; values: ValueItem[] }
   | { key: string; y: number; kind: "color"; values: ValueItem[] }
-  | { key: string; y: number; kind: "slider"; channel: 0 | 1 | 2; cursorX: number };
+  | {
+      key: string;
+      y: number;
+      kind: "slider";
+      channel: 0 | 1 | 2;
+      cursorX: number;
+    };
 
 const WINDOW_DEFAULTS: Record<number, RGB[]> = {
   1: WINDOW_PALETTE_DEFAULTS.window1 as RGB[],
@@ -66,19 +88,77 @@ const TOGGLE_DEFAULTS = {
 } as const;
 
 const PAGE_A_OPTIONS: OptionRow[] = [
-  { key: "BatMode", y: 44, values: [["active", 112], ["wait", 176]] },
-  { key: "BatSpeed", y: 60, values: [1, 2, 3, 4, 5, 6].map((v, i) => [v, 112 + i * 16] as const) },
-  { key: "MsgSpeed", y: 76, values: [1, 2, 3, 4, 5, 6].map((v, i) => [v, 112 + i * 16] as const) },
-  { key: "Command", y: 92, values: [["window", 112], ["short", 176]] },
-  { key: "Gauge", y: 108, values: [["on", 112], ["off", 176]] },
-  { key: "Sound", y: 124, values: [["stereo", 112], ["mono", 176]] },
-  { key: "Cursor", y: 140, values: [["reset", 112], ["memory", 176]] },
-  { key: "Reequip", y: 156, values: [["optimum", 112], ["empty", 176]] },
+  {
+    key: "BatMode",
+    y: 44,
+    values: [
+      ["active", 112],
+      ["wait", 176],
+    ],
+  },
+  {
+    key: "BatSpeed",
+    y: 60,
+    values: [1, 2, 3, 4, 5, 6].map((v, i) => [v, 112 + i * 16] as const),
+  },
+  {
+    key: "MsgSpeed",
+    y: 76,
+    values: [1, 2, 3, 4, 5, 6].map((v, i) => [v, 112 + i * 16] as const),
+  },
+  {
+    key: "Command",
+    y: 92,
+    values: [
+      ["window", 112],
+      ["short", 176],
+    ],
+  },
+  {
+    key: "Gauge",
+    y: 108,
+    values: [
+      ["on", 112],
+      ["off", 176],
+    ],
+  },
+  {
+    key: "Sound",
+    y: 124,
+    values: [
+      ["stereo", 112],
+      ["mono", 176],
+    ],
+  },
+  {
+    key: "Cursor",
+    y: 140,
+    values: [
+      ["reset", 112],
+      ["memory", 176],
+    ],
+  },
+  {
+    key: "Reequip",
+    y: 156,
+    values: [
+      ["optimum", 112],
+      ["empty", 176],
+    ],
+  },
 ];
 
 const PAGE_B_OPTIONS: OptionRow[] = [
-  { key: "SpellOrder", y: 44, values: [1, 2, 3, 4, 5, 6].map((v, i) => [v, 112 + i * 16] as const) },
-  { key: "Wallpaper", y: 108, values: [1, 2, 3, 4, 5, 6, 7, 8].map((v, i) => [v, 112 + i * 16] as const) },
+  {
+    key: "SpellOrder",
+    y: 44,
+    values: [1, 2, 3, 4, 5, 6].map((v, i) => [v, 112 + i * 16] as const),
+  },
+  {
+    key: "Wallpaper",
+    y: 108,
+    values: [1, 2, 3, 4, 5, 6, 7, 8].map((v, i) => [v, 112 + i * 16] as const),
+  },
   {
     key: "Color",
     y: 124,
@@ -86,7 +166,9 @@ const PAGE_B_OPTIONS: OptionRow[] = [
     values: [
       ["font", 112, 124] as const,
       ["window", 176, 124] as const,
-      ...[1, 2, 3, 4, 5, 6, 7].map((s, i) => [`slot${s}`, 180 + i * 8, 139] as const),
+      ...[1, 2, 3, 4, 5, 6, 7].map(
+        (s, i) => [`slot${s}`, 180 + i * 8, 139] as const,
+      ),
     ],
   },
   { key: "R", y: 154, kind: "slider", channel: 0, cursorX: 112 },
@@ -117,16 +199,46 @@ type AssetCache = {
 };
 
 const DIGIT_MASKS: number[][] = [
-  [0, 0b01111100, 0b11000110, 0b11000110, 0b11000110, 0b11000110, 0b11000110, 0b01111100, 0, 0],
-  [0, 0b00110000, 0b01110000, 0b00110000, 0b00110000, 0b00110000, 0b00110000, 0b01111000, 0, 0],
-  [0, 0b01111100, 0b10000110, 0b00000110, 0b00001100, 0b00110000, 0b01100000, 0b11111110, 0, 0],
-  [0, 0b11111110, 0b00001100, 0b00011000, 0b00111100, 0b00000110, 0b10000110, 0b01111100, 0, 0],
-  [0, 0b00011100, 0b00101100, 0b01001100, 0b10001100, 0b10001100, 0b11111110, 0b00001100, 0, 0],
-  [0, 0b11111110, 0b11000000, 0b11111100, 0b00000110, 0b00000110, 0b10000110, 0b01111100, 0, 0],
-  [0, 0b00111100, 0b01100000, 0b11000000, 0b11111100, 0b11000110, 0b11000110, 0b01111100, 0, 0],
-  [0, 0b11111110, 0b00000110, 0b00000110, 0b00001100, 0b00011000, 0b00110000, 0b00110000, 0, 0],
-  [0, 0b01111100, 0b11000110, 0b11000110, 0b01111100, 0b11000110, 0b11000110, 0b01111100, 0, 0],
-  [0, 0b01111100, 0b11000110, 0b11000110, 0b01111110, 0b00000110, 0b00001100, 0b01111000, 0, 0],
+  [
+    0, 0b01111100, 0b11000110, 0b11000110, 0b11000110, 0b11000110, 0b11000110,
+    0b01111100, 0, 0,
+  ],
+  [
+    0, 0b00110000, 0b01110000, 0b00110000, 0b00110000, 0b00110000, 0b00110000,
+    0b01111000, 0, 0,
+  ],
+  [
+    0, 0b01111100, 0b10000110, 0b00000110, 0b00001100, 0b00110000, 0b01100000,
+    0b11111110, 0, 0,
+  ],
+  [
+    0, 0b11111110, 0b00001100, 0b00011000, 0b00111100, 0b00000110, 0b10000110,
+    0b01111100, 0, 0,
+  ],
+  [
+    0, 0b00011100, 0b00101100, 0b01001100, 0b10001100, 0b10001100, 0b11111110,
+    0b00001100, 0, 0,
+  ],
+  [
+    0, 0b11111110, 0b11000000, 0b11111100, 0b00000110, 0b00000110, 0b10000110,
+    0b01111100, 0, 0,
+  ],
+  [
+    0, 0b00111100, 0b01100000, 0b11000000, 0b11111100, 0b11000110, 0b11000110,
+    0b01111100, 0, 0,
+  ],
+  [
+    0, 0b11111110, 0b00000110, 0b00000110, 0b00001100, 0b00011000, 0b00110000,
+    0b00110000, 0, 0,
+  ],
+  [
+    0, 0b01111100, 0b11000110, 0b11000110, 0b01111100, 0b11000110, 0b11000110,
+    0b01111100, 0, 0,
+  ],
+  [
+    0, 0b01111100, 0b11000110, 0b11000110, 0b01111110, 0b00000110, 0b00001100,
+    0b01111000, 0, 0,
+  ],
 ];
 const DIGIT_MASK_W = 8;
 const DIGIT_MASK_H = 10;
@@ -134,19 +246,131 @@ const DIGIT_MASK_H = 10;
 type WordMask = { w: number; h: number; ipr: number; rows: number[] };
 
 const WORD_MASKS: Record<string, WordMask> = {
-  wait: { w: 30, h: 7, ipr: 1, rows: [0xb6003030, 0xb67830fc, 0xb68c0030, 0xb67c3030, 0xb6cc3030, 0xb6cc3030, 0xfc7c301c] },
-  window: { w: 47, h: 7, ipr: 2, rows: [0xb630000c, 0x00000000, 0xb630f80c, 0x78b60000, 0xb600cc7c, 0xccb60000, 0xb630cccc, 0xccb60000, 0xb630cccc, 0xccb60000, 0xb630cccc, 0xccb60000, 0xfc30cc7c, 0x78fc0000] },
-  on: { w: 14, h: 7, ipr: 1, rows: [0x7c000000, 0xc6f80000, 0xc6cc0000, 0xc6cc0000, 0xc6cc0000, 0xc6cc0000, 0x7ccc0000] },
-  stereo: { w: 46, h: 7, ipr: 2, rows: [0x7c300000, 0x00000000, 0xc2fc78dc, 0x78780000, 0xe030cce0, 0xcccc0000, 0x7830fcc0, 0xfccc0000, 0x1c30c0c0, 0xc0cc0000, 0x8e30c4c0, 0xc4cc0000, 0x7c1c78c0, 0x78780000] },
-  reset: { w: 38, h: 7, ipr: 2, rows: [0xfc000000, 0x30000000, 0xc6787878, 0xfc000000, 0xc6ccc4cc, 0x30000000, 0xfcfc70fc, 0x30000000, 0xc6c038c0, 0x30000000, 0xc6c48cc4, 0x30000000, 0xc6787878, 0x1c000000] },
-  optimum: { w: 55, h: 8, ipr: 2, rows: [0x7c003030, 0x00000000, 0xc6f8fc30, 0xfcccfc00, 0xc6cc3000, 0xb6ccb600, 0xc6cc3030, 0xb6ccb600, 0xc6cc3030, 0xb6ccb600, 0xc6f83030, 0xb6ccb600, 0x7cc01c30, 0xb67cb600, 0x00c00000, 0x00000000] },
-  active: { w: 46, h: 7, ipr: 2, rows: [0x7c003030, 0x00000000, 0xc678fc30, 0xcc780000, 0xc6c43000, 0xcccc0000, 0xc6c03030, 0xccfc0000, 0xfec03030, 0xccc00000, 0xc6c43030, 0xc8c40000, 0xc6781c30, 0xf0780000] },
-  short: { w: 38, h: 7, ipr: 2, rows: [0x7cc00000, 0x30000000, 0xc2c078dc, 0xfc000000, 0xe0f8cce0, 0x30000000, 0x78ccccc0, 0x30000000, 0x1cccccc0, 0x30000000, 0x8eccccc0, 0x30000000, 0x7ccc78c0, 0x1c000000] },
-  off: { w: 22, h: 7, ipr: 1, rows: [0x7c1c1c00, 0xc6303000, 0xc6fcfc00, 0xc6303000, 0xc6303000, 0xc6303000, 0x7c303000] },
-  mono: { w: 30, h: 7, ipr: 1, rows: [0x86000000, 0xce78f878, 0xfecccccc, 0xb6cccccc, 0x86cccccc, 0x86cccccc, 0x8678cc78] },
-  memory: { w: 46, h: 8, ipr: 2, rows: [0x86000000, 0x00000000, 0xce78fc78, 0xdccc0000, 0xfeccb6cc, 0xe0cc0000, 0xb6fcb6cc, 0xc0cc0000, 0x86c0b6cc, 0xc07c0000, 0x86c4b6cc, 0xc00c0000, 0x8678b678, 0xc08c0000, 0x00000000, 0x00780000] },
-  empty: { w: 38, h: 8, ipr: 2, rows: [0xfe000030, 0x00000000, 0xc0fcf8fc, 0xcc000000, 0xc0b6cc30, 0xcc000000, 0xfcb6cc30, 0xcc000000, 0xc0b6cc30, 0x7c000000, 0xc0b6f830, 0x0c000000, 0xfeb6c01c, 0x8c000000, 0x0000c000, 0x78000000] },
-  font: { w: 30, h: 7, ipr: 1, rows: [0xfe000030, 0xc078f8fc, 0xc0cccc30, 0xfccccc30, 0xc0cccc30, 0xc0cccc30, 0xc078cc1c] },
+  wait: {
+    w: 30,
+    h: 7,
+    ipr: 1,
+    rows: [
+      0xb6003030, 0xb67830fc, 0xb68c0030, 0xb67c3030, 0xb6cc3030, 0xb6cc3030,
+      0xfc7c301c,
+    ],
+  },
+  window: {
+    w: 47,
+    h: 7,
+    ipr: 2,
+    rows: [
+      0xb630000c, 0x00000000, 0xb630f80c, 0x78b60000, 0xb600cc7c, 0xccb60000,
+      0xb630cccc, 0xccb60000, 0xb630cccc, 0xccb60000, 0xb630cccc, 0xccb60000,
+      0xfc30cc7c, 0x78fc0000,
+    ],
+  },
+  on: {
+    w: 14,
+    h: 7,
+    ipr: 1,
+    rows: [
+      0x7c000000, 0xc6f80000, 0xc6cc0000, 0xc6cc0000, 0xc6cc0000, 0xc6cc0000,
+      0x7ccc0000,
+    ],
+  },
+  stereo: {
+    w: 46,
+    h: 7,
+    ipr: 2,
+    rows: [
+      0x7c300000, 0x00000000, 0xc2fc78dc, 0x78780000, 0xe030cce0, 0xcccc0000,
+      0x7830fcc0, 0xfccc0000, 0x1c30c0c0, 0xc0cc0000, 0x8e30c4c0, 0xc4cc0000,
+      0x7c1c78c0, 0x78780000,
+    ],
+  },
+  reset: {
+    w: 38,
+    h: 7,
+    ipr: 2,
+    rows: [
+      0xfc000000, 0x30000000, 0xc6787878, 0xfc000000, 0xc6ccc4cc, 0x30000000,
+      0xfcfc70fc, 0x30000000, 0xc6c038c0, 0x30000000, 0xc6c48cc4, 0x30000000,
+      0xc6787878, 0x1c000000,
+    ],
+  },
+  optimum: {
+    w: 55,
+    h: 8,
+    ipr: 2,
+    rows: [
+      0x7c003030, 0x00000000, 0xc6f8fc30, 0xfcccfc00, 0xc6cc3000, 0xb6ccb600,
+      0xc6cc3030, 0xb6ccb600, 0xc6cc3030, 0xb6ccb600, 0xc6f83030, 0xb6ccb600,
+      0x7cc01c30, 0xb67cb600, 0x00c00000, 0x00000000,
+    ],
+  },
+  active: {
+    w: 46,
+    h: 7,
+    ipr: 2,
+    rows: [
+      0x7c003030, 0x00000000, 0xc678fc30, 0xcc780000, 0xc6c43000, 0xcccc0000,
+      0xc6c03030, 0xccfc0000, 0xfec03030, 0xccc00000, 0xc6c43030, 0xc8c40000,
+      0xc6781c30, 0xf0780000,
+    ],
+  },
+  short: {
+    w: 38,
+    h: 7,
+    ipr: 2,
+    rows: [
+      0x7cc00000, 0x30000000, 0xc2c078dc, 0xfc000000, 0xe0f8cce0, 0x30000000,
+      0x78ccccc0, 0x30000000, 0x1cccccc0, 0x30000000, 0x8eccccc0, 0x30000000,
+      0x7ccc78c0, 0x1c000000,
+    ],
+  },
+  off: {
+    w: 22,
+    h: 7,
+    ipr: 1,
+    rows: [
+      0x7c1c1c00, 0xc6303000, 0xc6fcfc00, 0xc6303000, 0xc6303000, 0xc6303000,
+      0x7c303000,
+    ],
+  },
+  mono: {
+    w: 30,
+    h: 7,
+    ipr: 1,
+    rows: [
+      0x86000000, 0xce78f878, 0xfecccccc, 0xb6cccccc, 0x86cccccc, 0x86cccccc,
+      0x8678cc78,
+    ],
+  },
+  memory: {
+    w: 46,
+    h: 8,
+    ipr: 2,
+    rows: [
+      0x86000000, 0x00000000, 0xce78fc78, 0xdccc0000, 0xfeccb6cc, 0xe0cc0000,
+      0xb6fcb6cc, 0xc0cc0000, 0x86c0b6cc, 0xc07c0000, 0x86c4b6cc, 0xc00c0000,
+      0x8678b678, 0xc08c0000, 0x00000000, 0x00780000,
+    ],
+  },
+  empty: {
+    w: 38,
+    h: 8,
+    ipr: 2,
+    rows: [
+      0xfe000030, 0x00000000, 0xc0fcf8fc, 0xcc000000, 0xc0b6cc30, 0xcc000000,
+      0xfcb6cc30, 0xcc000000, 0xc0b6cc30, 0x7c000000, 0xc0b6f830, 0x0c000000,
+      0xfeb6c01c, 0x8c000000, 0x0000c000, 0x78000000,
+    ],
+  },
+  font: {
+    w: 30,
+    h: 7,
+    ipr: 1,
+    rows: [
+      0xfe000030, 0xc078f8fc, 0xc0cccc30, 0xfccccc30, 0xc0cccc30, 0xc0cccc30,
+      0xc078cc1c,
+    ],
+  },
 };
 
 const SLIDER_ROWS = [
@@ -201,7 +425,10 @@ const defaultInternalState = (): State => ({
   Wallpaper: TOGGLE_DEFAULTS.Wallpaper,
   font: [...FONT_DEFAULT] as RGB,
   windows: Object.fromEntries(
-    Object.entries(WINDOW_DEFAULTS).map(([k, v]) => [k, v.map((c) => [...c] as RGB)])
+    Object.entries(WINDOW_DEFAULTS).map(([k, v]) => [
+      k,
+      v.map((c) => [...c] as RGB),
+    ]),
   ) as Record<number, RGB[]>,
   editing: { kind: "font" },
   cursor: 0,
@@ -260,13 +487,22 @@ const persistState = (s: State) => {
     wallpaper: s.Wallpaper,
     fontColor: s.font,
     windowPalettes: Object.fromEntries(
-      Object.entries(s.windows).map(([k, v]) => [`window${k}`, v])
+      Object.entries(s.windows).map(([k, v]) => [`window${k}`, v]),
     ),
   };
   localStorage.setItem("in_game_config", JSON.stringify(out));
 };
 
-const CURSOR_PIXELS = ["X.......", "XX......", "XXX.....", "XXXX....", "XXXX....", "XXX.....", "XX......", "X......."];
+const CURSOR_PIXELS = [
+  "X.......",
+  "XX......",
+  "XXX.....",
+  "XXXX....",
+  "XXXX....",
+  "XXX.....",
+  "XX......",
+  "X.......",
+];
 
 const buildCursorSprite = (): HTMLCanvasElement => {
   const c = document.createElement("canvas");
@@ -276,7 +512,8 @@ const buildCursorSprite = (): HTMLCanvasElement => {
   if (cx) {
     cx.fillStyle = "#fff";
     for (let y = 0; y < 8; y++)
-      for (let x = 0; x < 8; x++) if (CURSOR_PIXELS[y][x] === "X") cx.fillRect(x, y, 1, 1);
+      for (let x = 0; x < 8; x++)
+        if (CURSOR_PIXELS[y][x] === "X") cx.fillRect(x, y, 1, 1);
   }
   return c;
 };
@@ -334,9 +571,13 @@ const buildArrowUpSprite = (down: HTMLCanvasElement): HTMLCanvasElement => {
   return c;
 };
 
-const getOptionsForPage = (page: "A" | "B") => (page === "A" ? PAGE_A_OPTIONS : PAGE_B_OPTIONS);
+const getOptionsForPage = (page: "A" | "B") =>
+  page === "A" ? PAGE_A_OPTIONS : PAGE_B_OPTIONS;
 
-const valuePos = (row: OptionRow, item: ValueItem): { x: number; y: number } => {
+const valuePos = (
+  row: OptionRow,
+  item: ValueItem,
+): { x: number; y: number } => {
   if (row.kind === "slider") return { x: row.cursorX, y: row.y };
   const x = item[1] as number;
   const yOverride = item[2] as number | undefined;
@@ -425,7 +666,9 @@ export const InGameConfigCard = () => {
       try {
         let manifest = globalManifest;
         if (!manifest) {
-          manifest = await fetch(`${ASSET_BASE}/manifest.json${CB}`).then((r) => r.json());
+          manifest = await fetch(`${ASSET_BASE}/manifest.json${CB}`).then((r) =>
+            r.json(),
+          );
           globalManifest = manifest;
         }
         assetsRef.current.manifest = manifest;
@@ -441,7 +684,9 @@ export const InGameConfigCard = () => {
         const others = Object.keys(manifest.windows || {})
           .map((k) => parseInt(k, 10))
           .filter((n) => n !== activeWin);
-        await Promise.all(others.map((n) => loadWindowAssetsInto(assetsRef.current, n)));
+        await Promise.all(
+          others.map((n) => loadWindowAssetsInto(assetsRef.current, n)),
+        );
 
         // Load magorder overlays.
         await loadMagOrderOverlays(assetsRef.current);
@@ -465,7 +710,7 @@ export const InGameConfigCard = () => {
       arrowDownRef.current,
       arrowUpRef.current,
       assetsRef.current,
-      state
+      state,
     );
   }, [state, ready]);
 
@@ -500,11 +745,15 @@ export const InGameConfigCard = () => {
       }
       if (k === "tab") {
         e.preventDefault();
-        setState((s) => ({ ...s, page: s.page === "A" ? "B" : "A", cursor: 0 }));
+        setState((s) => ({
+          ...s,
+          page: s.page === "A" ? "B" : "A",
+          cursor: 0,
+        }));
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [],
   );
 
   const move = useCallback(
@@ -530,7 +779,10 @@ export const InGameConfigCard = () => {
           const row = opts[next.cursor];
           if (row.kind === "slider") {
             const rgb = [...editedRgb(next)] as RGB;
-            rgb[row.channel] = Math.max(0, Math.min(31, rgb[row.channel] + dCol));
+            rgb[row.channel] = Math.max(
+              0,
+              Math.min(31, rgb[row.channel] + dCol),
+            );
             next = writeEditedRgb(next, rgb);
           } else {
             const cur = activeValueIndex(row, next);
@@ -543,7 +795,7 @@ export const InGameConfigCard = () => {
       });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [],
   );
 
   const startRepeat = (dRow: number, dCol: number) => {
@@ -579,9 +831,14 @@ export const InGameConfigCard = () => {
     });
   }, [setState]);
 
-  const updateSliderValue = (clientX: number, rect: DOMRect, rowIdx: number, channel: 0 | 1 | 2) => {
+  const updateSliderValue = (
+    clientX: number,
+    rect: DOMRect,
+    rowIdx: number,
+    channel: 0 | 1 | 2,
+  ) => {
     const relativeClick = (clientX - rect.left) / rect.width;
-    const xCanvas = (SLIDER_BAR_X0 - 4) + relativeClick * (SLIDER_BAR_W31 + 8);
+    const xCanvas = SLIDER_BAR_X0 - 4 + relativeClick * (SLIDER_BAR_W31 + 8);
     const t = (xCanvas - SLIDER_BAR_X0) / SLIDER_BAR_W31;
     const v = Math.round(Math.max(0, Math.min(1, t)) * 31);
     setState((s) => {
@@ -594,7 +851,7 @@ export const InGameConfigCard = () => {
   const handleSliderMouseDown = (
     e: React.MouseEvent<HTMLButtonElement>,
     rowIdx: number,
-    channel: 0 | 1 | 2
+    channel: 0 | 1 | 2,
   ) => {
     if (e.button !== 0) return; // only left click
     e.preventDefault();
@@ -620,7 +877,7 @@ export const InGameConfigCard = () => {
   const handleSliderTouchStart = (
     e: React.TouchEvent<HTMLButtonElement>,
     rowIdx: number,
-    channel: 0 | 1 | 2
+    channel: 0 | 1 | 2,
   ) => {
     e.preventDefault();
     const button = e.currentTarget;
@@ -660,12 +917,13 @@ export const InGameConfigCard = () => {
     <Card title="In-Game Configurations">
       <div className="flex flex-col gap-4">
         <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-          Customize system preferences, spell sortings, and window styles that will automatically be
-          patched directly into your ROM when downloaded.
+          Customize system preferences, spell sortings, and window styles that
+          will automatically be patched directly into your ROM when downloaded.
         </p>
         <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed -mt-2">
-          Arrow keys / WASD = move cursor &middot; Enter / Space = toggle &middot; Tab = switch page
-          &middot; Click options directly with the mouse.
+          Arrow keys / WASD = move cursor &middot; Enter / Space = toggle
+          &middot; Tab = switch page &middot; Click options directly with the
+          mouse.
         </p>
 
         <div className="flex flex-col items-center gap-3 w-full">
@@ -675,8 +933,14 @@ export const InGameConfigCard = () => {
                 type="button"
                 size="small"
                 variant={state.page === "A" ? "primary" : "default"}
-                style={state.page === "A" ? { border: "1px solid transparent" } : undefined}
-                onClick={() => setState((s) => ({ ...s, page: "A", cursor: 0 }))}
+                style={
+                  state.page === "A"
+                    ? { border: "1px solid transparent" }
+                    : undefined
+                }
+                onClick={() =>
+                  setState((s) => ({ ...s, page: "A", cursor: 0 }))
+                }
               >
                 Page A
               </Button>
@@ -684,8 +948,14 @@ export const InGameConfigCard = () => {
                 type="button"
                 size="small"
                 variant={state.page === "B" ? "primary" : "default"}
-                style={state.page === "B" ? { border: "1px solid transparent" } : undefined}
-                onClick={() => setState((s) => ({ ...s, page: "B", cursor: 0 }))}
+                style={
+                  state.page === "B"
+                    ? { border: "1px solid transparent" }
+                    : undefined
+                }
+                onClick={() =>
+                  setState((s) => ({ ...s, page: "B", cursor: 0 }))
+                }
               >
                 Page B
               </Button>
@@ -705,9 +975,7 @@ export const InGameConfigCard = () => {
             </Button>
           </div>
 
-          <div
-            className="relative w-full max-w-[768px] aspect-[256/224] border-2 border-slate-600 focus-within:border-emerald-500 outline-none bg-black overflow-hidden"
-          >
+          <div className="relative w-full max-w-[768px] aspect-[256/224] border-2 border-slate-600 focus-within:border-emerald-500 outline-none bg-black overflow-hidden">
             <canvas
               ref={canvasRef}
               width={256}
@@ -719,17 +987,19 @@ export const InGameConfigCard = () => {
                 imageRendering: "pixelated",
               }}
             />
-            <div
-              className="absolute inset-0 pointer-events-none"
-            >
+            <div className="absolute inset-0 pointer-events-none">
               {opts.map((row, rIdx) => {
                 if (row.kind === "slider") {
                   return (
                     <button
                       key={`slider-${rIdx}`}
                       type="button"
-                      onMouseDown={(e) => handleSliderMouseDown(e, rIdx, row.channel)}
-                      onTouchStart={(e) => handleSliderTouchStart(e, rIdx, row.channel)}
+                      onMouseDown={(e) =>
+                        handleSliderMouseDown(e, rIdx, row.channel)
+                      }
+                      onTouchStart={(e) =>
+                        handleSliderTouchStart(e, rIdx, row.channel)
+                      }
                       title={`${row.key}: click and drag to set`}
                       className="absolute pointer-events-auto cursor-pointer hover:outline hover:outline-1 hover:outline-dashed hover:outline-white/40"
                       style={{
@@ -771,7 +1041,11 @@ export const InGameConfigCard = () => {
               <button
                 type="button"
                 onClick={() =>
-                  setState((s) => ({ ...s, page: s.page === "A" ? "B" : "A", cursor: 0 }))
+                  setState((s) => ({
+                    ...s,
+                    page: s.page === "A" ? "B" : "A",
+                    cursor: 0,
+                  }))
                 }
                 title={state.page === "A" ? "Go to Page B" : "Go to Page A"}
                 className="absolute pointer-events-auto cursor-pointer hover:outline hover:outline-1 hover:outline-dashed hover:outline-white/40"
@@ -796,7 +1070,10 @@ export const InGameConfigCard = () => {
                 <div></div>
                 <button
                   type="button"
-                  onPointerDown={(e) => { e.preventDefault(); startRepeat(-1, 0); }}
+                  onPointerDown={(e) => {
+                    e.preventDefault();
+                    startRepeat(-1, 0);
+                  }}
                   onPointerUp={stopRepeat}
                   onPointerLeave={stopRepeat}
                   onPointerCancel={stopRepeat}
@@ -811,7 +1088,10 @@ export const InGameConfigCard = () => {
                 {/* Row 2 */}
                 <button
                   type="button"
-                  onPointerDown={(e) => { e.preventDefault(); startRepeat(0, -1); }}
+                  onPointerDown={(e) => {
+                    e.preventDefault();
+                    startRepeat(0, -1);
+                  }}
                   onPointerUp={stopRepeat}
                   onPointerLeave={stopRepeat}
                   onPointerCancel={stopRepeat}
@@ -826,7 +1106,10 @@ export const InGameConfigCard = () => {
                 </div>
                 <button
                   type="button"
-                  onPointerDown={(e) => { e.preventDefault(); startRepeat(0, 1); }}
+                  onPointerDown={(e) => {
+                    e.preventDefault();
+                    startRepeat(0, 1);
+                  }}
                   onPointerUp={stopRepeat}
                   onPointerLeave={stopRepeat}
                   onPointerCancel={stopRepeat}
@@ -841,7 +1124,10 @@ export const InGameConfigCard = () => {
                 <div></div>
                 <button
                   type="button"
-                  onPointerDown={(e) => { e.preventDefault(); startRepeat(1, 0); }}
+                  onPointerDown={(e) => {
+                    e.preventDefault();
+                    startRepeat(1, 0);
+                  }}
                   onPointerUp={stopRepeat}
                   onPointerLeave={stopRepeat}
                   onPointerCancel={stopRepeat}
@@ -873,7 +1159,11 @@ function writeEditedRgb(s: State, rgb: RGB): State {
   return { ...s, windows: { ...s.windows, [win]: palette } };
 }
 
-function applyValueSelection(s: State, row: OptionRow, val: string | number): State {
+function applyValueSelection(
+  s: State,
+  row: OptionRow,
+  val: string | number,
+): State {
   if (row.kind === "color") {
     if (val === "font") return { ...s, editing: { kind: "font" } };
     if (val === "window") return { ...s, editing: { kind: "window" } };
@@ -913,7 +1203,7 @@ async function loadWindowAssetsInto(cache: AssetCache, n: number) {
         out.push(
           present && present.includes(s)
             ? loadImage(`${base}slot${s}${suffix}.png`)
-            : Promise.resolve(null)
+            : Promise.resolve(null),
         );
       }
       return out;
@@ -922,12 +1212,20 @@ async function loadWindowAssetsInto(cache: AssetCache, n: number) {
       loadImage(base + "baseline.png"),
       ...slotPaths("", info.slots),
       info.font ? loadImage(base + "font.png") : Promise.resolve(null),
-      info.hasDefaultA ? loadImage(base + "defaultA.png") : Promise.resolve(null),
-      info.hasDefaultB ? loadImage(base + "defaultB.png") : Promise.resolve(null),
-      info.hasCorrection ? fetch(base + "correction.json" + CB).then((r) => r.json()) : Promise.resolve(null),
+      info.hasDefaultA
+        ? loadImage(base + "defaultA.png")
+        : Promise.resolve(null),
+      info.hasDefaultB
+        ? loadImage(base + "defaultB.png")
+        : Promise.resolve(null),
+      info.hasCorrection
+        ? fetch(base + "correction.json" + CB).then((r) => r.json())
+        : Promise.resolve(null),
       pageA ? loadImage(base + "baselineA.png") : Promise.resolve(null),
       ...slotPaths("A", pageA ? pageA.slots : null),
-      pageA && pageA.font ? loadImage(base + "fontA.png") : Promise.resolve(null),
+      pageA && pageA.font
+        ? loadImage(base + "fontA.png")
+        : Promise.resolve(null),
       pageA && pageA.hasCorrection
         ? fetch(base + "correctionA.json" + CB).then((r) => r.json())
         : Promise.resolve(null),
@@ -1005,7 +1303,7 @@ function renderCanvas(
   arrowDown: HTMLCanvasElement | null,
   arrowUp: HTMLCanvasElement | null,
   cache: AssetCache,
-  state: State
+  state: State,
 ) {
   if (!canvas) return;
   const ctx = canvas.getContext("2d");
@@ -1033,7 +1331,11 @@ function renderCanvas(
   drawSelectionOverlay(ctx, state);
 }
 
-function recolor(ctx: CanvasRenderingContext2D, asset: WindowAsset, state: State): ImageData | null {
+function recolor(
+  ctx: CanvasRenderingContext2D,
+  asset: WindowAsset,
+  state: State,
+): ImageData | null {
   if (!asset.baselineData) return null;
   const useA = state.page === "A" && !!asset.baselineDataA;
   const baselineData = useA ? asset.baselineDataA! : asset.baselineData;
@@ -1144,7 +1446,11 @@ function drawPaletteHintBar(ctx: CanvasRenderingContext2D) {
   ctx.restore();
 }
 
-function drawMagOrderText(ctx: CanvasRenderingContext2D, cache: AssetCache, state: State) {
+function drawMagOrderText(
+  ctx: CanvasRenderingContext2D,
+  cache: AssetCache,
+  state: State,
+) {
   const n = state.SpellOrder;
   const img = cache.magOrder[n];
   if (!img || !cache.magOrderBbox) return;
@@ -1223,15 +1529,32 @@ function drawColorEditValues(ctx: CanvasRenderingContext2D, state: State) {
   }
 }
 
-function redrawNumber(ctx: CanvasRenderingContext2D, rowY: number, value: number, fontCss: string) {
+function redrawNumber(
+  ctx: CanvasRenderingContext2D,
+  rowY: number,
+  value: number,
+  fontCss: string,
+) {
   const yTop = rowY + SLIDER_NUM_Y_OFF;
-  const src = ctx.getImageData(SLIDER_NUM_ERASE_SRC_X, yTop, SLIDER_NUM_ERASE_W, SLIDER_NUM_ERASE_H);
+  const src = ctx.getImageData(
+    SLIDER_NUM_ERASE_SRC_X,
+    yTop,
+    SLIDER_NUM_ERASE_W,
+    SLIDER_NUM_ERASE_H,
+  );
   ctx.putImageData(src, SLIDER_NUM_ERASE_X, yTop);
-  if (value >= 10) drawDigit(ctx, SLIDER_NUM_TENS_X, yTop, Math.floor(value / 10), fontCss);
+  if (value >= 10)
+    drawDigit(ctx, SLIDER_NUM_TENS_X, yTop, Math.floor(value / 10), fontCss);
   drawDigit(ctx, SLIDER_NUM_ONES_X, yTop, value % 10, fontCss);
 }
 
-function drawDigit(ctx: CanvasRenderingContext2D, x: number, y: number, digit: number, fillCss: string) {
+function drawDigit(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  digit: number,
+  fillCss: string,
+) {
   const mask = DIGIT_MASKS[digit];
   if (!mask) return;
   ctx.fillStyle = "#000000";
@@ -1243,7 +1566,8 @@ function drawDigit(ctx: CanvasRenderingContext2D, x: number, y: number, digit: n
     for (let dx = 0; dx < DIGIT_MASK_W; dx++) {
       const px = x + dx;
       if (px + 1 < 0 || px + 1 >= 256) continue;
-      if (bits & (1 << (DIGIT_MASK_W - 1 - dx))) ctx.fillRect(px + 1, py + 1, 1, 1);
+      if (bits & (1 << (DIGIT_MASK_W - 1 - dx)))
+        ctx.fillRect(px + 1, py + 1, 1, 1);
     }
   }
   ctx.fillStyle = fillCss;
@@ -1260,7 +1584,12 @@ function drawDigit(ctx: CanvasRenderingContext2D, x: number, y: number, digit: n
   }
 }
 
-function redrawBarFill(ctx: CanvasRenderingContext2D, rowY: number, value: number, fontCss: string) {
+function redrawBarFill(
+  ctx: CanvasRenderingContext2D,
+  rowY: number,
+  value: number,
+  fontCss: string,
+) {
   const fillW = Math.round((value * SLIDER_BAR_W31) / 31);
   if (fillW <= 0) return;
   ctx.fillStyle = fontCss;
@@ -1274,7 +1603,7 @@ function stampWordHighlight(
   word: string,
   x: number,
   y: number,
-  color: [number, number, number]
+  color: [number, number, number],
 ) {
   const m = WORD_MASKS[word];
   if (!m) return;
@@ -1315,7 +1644,11 @@ function highlightValueText(ctx: CanvasRenderingContext2D, state: State) {
     Math.round((state.font[1] * 255) / 31),
     Math.round((state.font[2] * 255) / 31),
   ];
-  const DIM_COLOR: [number, number, number] = [DIM_TARGET, DIM_TARGET, DIM_TARGET];
+  const DIM_COLOR: [number, number, number] = [
+    DIM_TARGET,
+    DIM_TARGET,
+    DIM_TARGET,
+  ];
 
   const adjustPixel = (i: number, target: number) => {
     const r = d[i],
@@ -1339,15 +1672,28 @@ function highlightValueText(ctx: CanvasRenderingContext2D, state: State) {
     if (row.kind === "slider") continue;
     if (row.kind === "color") {
       const fontBright = state.editing.kind === "font";
-      stampWordHighlight(d, "font", 112, 124, fontBright ? BRIGHT_COLOR : DIM_COLOR);
-      stampWordHighlight(d, "window", 176, 124, fontBright ? DIM_COLOR : BRIGHT_COLOR);
+      stampWordHighlight(
+        d,
+        "font",
+        112,
+        124,
+        fontBright ? BRIGHT_COLOR : DIM_COLOR,
+      );
+      stampWordHighlight(
+        d,
+        "window",
+        176,
+        124,
+        fontBright ? DIM_COLOR : BRIGHT_COLOR,
+      );
       continue;
     }
     const cur = currentValueOf(row, state);
     for (const item of row.values) {
       const val = item[0];
       const { x, y } = valuePos(row, item);
-      const color: [number, number, number] = val === cur ? BRIGHT_COLOR : DIM_COLOR;
+      const color: [number, number, number] =
+        val === cur ? BRIGHT_COLOR : DIM_COLOR;
       const target = val === cur ? BRIGHT_TARGET : DIM_TARGET;
 
       if (typeof val === "number" && val >= 0 && val < DIGIT_MASKS.length) {
@@ -1399,7 +1745,7 @@ function drawPageSwitchArrow(
   ctx: CanvasRenderingContext2D,
   arrowDown: HTMLCanvasElement | null,
   arrowUp: HTMLCanvasElement | null,
-  state: State
+  state: State,
 ) {
   if (state.page === "A") {
     if (arrowDown) ctx.drawImage(arrowDown, ARROW_X0, ARROW_DOWN_Y0);
@@ -1411,7 +1757,7 @@ function drawPageSwitchArrow(
 function drawCursorOverlay(
   ctx: CanvasRenderingContext2D,
   cursorSprite: HTMLCanvasElement | null,
-  state: State
+  state: State,
 ) {
   if (!cursorSprite) return;
   const opts = getOptionsForPage(state.page);

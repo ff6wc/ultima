@@ -80,7 +80,11 @@ export const FlagSlider = ({
 
   return (
     <div className={"flex flex-col gap-2"}>
-      <div className={"flex flex-col sm:flex-row justify-between sm:items-center gap-4"}>
+      <div
+        className={
+          "flex flex-col sm:flex-row justify-between sm:items-center gap-4"
+        }
+      >
         <div className="flex-grow min-w-0 w-full">
           <FlagLabel
             flag={flag}
@@ -89,7 +93,11 @@ export const FlagSlider = ({
             hideFlag={hideFlag}
           />
         </div>
-        <div className={"flex items-center justify-between sm:justify-center flex-shrink-0 w-full sm:w-auto gap-2"}>
+        <div
+          className={
+            "flex items-center justify-between sm:justify-center flex-shrink-0 w-full sm:w-auto gap-2"
+          }
+        >
           <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-sub)] sm:hidden">
             Value:
           </span>

@@ -17,7 +17,10 @@ import { GenerateUpload } from "~/components/GenerateUpload/GenerateUpload";
 import { FlagTextInput } from "~/components/FlagInput/FlagInput";
 import { FlagSwitch } from "~/components/FlagSwitch/FlagSwitch";
 import styles from "./GenerateCard.module.css";
-import { selectActivePresetName, selectLastSelectedPresetName } from "~/state/presetSlice";
+import {
+  selectActivePresetName,
+  selectLastSelectedPresetName,
+} from "~/state/presetSlice";
 import { FlagSummary } from "~/components/FlagSummary/FlagSummary";
 import { FaCopy, FaCheck } from "react-icons/fa";
 
@@ -40,7 +43,7 @@ const hasSevereProfanity = (text: string): boolean => {
     /\bretard(?:ed)?\b/i,
   ];
 
-  if (severePatterns.some(pattern => pattern.test(text))) {
+  if (severePatterns.some((pattern) => pattern.test(text))) {
     return true;
   }
 
@@ -60,10 +63,10 @@ const hasSevereProfanity = (text: string): boolean => {
     "faggut",
     "nigger",
     "kike",
-    "tranny"
+    "tranny",
   ];
 
-  if (strictSubstrings.some(word => normalized.includes(word))) {
+  if (strictSubstrings.some((word) => normalized.includes(word))) {
     return true;
   }
 
@@ -139,20 +142,29 @@ export const GenerateCard = ({
   const [lastSavedFlags, setLastSavedFlags] = useState<string | null>(null);
 
   const handleSavePreset = async () => {
-    if (hasSevereProfanity(presetName) || hasSevereProfanity(presetDescription)) {
-      setPresetError("Preset Name and Description must not contain inappropriate language.");
+    if (
+      hasSevereProfanity(presetName) ||
+      hasSevereProfanity(presetDescription)
+    ) {
+      setPresetError(
+        "Preset Name and Description must not contain inappropriate language.",
+      );
       return;
     }
     setIsSubmittingPreset(true);
     setPresetError(null);
     try {
-      const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
-      const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+      const token =
+        typeof window !== "undefined"
+          ? localStorage.getItem("auth_token")
+          : null;
+      const BACKEND_URL =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
       const res = await fetch(`${BACKEND_URL}/api/v1/user-presets`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify({
           name: presetName,
@@ -226,7 +238,9 @@ export const GenerateCard = ({
           const parsed = JSON.parse(text);
           if (parsed && typeof parsed === "object") {
             if (parsed.errors) {
-              errMsg = Array.isArray(parsed.errors) ? parsed.errors.join(", ") : String(parsed.errors);
+              errMsg = Array.isArray(parsed.errors)
+                ? parsed.errors.join(", ")
+                : String(parsed.errors);
             }
             stderr = parsed.stderr;
             originalFlags = parsed.flags;
@@ -234,7 +248,7 @@ export const GenerateCard = ({
         } catch (e) {
           // ignore parsing error, use generic fallback text
         }
-        
+
         const customErr = new Error(errMsg) as any;
         customErr.stderr = stderr;
         customErr.flags = originalFlags;
@@ -286,11 +300,12 @@ export const GenerateCard = ({
       const { filename, patch, seed_id, log } = generateResult;
       const rom = romData as string;
 
-      const [{ XDelta3Decoder }, { base64ToByteArray }, { applyInGameConfig }] = await Promise.all([
-        import("~/utils/xdelta3_decoder"),
-        import("~/utils/base64ToByteArray"),
-        import("~/utils/romUtils"),
-      ]);
+      const [{ XDelta3Decoder }, { base64ToByteArray }, { applyInGameConfig }] =
+        await Promise.all([
+          import("~/utils/xdelta3_decoder"),
+          import("~/utils/base64ToByteArray"),
+          import("~/utils/romUtils"),
+        ]);
 
       const patched = XDelta3Decoder.decode(
         base64ToByteArray(patch as string),
@@ -307,7 +322,7 @@ export const GenerateCard = ({
         link.href = window.URL.createObjectURL(content);
         link.download = `${filename}.zip`;
         link.click();
-        
+
         if (newWindow) {
           newWindow.location.href = `/seed/?id=${seed_id}`;
         } else {
@@ -317,14 +332,20 @@ export const GenerateCard = ({
 
       // Track seed generation count in localStorage
       try {
-        const currentCount = parseInt(localStorage.getItem("seeds_generated") || "0", 10);
+        const currentCount = parseInt(
+          localStorage.getItem("seeds_generated") || "0",
+          10,
+        );
         localStorage.setItem("seeds_generated", String(currentCount + 1));
 
         // Track most-played preset per user
         if (lastSelectedPresetName) {
           const presetCountKey = "preset_play_counts";
-          const existingCounts = JSON.parse(localStorage.getItem(presetCountKey) || "{}");
-          existingCounts[lastSelectedPresetName] = (existingCounts[lastSelectedPresetName] || 0) + 1;
+          const existingCounts = JSON.parse(
+            localStorage.getItem(presetCountKey) || "{}",
+          );
+          existingCounts[lastSelectedPresetName] =
+            (existingCounts[lastSelectedPresetName] || 0) + 1;
           localStorage.setItem(presetCountKey, JSON.stringify(existingCounts));
         }
       } catch (e) {
@@ -333,17 +354,28 @@ export const GenerateCard = ({
 
       // Record seed in seedlist database
       try {
-        const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
-        const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-        const host = typeof window !== "undefined" ? window.location.hostname : "";
-        const serverName = host === "ff6worldscollide.com" ? "ff6worldscollide.com" : "dev.ff6worldscollide.com";
-        const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/seed/?id=${seed_id}` : "";
+        const token =
+          typeof window !== "undefined"
+            ? localStorage.getItem("auth_token")
+            : null;
+        const BACKEND_URL =
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+        const host =
+          typeof window !== "undefined" ? window.location.hostname : "";
+        const serverName =
+          host === "ff6worldscollide.com"
+            ? "ff6worldscollide.com"
+            : "dev.ff6worldscollide.com";
+        const shareUrl =
+          typeof window !== "undefined"
+            ? `${window.location.origin}/seed/?id=${seed_id}`
+            : "";
 
         fetch(`${BACKEND_URL}/api/v1/seedlist`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
           body: JSON.stringify({
             seed_type: lastSelectedPresetName || "ff6wc",
@@ -351,22 +383,28 @@ export const GenerateCard = ({
             server_name: serverName,
             flagstring: flags,
           }),
-        }).catch((err) => console.error("Failed to record seed to seedlist database:", err));
+        }).catch((err) =>
+          console.error("Failed to record seed to seedlist database:", err),
+        );
       } catch (e) {
         console.error("Failed to record seed to seedlist:", e);
       }
 
       // Update preset download timestamp when generating a seed using a selected preset
       if (lastSelectedPresetName) {
-        const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
-        const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+        const token =
+          typeof window !== "undefined"
+            ? localStorage.getItem("auth_token")
+            : null;
+        const BACKEND_URL =
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
         fetch(`${BACKEND_URL}/api/v1/user-presets`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
-            ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
-          body: JSON.stringify({ flags, presetName: lastSelectedPresetName })
+          body: JSON.stringify({ flags, presetName: lastSelectedPresetName }),
         }).catch(console.error);
 
         // Record download time for official/custom presets in local storage
@@ -374,9 +412,15 @@ export const GenerateCard = ({
           const discordId = (session.user as any).discordId;
           if (discordId) {
             try {
-              localStorage.setItem(`preset_real_dl:${discordId}:${lastSelectedPresetName}`, new Date().toISOString());
+              localStorage.setItem(
+                `preset_real_dl:${discordId}:${lastSelectedPresetName}`,
+                new Date().toISOString(),
+              );
             } catch (e) {
-              console.error("Failed to write preset download to localStorage:", e);
+              console.error(
+                "Failed to write preset download to localStorage:",
+                e,
+              );
             }
           }
         }
@@ -476,15 +520,15 @@ export const GenerateCard = ({
           value={inputFlags}
           placeholder="Your selected flags will appear here..."
         />
-        
+
         <div className="mt-3 flex justify-between items-center w-full">
           <div>
             {session?.user ? (
               !isSavingPreset && (
                 <button
                   className={`text-sm font-bold py-1.5 px-4 rounded shadow transition-colors ${
-                    isSaved 
-                      ? "bg-emerald-600 text-white cursor-default opacity-80" 
+                    isSaved
+                      ? "bg-emerald-600 text-white cursor-default opacity-80"
                       : "bg-blue-600 hover:bg-blue-700 text-white"
                   }`}
                   onClick={() => !isSaved && setIsSavingPreset(true)}
@@ -511,7 +555,9 @@ export const GenerateCard = ({
 
         {session?.user && isSavingPreset && (
           <div className="p-4 bg-slate-800 border border-slate-700 rounded-md mt-2 flex flex-col gap-3 shadow-inner w-full">
-            <h4 className="text-sm font-bold text-blue-400 m-0">Save New Preset</h4>
+            <h4 className="text-sm font-bold text-blue-400 m-0">
+              Save New Preset
+            </h4>
             <input
               type="text"
               value={presetName}
@@ -545,7 +591,9 @@ export const GenerateCard = ({
                 {isSubmittingPreset ? "Saving..." : "Save Preset"}
               </button>
             </div>
-            {presetError && <span className="text-xs text-red-400">{presetError}</span>}
+            {presetError && (
+              <span className="text-xs text-red-400">{presetError}</span>
+            )}
           </div>
         )}
         <FlagSummary />
@@ -603,9 +651,19 @@ export const GenerateCard = ({
                 <div className="text-xs font-bold text-red-400 uppercase tracking-wider">
                   System Error Log (wc.py)
                 </div>
-                
+
                 <div className="text-sm text-slate-300 block italic leading-relaxed">
-                  Please report this issue in the <a href="https://discord.com/channels/666661907628949504/666811452350398493" target="_blank" rel="noreferrer" className="text-blue-400 underline hover:text-blue-300 font-bold">#bug-reports</a> channel on the Discord. You can copy the diagnostic details block below to include in your report.
+                  Please report this issue in the{" "}
+                  <a
+                    href="https://discord.com/channels/666661907628949504/666811452350398493"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-blue-400 underline hover:text-blue-300 font-bold"
+                  >
+                    #bug-reports
+                  </a>{" "}
+                  channel on the Discord. You can copy the diagnostic details
+                  block below to include in your report.
                 </div>
 
                 <div className="relative">
@@ -618,7 +676,10 @@ ${activeErrorStderr}`}
                   <button
                     onClick={() => {
                       const reportText = `[Seed Generation Error Report]\nFlags: ${activeErrorFlags}\nError Detail:\n${activeErrorStderr}`;
-                      if (typeof window !== "undefined" && navigator.clipboard) {
+                      if (
+                        typeof window !== "undefined" &&
+                        navigator.clipboard
+                      ) {
                         navigator.clipboard.writeText(reportText).then(() => {
                           setCopiedReport(true);
                           setTimeout(() => setCopiedReport(false), 2000);

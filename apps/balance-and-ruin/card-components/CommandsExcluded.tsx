@@ -62,7 +62,9 @@ export const ExcludeSelect = ({ flag }: ExcludeSelectProps) => {
   const selectOptions = useMemo(() => {
     const currentValue = Number(value ?? NONE);
     return allOptions
-      .filter(({ value: id }) => id === currentValue || !excludedValues.includes(id))
+      .filter(
+        ({ value: id }) => id === currentValue || !excludedValues.includes(id),
+      )
       .map((opt) => ({
         label: opt.label,
         value: opt.value.toString(),
