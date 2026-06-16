@@ -230,9 +230,9 @@ export const AppLayout = ({ children, title }: AppLayoutProps) => {
 
         <div className={styles.sidebarFooter}>
           <span>Version</span>
-          <span className={styles.versionBadge}>
-            {version ? `v${version.replace(/[a-zA-Z]+$/, "")}` : "Unknown"}
-          </span>
+<span className={styles.versionBadge}>
+  {version ? `v${version}` : "Unknown"}
+</span>
         </div>
       </aside>
 
