@@ -25,24 +25,26 @@ const AppSessionContext = createContext<AppSessionContextType>({
 });
 
 export const signIn = (provider?: string) => {
-  const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+  const BACKEND_URL =
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
   const loginUrl = `${BACKEND_URL}/api/v1/auth/login`;
 
   // If we are on a preview domain or local development (not the main domain), use a popup to handle cross-origin login
-  const isMainDomain = typeof window !== "undefined" && 
-    (window.location.hostname === "dev.ff6worldscollide.com" || 
-     window.location.hostname === "ff6worldscollide.com");
+  const isMainDomain =
+    typeof window !== "undefined" &&
+    (window.location.hostname === "dev.ff6worldscollide.com" ||
+      window.location.hostname === "ff6worldscollide.com");
 
   if (!isMainDomain && typeof window !== "undefined") {
     const width = 600;
     const height = 750;
     const left = window.screenX + (window.outerWidth - width) / 2;
     const top = window.screenY + (window.outerHeight - height) / 2;
-    
+
     window.open(
       loginUrl,
       "narshe_login",
-      `width=${width},height=${height},left=${left},top=${top},status=no,menubar=no,toolbar=no`
+      `width=${width},height=${height},left=${left},top=${top},status=no,menubar=no,toolbar=no`,
     );
   } else {
     window.location.href = loginUrl;
@@ -63,7 +65,9 @@ export const AppSessionProvider = ({
   session?: any;
 }) => {
   const [data, setData] = useState<AppSession | null>(null);
-  const [status, setStatus] = useState<"authenticated" | "unauthenticated" | "loading">("loading");
+  const [status, setStatus] = useState<
+    "authenticated" | "unauthenticated" | "loading"
+  >("loading");
 
   useEffect(() => {
     // Add message listener for cross-origin popup login
@@ -91,10 +95,10 @@ export const AppSessionProvider = ({
           atob(base64)
             .split("")
             .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-            .join("")
+            .join(""),
         );
         const payload = JSON.parse(jsonPayload);
-        
+
         const discordId = payload.sub || payload.discordId;
         const name = payload.username || payload.name || "Discord User";
         let image = payload.avatar || payload.image || null;
@@ -106,8 +110,14 @@ export const AppSessionProvider = ({
         const ADMIN_IDS = envAdminIds
           ? envAdminIds.split(",")
           : ["451050854934511647", "197757429948219392"];
-        const isHardcodedAdmin = discordId && ADMIN_IDS.includes(String(discordId));
-        const isAdmin = !!(payload.isAdmin || payload.is_admin || payload.isSuperadmin || isHardcodedAdmin);
+        const isHardcodedAdmin =
+          discordId && ADMIN_IDS.includes(String(discordId));
+        const isAdmin = !!(
+          payload.isAdmin ||
+          payload.is_admin ||
+          payload.isSuperadmin ||
+          isHardcodedAdmin
+        );
         const isSuperadmin = !!(payload.isSuperadmin || isHardcodedAdmin);
 
         setData({

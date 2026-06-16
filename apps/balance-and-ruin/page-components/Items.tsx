@@ -13,7 +13,7 @@ import { selectStartingItems } from "~/state/itemSlice";
 
 export const Items = () => {
   const items = useSelector(selectStartingItems);
-  
+
   return (
     <PageContainer columns={2} className="!items-stretch">
       {/* Row 1: Starting Gold/Items (Massive - Full Width!) */}

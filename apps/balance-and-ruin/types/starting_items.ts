@@ -6,7 +6,7 @@ export type RawStartingItem = {
   id: number;
   name: string;
   hideable: boolean;
-}
+};
 
 export type StartingItem = {
   name: string;

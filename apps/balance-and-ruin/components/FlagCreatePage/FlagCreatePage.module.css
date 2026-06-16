@@ -434,4 +434,22 @@
   }
 }
 
+.sidebarFooter {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 1rem 1.5rem;
+  background-color: rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.versionBadge {
+  color: #ffffff;
+  font-weight: 600;
+  font-family: monospace;
+}
+
+
 

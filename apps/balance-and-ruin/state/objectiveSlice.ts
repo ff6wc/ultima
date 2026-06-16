@@ -144,7 +144,8 @@ export const objectiveSlice = createSlice({
       const objectiveValues = objectivesToData(action.payload);
       const objectives = Object.entries(objectiveValues).map(
         ([flag, value]) => {
-          const values = value?.split(".") || DEFAULT_OBJECTIVE_VALUE.split(".");
+          const values =
+            value?.split(".") || DEFAULT_OBJECTIVE_VALUE.split(".");
           const resultId = values[0];
           let metadata = state.metadataById.results[resultId];
           if (!metadata) {

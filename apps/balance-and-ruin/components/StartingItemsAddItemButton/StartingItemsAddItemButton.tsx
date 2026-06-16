@@ -1,9 +1,6 @@
 import { useDispatch } from "react-redux";
 import { setFlag } from "~/state/flagSlice";
-import {
-  MAX_CUSTOM_ITEM_COUNT,
-  setItems,
-} from "~/state/itemSlice";
+import { MAX_CUSTOM_ITEM_COUNT, setItems } from "~/state/itemSlice";
 import { StartingItems, StartingItem } from "~/types/starting_items";
 import { startingItemsToString } from "~/utils/startingItemsToString";
 import { FaPlus } from "react-icons/fa";
@@ -12,9 +9,7 @@ type StartingItemsProps = {
   items: StartingItems;
 };
 
-export const StartingItemsAddItemButton = ({
-  items,
-}: StartingItemsProps) => {
+export const StartingItemsAddItemButton = ({ items }: StartingItemsProps) => {
   const dispatch = useDispatch();
 
   const addItem = () => {
@@ -39,7 +34,7 @@ export const StartingItemsAddItemButton = ({
       setFlag({
         flag: "-si",
         value: startingItemsToString(newItems),
-      })
+      }),
     );
   };
 
@@ -59,4 +54,3 @@ export const StartingItemsAddItemButton = ({
     </div>
   );
 };
-

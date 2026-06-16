@@ -93,7 +93,10 @@ const SeedDetailsPage = () => {
 
           {/* 3x Enlarged Centered Brand & Title Column */}
           <div className="flex flex-col items-center gap-4 text-center py-4 select-none">
-            <Link href="/" className="cursor-pointer hover:opacity-80 transition-opacity">
+            <Link
+              href="/"
+              className="cursor-pointer hover:opacity-80 transition-opacity"
+            >
               <img
                 src="/logo-transparent.png"
                 alt="FF6WC Logo"

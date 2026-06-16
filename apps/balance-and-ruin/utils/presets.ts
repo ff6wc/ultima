@@ -4,10 +4,13 @@ export const normalizePresets = (data: any): Record<string, FlagPreset> => {
   if (!data) return {};
   const presetsArray = Array.isArray(data) ? data : Object.values(data);
   return presetsArray.reduce((acc: Record<string, FlagPreset>, p: any) => {
-    const name = p ? (p.preset_name || p.name) : null;
+    const name = p ? p.preset_name || p.name : null;
     if (p && name) {
       let flags = p.flags || "";
-      if (name.toLowerCase().includes("atma series") && typeof flags === "string") {
+      if (
+        name.toLowerCase().includes("atma series") &&
+        typeof flags === "string"
+      ) {
         const siMatch = flags.match(/-si\s+([^\s]+)/);
         if (siMatch) {
           const siValue = siMatch[1];
@@ -23,8 +26,8 @@ export const normalizePresets = (data: any): Record<string, FlagPreset> => {
             }
           }
 
-          const hasMoogleCharm = items.some(item => item.id === "222");
-          const hasPotion = items.some(item => item.id === "233");
+          const hasMoogleCharm = items.some((item) => item.id === "222");
+          const hasPotion = items.some((item) => item.id === "233");
 
           let changed = false;
           if (!hasMoogleCharm) {
@@ -37,7 +40,9 @@ export const normalizePresets = (data: any): Record<string, FlagPreset> => {
           }
 
           if (changed) {
-            const newSiValue = items.map(item => `${item.id}.${item.min}.${item.max}`).join('.');
+            const newSiValue = items
+              .map((item) => `${item.id}.${item.min}.${item.max}`)
+              .join(".");
             flags = flags.replace(`-si ${siValue}`, `-si ${newSiValue}`);
           }
         } else {
@@ -49,7 +54,7 @@ export const normalizePresets = (data: any): Record<string, FlagPreset> => {
       const normalizedPreset = {
         ...p,
         name: name,
-        flags: flags
+        flags: flags,
       };
       acc[name.toLowerCase()] = normalizedPreset;
     }

@@ -54,11 +54,12 @@ export const SeedCard = ({ className, seed }: SeedCardProps) => {
   const executeGenerate = async (currentRomData: string) => {
     const { filename, patch, log } = seed;
 
-    const [{ XDelta3Decoder }, { base64ToByteArray }, { applyInGameConfig }] = await Promise.all([
-      import("~/utils/xdelta3_decoder"),
-      import("~/utils/base64ToByteArray"),
-      import("~/utils/romUtils"),
-    ]);
+    const [{ XDelta3Decoder }, { base64ToByteArray }, { applyInGameConfig }] =
+      await Promise.all([
+        import("~/utils/xdelta3_decoder"),
+        import("~/utils/base64ToByteArray"),
+        import("~/utils/romUtils"),
+      ]);
 
     const patched = XDelta3Decoder.decode(
       base64ToByteArray(patch as string),
@@ -117,7 +118,7 @@ export const SeedCard = ({ className, seed }: SeedCardProps) => {
           localStorage.setItem("rom_name", file.name);
           setRomData(data_string);
           setRomName(file.name);
-          
+
           // Immediately trigger generate upon selection
           await executeGenerate(data_string);
         } catch (e) {
@@ -132,16 +133,21 @@ export const SeedCard = ({ className, seed }: SeedCardProps) => {
   return (
     <div className={cx(styles.container, className)}>
       <div className="flex flex-col items-center text-center gap-6 py-6 w-full">
-        <h2 className={cx(styles.title, "w-full text-center pb-4")}>Generate Your ROM</h2>
-        
+        <h2 className={cx(styles.title, "w-full text-center pb-4")}>
+          Generate Your ROM
+        </h2>
+
         <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed max-w-md font-sans font-medium mt-2">
-          {hasRomData 
-            ? `Your base ROM (${displayRomName}) is loaded and ready.` 
+          {hasRomData
+            ? `Your base ROM (${displayRomName}) is loaded and ready.`
             : "Load your base ROM to patch and download this seed instantly."}
         </p>
 
         <button
-          className={cx(styles.generateButton, "w-full sm:w-auto min-w-[220px] justify-center flex items-center gap-2 px-8 py-3.5 font-bold text-base transition-all duration-200 shadow-md active:scale-95 hover:shadow-lg self-center mt-4")}
+          className={cx(
+            styles.generateButton,
+            "w-full sm:w-auto min-w-[220px] justify-center flex items-center gap-2 px-8 py-3.5 font-bold text-base transition-all duration-200 shadow-md active:scale-95 hover:shadow-lg self-center mt-4",
+          )}
           onClick={handleGenerateClick}
         >
           Generate ROM
@@ -166,5 +172,3 @@ export const SeedCard = ({ className, seed }: SeedCardProps) => {
     </div>
   );
 };
-
-

@@ -7,12 +7,26 @@ import {
   SubflagOption,
 } from "~/components/FlagSubflagSelect/FlagSubflagSelect";
 
-const MultiColumnList = ({ title, items, cols = 2 }: { title?: string; items: string[]; cols?: number }) => {
+const MultiColumnList = ({
+  title,
+  items,
+  cols = 2,
+}: {
+  title?: string;
+  items: string[];
+  cols?: number;
+}) => {
   const gridColsClass = cols === 3 ? "grid-cols-3" : "grid-cols-2";
   return (
     <div className="mt-2 text-xs leading-relaxed text-slate-700 dark:text-slate-200 font-medium">
-      {title && <span className="block font-semibold mb-1 text-slate-700 dark:text-slate-200">{title}</span>}
-      <div className={`grid ${gridColsClass} gap-x-2 gap-y-0.5 pl-1 text-xs text-slate-600 dark:text-slate-300`}>
+      {title && (
+        <span className="block font-semibold mb-1 text-slate-700 dark:text-slate-200">
+          {title}
+        </span>
+      )}
+      <div
+        className={`grid ${gridColsClass} gap-x-2 gap-y-0.5 pl-1 text-xs text-slate-600 dark:text-slate-300`}
+      >
         {items.map((item, idx) => (
           <div key={idx} className="flex items-center gap-1.5 truncate">
             <span className="text-slate-400 dark:text-slate-500">•</span>
@@ -32,14 +46,36 @@ const STANDARD_IR = {
       cols={3}
       title="Possible Item Rewards:"
       items={[
-        "ValiantKnife", "Illumina", "Ragnarok", "Atma Weapon",
-        "Pearl Lance", "Aura Lance", "Magus Rod", "Fixed Dice",
-        "Aegis Shld", "Flame Shld", "Ice Shld", "Thunder Shld",
-        "Genji Shld", "Paladin Shld", "Force Shld", "Red Cap",
-        "Cat Hood", "Genji Helmet", "Force Armor", "Genji Armor",
-        "Minerva", "BehemothSuit", "Snow Muffler", "Economizer",
-        "Genji Glove", "Offering", "Gem Box", "Dragon Horn",
-        "Marvel Shoes", "Exp. Egg"
+        "ValiantKnife",
+        "Illumina",
+        "Ragnarok",
+        "Atma Weapon",
+        "Pearl Lance",
+        "Aura Lance",
+        "Magus Rod",
+        "Fixed Dice",
+        "Aegis Shld",
+        "Flame Shld",
+        "Ice Shld",
+        "Thunder Shld",
+        "Genji Shld",
+        "Paladin Shld",
+        "Force Shld",
+        "Red Cap",
+        "Cat Hood",
+        "Genji Helmet",
+        "Force Armor",
+        "Genji Armor",
+        "Minerva",
+        "BehemothSuit",
+        "Snow Muffler",
+        "Economizer",
+        "Genji Glove",
+        "Offering",
+        "Gem Box",
+        "Dragon Horn",
+        "Marvel Shoes",
+        "Exp. Egg",
       ]}
     />
   ),
@@ -68,11 +104,24 @@ const irOptions: SubflagOption[] = [
         cols={3}
         title="Possible High Tier Item Rewards:"
         items={[
-          "ValiantKnife", "Illumina", "Ragnarok", "Atma Weapon",
-          "Aura Lance", "Fixed Dice", "Flame Shld", "Ice Shld",
-          "Thunder Shld", "Paladin Shld", "Force Shld", "Minerva",
-          "BehemothSuit", "Snow Muffler", "Genji Glove", "Offering",
-          "Dragon Horn", "Exp. Egg"
+          "ValiantKnife",
+          "Illumina",
+          "Ragnarok",
+          "Atma Weapon",
+          "Aura Lance",
+          "Fixed Dice",
+          "Flame Shld",
+          "Ice Shld",
+          "Thunder Shld",
+          "Paladin Shld",
+          "Force Shld",
+          "Minerva",
+          "BehemothSuit",
+          "Snow Muffler",
+          "Genji Glove",
+          "Offering",
+          "Dragon Horn",
+          "Exp. Egg",
         ]}
       />
     ),
@@ -87,10 +136,19 @@ const irOptions: SubflagOption[] = [
         cols={3}
         title="Possible High Tier Item Rewards:"
         items={[
-          "ValiantKnife", "Illumina", "Ragnarok", "Atma Weapon",
-          "Fixed Dice", "Flame Shld", "Ice Shld", "Thunder Shld",
-          "Paladin Shld", "Minerva", "Genji Glove", "Offering",
-          "Exp. Egg"
+          "ValiantKnife",
+          "Illumina",
+          "Ragnarok",
+          "Atma Weapon",
+          "Fixed Dice",
+          "Flame Shld",
+          "Ice Shld",
+          "Thunder Shld",
+          "Paladin Shld",
+          "Minerva",
+          "Genji Glove",
+          "Offering",
+          "Exp. Egg",
         ]}
       />
     ),
@@ -112,9 +170,15 @@ export const Checks = () => {
                 cols={2}
                 title="Remove character/esper rewards from:"
                 items={[
-                  "Auction House", "Collapsing House", "Figaro Castle Throne",
-                  "Gau's Father's House", "Kohlingen Inn", "Narshe Weapon Shop",
-                  "Sealed Gate", "South Figaro Basement", "Lone Wolf"
+                  "Auction House",
+                  "Collapsing House",
+                  "Figaro Castle Throne",
+                  "Gau's Father's House",
+                  "Kohlingen Inn",
+                  "Narshe Weapon Shop",
+                  "Sealed Gate",
+                  "South Figaro Basement",
+                  "Lone Wolf",
                 ]}
               />
             }

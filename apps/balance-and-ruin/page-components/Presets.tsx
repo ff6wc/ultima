@@ -17,7 +17,11 @@ import {
   FaBolt,
   FaSkull,
 } from "react-icons/fa";
-import { generateRandom, generateChaos, generateTrueChaos } from "~/utils/randomFlagsets";
+import {
+  generateRandom,
+  generateChaos,
+  generateTrueChaos,
+} from "~/utils/randomFlagsets";
 import { setRawFlags, selectRawFlags } from "~/state/flagSlice";
 import { setRawObjectives } from "~/state/objectiveSlice";
 import { setRawStartingItems } from "~/state/itemSlice";
@@ -532,15 +536,11 @@ const CategorySection = ({
                   padding: "0.5rem",
                 }}
               >
-                {title === "My Presets" ? (
-                  session?.user ? (
-                    "No saved presets. Save your current flags as a preset on the Generate page to see them here!"
-                  ) : (
-                    "Please connect your Discord account in the Profile tab to view your saved presets."
-                  )
-                ) : (
-                  "No results found."
-                )}
+                {title === "My Presets"
+                  ? session?.user
+                    ? "No saved presets. Save your current flags as a preset on the Generate page to see them here!"
+                    : "Please connect your Discord account in the Profile tab to view your saved presets."
+                  : "No results found."}
               </p>
             ) : (
               sorted.map((preset) => (
@@ -581,7 +581,7 @@ const hasSevereProfanity = (text: string): boolean => {
     /\bretard(?:ed)?\b/i,
   ];
 
-  if (severePatterns.some(pattern => pattern.test(text))) {
+  if (severePatterns.some((pattern) => pattern.test(text))) {
     return true;
   }
 
@@ -601,10 +601,10 @@ const hasSevereProfanity = (text: string): boolean => {
     "faggut",
     "nigger",
     "kike",
-    "tranny"
+    "tranny",
   ];
 
-  if (strictSubstrings.some(word => normalized.includes(word))) {
+  if (strictSubstrings.some((word) => normalized.includes(word))) {
     return true;
   }
 
@@ -641,7 +641,10 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
 
   const [dbPresets, setDbPresets] = useState<any[]>([]);
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
-  const [toast, setToast] = useState<{ message: string; type: "random" | "chaos" | "true_chaos" } | null>(null);
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "random" | "chaos" | "true_chaos";
+  } | null>(null);
 
   useEffect(() => {
     if (toast) {
@@ -650,7 +653,10 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
     }
   }, [toast]);
 
-  const handleRandomRoll = (type: "random" | "chaos" | "true_chaos", generator: () => string) => {
+  const handleRandomRoll = (
+    type: "random" | "chaos" | "true_chaos",
+    generator: () => string,
+  ) => {
     try {
       const rolledFlags = generator();
       dispatch(clearActivePreset());
@@ -660,8 +666,13 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
       if (typeof window !== "undefined") {
         window.dispatchEvent(new CustomEvent("animate-preset-box"));
       }
-      
-      const typeLabel = type === "random" ? "Random" : type === "chaos" ? "Chaos" : "True Chaos";
+
+      const typeLabel =
+        type === "random"
+          ? "Random"
+          : type === "chaos"
+            ? "Chaos"
+            : "True Chaos";
       setToast({
         message: `Successfully rolled ${typeLabel} flags!`,
         type: type,
@@ -679,7 +690,8 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
       color: "#10b981", // Emerald / Green
       rgb: "16, 185, 129",
       glow: "rgba(16,185,129,0.15)",
-      bgGradient: "linear-gradient(135deg, rgba(16,185,129,0.08) 0%, rgba(16,185,129,0.01) 100%)",
+      bgGradient:
+        "linear-gradient(135deg, rgba(16,185,129,0.08) 0%, rgba(16,185,129,0.01) 100%)",
       helper: "Light randomization, perfect for quick runs",
       action: "Roll Random",
       generator: generateRandom,
@@ -691,7 +703,8 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
       color: "#f59e0b", // Amber / Yellow
       rgb: "245, 158, 11",
       glow: "rgba(245,158,11,0.15)",
-      bgGradient: "linear-gradient(135deg, rgba(245,158,11,0.08) 0%, rgba(245,158,11,0.01) 100%)",
+      bgGradient:
+        "linear-gradient(135deg, rgba(245,158,11,0.08) 0%, rgba(245,158,11,0.01) 100%)",
       helper: "More randomization, can get a little wacky",
       action: "Unleash Chaos",
       generator: generateChaos,
@@ -703,7 +716,8 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
       color: "#ef4444", // Red
       rgb: "239, 68, 68",
       glow: "rgba(239,68,68,0.15)",
-      bgGradient: "linear-gradient(135deg, rgba(239,68,68,0.08) 0%, rgba(239,68,68,0.01) 100%)",
+      bgGradient:
+        "linear-gradient(135deg, rgba(239,68,68,0.08) 0%, rgba(239,68,68,0.01) 100%)",
       helper: "Total randomization. Good luck!",
       action: "Enter the Void",
       generator: generateTrueChaos,
@@ -721,12 +735,16 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
 
   useEffect(() => {
     if (session?.user) {
-      const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
-      const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+      const token =
+        typeof window !== "undefined"
+          ? localStorage.getItem("auth_token")
+          : null;
+      const BACKEND_URL =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
       fetch(`${BACKEND_URL}/api/v1/user-presets`, {
         headers: {
-          ...(token ? { "Authorization": `Bearer ${token}` } : {}),
-        }
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
       })
         .then((res) => {
           if (res.ok) return res.json();
@@ -736,7 +754,10 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
           setDbPresets(data);
         })
         .catch((err) => {
-          console.warn("Failed to fetch database presets under Presets tab:", err);
+          console.warn(
+            "Failed to fetch database presets under Presets tab:",
+            err,
+          );
         });
     } else {
       setDbPresets([]);
@@ -751,13 +772,21 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
       })
       .map((p) => {
         const creatorId = p.owner_id || p.creator_id;
-        const officialVal = p.is_official !== undefined
-          ? p.is_official
-          : (!!p.official || (Array.isArray(p.tags) && p.tags.includes("official")));
+        const officialVal =
+          p.is_official !== undefined
+            ? p.is_official
+            : !!p.official ||
+              (Array.isArray(p.tags) && p.tags.includes("official"));
         const createdAt = p.created_at || p.created_timestamp;
 
-        const isSelf = creatorId != null && currentUserId != null && String(creatorId) === String(currentUserId);
-        const displayName = isSelf ? "You" : (p.creator_name || (creatorId === "seedbot" ? "Seedbot" : "Community"));
+        const isSelf =
+          creatorId != null &&
+          currentUserId != null &&
+          String(creatorId) === String(currentUserId);
+        const displayName = isSelf
+          ? "You"
+          : p.creator_name ||
+            (creatorId === "seedbot" ? "Seedbot" : "Community");
 
         const presetName = p.preset_name || p.name || "";
         return {
@@ -794,7 +823,9 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
     }
 
     if (hasSevereProfanity(newPresetName) || hasSevereProfanity(description)) {
-      setSubmitError("Preset Name and Description must not contain inappropriate language.");
+      setSubmitError(
+        "Preset Name and Description must not contain inappropriate language.",
+      );
       return;
     }
 
@@ -882,18 +913,22 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
       .map((p): FlagPreset => {
         const override = overridesMap.get(p.name.toLowerCase());
         const isDeleted = override?.deleted === true;
-        
-        let officialVal = p.is_official !== undefined ? !!p.is_official : !!p.official;
+
+        let officialVal =
+          p.is_official !== undefined ? !!p.is_official : !!p.official;
         if (override) {
           if (override.is_official !== undefined) {
             officialVal = !!override.is_official;
           } else if (override.official !== undefined) {
             officialVal = !!override.official;
-          } else if (Array.isArray(override.tags) && override.tags.includes("official")) {
+          } else if (
+            Array.isArray(override.tags) &&
+            override.tags.includes("official")
+          ) {
             officialVal = true;
           }
         }
-        const tagsVal = override?.tags ? override.tags : (p.tags || []);
+        const tagsVal = override?.tags ? override.tags : p.tags || [];
 
         return {
           ...p,
@@ -918,23 +953,30 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
     }
 
     return combined.filter((p) => {
-        const isOfficial = p.official;
-        const isUserOwned =
+      const isOfficial = p.official;
+      const isUserOwned =
+        currentUserId &&
+        (String(p.creator_id) === String(currentUserId) ||
+          String(p.creator_name).toLowerCase() === currentUserNameLower);
+      const isLocalCustom = customPresets[p.name] !== undefined;
+      const isUserDbPreset = mappedDbPresets.some(
+        (dbP) =>
+          dbP.name.toLowerCase() === p.name.toLowerCase() &&
           currentUserId &&
-          (String(p.creator_id) === String(currentUserId) ||
-           String(p.creator_name).toLowerCase() === currentUserNameLower);
-        const isLocalCustom = customPresets[p.name] !== undefined;
-        const isUserDbPreset = mappedDbPresets.some(
-          (dbP) =>
-            dbP.name.toLowerCase() === p.name.toLowerCase() &&
-            currentUserId &&
-            (String(dbP.creator_id) === String(currentUserId) ||
-             String(dbP.creator_name).toLowerCase() === currentUserNameLower)
-        );
+          (String(dbP.creator_id) === String(currentUserId) ||
+            String(dbP.creator_name).toLowerCase() === currentUserNameLower),
+      );
 
-        return isOfficial || isUserOwned || isLocalCustom || isUserDbPreset;
-      });
-  }, [mergedPresets, currentUserId, mappedDbPresets, dbPresets, customPresets, session?.user?.name]);
+      return isOfficial || isUserOwned || isLocalCustom || isUserDbPreset;
+    });
+  }, [
+    mergedPresets,
+    currentUserId,
+    mappedDbPresets,
+    dbPresets,
+    customPresets,
+    session?.user?.name,
+  ]);
 
   const customPresetNames = new Set(Object.keys(customPresets));
 
@@ -944,7 +986,9 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
 
   const myPresets = useMemo(() => {
     // 1. Start with all database saved presets authored by current user
-    const combined = mappedDbPresets.filter(p => currentUserId && String(p.creator_id) === String(currentUserId));
+    const combined = mappedDbPresets.filter(
+      (p) => currentUserId && String(p.creator_id) === String(currentUserId),
+    );
     const existingNames = new Set(combined.map((p) => p.name.toLowerCase()));
 
     // 2. Add local storage custom presets if they aren't duplicates
@@ -960,7 +1004,7 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
       (p) =>
         currentUserId &&
         !p.official &&
-        String(p.creator_id) === String(currentUserId)
+        String(p.creator_id) === String(currentUserId),
     );
 
     for (const ap of apiMyPresets) {
@@ -971,7 +1015,6 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
 
     return combined;
   }, [mappedDbPresets, customPresets, allPresets, currentUserId]);
-
 
   const handleSelect = (preset: FlagPreset) => {
     // Dispatch setActivePreset BEFORE setRawFlags so the preset name is set
@@ -1031,12 +1074,16 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
         </div>
 
         {/* Style injection for slideUpFade keyframes only */}
-        <style dangerouslySetInnerHTML={{ __html: `
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `
           @keyframes slideUpFade {
             from { transform: translateY(12px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
           }
-        ` }} />
+        `,
+          }}
+        />
 
         {/* Random / Chaos / True Chaos rolling panel */}
         <div className="grid grid-cols-3 gap-2 sm:gap-4 mt-1">
@@ -1047,17 +1094,20 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
                 key={card.id}
                 onClick={() => handleRandomRoll(card.id as any, card.generator)}
                 className={`group relative overflow-hidden cursor-pointer flex flex-col justify-between p-5 rounded-[14px] border transition-all duration-250 ease-[cubic-bezier(0.4,0,0.2,1)]
-                  ${isRolled 
-                    ? "scale-[0.98] border-[var(--card-color)] bg-[rgba(var(--card-rgb),0.12)] shadow-[0_0_15px_var(--card-glow)]" 
-                    : "border-[var(--border-light)] bg-[var(--bg-card)] hover:-translate-y-1 hover:border-[var(--card-color)] hover:bg-[linear-gradient(135deg,rgba(var(--card-rgb),0.08)_0%,rgba(var(--card-rgb),0.01)_100%)] hover:shadow-[0_10px_20px_-5px_rgba(var(--card-rgb),0.15),0_4px_6px_-2px_rgba(var(--card-rgb),0.15)] max-sm:hover:translate-y-0 max-sm:hover:border-[var(--border-light)] max-sm:hover:bg-[var(--bg-card)] max-sm:hover:shadow-none"
+                  ${
+                    isRolled
+                      ? "scale-[0.98] border-[var(--card-color)] bg-[rgba(var(--card-rgb),0.12)] shadow-[0_0_15px_var(--card-glow)]"
+                      : "border-[var(--border-light)] bg-[var(--bg-card)] hover:-translate-y-1 hover:border-[var(--card-color)] hover:bg-[linear-gradient(135deg,rgba(var(--card-rgb),0.08)_0%,rgba(var(--card-rgb),0.01)_100%)] hover:shadow-[0_10px_20px_-5px_rgba(var(--card-rgb),0.15),0_4px_6px_-2px_rgba(var(--card-rgb),0.15)] max-sm:hover:translate-y-0 max-sm:hover:border-[var(--border-light)] max-sm:hover:bg-[var(--bg-card)] max-sm:hover:shadow-none"
                   }
                   max-sm:p-[0.6rem_0.4rem] max-sm:min-h-[125px] max-sm:justify-center max-sm:items-center max-sm:text-center max-sm:gap-1 max-sm:rounded-xl
                 `}
-                style={{
-                  "--card-color": card.color,
-                  "--card-rgb": card.rgb,
-                  "--card-glow": card.glow,
-                } as React.CSSProperties}
+                style={
+                  {
+                    "--card-color": card.color,
+                    "--card-rgb": card.rgb,
+                    "--card-glow": card.glow,
+                  } as React.CSSProperties
+                }
               >
                 {isRolled ? (
                   <div className="flex flex-col items-center justify-center flex-1 gap-2 text-center animate-[slideUpFade_0.2s_cubic-bezier(0.16,1,0.3,1)_forwards]">
@@ -1065,11 +1115,11 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
                       ✓
                     </div>
                     <span className="text-[0.95rem] font-extrabold text-[var(--text-main)]">
-                      {card.id === "random" 
-                        ? "Rolled Random!" 
-                        : card.id === "chaos" 
-                        ? "Chaos Unleashed!" 
-                        : "Void Entered!"}
+                      {card.id === "random"
+                        ? "Rolled Random!"
+                        : card.id === "chaos"
+                          ? "Chaos Unleashed!"
+                          : "Void Entered!"}
                     </span>
                   </div>
                 ) : (
@@ -1094,11 +1144,11 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
                         {card.helper}
                       </p>
                       <p className="hidden max-sm:block text-[0.6rem] text-[var(--text-sub)] mt-0.5 leading-[1.1] opacity-80">
-                        {card.id === "random" 
-                          ? "Light randomization" 
-                          : card.id === "chaos" 
-                          ? "More randomization" 
-                          : "Total randomization"}
+                        {card.id === "random"
+                          ? "Light randomization"
+                          : card.id === "chaos"
+                            ? "More randomization"
+                            : "Total randomization"}
                       </p>
                     </div>
 
@@ -1520,8 +1570,6 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
             />
           </>
         )}
-
-
       </div>
     </PageContainer>
   );

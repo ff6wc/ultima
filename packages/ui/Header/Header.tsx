@@ -25,7 +25,9 @@ export const Header = ({ children = null, className }: HeaderProps) => {
           />
         </Link>
       </div>
-      {children && <div className="flex flex-col z-10 w-full mt-8">{children}</div>}
+      {children && (
+        <div className="flex flex-col z-10 w-full mt-8">{children}</div>
+      )}
       <div className="WC-hero absolute top-0 bottom-0 left-0 right-0 bg-[url('/hero.png')] opacity-80 brightness-75 bg-no-repeat bg-cover bg-center z-0"></div>
     </div>
   );

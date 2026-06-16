@@ -8,7 +8,11 @@ import random from "lodash/random";
 import startCase from "lodash/startCase";
 import { useMemo } from "react";
 import { useDispatch } from "react-redux";
-import { Select, SelectOption as BaseOption, AutoPanText } from "~/components/Select/Select";
+import {
+  Select,
+  SelectOption as BaseOption,
+  AutoPanText,
+} from "~/components/Select/Select";
 import SpriteDrawLoad from "~/components/SpriteDrawLoad/SpriteDrawLoad";
 import {
   defaultCharacterNameString,

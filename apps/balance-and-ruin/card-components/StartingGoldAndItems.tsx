@@ -18,7 +18,10 @@ export interface StartingItemsProps {
   curateItems?: boolean;
 }
 
-export const StartingGoldAndItems = ({ items: propsItems, curateItems = false }: StartingItemsProps) => {
+export const StartingGoldAndItems = ({
+  items: propsItems,
+  curateItems = false,
+}: StartingItemsProps) => {
   const dispatch = useDispatch();
   const reduxItems = useSelector(selectStartingItems);
   const items = propsItems ?? reduxItems;
@@ -46,11 +49,17 @@ export const StartingGoldAndItems = ({ items: propsItems, curateItems = false }:
     if (typeof window === "undefined") return;
 
     const updateHeight = () => {
-      if (window.innerWidth >= 768 && rightColumnRef.current && leftHeaderRef.current) {
+      if (
+        window.innerWidth >= 768 &&
+        rightColumnRef.current &&
+        leftHeaderRef.current
+      ) {
         const rightHeight = rightColumnRef.current.offsetHeight;
         const headerHeight = leftHeaderRef.current.offsetHeight;
         const availableHeight = rightHeight - headerHeight - 16; // 16px is flex gap-4
-        setMaxHeight(availableHeight > 0 ? Math.max(480, availableHeight) : 480);
+        setMaxHeight(
+          availableHeight > 0 ? Math.max(480, availableHeight) : 480,
+        );
       } else {
         setMaxHeight(600);
       }
@@ -84,11 +93,11 @@ export const StartingGoldAndItems = ({ items: propsItems, curateItems = false }:
       setFlag({
         flag: "-si",
         value: sits(items),
-      })
+      }),
     );
   };
 
-  const validItems = items.items.filter(i => i.id >= 0 && i.name);
+  const validItems = items.items.filter((i) => i.id >= 0 && i.name);
 
   return (
     <Card title={"Starting Gold/Items"}>
@@ -157,7 +166,10 @@ export const StartingGoldAndItems = ({ items: propsItems, curateItems = false }:
             {validItems.length > 0 ? (
               <div className="grid grid-cols-2 gap-2">
                 {validItems.map((item, idx) => {
-                  const qty = item.min === item.max ? `${item.min}` : `${item.min}-${item.max}`;
+                  const qty =
+                    item.min === item.max
+                      ? `${item.min}`
+                      : `${item.min}-${item.max}`;
                   return (
                     <div
                       key={idx}
@@ -172,7 +184,9 @@ export const StartingGoldAndItems = ({ items: propsItems, curateItems = false }:
                 })}
               </div>
             ) : (
-              <span className="text-xs italic text-[var(--text-sub)]">No starting items selected.</span>
+              <span className="text-xs italic text-[var(--text-sub)]">
+                No starting items selected.
+              </span>
             )}
           </div>
         </div>
@@ -209,7 +223,10 @@ export const StartingGoldAndItems = ({ items: propsItems, curateItems = false }:
               {validItems.length > 0 ? (
                 <div className="grid grid-cols-2 gap-2">
                   {validItems.map((item, idx) => {
-                    const qty = item.min === item.max ? `${item.min}` : `${item.min}-${item.max}`;
+                    const qty =
+                      item.min === item.max
+                        ? `${item.min}`
+                        : `${item.min}-${item.max}`;
                     return (
                       <div
                         key={idx}
@@ -224,7 +241,9 @@ export const StartingGoldAndItems = ({ items: propsItems, curateItems = false }:
                   })}
                 </div>
               ) : (
-                <span className="text-xs italic text-[var(--text-sub)]">No starting items selected.</span>
+                <span className="text-xs italic text-[var(--text-sub)]">
+                  No starting items selected.
+                </span>
               )}
             </div>
           </div>

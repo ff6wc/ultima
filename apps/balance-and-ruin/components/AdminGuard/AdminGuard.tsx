@@ -21,7 +21,7 @@ export const AdminGuard = ({ children }: AdminGuardProps) => {
 
   if (status === "loading") {
     return (
-      <div 
+      <div
         style={{
           display: "flex",
           minHeight: "400px",
@@ -34,7 +34,7 @@ export const AdminGuard = ({ children }: AdminGuardProps) => {
           fontFamily: "var(--font-runic, monospace)",
         }}
       >
-        <div 
+        <div
           style={{
             width: "48px",
             height: "48px",
@@ -49,7 +49,15 @@ export const AdminGuard = ({ children }: AdminGuardProps) => {
             to { transform: rotate(360deg); }
           }
         `}</style>
-        <div style={{ fontSize: "1.1rem", fontWeight: "bold", letterSpacing: "1px", color: "#60a5fa" }} className="animate-pulse">
+        <div
+          style={{
+            fontSize: "1.1rem",
+            fontWeight: "bold",
+            letterSpacing: "1px",
+            color: "#60a5fa",
+          }}
+          className="animate-pulse"
+        >
           LOADING SYSTEM SECURITY DATA...
         </div>
       </div>
