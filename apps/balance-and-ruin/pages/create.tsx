@@ -109,8 +109,12 @@ const Create = () => {
     }
 
     // 2. Fetch fresh data in the background (Stale-While-Revalidate)
-    fetchWithTimeout(`${process.env.NEXT_PUBLIC_API_URL}/presets`, {}, 2500)
-      .then((res) => res.json())
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+    fetchWithTimeout(`${backendUrl}/presets`, {}, 2500)
+      .then((res) => {
+        if (!res.ok) throw new Error("Network response was not ok");
+        return res.json();
+      })
       .then((data) => {
         const normalized = normalizePresets(data);
         setPresets(normalized);
@@ -149,11 +153,14 @@ const Create = () => {
       });
 
     fetchWithTimeout(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/metadata/flag`,
+      `${backendUrl}/api/metadata/flag`,
       {},
       2500,
     )
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error("Network response was not ok");
+        return res.json();
+      })
       .then((data) => {
         setSchemaLocal(data);
         localStorage.setItem("cached_schema", JSON.stringify(data));
@@ -183,11 +190,14 @@ const Create = () => {
       });
 
     fetchWithTimeout(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/metadata/objective`,
+      `${backendUrl}/api/metadata/objective`,
       {},
       2500,
     )
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error("Network response was not ok");
+        return res.json();
+      })
       .then((data) => {
         setObjectives(data);
         localStorage.setItem("cached_objectives", JSON.stringify(data));
@@ -219,8 +229,11 @@ const Create = () => {
           });
       });
 
-    fetchWithTimeout(`${process.env.NEXT_PUBLIC_API_URL}/api/wc`, {}, 2500)
-      .then((res) => res.json())
+    fetchWithTimeout(`${backendUrl}/api/wc`, {}, 2500)
+      .then((res) => {
+        if (!res.ok) throw new Error("Network response was not ok");
+        return res.json();
+      })
       .then((data) => {
         const fetchedVersion = data["version"];
         setVersion(fetchedVersion);

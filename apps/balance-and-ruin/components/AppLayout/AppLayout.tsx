@@ -39,8 +39,12 @@ export const AppLayout = ({ children, title }: AppLayoutProps) => {
       } catch (e) {}
     }
 
-    fetchWithTimeout(`${process.env.NEXT_PUBLIC_API_URL}/api/wc`, {}, 2500)
-      .then((res) => res.json())
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+    fetchWithTimeout(`${backendUrl}/api/wc`, {}, 2500)
+      .then((res) => {
+        if (!res.ok) throw new Error("Network response was not ok");
+        return res.json();
+      })
       .then((data) => {
         const fetchedVersion = data["version"];
         if (fetchedVersion) {

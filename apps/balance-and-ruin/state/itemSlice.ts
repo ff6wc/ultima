@@ -175,13 +175,7 @@ export const selectItemById = (state: AppState) => {
   // this should be state.item.metadataById but for somereason
   // it is losing it's values between the create page starting up
   // and when the user clicks to add an item to the list
-  return itemsMetadata.itemsMetadata.reduce(
-    (acc, val) => {
-      acc[val.id] = val;
-      return acc;
-    },
-    {} as Record<string, RawStartingItem>,
-  );
+  return prefilledItems as unknown as Record<string, RawStartingItem>;
 };
 
 export default itemSlice.reducer;
