@@ -41,7 +41,9 @@ export const settingsSlice = createSlice({
       state.settings.showFlags = action.payload;
     },
     setVersion(state, action: { payload: string }) {
-      state.version = action.payload;
+      if (action.payload) {
+        state.version = action.payload;
+      }
     },
   },
   // Special reducer for hydrating the state. Special case for next-redux-wrapper

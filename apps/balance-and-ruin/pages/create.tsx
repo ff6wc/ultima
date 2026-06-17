@@ -258,7 +258,7 @@ const Create = () => {
               "Failed to fetch fallback version, using hardcoded fallback:",
               fallbackErr,
             );
-            const fetchedVersion = (fallbackWc as any).version || "1.4.3d";
+            const fetchedVersion = (fallbackWc as any).version || "1.4.4d";
             dispatch(setVersion(fetchedVersion));
             localStorage.setItem(
               "cached_version",
