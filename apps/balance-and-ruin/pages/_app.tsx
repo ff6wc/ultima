@@ -23,8 +23,6 @@ type Props = {
   schema: Schema;
 };
 
-
-
 export let singletonStore: any = null;
 
 const App: AppType<Props> = ({ Component, ...rest }: AppProps<Props>) => {

@@ -1,10 +1,18 @@
 import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { signIn, signOut } from "~/hooks/useAppSession";
 import { useAppSession } from "~/hooks/useAppSession";
+import { selectVersion } from "~/state/settingsSlice";
 
 const AUTH_ENABLED = process.env.NEXT_PUBLIC_AUTH_ENABLED !== "false";
 
-import { FaDiscord, FaBook, FaSearch, FaBolt, FaSlidersH } from "react-icons/fa";
+import {
+  FaDiscord,
+  FaBook,
+  FaSearch,
+  FaBolt,
+  FaSlidersH,
+} from "react-icons/fa";
 import { HiOutlineMoon, HiOutlineSun } from "react-icons/hi";
 import styles from "~/components/FlagCreatePage/FlagCreatePage.module.css";
 
@@ -17,7 +25,9 @@ export const AppLayout = ({ children, title }: AppLayoutProps) => {
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const { data: session, status } = useAppSession();
   const [profileHovered, setProfileHovered] = useState(false);
-  const logoSrc = theme === "dark" ? "/logo-transparent.png?v=2" : "/logo-light.png?v=2";
+  const logoSrc =
+    theme === "dark" ? "/logo-transparent.png?v=2" : "/logo-light.png?v=2";
+  const version = useSelector(selectVersion);
 
   useEffect(() => {
     const saved = localStorage.getItem("app-theme") as "light" | "dark";
@@ -94,16 +104,46 @@ export const AppLayout = ({ children, title }: AppLayoutProps) => {
 
           {!AUTH_ENABLED ? null : (
             <>
-              <div style={{ borderTop: "1px solid rgba(255, 255, 255, 0.15)", margin: "1.5rem 1rem 0.75rem 1rem" }} />
+              <div
+                style={{
+                  borderTop: "1px solid rgba(255, 255, 255, 0.15)",
+                  margin: "1.5rem 1rem 0.75rem 1rem",
+                }}
+              />
               {session?.user ? (
                 <a
                   href="/create?tab=profile"
                   className={styles.tabItem}
-                  style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "0.5rem" }}
+                  style={{
+                    textDecoration: "none",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                  }}
                 >
-                  <div style={{ width: "20px", height: "20px", borderRadius: "50%", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "#334155", flexShrink: 0 }}>
+                  <div
+                    style={{
+                      width: "20px",
+                      height: "20px",
+                      borderRadius: "50%",
+                      overflow: "hidden",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      backgroundColor: "#334155",
+                      flexShrink: 0,
+                    }}
+                  >
                     {session.user.image ? (
-                      <img src={session.user.image} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      <img
+                        src={session.user.image}
+                        alt=""
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                        }}
+                      />
                     ) : (
                       <FaDiscord size={12} color="white" />
                     )}
@@ -121,7 +161,12 @@ export const AppLayout = ({ children, title }: AppLayoutProps) => {
                   <span>Login</span>
                 </button>
               )}
-              <div style={{ borderTop: "1px solid rgba(255, 255, 255, 0.15)", margin: "0.75rem 1rem 0.75rem 1rem" }} />
+              <div
+                style={{
+                  borderTop: "1px solid rgba(255, 255, 255, 0.15)",
+                  margin: "0.75rem 1rem 0.75rem 1rem",
+                }}
+              />
             </>
           )}
         </div>
@@ -138,6 +183,13 @@ export const AppLayout = ({ children, title }: AppLayoutProps) => {
             <FaDiscord size={16} />
             <span>Join Discord</span>
           </a>
+        </div>
+
+        <div className={styles.sidebarFooter}>
+          <span>Version</span>
+<span className={styles.versionBadge}>
+  {version ? `v${version}` : "Unknown"}
+</span>
         </div>
       </aside>
 

@@ -29,7 +29,9 @@ const PaletteSelect = ({ options, onChange, value }: SelectProps) => {
         value={value}
         renderOption={(opt: PaletteSelectOption) => (
           <div className="flex flex-col justify-center gap-2 w-full min-w-0">
-            <span className="block font-medium w-full min-w-0"><AutoPanText text={opt.label} /></span>
+            <span className="block font-medium w-full min-w-0">
+              <AutoPanText text={opt.label} />
+            </span>
             <div>
               <PaletteSwatch colors={opt.color as number[][]} />
             </div>

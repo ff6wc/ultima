@@ -16,6 +16,7 @@ export interface SettingsState {
     /** Displays the flag name next to the option title */
     showFlags: boolean;
   };
+  version: string;
 }
 
 // Initial state
@@ -26,6 +27,7 @@ const initialState: SettingsState = {
     showLayout: false,
     showFlags: false,
   },
+  version: "1.4.4d",
 };
 
 // Actual Slice
@@ -37,6 +39,11 @@ export const settingsSlice = createSlice({
     setSetting(state, action) {},
     setShowFlags(state, action: { payload: boolean }) {
       state.settings.showFlags = action.payload;
+    },
+    setVersion(state, action: { payload: string }) {
+      if (action.payload) {
+        state.version = action.payload;
+      }
     },
   },
   // Special reducer for hydrating the state. Special case for next-redux-wrapper
@@ -50,10 +57,11 @@ export const settingsSlice = createSlice({
   },
 });
 
-export const { setSetting, setShowFlags } = settingsSlice.actions;
+export const { setSetting, setShowFlags, setVersion } = settingsSlice.actions;
 
 export const selectSettings = (state: AppState) => state?.settings?.settings;
 export const selectShowFlags = (state: AppState) =>
   !!state?.settings?.settings?.showFlags;
+export const selectVersion = (state: AppState) => state?.settings?.version;
 
 export default settingsSlice.reducer;

@@ -35,7 +35,15 @@ export const GenerateUpload = ({
 }: GenerateUploadProps) => {
   return (
     <>
-      <p style={{ margin: 0, fontSize: "0.9rem", color: "var(--text-input, #94a3b8)" }}>Click the button below to select your v1.0 US ROM file.</p>
+      <p
+        style={{
+          margin: 0,
+          fontSize: "0.9rem",
+          color: "var(--text-input, #94a3b8)",
+        }}
+      >
+        Click the button below to select your v1.0 US ROM file.
+      </p>
       <div className="">
         {!success && !error && (
           <BadgeText variant="warning">Waiting for ROM upload</BadgeText>

@@ -38,7 +38,8 @@ export const GenerateJohnnydmadCard = ({
   const { error, trigger, isMutating } = useSWRMutation(
     ["/api/music/generate", romData],
     async (key, { arg }) => {
-      const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+      const BACKEND_URL =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
       const result = await fetch(`${BACKEND_URL}/api/music/generate`, {
         headers: {
           "Content-Type": "application/json",
@@ -70,11 +71,12 @@ export const GenerateJohnnydmadCard = ({
 
     const { filename, patch, seed_id, log: spoiler_log } = generateResult;
 
-    const [{ XDelta3Decoder }, { base64ToByteArray }, { applyInGameConfig }] = await Promise.all([
-      import("~/utils/xdelta3_decoder"),
-      import("~/utils/base64ToByteArray"),
-      import("~/utils/romUtils"),
-    ]);
+    const [{ XDelta3Decoder }, { base64ToByteArray }, { applyInGameConfig }] =
+      await Promise.all([
+        import("~/utils/xdelta3_decoder"),
+        import("~/utils/base64ToByteArray"),
+        import("~/utils/romUtils"),
+      ]);
 
     const patched = XDelta3Decoder.decode(
       base64ToByteArray(patch),

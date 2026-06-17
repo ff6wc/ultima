@@ -54,7 +54,7 @@ const AnimatedBox = ({ size = 22, className, ...props }: AnimatedBoxProps) => {
       {/* Box bottom panels and outlines */}
       <path d="M 7.5 14.762 V 6.838 L 1 4.239 v 7.923 Z" />
       <path d="M 8.5 14.762 V 6.838 L 15 4.239 v 7.923 Z" />
-      
+
       {/* Animating hingeing lid */}
       <path
         d={lidD}
@@ -320,7 +320,10 @@ const TAB_TITLES_MAP: Record<string, string[]> = {
   ],
 };
 
-const TargetWithArrow = ({ size = 22, ...props }: React.SVGProps<SVGSVGElement> & { size?: number | string }) => (
+const TargetWithArrow = ({
+  size = 22,
+  ...props
+}: React.SVGProps<SVGSVGElement> & { size?: number | string }) => (
   <svg
     viewBox="0 0 100 100"
     width={size}
@@ -329,15 +332,40 @@ const TargetWithArrow = ({ size = 22, ...props }: React.SVGProps<SVGSVGElement> 
     {...props}
   >
     {/* Outer Ring */}
-    <circle cx="50" cy="50" r="38" stroke="currentColor" strokeWidth="6" fill="none" />
+    <circle
+      cx="50"
+      cy="50"
+      r="38"
+      stroke="currentColor"
+      strokeWidth="6"
+      fill="none"
+    />
     {/* Middle Ring */}
-    <circle cx="50" cy="50" r="24" stroke="currentColor" strokeWidth="6" fill="none" />
+    <circle
+      cx="50"
+      cy="50"
+      r="24"
+      stroke="currentColor"
+      strokeWidth="6"
+      fill="none"
+    />
     {/* Center Bullseye */}
     <circle cx="50" cy="50" r="10" fill="currentColor" />
     {/* Arrow Shaft (starts in center, extends to top right) */}
-    <line x1="50" y1="50" x2="80" y2="20" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" />
+    <line
+      x1="50"
+      y1="50"
+      x2="80"
+      y2="20"
+      stroke="currentColor"
+      strokeWidth="5.5"
+      strokeLinecap="round"
+    />
     {/* Arrow Fletching/Feathers */}
-    <path d="M 74 26 L 88 12 L 84 8 L 70 22 Z M 78 22 L 92 8 L 88 4 L 74 18 Z" fill="currentColor" />
+    <path
+      d="M 74 26 L 88 12 L 84 8 L 70 22 Z M 78 22 L 92 8 L 88 4 L 74 18 Z"
+      fill="currentColor"
+    />
   </svg>
 );
 
@@ -350,7 +378,8 @@ export const FlagCreatePage = ({
   const router = useRouter();
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const { data: session, status } = useAppSession();
-  const logoSrc = theme === "dark" ? "/logo-transparent.png?v=2" : "/logo-light.png?v=2";
+  const logoSrc =
+    theme === "dark" ? "/logo-transparent.png?v=2" : "/logo-light.png?v=2";
   const { isAdmin } = useAdmin();
   const [profileHovered, setProfileHovered] = useState(false);
   const [devAdminActive, setDevAdminActive] = useState(false);
@@ -484,20 +513,23 @@ export const FlagCreatePage = ({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const NAV_FLOW = useMemo(() => [
-    "home",
-    "presets",
-    "objectives",
-    "party",
-    "commands",
-    "battle",
-    "magic",
-    "items",
-    "misc",
-    "Graphics",
-    "settings",
-    "generate"
-  ], []);
+  const NAV_FLOW = useMemo(
+    () => [
+      "home",
+      "presets",
+      "objectives",
+      "party",
+      "commands",
+      "battle",
+      "magic",
+      "items",
+      "misc",
+      "Graphics",
+      "settings",
+      "generate",
+    ],
+    [],
+  );
 
   const currentFlowIndex = NAV_FLOW.indexOf(activeTabId);
   // Disables the Previous button on both the Home page (index 0) and the Presets page (index 1) as requested.
@@ -548,8 +580,12 @@ export const FlagCreatePage = ({
       // Fail-Safe 3: Proactively clear manual styles on touchstart if sidebar is closed.
       // This guarantees that any stuck styles left behind from interrupted wiggles are cleared instantly on next screen contact.
       if (!sidebarOpen) {
-        const sidebarEl = document.querySelector(`.${styles.sidebar}`) as HTMLElement;
-        const backdropEl = document.querySelector(`.${styles.sidebarBackdrop}`) as HTMLElement;
+        const sidebarEl = document.querySelector(
+          `.${styles.sidebar}`,
+        ) as HTMLElement;
+        const backdropEl = document.querySelector(
+          `.${styles.sidebarBackdrop}`,
+        ) as HTMLElement;
         if (sidebarEl) sidebarEl.style.left = "";
         if (backdropEl) {
           backdropEl.classList.remove(styles.sidebarBackdropDragging);
@@ -564,7 +600,8 @@ export const FlagCreatePage = ({
 
       const target = e.target as HTMLElement;
       try {
-        const element = target.nodeType === Node.TEXT_NODE ? target.parentElement : target;
+        const element =
+          target.nodeType === Node.TEXT_NODE ? target.parentElement : target;
         if (element && typeof element.closest === "function") {
           // Skip swipe gesture if touching interactive controls or dropdown popups/options to prevent conflict (Fail-Safe 1)
           if (
@@ -626,8 +663,12 @@ export const FlagCreatePage = ({
 
         const percentOpen = (newLeft + drawerWidth) / drawerWidth; // 0 to 1
 
-        const sidebarEl = document.querySelector(`.${styles.sidebar}`) as HTMLElement;
-        const backdropEl = document.querySelector(`.${styles.sidebarBackdrop}`) as HTMLElement;
+        const sidebarEl = document.querySelector(
+          `.${styles.sidebar}`,
+        ) as HTMLElement;
+        const backdropEl = document.querySelector(
+          `.${styles.sidebarBackdrop}`,
+        ) as HTMLElement;
 
         if (sidebarEl) {
           sidebarEl.style.transition = "none";
@@ -656,8 +697,12 @@ export const FlagCreatePage = ({
           shouldOpen = diffX >= -threshold;
         }
 
-        const sidebarEl = document.querySelector(`.${styles.sidebar}`) as HTMLElement;
-        const backdropEl = document.querySelector(`.${styles.sidebarBackdrop}`) as HTMLElement;
+        const sidebarEl = document.querySelector(
+          `.${styles.sidebar}`,
+        ) as HTMLElement;
+        const backdropEl = document.querySelector(
+          `.${styles.sidebarBackdrop}`,
+        ) as HTMLElement;
 
         if (sidebarEl) {
           sidebarEl.style.transition = "";
@@ -768,9 +813,6 @@ export const FlagCreatePage = ({
       clearTimeout(timer2);
     };
   }, [searchQuery, selectedIndex]);
-
-
-
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("app-theme") as "light" | "dark";
@@ -890,10 +932,15 @@ export const FlagCreatePage = ({
             <Tab.List className={styles.tabList}>
               {!AUTH_ENABLED ? null : (
                 <>
-                  <div style={{ borderTop: "1px solid rgba(255, 255, 255, 0.15)", margin: "1.5rem 1rem 0.75rem 1rem" }} />
+                  <div
+                    style={{
+                      borderTop: "1px solid rgba(255, 255, 255, 0.15)",
+                      margin: "1.5rem 1rem 0.75rem 1rem",
+                    }}
+                  />
                   {status === "loading" ? (
-                    <div 
-                      className={`${styles.tabItem} animate-pulse`} 
+                    <div
+                      className={`${styles.tabItem} animate-pulse`}
                       style={{ opacity: 0.6, cursor: "wait" }}
                     >
                       <div className="w-6 h-6 rounded-full bg-slate-500 animate-pulse" />
@@ -914,9 +961,9 @@ export const FlagCreatePage = ({
                     >
                       <div className="w-6 h-6 rounded-full overflow-hidden flex items-center justify-center bg-slate-700">
                         {session.user.image ? (
-                          <img 
-                            src={session.user.image} 
-                            alt={session.user.name || "Profile"} 
+                          <img
+                            src={session.user.image}
+                            alt={session.user.name || "Profile"}
                             className="w-full h-full object-cover rounded-full"
                           />
                         ) : (
@@ -935,7 +982,12 @@ export const FlagCreatePage = ({
                       <span>Login</span>
                     </button>
                   )}
-                  <div style={{ borderTop: "1px solid rgba(255, 255, 255, 0.15)", margin: "0.75rem 1rem 0.75rem 1rem" }} />
+                  <div
+                    style={{
+                      borderTop: "1px solid rgba(255, 255, 255, 0.15)",
+                      margin: "0.75rem 1rem 0.75rem 1rem",
+                    }}
+                  />
                 </>
               )}
               {tabs.map((tab) => {
@@ -978,6 +1030,13 @@ export const FlagCreatePage = ({
                 <FaDiscord size={22} />
                 <span>DISCORD</span>
               </a>
+            </div>
+
+            <div className={styles.sidebarFooter}>
+              <span>Version</span>
+              <span className={styles.versionBadge}>
+                {version ? `v${version}` : "Unknown"}
+              </span>
             </div>
           </aside>
 
@@ -1118,7 +1177,8 @@ export const FlagCreatePage = ({
                   onClick={handleGenerate}
                   className="flex items-center gap-1.5 px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 border select-none cursor-pointer text-white active:scale-95"
                   style={{
-                    background: "linear-gradient(180deg, var(--bg-generate-start) 0%, var(--bg-generate-end) 100%)",
+                    background:
+                      "linear-gradient(180deg, var(--bg-generate-start) 0%, var(--bg-generate-end) 100%)",
                     borderColor: "var(--border-generate)",
                     boxShadow: "0 2px 10px var(--shadow-generate-hover)",
                   }}
@@ -1171,7 +1231,9 @@ export const FlagCreatePage = ({
             padding: "0.6rem 1rem",
             borderRadius: "999px",
             border: `1px solid ${devAdminActive ? "#ef4444" : "#3b82f6"}`,
-            background: devAdminActive ? "rgba(239, 68, 68, 0.9)" : "rgba(59, 130, 246, 0.9)",
+            background: devAdminActive
+              ? "rgba(239, 68, 68, 0.9)"
+              : "rgba(59, 130, 246, 0.9)",
             color: "white",
             fontSize: "0.8rem",
             fontWeight: "bold",

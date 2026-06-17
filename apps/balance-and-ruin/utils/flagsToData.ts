@@ -63,7 +63,9 @@ export const objectivesToData = (rawFlags: string): Record<string, string> => {
   );
 };
 
-export const startingItemsToData = (rawFlags: string): Record<string, string> => {
+export const startingItemsToData = (
+  rawFlags: string,
+): Record<string, string> => {
   const flags = rawFlags
     .split(FLAG_START_REGEX)
     .filter((flag) => flag)

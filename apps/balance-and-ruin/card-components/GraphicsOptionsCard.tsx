@@ -50,8 +50,8 @@ export const GraphicsOptionsCard = ({
     } else {
       localStorage.removeItem(GFX_PERSIST_KEY);
       // Clear any saved graphics values so they don't ghost back in later
-      ["gfx_name", "gfx_cpal", "gfx_cpor", "gfx_cspr", "gfx_cspp"].forEach((k) =>
-        localStorage.removeItem(k),
+      ["gfx_name", "gfx_cpal", "gfx_cpor", "gfx_cspr", "gfx_cspp"].forEach(
+        (k) => localStorage.removeItem(k),
       );
     }
   };
@@ -89,7 +89,8 @@ export const GraphicsOptionsCard = ({
     dispatch(setFlag({ flag: "-name", value: defaultCharacterNameString }));
   };
 
-  const isLoaded = sprites.length > 0 && portraits.length > 0 && palettes.length > 0;
+  const isLoaded =
+    sprites.length > 0 && portraits.length > 0 && palettes.length > 0;
 
   return (
     <Card title="Graphics Options">

@@ -19,7 +19,7 @@ export default function LoginSuccess() {
 
     if (token) {
       localStorage.setItem("auth_token", token);
-      
+
       // If we are in a popup, send the token to the opener
       if (window.opener) {
         try {
@@ -57,7 +57,10 @@ export default function LoginSuccess() {
     <div className="flex flex-col items-center justify-center min-h-screen bg-slate-950 text-white font-sans overflow-hidden relative">
       {/* Background gradients */}
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl animate-pulse" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "700ms" }} />
+      <div
+        className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl animate-pulse"
+        style={{ animationDelay: "700ms" }}
+      />
 
       <div className="z-10 flex flex-col items-center max-w-md px-6 py-12 text-center bg-slate-900/60 backdrop-blur-xl border border-slate-800 rounded-2xl shadow-2xl">
         {/* Animated magical orb loader */}

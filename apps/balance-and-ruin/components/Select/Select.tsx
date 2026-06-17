@@ -1,10 +1,23 @@
 import { Listbox, Transition } from "@headlessui/react";
-import { Fragment, KeyboardEvent, useMemo, useState, useRef, useEffect } from "react";
+import {
+  Fragment,
+  KeyboardEvent,
+  useMemo,
+  useState,
+  useRef,
+  useEffect,
+} from "react";
 import { HiChevronDown, HiMagnifyingGlass } from "react-icons/hi2";
 import { cx } from "cva";
 import { renderDescription } from "~/utils/renderDescription";
 
-export const AutoPanText = ({ text, className }: { text: string; className?: string }) => {
+export const AutoPanText = ({
+  text,
+  className,
+}: {
+  text: string;
+  className?: string;
+}) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
   const [shouldPan, setShouldPan] = useState(false);
@@ -18,7 +31,7 @@ export const AutoPanText = ({ text, className }: { text: string; className?: str
       const containerWidth = container.getBoundingClientRect().width;
       const textWidth = textEl.getBoundingClientRect().width;
       const isOverflowing = textWidth > containerWidth;
-      
+
       setShouldPan(isOverflowing);
       if (isOverflowing) {
         const overflowAmount = textWidth - containerWidth;
@@ -34,12 +47,16 @@ export const AutoPanText = ({ text, className }: { text: string; className?: str
   }, [text]);
 
   return (
-    <div 
-      ref={containerRef} 
+    <div
+      ref={containerRef}
       className={`relative overflow-hidden whitespace-nowrap w-full ${className || ""}`}
       style={{
-        maskImage: shouldPan ? "linear-gradient(to right, black 85%, transparent 100%)" : "none",
-        WebkitMaskImage: shouldPan ? "linear-gradient(to right, black 85%, transparent 100%)" : "none",
+        maskImage: shouldPan
+          ? "linear-gradient(to right, black 85%, transparent 100%)"
+          : "none",
+        WebkitMaskImage: shouldPan
+          ? "linear-gradient(to right, black 85%, transparent 100%)"
+          : "none",
       }}
     >
       <span
@@ -48,14 +65,16 @@ export const AutoPanText = ({ text, className }: { text: string; className?: str
         style={{
           display: "inline-block",
           transform: shouldPan ? undefined : "none",
-          animation: shouldPan ? `auto-pan-loop ${duration} linear infinite alternate` : "none",
+          animation: shouldPan
+            ? `auto-pan-loop ${duration} linear infinite alternate`
+            : "none",
           // Set custom properties for keyframes to read
           ["--pan-amount" as any]: translateX,
         }}
       >
         {text}
       </span>
-      
+
       <style>{`
         @keyframes auto-pan-loop {
           0% { transform: translate3d(0, 0, 0); }
@@ -67,7 +86,6 @@ export const AutoPanText = ({ text, className }: { text: string; className?: str
     </div>
   );
 };
-
 
 export type SelectOption = {
   readonly helperText?: React.ReactNode | ((value: any) => React.ReactNode);
@@ -202,7 +220,9 @@ export const Select = ({
         {({ open }) => (
           <div className="relative">
             <Listbox.Button
-              onKeyDown={(e: KeyboardEvent<HTMLButtonElement>) => handleKeyDown(e, open)}
+              onKeyDown={(e: KeyboardEvent<HTMLButtonElement>) =>
+                handleKeyDown(e, open)
+              }
               className={cx(
                 "relative w-full min-h-[42px] py-2 pl-3 pr-10 text-left transition-all duration-200 cursor-pointer",
                 "bg-[var(--bg-input)] border border-[var(--border-input)] rounded shadow-sm",
@@ -211,11 +231,17 @@ export const Select = ({
               )}
             >
               <span className="flex items-center gap-2 text-sm font-medium text-[var(--text-main)] w-full min-w-0">
-                {activeOption
-                  ? renderValue
-                    ? renderValue(activeOption)
-                    : <AutoPanText text={activeOption.label} />
-                  : <span className="opacity-60">{placeholder ?? "Select option..."}</span>}
+                {activeOption ? (
+                  renderValue ? (
+                    renderValue(activeOption)
+                  ) : (
+                    <AutoPanText text={activeOption.label} />
+                  )
+                ) : (
+                  <span className="opacity-60">
+                    {placeholder ?? "Select option..."}
+                  </span>
+                )}
               </span>
               <span className="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none">
                 <HiChevronDown
@@ -277,60 +303,62 @@ export const Select = ({
                             <div className="sticky top-0 z-10 px-4 py-1.5 text-xs font-bold tracking-wider uppercase bg-slate-800/30 text-blue-400 select-none backdrop-blur-sm border-b border-t border-[var(--border-light)]/10">
                               {item.label}
                             </div>
-                            {item.options.map((option: SelectOption, subIdx: number) => (
-                              <Listbox.Option
-                                key={`${option.value}-${subIdx}`}
-                                className={({ active, selected }) =>
-                                  cx(
-                                    "relative cursor-pointer select-none py-2.5 px-4 transition-all duration-100",
-                                    active
-                                      ? "bg-blue-600 text-white"
-                                      : selected
-                                        ? "bg-[var(--border-light)]/40 text-[var(--text-main)] font-semibold"
-                                        : "text-[var(--text-main)]",
-                                  )
-                                }
-                                value={option}
-                              >
-                                {({ active, selected }) => (
-                                  <div className="flex flex-col pl-2 border-l border-blue-500/20">
-                                    {renderOption ? (
-                                      renderOption(option)
-                                    ) : (
-                                      <>
-                                        <span
-                                          className={cx(
-                                            "block w-full min-w-0",
-                                            selected
-                                              ? "font-semibold"
-                                              : "font-normal",
-                                          )}
-                                        >
-                                          <AutoPanText text={option.label} />
-                                        </span>
-                                        {option.helperText && (
+                            {item.options.map(
+                              (option: SelectOption, subIdx: number) => (
+                                <Listbox.Option
+                                  key={`${option.value}-${subIdx}`}
+                                  className={({ active, selected }) =>
+                                    cx(
+                                      "relative cursor-pointer select-none py-2.5 px-4 transition-all duration-100",
+                                      active
+                                        ? "bg-blue-600 text-white"
+                                        : selected
+                                          ? "bg-[var(--border-light)]/40 text-[var(--text-main)] font-semibold"
+                                          : "text-[var(--text-main)]",
+                                    )
+                                  }
+                                  value={option}
+                                >
+                                  {({ active, selected }) => (
+                                    <div className="flex flex-col pl-2 border-l border-blue-500/20">
+                                      {renderOption ? (
+                                        renderOption(option)
+                                      ) : (
+                                        <>
                                           <span
                                             className={cx(
-                                              "block text-xs mt-0.5 font-normal break-words whitespace-normal leading-relaxed opacity-85",
-                                              active
-                                                ? "text-blue-100"
-                                                : "text-[var(--text-sub)]",
+                                              "block w-full min-w-0",
+                                              selected
+                                                ? "font-semibold"
+                                                : "font-normal",
                                             )}
                                           >
-                                            {renderDescription(
-                                              option.helperText,
-                                              option.dynamicValue ??
-                                                option.defaultValue ??
-                                                null,
-                                            )}
+                                            <AutoPanText text={option.label} />
                                           </span>
-                                        )}
-                                      </>
-                                    )}
-                                  </div>
-                                )}
-                              </Listbox.Option>
-                            ))}
+                                          {option.helperText && (
+                                            <span
+                                              className={cx(
+                                                "block text-xs mt-0.5 font-normal break-words whitespace-normal leading-relaxed opacity-85",
+                                                active
+                                                  ? "text-blue-100"
+                                                  : "text-[var(--text-sub)]",
+                                              )}
+                                            >
+                                              {renderDescription(
+                                                option.helperText,
+                                                option.dynamicValue ??
+                                                  option.defaultValue ??
+                                                  null,
+                                              )}
+                                            </span>
+                                          )}
+                                        </>
+                                      )}
+                                    </div>
+                                  )}
+                                </Listbox.Option>
+                              ),
+                            )}
                           </div>
                         );
                       }
