@@ -1,6 +1,7 @@
 import type { NextPage } from "next";
 import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { selectVersion, setVersion } from "~/state/settingsSlice";
 import dynamic from "next/dynamic";
 
 const FlagCreatePage = dynamic<any>(
@@ -52,9 +53,7 @@ const Create = () => {
   const [schema, setSchemaLocal] = useState<Record<string, RawFlagMetadata>>(
     fallbackFlag as any,
   );
-  const [version, setVersion] = useState<string>(
-    (fallbackWc as any).version || "1.4.3d",
-  );
+  const version = useSelector(selectVersion);
 
   useEffect(() => {
     setIsMounted(true);
@@ -101,7 +100,7 @@ const Create = () => {
       if (cachedVersion) {
         const parsed = JSON.parse(cachedVersion);
         if (parsed && typeof parsed === "string") {
-          setVersion(parsed);
+          dispatch(setVersion(parsed));
         }
       }
     } catch (e) {
@@ -236,7 +235,7 @@ const Create = () => {
       })
       .then((data) => {
         const fetchedVersion = data["version"];
-        setVersion(fetchedVersion);
+        dispatch(setVersion(fetchedVersion));
         localStorage.setItem("cached_version", JSON.stringify(fetchedVersion));
       })
       .catch((err) => {
@@ -248,7 +247,7 @@ const Create = () => {
           .then((res) => res.json())
           .then((data) => {
             const fetchedVersion = data["version"];
-            setVersion(fetchedVersion);
+            dispatch(setVersion(fetchedVersion));
             localStorage.setItem(
               "cached_version",
               JSON.stringify(fetchedVersion),
@@ -259,8 +258,8 @@ const Create = () => {
               "Failed to fetch fallback version, using hardcoded fallback:",
               fallbackErr,
             );
-            const fetchedVersion = (fallbackWc as any).version || "1.4.3d";
-            setVersion(fetchedVersion);
+            const fetchedVersion = (fallbackWc as any).version || "1.4.4d";
+            dispatch(setVersion(fetchedVersion));
             localStorage.setItem(
               "cached_version",
               JSON.stringify(fetchedVersion),

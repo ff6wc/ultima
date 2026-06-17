@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { signIn, signOut } from "~/hooks/useAppSession";
 import { useAppSession } from "~/hooks/useAppSession";
-import { fetchWithTimeout } from "~/utils/fetchWithTimeout";
+import { selectVersion } from "~/state/settingsSlice";
 
 const AUTH_ENABLED = process.env.NEXT_PUBLIC_AUTH_ENABLED !== "false";
 
@@ -26,51 +27,7 @@ export const AppLayout = ({ children, title }: AppLayoutProps) => {
   const [profileHovered, setProfileHovered] = useState(false);
   const logoSrc =
     theme === "dark" ? "/logo-transparent.png?v=2" : "/logo-light.png?v=2";
-  const [version, setVersion] = useState<string>("1.4.3d");
-
-  useEffect(() => {
-    const cachedVersion = localStorage.getItem("cached_version");
-    if (cachedVersion) {
-      try {
-        const parsed = JSON.parse(cachedVersion);
-        if (parsed && typeof parsed === "string") {
-          setVersion(parsed);
-        }
-      } catch (e) {}
-    }
-
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-    fetchWithTimeout(`${backendUrl}/api/wc`, {}, 2500)
-      .then((res) => {
-        if (!res.ok) throw new Error("Network response was not ok");
-        return res.json();
-      })
-      .then((data) => {
-        const fetchedVersion = data["version"];
-        if (fetchedVersion) {
-          setVersion(fetchedVersion);
-          localStorage.setItem(
-            "cached_version",
-            JSON.stringify(fetchedVersion),
-          );
-        }
-      })
-      .catch(() => {
-        fetch("/metadata-fallback/wc.json")
-          .then((res) => res.json())
-          .then((data) => {
-            const fetchedVersion = data["version"];
-            if (fetchedVersion) {
-              setVersion(fetchedVersion);
-              localStorage.setItem(
-                "cached_version",
-                JSON.stringify(fetchedVersion),
-              );
-            }
-          })
-          .catch(() => {});
-      });
-  }, []);
+  const version = useSelector(selectVersion);
 
   useEffect(() => {
     const saved = localStorage.getItem("app-theme") as "light" | "dark";
