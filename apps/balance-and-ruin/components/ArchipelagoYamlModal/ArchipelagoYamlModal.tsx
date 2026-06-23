@@ -37,8 +37,10 @@ export const ArchipelagoYamlModal: React.FC<ArchipelagoYamlModalProps> = ({
 
   // Handle Escape key to close modal
   useEffect(() => {
+    if (!isOpen) return;
+
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isOpen) {
+      if (e.key === "Escape") {
         onClose();
       }
     };
@@ -86,7 +88,7 @@ export const ArchipelagoYamlModal: React.FC<ArchipelagoYamlModalProps> = ({
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="flex-grow overflow-y-auto p-6 flex flex-col gap-6">
+        <form id="archipelago-yaml-form" onSubmit={handleSubmit} className="flex-grow overflow-y-auto p-6 flex flex-col gap-6">
           {/* Explanation Box */}
           <div className="p-4 rounded-xl bg-indigo-50/50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800/40 text-indigo-900 dark:text-indigo-200 text-sm leading-relaxed flex flex-col gap-3 shadow-inner">
             <div className="flex items-start gap-2.5">
@@ -237,7 +239,7 @@ export const ArchipelagoYamlModal: React.FC<ArchipelagoYamlModalProps> = ({
           </button>
           <button
             type="submit"
-            onClick={handleSubmit}
+            form="archipelago-yaml-form"
             className="px-6 py-2.5 text-sm font-bold text-white bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 rounded-lg shadow-md hover:shadow-lg transition-all active:scale-[0.98]"
           >
             Generate YAML
