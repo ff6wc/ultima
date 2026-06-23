@@ -144,24 +144,45 @@ export const getGeneratingHtml = (apiUrl: string) => {
 
   <script>
     // Get theme from opener
+    let theme = null;
     try {
-      if (window.opener && window.opener.document.documentElement.classList.contains('dark')) {
-        document.documentElement.classList.add('dark');
-      } else if (window.opener && window.opener.document.documentElement.classList.contains('light')) {
-        document.documentElement.classList.add('light');
-      } else {
-        // Fallback to prefers-color-scheme
-        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-          document.documentElement.classList.add('dark');
-        } else {
-          document.documentElement.classList.add('light');
+      if (window.opener && window.opener.document) {
+        if (window.opener.document.documentElement.classList.contains('dark')) {
+          theme = 'dark';
+        } else if (window.opener.document.documentElement.classList.contains('light')) {
+          theme = 'light';
         }
       }
-    } catch (e) {
-      document.documentElement.classList.add('dark'); // Default to dark
+    } catch (e) { 
+      // Ignore cross-origin or permission errors
     }
 
-    const apiUrl = '${apiUrl}';
+    if (theme) {
+      document.documentElement.classList.add(theme);
+    } else {
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.add('light');
+      }
+    }
+
+    let openerOrigin = null;
+    try {
+      if (window.opener && window.opener.location) {
+        openerOrigin = window.opener.location.origin;
+      }
+    } catch (e) {
+      // Ignore security/cross-origin exceptions
+    }
+
+    let apiUrl = ${JSON.stringify(apiUrl)};
+    if (!apiUrl) {
+      apiUrl = openerOrigin || window.location.origin;
+    } else if (apiUrl.startsWith('/')) {
+      const origin = openerOrigin || window.location.origin;
+      apiUrl = origin + apiUrl;
+    }
     
     // Character details matching IDs 0 to 21
     const characterDetails = [
@@ -258,11 +279,12 @@ export const getGeneratingHtml = (apiUrl: string) => {
       if (!context) return;
       const image_data = context.createImageData(width, height);
       const data = image_data.data;
+      const hasAlpha = Array.isArray(alpha_color) && alpha_color.length >= 3;
       for (let i = 0, j = 0; i < data.length && j < rgb_data.length; i += 4, j += 3) {
         data[i + 0] = rgb_data[j + 0];
         data[i + 1] = rgb_data[j + 1];
         data[i + 2] = rgb_data[j + 2];
-        if (rgb_data[j + 0] == alpha_color[0] && rgb_data[j + 1] == alpha_color[1] && rgb_data[j + 2] == alpha_color[2]) {
+        if (hasAlpha && rgb_data[j + 0] == alpha_color[0] && rgb_data[j + 1] == alpha_color[1] && rgb_data[j + 2] == alpha_color[2]) {
           data[i + 3] = 0;
         } else {
           data[i + 3] = 255;
