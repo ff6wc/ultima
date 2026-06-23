@@ -31,16 +31,19 @@ export const generateArchipelagoYaml = (
   const host = typeof window !== "undefined" ? window.location.hostname : "ff6worldscollide.com";
   const displayHost = host.includes("dev") ? "dev.ff6worldscollide.com" : "ff6worldscollide.com";
 
-  // Replicate seedbot template yaml with placeholders
+  const escapedFlags = finalFlags.replace(/"/g, '\\"');
+  const escapedPlayerName = playerName.replace(/"/g, '\\"');
+
+  // Replicate seedbot template yaml with placeholders, wrapping names and flagstrings in double quotes to prevent special char syntax errors.
   const templateYaml = `Final Fantasy 6 Worlds Collide:
   progression_balancing: 50
   accessibility: full
   EnableFlagstring: "true"
-  Flagstring: "${finalFlags}"
+  Flagstring: "${escapedFlags}"
   Treasuresanity: ${treasuresanity}
 description: 'Generated on ${displayHost}'
 game: Final Fantasy 6 Worlds Collide
-name: ${playerName}
+name: "${escapedPlayerName}"
 `;
 
   const sanitizedPresetName = presetName
