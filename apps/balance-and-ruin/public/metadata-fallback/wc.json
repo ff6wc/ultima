@@ -1,1 +1,45 @@
-{"version": "1.4.4d"}
+{
+    "version": "1.4.4d",
+    "-nfh": {
+        "key": "no_free_heals",
+        "type": "bool",
+        "flag": "-nfh",
+        "description": "Reduce or remove free party heals: inns cost more, recovery springs get random effects, free beds may trigger ambush, and scripted full heals are removed",
+        "group": "Misc."
+    },
+    "-seri": {
+        "key": "shops_expensive_restorative_items",
+        "type": "bool",
+        "flag": "-seri",
+        "description": "Increase base price of most restorative items (Potions, Ethers, Tents, etc.)",
+        "group": "Shops"
+    },
+    "-sli": {
+        "key": "shop_limited_inventory",
+        "type": "bool",
+        "flag": "-sli",
+        "description": "Shops sell items in limited packs. Each item slot can only be bought once",
+        "group": "Shops"
+    },
+    "-oops": {
+        "key": "oops",
+        "type": "str",
+        "flag": "-oops",
+        "description": "Oops, all boss! Replace all bosses with the specified boss enemy ID or name, or random.",
+        "group": "Bosses"
+    },
+    "-who": {
+        "key": "who_there",
+        "type": "bool",
+        "flag": "-who",
+        "description": "Whos There? Bosses look like Imps and have the name ??????",
+        "group": "Graphics"
+    },
+    "-steve": {
+        "key": "steveify",
+        "type": "str",
+        "flag": "-steve",
+        "description": "Steveify the seed: rename all characters, items, espers, magic, enemies, etc. to a given name (default: Steve)",
+        "group": "Graphics"
+    }
+}

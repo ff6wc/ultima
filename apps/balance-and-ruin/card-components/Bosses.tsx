@@ -1,5 +1,8 @@
 import { Card } from "@ff6wc/ui";
 import { FlagSubflagSelect } from "~/components/FlagSubflagSelect/FlagSubflagSelect";
+import { FlagSelect } from "~/components/FlagSelect/FlagSelect";
+import { FlagSwitch } from "~/components/FlagSwitch/FlagSwitch";
+import { Divider } from "@ff6wc/ui/Divider/Divider";
 
 const battleOptions = [
   {
@@ -71,6 +74,86 @@ const statueOptions = [
   MIX_STATUES,
 ];
 
+const oopsOptions = [
+  { value: "random", label: "Random" },
+  { value: "Air Force", label: "Air Force" },
+  { value: "Atma", label: "Atma" },
+  { value: "AtmaWeapon", label: "AtmaWeapon" },
+  { value: "BL Tentacle", label: "BL Tentacle" },
+  { value: "BR Tentacle", label: "BR Tentacle" },
+  { value: "Blue Drgn", label: "Blue Drgn" },
+  { value: "Chadarnook (Demon)", label: "Chadarnook (Demon)" },
+  { value: "Chadarnook (Painting)", label: "Chadarnook (Painting)" },
+  { value: "Chupon", label: "Chupon" },
+  { value: "Curley", label: "Curley" },
+  { value: "Dadaluma", label: "Dadaluma" },
+  { value: "Dirt Drgn", label: "Dirt Drgn" },
+  { value: "Doom", label: "Doom" },
+  { value: "Doom Gaze", label: "Doom Gaze" },
+  { value: "Dullahan", label: "Dullahan" },
+  { value: "FlameEater", label: "FlameEater" },
+  { value: "GhostTrain", label: "GhostTrain" },
+  { value: "Goddess", label: "Goddess" },
+  { value: "Gold Drgn", label: "Gold Drgn" },
+  { value: "Guardian", label: "Guardian" },
+  { value: "Head", label: "Head" },
+  { value: "Hidon", label: "Hidon" },
+  { value: "Hidonite1", label: "Hidonite1" },
+  { value: "Hidonite2", label: "Hidonite2" },
+  { value: "Hidonite3", label: "Hidonite3" },
+  { value: "Hidonite4", label: "Hidonite4" },
+  { value: "Ice Dragon", label: "Ice Dragon" },
+  { value: "Ifrit", label: "Ifrit" },
+  { value: "Inferno", label: "Inferno" },
+  { value: "Ipooh", label: "Ipooh" },
+  { value: "KatanaSoul", label: "KatanaSoul" },
+  { value: "Kefka (Final)", label: "Kefka (Final)" },
+  { value: "Kefka (Narshe)", label: "Kefka (Narshe)" },
+  { value: "Larry", label: "Larry" },
+  { value: "Laser Gun", label: "Laser Gun" },
+  { value: "Leader", label: "Leader" },
+  { value: "Left Blade", label: "Left Blade" },
+  { value: "Left Crane", label: "Left Crane" },
+  { value: "MagiMaster", label: "MagiMaster" },
+  { value: "Marshal", label: "Marshal" },
+  { value: "MissileBay", label: "MissileBay" },
+  { value: "Moe", label: "Moe" },
+  { value: "Naughty", label: "Naughty" },
+  { value: "Nerapa", label: "Nerapa" },
+  { value: "Number 024", label: "Number 024" },
+  { value: "Number 128", label: "Number 128" },
+  { value: "Phunbaba 3", label: "Phunbaba 3" },
+  { value: "Phunbaba 4", label: "Phunbaba 4" },
+  { value: "Piranha", label: "Piranha" },
+  { value: "Poltrgeist", label: "Poltrgeist" },
+  { value: "Presenter", label: "Presenter" },
+  { value: "Red Dragon", label: "Red Dragon" },
+  { value: "Right Blade", label: "Right Blade" },
+  { value: "Right Crane", label: "Right Crane" },
+  { value: "Rizopas", label: "Rizopas" },
+  { value: "Rough", label: "Rough" },
+  { value: "Shiva", label: "Shiva" },
+  { value: "Skull Drgn", label: "Skull Drgn" },
+  { value: "SoulSaver", label: "SoulSaver" },
+  { value: "Speck", label: "Speck" },
+  { value: "SrBehemoth", label: "SrBehemoth" },
+  { value: "Storm Drgn", label: "Storm Drgn" },
+  { value: "Striker", label: "Striker" },
+  { value: "TL Tentacle", label: "TL Tentacle" },
+  { value: "TR Tentacle", label: "TR Tentacle" },
+  { value: "Tritoch", label: "Tritoch" },
+  { value: "TunnelArmr", label: "TunnelArmr" },
+  { value: "Ultros 1", label: "Ultros 1" },
+  { value: "Ultros 2", label: "Ultros 2" },
+  { value: "Ultros 3", label: "Ultros 3" },
+  { value: "Ultros 4", label: "Ultros 4" },
+  { value: "Umaro", label: "Umaro" },
+  { value: "Vargas", label: "Vargas" },
+  { value: "Whelk", label: "Whelk" },
+  { value: "White Drgn", label: "White Drgn" },
+  { value: "Wrexsoul", label: "Wrexsoul" },
+];
+
 export const Bosses = () => {
   return (
     <Card title={"Bosses"}>
@@ -96,6 +179,23 @@ export const Bosses = () => {
             defaultSelected={SHUFFLE_DRAGONS}
             label="Dragon Battles"
             options={dragonOptions}
+          />
+        </div>
+
+        <div className="border-t border-white/10" />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <FlagSelect
+            flag="-oops"
+            label="Oops All Boss"
+            options={oopsOptions}
+            nullable
+            nullableLabel="Disabled"
+          />
+          <FlagSwitch
+            flag="-who"
+            helperText={"Bosses look like Imps and have the name '??????'"}
+            label="Who's There?"
           />
         </div>
 
