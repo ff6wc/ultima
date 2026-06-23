@@ -33,11 +33,11 @@ export const hasSevereProfanity = (text: string): boolean => {
 
   const strictSubstrings = [
     "fuck",
-    "faggot",
     "faggut",
     "nigger",
     "kike",
     "tranny",
+    "cunt",
   ];
 
   if (strictSubstrings.some((word) => normalized.includes(word))) {

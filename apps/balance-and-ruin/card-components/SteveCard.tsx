@@ -41,7 +41,7 @@ export const SteveCard = () => {
     setLocalValue(newValue);
     if (hasSevereProfanity(newValue)) {
       setError("Inappropriate language detected.");
-      lastDispatchedValueRef.current = null;
+      lastDispatchedValueRef.current = defaultValue?.toString() ?? "";
       // Do not dispatch profanity to Redux (clear it so it doesn't get generated/shared)
       dispatch(
         setFlag({
