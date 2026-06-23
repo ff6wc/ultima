@@ -136,6 +136,11 @@ export const Shops = () => {
           helperText="Increases the base price of Super Balls"
           label="Expensive Super Balls"
         />
+        <FlagSwitch
+          flag="-seri"
+          helperText="Increases the base price of most restorative items (Potions, Ethers, Tents, etc.)"
+          label="Expensive Restoratives"
+        />
         <div className="col-span-full">
           <Divider />
         </div>
@@ -145,6 +150,14 @@ export const Shops = () => {
         <FlagSwitch flag="-snes" label="No Elemental Shields" />
         <FlagSwitch flag="-snee" label="No Exp. Eggs" />
         <FlagSwitch flag="-snil" label="No Illuminas" />
+        <div className="col-span-full">
+          <Divider />
+        </div>
+        <FlagSwitch
+          flag="-sli"
+          helperText="Shops sell items in limited packs — each item slot can only be bought once"
+          label="Limited Inventory"
+        />
       </CardColumn>
     </Card>
   );

@@ -24,6 +24,11 @@ export const Challenges = () => {
           helperText="No log, no flags menu"
           label="Hide Flags"
         />
+        <FlagSwitch
+          flag="-nfh"
+          helperText="Inns cost more, recovery springs and the Phantom Train restaurant get random effects, free beds may trigger ambush, and scripted full heals are removed"
+          label="No Free Heals"
+        />
       </CardColumn>
     </Card>
   );
