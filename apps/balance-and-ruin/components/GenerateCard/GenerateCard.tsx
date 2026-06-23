@@ -18,6 +18,7 @@ import { FlagTextInput } from "~/components/FlagInput/FlagInput";
 import { FlagSwitch } from "~/components/FlagSwitch/FlagSwitch";
 import styles from "./GenerateCard.module.css";
 import { ArchipelagoYamlModal } from "~/components/ArchipelagoYamlModal/ArchipelagoYamlModal";
+import { getGeneratingHtml } from "~/utils/generatingHtml";
 import {
   selectActivePresetName,
   selectLastSelectedPresetName,
@@ -270,7 +271,11 @@ export const GenerateCard = ({
 
     const newWindow = window.open("", "_blank");
     if (newWindow) {
-      newWindow.document.write("<p>Generating seed... Please wait.</p>");
+      newWindow.document.open();
+      newWindow.document.write(
+        getGeneratingHtml(process.env.NEXT_PUBLIC_API_URL || ""),
+      );
+      newWindow.document.close();
     }
 
     let reCAPTCHA: string | null = null;

@@ -9,6 +9,7 @@ import useSWRMutation from "swr/mutation";
 import JSZip from "jszip";
 import { useAppSession } from "~/hooks/useAppSession";
 import { ArchipelagoYamlModal } from "~/components/ArchipelagoYamlModal/ArchipelagoYamlModal";
+import { getGeneratingHtml } from "~/utils/generatingHtml";
 
 export type SeedDetailsProps = {
   seedId: string;
@@ -126,7 +127,11 @@ export const SeedDetails = ({ seedId }: SeedDetailsProps) => {
 
     const newWindow = window.open("", "_blank");
     if (newWindow) {
-      newWindow.document.write("<p>Generating seed... Please wait.</p>");
+      newWindow.document.open();
+      newWindow.document.write(
+        getGeneratingHtml(process.env.NEXT_PUBLIC_API_URL || ""),
+      );
+      newWindow.document.close();
     }
 
     let reCAPTCHA: string | null = null;
