@@ -122,7 +122,7 @@ export const ArchipelagoYamlModal: React.FC<ArchipelagoYamlModalProps> = ({
               className="w-full px-4 py-2.5 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-sans text-sm"
             />
             <span className="text-xs text-slate-400 italic">
-              Archipelago template uses {"{number}"} dynamically for multiworld slots. Keep it in your name if you plan to use multiple slots.
+              Archipelago player names can be up to 16 characters.
             </span>
           </div>
 
@@ -144,7 +144,7 @@ export const ArchipelagoYamlModal: React.FC<ArchipelagoYamlModalProps> = ({
                 <span className="flex flex-col gap-0.5 text-sm text-slate-900 dark:text-slate-100 font-medium">
                   Unchanged
                   <span className="text-xs text-slate-400 font-normal leading-normal">
-                    Uses the preset&apos;s scaling. Caution: character/esper scaling can be very difficult.
+                    Uses the flagset&apos;s scaling. Caution: character/esper scaling can be very difficult.
                   </span>
                 </span>
               </label>
