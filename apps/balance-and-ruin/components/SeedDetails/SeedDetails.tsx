@@ -7,6 +7,9 @@ import first from "lodash/first";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import useSWRMutation from "swr/mutation";
 import JSZip from "jszip";
+import { useAppSession } from "~/hooks/useAppSession";
+import { ArchipelagoYamlModal } from "~/components/ArchipelagoYamlModal/ArchipelagoYamlModal";
+import { getGeneratingHtml } from "~/utils/generatingHtml";
 
 export type SeedDetailsProps = {
   seedId: string;
@@ -23,6 +26,8 @@ export const SeedDetails = ({ seedId }: SeedDetailsProps) => {
   const [seed, setSeed] = useState<SeedData | null>(null);
   const [logWithFlags, setLogWithFlags] = useState("");
   const [copied, setCopied] = useState(false);
+  const { data: session } = useAppSession();
+  const [isArchipelagoModalOpen, setIsArchipelagoModalOpen] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const [romData, setRomData] = useState<string | null>(null);
@@ -122,7 +127,11 @@ export const SeedDetails = ({ seedId }: SeedDetailsProps) => {
 
     const newWindow = window.open("", "_blank");
     if (newWindow) {
-      newWindow.document.write("<p>Generating seed... Please wait.</p>");
+      newWindow.document.open();
+      newWindow.document.write(
+        getGeneratingHtml(process.env.NEXT_PUBLIC_API_URL || ""),
+      );
+      newWindow.document.close();
     }
 
     let reCAPTCHA: string | null = null;
@@ -206,7 +215,7 @@ export const SeedDetails = ({ seedId }: SeedDetailsProps) => {
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
           body: JSON.stringify({
-            seed_type: (seed as any)?.seed_type || "ff6wc",
+            seed_type: seed?.seed_type || "ff6wc",
             share_url: shareUrl,
             server_name: serverName,
             flagstring: seed.flags,
@@ -459,13 +468,23 @@ export const SeedDetails = ({ seedId }: SeedDetailsProps) => {
                 </h4>
                 <div className="flex justify-between items-center flex-wrap gap-4 mt-1">
                   {/* Exact Generate Button */}
-                  <button
-                    onClick={handleGenerateExactClick}
-                    disabled={!romData || isGeneratingExact}
-                    className="whitespace-nowrap flex items-center justify-center gap-2 transition-all duration-200 px-8 py-3 rounded-lg font-bold font-sans text-base text-white bg-blue-600 hover:bg-blue-700 disabled:bg-slate-500 dark:disabled:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] shadow-md outline-none select-none"
-                  >
-                    {isGeneratingExact ? "Generating..." : "Generate"}
-                  </button>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <button
+                      onClick={handleGenerateExactClick}
+                      disabled={!romData || isGeneratingExact}
+                      className="whitespace-nowrap flex items-center justify-center gap-2 transition-all duration-200 px-8 py-3 rounded-lg font-bold font-sans text-base text-white bg-blue-600 hover:bg-blue-700 disabled:bg-slate-500 dark:disabled:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] shadow-md outline-none select-none"
+                    >
+                      {isGeneratingExact ? "Generating..." : "Generate"}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setIsArchipelagoModalOpen(true)}
+                      className="whitespace-nowrap flex items-center justify-center gap-2 transition-all duration-200 px-6 py-3 rounded-lg font-bold font-sans text-base border border-indigo-500/50 hover:border-indigo-500 hover:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300 active:scale-[0.98] shadow-md outline-none select-none"
+                    >
+                      Generate Archipelago YAML
+                    </button>
+                  </div>
 
                   {/* Copy Flags & New Seed Buttons (Right-aligned) */}
                   <div className="flex items-center gap-3 flex-wrap">
@@ -502,6 +521,13 @@ export const SeedDetails = ({ seedId }: SeedDetailsProps) => {
           </CardColumn>
         </Card>
       )}
+      <ArchipelagoYamlModal
+        isOpen={isArchipelagoModalOpen}
+        onClose={() => setIsArchipelagoModalOpen(false)}
+        flags={seed?.flags || ""}
+        presetName={seed?.seed_type || "ff6wc"}
+        userName={session?.user?.name}
+      />
     </div>
   );
 };

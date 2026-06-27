@@ -17,6 +17,8 @@ import { GenerateUpload } from "~/components/GenerateUpload/GenerateUpload";
 import { FlagTextInput } from "~/components/FlagInput/FlagInput";
 import { FlagSwitch } from "~/components/FlagSwitch/FlagSwitch";
 import styles from "./GenerateCard.module.css";
+import { ArchipelagoYamlModal } from "~/components/ArchipelagoYamlModal/ArchipelagoYamlModal";
+import { getGeneratingHtml } from "~/utils/generatingHtml";
 import {
   selectActivePresetName,
   selectLastSelectedPresetName,
@@ -124,6 +126,7 @@ export const GenerateCard = ({
   const lastSelectedPresetName = useSelector(selectLastSelectedPresetName);
 
   const [copied, setCopied] = useState(false);
+  const [isArchipelagoModalOpen, setIsArchipelagoModalOpen] = useState(false);
 
   const handleCopyFlags = () => {
     if (typeof window !== "undefined" && navigator.clipboard) {
@@ -268,7 +271,11 @@ export const GenerateCard = ({
 
     const newWindow = window.open("", "_blank");
     if (newWindow) {
-      newWindow.document.write("<p>Generating seed... Please wait.</p>");
+      newWindow.document.open();
+      newWindow.document.write(
+        getGeneratingHtml(process.env.NEXT_PUBLIC_API_URL || ""),
+      );
+      newWindow.document.close();
     }
 
     let reCAPTCHA: string | null = null;
@@ -635,13 +642,23 @@ export const GenerateCard = ({
           </span>
         )}
 
-        <button
-          className={styles.generateButton}
-          disabled={!hasRomData || isMutating}
-          onClick={generate}
-        >
-          {isMutating ? "Generating..." : "Generate ROM"}
-        </button>
+        <div className="flex flex-wrap items-center gap-4 mt-4">
+          <button
+            className={styles.generateButton}
+            disabled={!hasRomData || isMutating}
+            onClick={generate}
+          >
+            {isMutating ? "Generating..." : "Generate ROM"}
+          </button>
+
+          <button
+            type="button"
+            className="px-6 py-3 rounded-lg font-bold text-base border border-indigo-500/50 hover:border-indigo-500 hover:bg-indigo-500/10 text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 transition-all select-none active:scale-[0.98]"
+            onClick={() => setIsArchipelagoModalOpen(true)}
+          >
+            Generate Archipelago YAML
+          </button>
+        </div>
 
         {activeError && (
           <div className={styles.error}>
@@ -696,6 +713,13 @@ ${activeErrorStderr}`}
           </div>
         )}
       </div>
+      <ArchipelagoYamlModal
+        isOpen={isArchipelagoModalOpen}
+        onClose={() => setIsArchipelagoModalOpen(false)}
+        flags={flags}
+        presetName={lastSelectedPresetName || "ff6wc"}
+        userName={session?.user?.name}
+      />
     </div>
   );
 };
