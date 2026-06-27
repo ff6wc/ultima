@@ -16,6 +16,7 @@ export type SeedData = {
   seed_id: string;
   url: string;
   version: string;
+  seed_type?: string | null;
 };
 
 export type SeedCardProps = {

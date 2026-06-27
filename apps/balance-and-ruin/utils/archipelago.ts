@@ -31,8 +31,8 @@ export const generateArchipelagoYaml = (
   const host = typeof window !== "undefined" ? window.location.hostname : "ff6worldscollide.com";
   const displayHost = host.includes("dev") ? "dev.ff6worldscollide.com" : "ff6worldscollide.com";
 
-  const escapedFlags = finalFlags.replace(/"/g, '\\"');
-  const escapedPlayerName = playerName.replace(/"/g, '\\"');
+  const escapedFlags = finalFlags.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  const escapedPlayerName = playerName.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
 
   // Replicate seedbot template yaml with placeholders, wrapping names and flagstrings in double quotes to prevent special char syntax errors.
   const templateYaml = `Final Fantasy 6 Worlds Collide:
