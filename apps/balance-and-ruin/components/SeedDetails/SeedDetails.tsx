@@ -215,7 +215,7 @@ export const SeedDetails = ({ seedId }: SeedDetailsProps) => {
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
           body: JSON.stringify({
-            seed_type: (seed as any)?.seed_type || "ff6wc",
+            seed_type: seed?.seed_type || "ff6wc",
             share_url: shareUrl,
             server_name: serverName,
             flagstring: seed.flags,

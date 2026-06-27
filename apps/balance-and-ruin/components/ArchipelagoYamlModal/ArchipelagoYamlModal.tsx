@@ -18,18 +18,25 @@ export const ArchipelagoYamlModal: React.FC<ArchipelagoYamlModalProps> = ({
   presetName,
   userName,
 }) => {
-  const [playerName, setPlayerName] = useState("Player{number}");
+  const [playerName, setPlayerName] = useState("Player");
+  const [appendNumberSfx, setAppendNumberSfx] = useState(false);
   const [scaling, setScaling] = useState<"unchanged" | "safe">("unchanged");
   const [treasuresanity, setTreasuresanity] = useState<
     "off" | "on" | "on_with_additional_gating"
   >("off");
 
+  const getFinalPlayerName = (name: string, append: boolean) => {
+    if (!append) return name;
+    return `${name.slice(0, 12)}{number}`;
+  };
+
   useEffect(() => {
     if (isOpen) {
       const defaultName = userName
-        ? `${userName.replace(/[^a-zA-Z0-9]/g, "").slice(0, 10)}_WC{number}`
-        : "Player{number}";
+        ? `${userName.replace(/[^a-zA-Z0-9]/g, "").slice(0, 10)}_WC`
+        : "Player";
       setPlayerName(defaultName);
+      setAppendNumberSfx(false);
       setScaling("unchanged");
       setTreasuresanity("off");
     }
@@ -56,7 +63,7 @@ export const ArchipelagoYamlModal: React.FC<ArchipelagoYamlModalProps> = ({
       flags,
       treasuresanity,
       scaling,
-      playerName,
+      getFinalPlayerName(playerName, appendNumberSfx),
       presetName
     );
     downloadYamlFile(content, filename);
@@ -116,14 +123,39 @@ export const ArchipelagoYamlModal: React.FC<ArchipelagoYamlModalProps> = ({
             <input
               type="text"
               required
+              maxLength={16}
               value={playerName}
               onChange={(e) => setPlayerName(e.target.value)}
-              placeholder="e.g. Player{number} or HerosName_WC{number}"
+              placeholder="e.g. Player or HeroName"
               className="w-full px-4 py-2.5 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-sans text-sm"
             />
-            <span className="text-xs text-slate-400 italic">
-              Archipelago player names can be up to 16 characters.
-            </span>
+
+            <label className="flex items-center gap-2 cursor-pointer mt-1">
+              <input
+                type="checkbox"
+                checked={appendNumberSfx}
+                onChange={(e) => setAppendNumberSfx(e.target.checked)}
+                className="rounded border-slate-300 dark:border-slate-700 text-indigo-600 focus:ring-indigo-500/20"
+              />
+              <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+                Append slot number suffix (<code>{"{number}"}</code>)
+              </span>
+            </label>
+
+            <div className="mt-1 p-2 rounded bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs">
+              <span className="text-slate-500 dark:text-slate-400">
+                YAML Slot Name Preview:
+              </span>
+              <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400">
+                {getFinalPlayerName(playerName, appendNumberSfx)}
+              </span>
+            </div>
+
+            {appendNumberSfx && playerName.length > 12 && (
+              <span className="text-[11px] text-amber-600 dark:text-amber-400 font-medium">
+                ⚠️ Player name trimmed to 12 characters to reserve space for slot suffix.
+              </span>
+            )}
           </div>
 
           {/* Scaling */}
