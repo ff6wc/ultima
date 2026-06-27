@@ -19,7 +19,7 @@ export const ArchipelagoYamlModal: React.FC<ArchipelagoYamlModalProps> = ({
   userName,
 }) => {
   const [playerName, setPlayerName] = useState("Player");
-  const [appendNumberSfx, setAppendNumberSfx] = useState(true);
+  const [appendNumberSfx, setAppendNumberSfx] = useState(false);
   const [scaling, setScaling] = useState<"unchanged" | "safe">("unchanged");
   const [treasuresanity, setTreasuresanity] = useState<
     "off" | "on" | "on_with_additional_gating"
@@ -36,7 +36,7 @@ export const ArchipelagoYamlModal: React.FC<ArchipelagoYamlModalProps> = ({
         ? `${userName.replace(/[^a-zA-Z0-9]/g, "").slice(0, 10)}_WC`
         : "Player";
       setPlayerName(defaultName);
-      setAppendNumberSfx(true);
+      setAppendNumberSfx(false);
       setScaling("unchanged");
       setTreasuresanity("off");
     }
