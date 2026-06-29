@@ -15,7 +15,7 @@ import {
 import { PageContainer } from "../PageContainer/PageContainer";
 import { FlagPreset } from "~/types/preset";
 
-const narsheFetch = (path: string, options: RequestInit = {}) => {
+const narsheFetch = async (path: string, options: RequestInit = {}) => {
   const token =
     typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
   const devAdminOverride =
@@ -35,7 +35,21 @@ const narsheFetch = (path: string, options: RequestInit = {}) => {
     ...(devAdminOverride && isLocalApi ? { "X-Dev-Bypass-Admin": "true" } : {}),
     ...(options.headers || {}),
   };
-  return fetch(url, { ...options, headers });
+
+  try {
+    const response = await fetch(url, { ...options, headers });
+    if (response.status === 401 || response.status === 403) {
+      console.warn(`Auth error (${response.status}) on admin fetch: ${path}`);
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("auth_token");
+        window.dispatchEvent(new CustomEvent("auth:expired"));
+      }
+    }
+    return response;
+  } catch (error) {
+    console.error(`Network error on admin fetch: ${path}`, error);
+    throw error;
+  }
 };
 
 type AdminTabProps = {

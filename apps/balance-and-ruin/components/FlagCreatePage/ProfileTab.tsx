@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { signOut, signIn } from "~/hooks/useAppSession";
 import { useAppSession } from "~/hooks/useAppSession";
+import { useAuthFetch } from "~/hooks/useAuthFetch";
+
 import {
   FaDiscord,
   FaShieldAlt,
@@ -49,6 +51,7 @@ const formatTruncatedDate = (dateStr: string) => {
 
 export const ProfileTab = () => {
   const { data: session, status } = useAppSession();
+  const authFetch = useAuthFetch();
   const router = useRouter();
   const dispatch = useDispatch();
 
@@ -299,16 +302,9 @@ export const ProfileTab = () => {
       }
 
       const userDiscordId = (activeSession.user as any)?.discordId;
-      const token = localStorage.getItem("auth_token");
-      const backendUrl =
-        process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
       setLoadingPresets(true);
-      fetch(`${backendUrl}/api/v1/user-presets?mine=true`, {
-        headers: {
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-      })
+      authFetch("/user-presets?mine=true")
         .then((res) => res.json())
         .then((data) => {
           if (Array.isArray(data)) {
@@ -336,14 +332,7 @@ export const ProfileTab = () => {
         setLoadingCount(true);
 
         // 1. Fetch latest 100 seeds for the history section
-        fetch(
-          `${backendUrl}/api/v1/seedlist?creator_id=${userDiscordId}&limit=100`,
-          {
-            headers: {
-              ...(token ? { Authorization: `Bearer ${token}` } : {}),
-            },
-          },
-        )
+        authFetch(`/seedlist?creator_id=${userDiscordId}&limit=100`)
           .then((res) => res.json())
           .then((data) => {
             if (Array.isArray(data)) {
@@ -354,14 +343,7 @@ export const ProfileTab = () => {
           .finally(() => setLoadingSeeds(false));
 
         // 2. Fetch the aggregate count of all seeds rolled
-        fetch(
-          `${backendUrl}/api/v1/seedlist/count?creator_id=${userDiscordId}`,
-          {
-            headers: {
-              ...(token ? { Authorization: `Bearer ${token}` } : {}),
-            },
-          },
-        )
+        authFetch(`/seedlist/count?creator_id=${userDiscordId}`)
           .then((res) => res.json())
           .then((data) => {
             if (data && typeof data.count === "number") {
@@ -381,6 +363,7 @@ export const ProfileTab = () => {
     activeSession?.user?.discordId,
     activeSession?.user?.email,
     devAdminOverride,
+    authFetch,
   ]);
 
   const handleDeletePreset = async (
@@ -398,14 +381,8 @@ export const ProfileTab = () => {
 
     setIsDeleting((prev) => ({ ...prev, [id]: true }));
     try {
-      const token = localStorage.getItem("auth_token");
-      const backendUrl =
-        process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-      const res = await fetch(`${backendUrl}/api/v1/user-presets?id=${id}`, {
+      const res = await authFetch(`/user-presets?id=${id}`, {
         method: "DELETE",
-        headers: {
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
       });
       if (res.ok) {
         setUserPresets((prev) =>

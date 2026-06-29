@@ -1,6 +1,8 @@
 import { useCallback, useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useAppSession } from "~/hooks/useAppSession";
+import { useAuthFetch } from "~/hooks/useAuthFetch";
+
 
 import {
   FaCalendarAlt,
@@ -617,6 +619,7 @@ type PresetsPageProps = {
 
 export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
   const dispatch = useDispatch();
+  const authFetch = useAuthFetch();
 
   const ENABLE_PRESET_CREATION = false;
 
@@ -735,17 +738,7 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
 
   useEffect(() => {
     if (session?.user) {
-      const token =
-        typeof window !== "undefined"
-          ? localStorage.getItem("auth_token")
-          : null;
-      const BACKEND_URL =
-        process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-      fetch(`${BACKEND_URL}/api/v1/user-presets`, {
-        headers: {
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-      })
+      authFetch("/user-presets")
         .then((res) => {
           if (res.ok) return res.json();
           return [];
@@ -762,7 +755,7 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
     } else {
       setDbPresets([]);
     }
-  }, [session]);
+  }, [session, authFetch]);
 
   const mappedDbPresets = useMemo<FlagPreset[]>(() => {
     return dbPresets
