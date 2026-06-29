@@ -20,11 +20,13 @@ export const useAuthFetch = () => {
 
       const url = `${BACKEND_URL}${urlPath}`;
 
-      const headers = {
-        "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        ...(options.headers || {}),
-      };
+      const headers = new Headers(options.headers);
+      if (!headers.has("Content-Type")) {
+        headers.set("Content-Type", "application/json");
+      }
+      if (token && !headers.has("Authorization")) {
+        headers.set("Authorization", "Bearer " + token);
+      }
 
       try {
         const response = await fetch(url, { ...options, headers });
@@ -32,9 +34,12 @@ export const useAuthFetch = () => {
         if (response.status === 401 || response.status === 403) {
           console.warn(`Auth error (${response.status}) detected from Narshe endpoint: ${urlPath}`);
           if (typeof window !== "undefined") {
-            // Remove token from storage and notify session provider
-            localStorage.removeItem("auth_token");
-            window.dispatchEvent(new CustomEvent("auth:expired"));
+            const hadToken = !!localStorage.getItem("auth_token");
+            if (hadToken) {
+              // Remove token from storage and notify session provider
+              localStorage.removeItem("auth_token");
+              window.dispatchEvent(new CustomEvent("auth:expired"));
+            }
           }
         }
 
