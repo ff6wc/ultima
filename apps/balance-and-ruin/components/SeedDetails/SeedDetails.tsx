@@ -8,6 +8,7 @@ import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import useSWRMutation from "swr/mutation";
 import JSZip from "jszip";
 import { useAppSession } from "~/hooks/useAppSession";
+import { useAuthFetch } from "~/hooks/useAuthFetch";
 import { ArchipelagoYamlModal } from "~/components/ArchipelagoYamlModal/ArchipelagoYamlModal";
 import { getGeneratingHtml } from "~/utils/generatingHtml";
 
@@ -27,6 +28,7 @@ export const SeedDetails = ({ seedId }: SeedDetailsProps) => {
   const [logWithFlags, setLogWithFlags] = useState("");
   const [copied, setCopied] = useState(false);
   const { data: session } = useAppSession();
+  const authFetch = useAuthFetch();
   const [isArchipelagoModalOpen, setIsArchipelagoModalOpen] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -191,12 +193,6 @@ export const SeedDetails = ({ seedId }: SeedDetailsProps) => {
 
       // Record seed in seedlist database
       try {
-        const token =
-          typeof window !== "undefined"
-            ? localStorage.getItem("auth_token")
-            : null;
-        const BACKEND_URL =
-          process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
         const host =
           typeof window !== "undefined" ? window.location.hostname : "";
         const serverName =
@@ -208,12 +204,8 @@ export const SeedDetails = ({ seedId }: SeedDetailsProps) => {
             ? `${window.location.origin}/seed/?id=${seed_id}`
             : "";
 
-        fetch(`${BACKEND_URL}/api/v1/seedlist`, {
+        authFetch("/seedlist", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
           body: JSON.stringify({
             seed_type: seed?.seed_type || "ff6wc",
             share_url: shareUrl,

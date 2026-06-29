@@ -86,8 +86,14 @@ export const AppSessionProvider = ({
       return;
     }
 
-    const token = localStorage.getItem("auth_token");
-    if (token) {
+    const checkToken = () => {
+      const token = localStorage.getItem("auth_token");
+      if (!token) {
+        setData(null);
+        setStatus("unauthenticated");
+        return;
+      }
+
       try {
         const base64Url = token.split(".")[1];
         const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
@@ -98,6 +104,19 @@ export const AppSessionProvider = ({
             .join(""),
         );
         const payload = JSON.parse(jsonPayload);
+
+        // Check token expiration
+        const currentTime = Math.floor(Date.now() / 1000);
+        if (payload.exp && payload.exp < currentTime) {
+          console.warn("Session token expired");
+          localStorage.removeItem("auth_token");
+          setData(null);
+          setStatus("unauthenticated");
+          if (typeof window !== "undefined") {
+            window.dispatchEvent(new CustomEvent("auth:expired"));
+          }
+          return;
+        }
 
         const discordId = payload.sub || payload.discordId;
         const name = payload.username || payload.name || "Discord User";
@@ -138,13 +157,25 @@ export const AppSessionProvider = ({
         setData(null);
         setStatus("unauthenticated");
       }
-    } else {
+    };
+
+    checkToken();
+
+    // Set up check token expiry every 30 seconds
+    const interval = setInterval(checkToken, 30000);
+
+    // Also listen for check requests or direct expiration events
+    const handleAuthExpiredEvent = () => {
+      localStorage.removeItem("auth_token");
       setData(null);
       setStatus("unauthenticated");
-    }
+    };
+    window.addEventListener("auth:expired", handleAuthExpiredEvent);
 
     return () => {
       window.removeEventListener("message", handleMessage);
+      window.removeEventListener("auth:expired", handleAuthExpiredEvent);
+      clearInterval(interval);
     };
   }, []);
 

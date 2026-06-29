@@ -15,7 +15,7 @@ import {
 import { PageContainer } from "../PageContainer/PageContainer";
 import { FlagPreset } from "~/types/preset";
 
-const narsheFetch = (path: string, options: RequestInit = {}) => {
+const narsheFetch = async (path: string, options: RequestInit = {}) => {
   const token =
     typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
   const devAdminOverride =
@@ -29,13 +29,34 @@ const narsheFetch = (path: string, options: RequestInit = {}) => {
   const isLocalApi =
     backendUrl.includes("localhost") || backendUrl.includes("127.0.0.1");
 
-  const headers = {
-    "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...(devAdminOverride && isLocalApi ? { "X-Dev-Bypass-Admin": "true" } : {}),
-    ...(options.headers || {}),
-  };
-  return fetch(url, { ...options, headers });
+  const headers = new Headers(options.headers);
+  if (!headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
+  if (token && !headers.has("Authorization")) {
+    headers.set("Authorization", "Bearer " + token);
+  }
+  if (devAdminOverride && isLocalApi) {
+    headers.set("X-Dev-Bypass-Admin", "true");
+  }
+
+  try {
+    const response = await fetch(url, { ...options, headers });
+    if (response.status === 401 || response.status === 403) {
+      console.warn(`Auth error (${response.status}) on admin fetch: ${path}`);
+      if (typeof window !== "undefined") {
+        const hadToken = !!localStorage.getItem("auth_token");
+        if (hadToken) {
+          localStorage.removeItem("auth_token");
+          window.dispatchEvent(new CustomEvent("auth:expired"));
+        }
+      }
+    }
+    return response;
+  } catch (error) {
+    console.error(`Network error on admin fetch: ${path}`, error);
+    throw error;
+  }
 };
 
 type AdminTabProps = {
