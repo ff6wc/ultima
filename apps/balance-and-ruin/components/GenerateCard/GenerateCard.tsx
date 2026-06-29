@@ -12,6 +12,7 @@ import { useRouter } from "next/router";
 import { selectSchema } from "~/state/schemaSlice";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { useAppSession } from "~/hooks/useAppSession";
+import { useAuthFetch } from "~/hooks/useAuthFetch";
 const AUTH_ENABLED = process.env.NEXT_PUBLIC_AUTH_ENABLED !== "false";
 import { GenerateUpload } from "~/components/GenerateUpload/GenerateUpload";
 import { FlagTextInput } from "~/components/FlagInput/FlagInput";
@@ -124,6 +125,7 @@ export const GenerateCard = ({
   const { data: session } = useAppSession();
   const activePresetName = useSelector(selectActivePresetName);
   const lastSelectedPresetName = useSelector(selectLastSelectedPresetName);
+  const authFetch = useAuthFetch();
 
   const [copied, setCopied] = useState(false);
   const [isArchipelagoModalOpen, setIsArchipelagoModalOpen] = useState(false);
@@ -157,18 +159,8 @@ export const GenerateCard = ({
     setIsSubmittingPreset(true);
     setPresetError(null);
     try {
-      const token =
-        typeof window !== "undefined"
-          ? localStorage.getItem("auth_token")
-          : null;
-      const BACKEND_URL =
-        process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-      const res = await fetch(`${BACKEND_URL}/api/v1/user-presets`, {
+      const res = await authFetch("/user-presets", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
         body: JSON.stringify({
           name: presetName,
           preset_name: presetName,
@@ -361,12 +353,6 @@ export const GenerateCard = ({
 
       // Record seed in seedlist database
       try {
-        const token =
-          typeof window !== "undefined"
-            ? localStorage.getItem("auth_token")
-            : null;
-        const BACKEND_URL =
-          process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
         const host =
           typeof window !== "undefined" ? window.location.hostname : "";
         const serverName =
@@ -378,12 +364,8 @@ export const GenerateCard = ({
             ? `${window.location.origin}/seed/?id=${seed_id}`
             : "";
 
-        fetch(`${BACKEND_URL}/api/v1/seedlist`, {
+        authFetch("/seedlist", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
           body: JSON.stringify({
             seed_type: lastSelectedPresetName || "ff6wc",
             share_url: shareUrl,
@@ -399,18 +381,8 @@ export const GenerateCard = ({
 
       // Update preset download timestamp when generating a seed using a selected preset
       if (lastSelectedPresetName) {
-        const token =
-          typeof window !== "undefined"
-            ? localStorage.getItem("auth_token")
-            : null;
-        const BACKEND_URL =
-          process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-        fetch(`${BACKEND_URL}/api/v1/user-presets`, {
+        authFetch("/user-presets", {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
           body: JSON.stringify({ flags, presetName: lastSelectedPresetName }),
         }).catch(console.error);
 

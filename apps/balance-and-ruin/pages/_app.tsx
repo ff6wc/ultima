@@ -11,6 +11,7 @@ import { makeStore, wrapper } from "~/state/store";
 import "~/styles/globals.css";
 import { AppSessionProvider } from "~/hooks/useAppSession";
 import { ErrorBoundary } from "~/components/ErrorBoundary/ErrorBoundary";
+import { SessionExpiredBanner } from "~/components/SessionExpiredBanner/SessionExpiredBanner";
 
 export const openSans = Open_Sans({
   subsets: ["latin"],
@@ -53,6 +54,7 @@ const App: AppType<Props> = ({ Component, ...rest }: AppProps<Props>) => {
             <AppSessionProvider session={props.pageProps.session}>
               <ErrorBoundary>
                 <Component {...props.pageProps} />
+                <SessionExpiredBanner />
               </ErrorBoundary>
             </AppSessionProvider>
           </GoogleReCaptchaProvider>
