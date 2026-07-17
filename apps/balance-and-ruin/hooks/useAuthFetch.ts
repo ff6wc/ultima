@@ -12,10 +12,10 @@ export const useAuthFetch = () => {
 
       // Ensure path starts with /
       const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-      
+
       // If path already starts with /api/v1, don't duplicate it
-      const urlPath = normalizedPath.startsWith("/api/v1") 
-        ? normalizedPath 
+      const urlPath = normalizedPath.startsWith("/api/v1")
+        ? normalizedPath
         : `/api/v1${normalizedPath}`;
 
       const url = `${BACKEND_URL}${urlPath}`;
@@ -32,7 +32,9 @@ export const useAuthFetch = () => {
         const response = await fetch(url, { ...options, headers });
 
         if (response.status === 401 || response.status === 403) {
-          console.warn(`Auth error (${response.status}) detected from Narshe endpoint: ${urlPath}`);
+          console.warn(
+            `Auth error (${response.status}) detected from Narshe endpoint: ${urlPath}`,
+          );
           if (typeof window !== "undefined") {
             const hadToken = !!localStorage.getItem("auth_token");
             if (hadToken) {

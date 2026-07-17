@@ -192,14 +192,20 @@ export const objectiveSlice = createSlice({
             }
 
             const rawMin = conditionString[idx + 1];
-            const rawMax = conditionString[idx + 2];
             const minValNum = Number.parseInt(rawMin);
-            const maxValNum = Number.parseInt(rawMax);
+            const values: (string | number)[] = [];
 
-            const values = [
-              Number.isFinite(minValNum) ? minValNum : rawMin,
-              Number.isFinite(maxValNum) ? maxValNum : rawMax,
-            ].filter((val) => val != null);
+            if (rawMin != null) {
+              values.push(Number.isFinite(minValNum) ? minValNum : rawMin);
+            }
+
+            if (range) {
+              const rawMax = conditionString[idx + 2];
+              const maxValNum = Number.parseInt(rawMax);
+              if (rawMax != null) {
+                values.push(Number.isFinite(maxValNum) ? maxValNum : rawMax);
+              }
+            }
 
             conditions.push({
               id: id.toString(),
