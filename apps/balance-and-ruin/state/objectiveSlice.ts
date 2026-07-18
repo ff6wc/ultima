@@ -199,6 +199,11 @@ export const objectiveSlice = createSlice({
               values.push(Number.isFinite(minValNum) ? minValNum : rawMin);
             }
 
+            // Only parse and consume rawMax if the condition is defined as a range.
+            // For non-range conditions, rawMax (at idx + 2) represents the ID of
+            // the next condition in the flag string. Consuming it here would corrupt
+            // the current condition's value list and prevent the next condition from
+            // being correctly recognized.
             if (range) {
               const rawMax = conditionString[idx + 2];
               const maxValNum = Number.parseInt(rawMax);
