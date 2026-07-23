@@ -147,6 +147,7 @@ export const GraphicsOptionsCard = ({
             <HelperText>Settings will persist across reloads</HelperText>
           </label>
         </div>
+
       </div>
     </Card>
   );

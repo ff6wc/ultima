@@ -10,6 +10,7 @@ import useSWR from "swr";
 import { SpritePalettes } from "~/card-components/SpritePalettes";
 import { OtherSprites } from "~/card-components/OtherSprites";
 import { GraphicsOptionsCard } from "~/card-components/GraphicsOptionsCard";
+import { SteveCard } from "~/card-components/SteveCard";
 
 export const Graphics = () => {
   const { data } = useSWR<CharacterSpritesProps>(["/api/sprites"], async () => {
@@ -49,6 +50,10 @@ export const Graphics = () => {
           portraits={portraits}
           sprites={sprites}
         />
+      </GridItem>
+
+      <GridItem size="full">
+        <SteveCard />
       </GridItem>
     </PageContainer>
   );
