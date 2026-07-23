@@ -21,7 +21,7 @@ export const useAuthFetch = () => {
       const url = `${BACKEND_URL}${urlPath}`;
 
       const headers = new Headers(options.headers);
-      if (!headers.has("Content-Type")) {
+      if (options.body && !headers.has("Content-Type")) {
         headers.set("Content-Type", "application/json");
       }
       if (token && !headers.has("Authorization")) {
@@ -31,7 +31,7 @@ export const useAuthFetch = () => {
       try {
         const response = await fetch(url, { ...options, headers });
 
-        if (response.status === 401 || response.status === 403) {
+        if (response.status === 401) {
           console.warn(
             `Auth error (${response.status}) detected from Narshe endpoint: ${urlPath}`,
           );
