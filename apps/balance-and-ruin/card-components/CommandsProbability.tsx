@@ -422,21 +422,33 @@ export const CommandsProbability = () => {
                     </span>
                   )}
                 </label>
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="secondary"
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
                     onClick={() => updateCommon(100, 100, 100)}
+                    className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all duration-150 active:scale-95 cursor-pointer shadow-sm ${
+                      commonFight === 100 &&
+                      commonMagic === 100 &&
+                      commonItem === 100
+                        ? "bg-blue-600 border-blue-600 text-white shadow-blue-500/20"
+                        : "bg-white dark:bg-slate-700/90 hover:bg-slate-100 dark:hover:bg-slate-600 border-slate-300 dark:border-slate-600 text-slate-800 dark:text-slate-200"
+                    }`}
                   >
                     100% All
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="secondary"
+                  </button>
+                  <button
+                    type="button"
                     onClick={() => updateCommon(100, 0, 100)}
+                    className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all duration-150 active:scale-95 cursor-pointer shadow-sm ${
+                      commonFight === 100 &&
+                      commonMagic === 0 &&
+                      commonItem === 100
+                        ? "bg-blue-600 border-blue-600 text-white shadow-blue-500/20"
+                        : "bg-white dark:bg-slate-700/90 hover:bg-slate-100 dark:hover:bg-slate-600 border-slate-300 dark:border-slate-600 text-slate-800 dark:text-slate-200"
+                    }`}
                   >
                     No Magic
-                  </Button>
+                  </button>
                 </div>
               </div>
             </div>
@@ -518,7 +530,7 @@ export const CommandsProbability = () => {
                         <button
                           type="button"
                           onClick={() => removeCustomPair(idx)}
-                          className="self-center sm:self-auto p-1.5 rounded-md text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 transition-colors"
+                          className="self-center sm:self-auto p-1.5 rounded-md text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
                           title="Remove skill"
                         >
                           <HiMinus className="w-4 h-4" />
@@ -531,15 +543,14 @@ export const CommandsProbability = () => {
 
               {/* Bottom Row: Add button & Minimize repeats checkbox */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
-                <Button
-                  size="sm"
-                  variant="secondary"
+                <button
+                  type="button"
                   onClick={addCustomPair}
-                  className="flex items-center gap-1.5 self-start"
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-blue-500/40 bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 transition-all duration-150 active:scale-95 cursor-pointer self-start shadow-sm"
                 >
                   <HiPlus className="w-4 h-4" />
                   Add skill probability
-                </Button>
+                </button>
 
                 <label className="flex items-center gap-2.5 cursor-pointer select-none">
                   <input

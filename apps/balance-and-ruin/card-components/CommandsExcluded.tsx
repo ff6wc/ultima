@@ -120,17 +120,21 @@ export const CommandsExcluded = () => {
             label={"Random Exclusions (-rec)"}
           />
           <div className="flex items-center gap-2 flex-wrap">
-            <Button size="sm" variant="secondary" onClick={setStandard}>
+            <button
+              type="button"
+              onClick={setStandard}
+              className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700/90 hover:bg-slate-100 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 shadow-sm transition-all duration-150 active:scale-95 cursor-pointer"
+            >
               Standard (Possess, Shock)
-            </Button>
-            <Button
-              size="sm"
-              variant="secondary"
+            </button>
+            <button
+              type="button"
               onClick={clearAll}
               disabled={excludedCommands.length === 0}
+              className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700/90 hover:bg-slate-100 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 shadow-sm transition-all duration-150 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
             >
               Clear All
-            </Button>
+            </button>
           </div>
         </div>
 
