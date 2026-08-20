@@ -612,6 +612,45 @@
                  "description":  "Character commands",
                  "group":  "Commands"
              },
+    "-comfr":  {
+                   "key":  "commands_fr",
+                   "type":  "str",
+                   "flag":  "-comfr",
+                   "description":  "Give every character the common commands by chance: 'FIGHT.MAGIC.ITEM' percent chances (e.g. -comfr 10.50.90)",
+                   "group":  "Commands"
+               },
+    "-comfru":  {
+                    "key":  "commands_fru",
+                    "type":  "str",
+                    "flag":  "-comfru",
+                    "description":  "Like -comfr, but unfilled slots draft unique commands",
+                    "group":  "Commands"
+                },
+    "-compr":  {
+                   "key":  "commands_pr",
+                   "type":  "str",
+                   "flag":  "-compr",
+                   "description":  "Give commands by chance: dot-separated command ids and matching percent chances (e.g. -compr 0.1.2.28 50.50.50.100)",
+                   "nargs":  2,
+                   "args":  ["IDS", "PERCENTS"],
+                   "group":  "Commands"
+               },
+    "-compru":  {
+                    "key":  "commands_pru",
+                    "type":  "str",
+                    "flag":  "-compru",
+                    "description":  "Like -compr, but unfilled slots draft unique commands",
+                    "nargs":  2,
+                    "args":  ["IDS", "PERCENTS"],
+                    "group":  "Commands"
+                },
+    "-rec":  {
+                 "key":  "random_exclude_command_ids",
+                 "type":  "str",
+                 "flag":  "-rec",
+                 "description":  "Exclude commands from random possibilities, as dot-separated command ids (e.g. -rec 05.07.10)",
+                 "group":  "Commands"
+             },
     "-scc":  {
                  "key":  "shuffle_commands",
                  "type":  "bool",

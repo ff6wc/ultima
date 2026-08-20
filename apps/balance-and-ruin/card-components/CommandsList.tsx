@@ -186,6 +186,11 @@ export const CommandsList = () => {
     setCommands(DEFAULT_COMMANDS.map(() => randomUnique).join(""));
   };
 
+  const allNone = () => {
+    const none = valToStr(NONE);
+    setCommands(DEFAULT_COMMANDS.map(() => none).join(""));
+  };
+
   return (
     <Card contentClassName="gap-6" title={"Commands"}>
       <div className="relative flex items-center justify-center min-h-[40px] w-full">
@@ -203,6 +208,9 @@ export const CommandsList = () => {
           </Button>
           <Button onClick={allRandomUnique} variant="primary">
             All Random Unique
+          </Button>
+          <Button onClick={allNone} variant="primary">
+            All None
           </Button>
           <Button onClick={allOriginal} variant="primary">
             Original
@@ -277,7 +285,7 @@ export const CommandsList = () => {
           <FlagSwitch
             flag="-scc"
             label="Shuffle Commands"
-            helperText="Shuffle the commands selected above"
+            helperText="Shuffle selected commands (or full command menus in probability mode)"
           />
         </div>
       </div>
