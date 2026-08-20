@@ -69,11 +69,54 @@ export const CommandsExcluded = () => {
     return orderBy(list, ({ label }) => label);
   }, []);
 
+  const syncProbabilities = (newExcluded: number[]) => {
+    const excludedSet = new Set(newExcluded);
+    const prFlag =
+      compru !== undefined && compru !== null ? "-compru" : "-compr";
+    const prValue = compru ?? compr;
+
+    if (prValue) {
+      const idsStr = Array.isArray(prValue)
+        ? prValue[0]
+        : prValue.split(" ")[0];
+      const percentsStr = Array.isArray(prValue)
+        ? prValue[1]
+        : prValue.split(" ")[1];
+
+      if (idsStr && percentsStr) {
+        const ids = idsStr.split(".").map(Number);
+        const percents = percentsStr.split(".").map(Number);
+
+        const remainingEntries = ids
+          .map((id, idx) => ({ id, percent: percents[idx] }))
+          .filter(({ id }) => !excludedSet.has(id));
+
+        if (remainingEntries.length === 0) {
+          dispatch(setFlag({ flag: "-compr", value: null }));
+          dispatch(setFlag({ flag: "-compru", value: null }));
+        } else if (remainingEntries.length !== ids.length) {
+          const newIdsStr = remainingEntries
+            .map((e) => e.id.toString().padStart(2, "0"))
+            .join(".");
+          const newPercentsStr = remainingEntries
+            .map((e) => e.percent.toString())
+            .join(".");
+          dispatch(
+            setFlag({ flag: prFlag, value: [newIdsStr, newPercentsStr] }),
+          );
+        }
+      }
+    }
+  };
+
   const updateExclusions = (newExcluded: number[]) => {
     // Clear legacy flags if any exist
     ["-rec1", "-rec2", "-rec3", "-rec4", "-rec5", "-rec6"].forEach((flag) => {
       dispatch(setFlag({ flag, value: null }));
     });
+
+    // Auto-sync custom probabilities to prevent overlap conflicts at gen time
+    syncProbabilities(newExcluded);
 
     if (newExcluded.length === 0) {
       dispatch(setFlag({ flag: "-rec", value: null }));
@@ -86,9 +129,6 @@ export const CommandsExcluded = () => {
   };
 
   const toggleCommand = (id: number) => {
-    if (probabilityCommandIds.has(id)) {
-      return;
-    }
     if (excludedCommands.includes(id)) {
       updateExclusions(excludedCommands.filter((val) => val !== id));
     } else {
@@ -147,21 +187,18 @@ export const CommandsExcluded = () => {
               <button
                 key={cmd.value}
                 type="button"
-                disabled={hasConflict}
                 onClick={() => toggleCommand(cmd.value)}
                 title={
-                  hasConflict
-                    ? `${cmd.label} has an active probability roll in -compr and cannot be excluded.`
-                    : isExcluded
-                      ? `Click to remove ${cmd.label} from exclusions`
+                  isExcluded
+                    ? `Click to remove ${cmd.label} from exclusions`
+                    : hasConflict
+                      ? `Click to exclude ${cmd.label} (will remove from custom probability list)`
                       : `Click to exclude ${cmd.label}`
                 }
-                className={`flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 border text-left ${
-                  hasConflict
-                    ? "opacity-40 cursor-not-allowed bg-slate-100 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-400"
-                    : isExcluded
-                      ? "bg-rose-500/15 border-rose-500/50 text-rose-600 dark:text-rose-400 font-semibold shadow-sm"
-                      : "bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300"
+                className={`flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 border text-left cursor-pointer active:scale-95 ${
+                  isExcluded
+                    ? "bg-rose-500/15 border-rose-500/50 text-rose-600 dark:text-rose-400 font-semibold shadow-sm"
+                    : "bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300"
                 }`}
               >
                 <span className="truncate">{cmd.label}</span>
@@ -171,8 +208,11 @@ export const CommandsExcluded = () => {
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
                   </span>
                 )}
-                {hasConflict && (
-                  <span className="text-xs text-amber-500 font-normal ml-1">
+                {!isExcluded && hasConflict && (
+                  <span
+                    className="text-xs text-amber-500 font-normal ml-1"
+                    title="Currently assigned a custom probability roll"
+                  >
                     %
                   </span>
                 )}
