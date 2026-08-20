@@ -109,6 +109,40 @@ export const CommandsProbability = () => {
     [isCommonEnabled, commonFight, commonMagic, commonItem, updateCommon],
   );
 
+  // Automatically remove active probability commands from -rec exclusions
+  const syncExclusions = useCallback(
+    (entries: Array<{ commandId: number; percent: number }>) => {
+      const activeProbabilityIds = new Set(
+        entries
+          .filter((e) => e.percent > 0 && e.commandId !== NONE)
+          .map((e) => e.commandId),
+      );
+
+      if (recRaw) {
+        const currentExcluded = recRaw
+          .split(".")
+          .map(Number)
+          .filter((n) => !isNaN(n) && n !== NONE);
+        const filtered = currentExcluded.filter(
+          (id) => !activeProbabilityIds.has(id),
+        );
+        if (filtered.length !== currentExcluded.length) {
+          ["-rec1", "-rec2", "-rec3", "-rec4", "-rec5", "-rec6"].forEach(
+            (flag) => {
+              dispatch(setFlag({ flag, value: null }));
+            },
+          );
+          const newRecVal =
+            filtered.length > 0
+              ? filtered.map((id) => id.toString().padStart(2, "0")).join(".")
+              : null;
+          dispatch(setFlag({ flag: "-rec", value: newRecVal }));
+        }
+      }
+    },
+    [recRaw, dispatch],
+  );
+
   // Update Custom
   const updateCustom = useCallback(
     (
@@ -126,30 +160,50 @@ export const CommandsProbability = () => {
         return;
       }
 
+      // Auto-sync exclusions whenever custom probabilities update
+      syncExclusions(entries);
+
       const idsStr = entries
         .map((e) => e.commandId.toString().padStart(2, "0"))
         .join(".");
       const percentsStr = entries.map((e) => e.percent.toString()).join(".");
       dispatch(setFlag({ flag: targetFlag, value: [idsStr, percentsStr] }));
     },
-    [isCustomUnique, dispatch],
+    [isCustomUnique, syncExclusions, dispatch],
   );
 
   const toggleCustom = useCallback(
     (enable: boolean) => {
       if (enable) {
-        // Start with an initial default row if empty
+        const declaredInCommon = isCommonEnabled
+          ? new Set([FIGHT, MAGIC, ITEM])
+          : new Set<number>();
+        const defaultCmd =
+          PROBABILITY_COMMAND_IDS.find(
+            (id) =>
+              !excludedCommandIds.has(id) &&
+              !declaredInCommon.has(id) &&
+              id !== NONE,
+          ) ?? MORPH;
+
         const initial =
           customProbabilities.length > 0
             ? customProbabilities
-            : [{ commandId: 5, percent: 50 }]; // Steal
+            : [{ commandId: defaultCmd, percent: 50 }];
         updateCustom(initial, isCustomUnique);
       } else {
         dispatch(setFlag({ flag: "-compr", value: null }));
         dispatch(setFlag({ flag: "-compru", value: null }));
       }
     },
-    [customProbabilities, isCustomUnique, updateCustom, dispatch],
+    [
+      customProbabilities,
+      isCustomUnique,
+      isCommonEnabled,
+      excludedCommandIds,
+      updateCustom,
+      dispatch,
+    ],
   );
 
   const toggleCustomMinimizeRepeats = useCallback(
@@ -172,6 +226,8 @@ export const CommandsProbability = () => {
         !existingIds.has(id) &&
         !declaredInCommon.has(id) &&
         !excludedCommandIds.has(id),
+    ) ?? PROBABILITY_COMMAND_IDS.find(
+      (id) => !existingIds.has(id) && !declaredInCommon.has(id),
     );
 
     if (nextCmd !== undefined) {
@@ -232,7 +288,6 @@ export const CommandsProbability = () => {
         if (id === currentRowCommandId) return true;
         if (existingOtherIds.has(id)) return false;
         if (declaredInCommon.has(id)) return false;
-        if (excludedCommandIds.has(id)) return false;
         return true;
       });
 
@@ -246,7 +301,7 @@ export const CommandsProbability = () => {
 
       return orderBy(options, ({ label }) => label);
     },
-    [customProbabilities, isCommonEnabled, excludedCommandIds],
+    [customProbabilities, isCommonEnabled],
   );
 
   return (
