@@ -265,7 +265,32 @@ export const PROBABILITY_COMMAND_IDS: number[] = [
   FIGHT,
   MAGIC,
   ITEM,
-  NONE,
+];
+
+export const ASSIGNABLE_COMMAND_IDS: number[] = [
+  FIGHT,
+  MORPH,
+  STEAL,
+  CAPTURE,
+  SWD_TECH,
+  THROW,
+  TOOLS,
+  BLITZ,
+  RUNIC,
+  LORE,
+  SKETCH,
+  CONTROL,
+  SLOT,
+  RAGE,
+  LEAP,
+  DANCE,
+  JUMP,
+  X_MAGIC,
+  GP_RAIN,
+  HEALTH,
+  SHOCK,
+  POSSESS,
+  MAGITEK,
 ];
 
 export const EXCLUDABLE_COMMAND_IDS: number[] = [

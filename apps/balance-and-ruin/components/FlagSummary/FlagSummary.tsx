@@ -263,7 +263,7 @@ function buildInfoRows(
   }
   const excludedCmds = excludedIds.map((v) => COMMAND_NAMES[v] ?? `#${v}`);
   const sortedExcluded = [...excludedCmds].sort().join(", ");
-  const stdExcluded = ["Possess", "Shock", "Steal"].sort().join(", "); // rec1=28, rec2=27, rec3=5
+  const stdExcluded = ["Possess", "Shock"].sort().join(", "); // rec1=28, rec2=27
   if (sortedExcluded !== stdExcluded) {
     rows.push({
       label: "Excluded Commands",

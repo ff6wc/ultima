@@ -11,6 +11,7 @@ import {
   FIGHT,
   MORPH,
   LEAP,
+  ASSIGNABLE_COMMAND_IDS,
 } from "@ff6wc/ff6-types";
 import { Button, Card } from "@ff6wc/ui";
 import orderBy from "lodash/orderBy";
@@ -77,10 +78,9 @@ const PARENTHETICALS = [
   "(Leap)",
 ];
 
-const hoistedOptions = [RANDOM, RANDOM_UNIQUE, NONE];
-const commandOptions = Object.values(ALL_COMMANDS).filter(
-  ({ value }) => !hoistedOptions.includes(value),
-);
+const commandOptions = ASSIGNABLE_COMMAND_IDS.map(
+  (id) => ALL_COMMANDS[id],
+).filter(Boolean);
 
 const constructOptions = (options: CommandOption[]): CommandOption[] => {
   return [

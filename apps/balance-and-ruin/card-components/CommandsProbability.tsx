@@ -1,12 +1,14 @@
 import {
   ALL_COMMANDS,
+  COMMON_COMMANDS,
   FIGHT,
   ITEM,
   MAGIC,
+  MORPH,
   NONE,
   PROBABILITY_COMMAND_IDS,
 } from "@ff6wc/ff6-types";
-import { Button, Card, Slider, Switch } from "@ff6wc/ui";
+import { Card, Slider, Switch } from "@ff6wc/ui";
 import orderBy from "lodash/orderBy";
 import { useCallback, useMemo } from "react";
 import { HiMinus, HiPlus } from "react-icons/hi2";
@@ -16,6 +18,10 @@ import { InputLabel } from "~/components/InputLabel/InputLabel";
 import { Select, SelectOption } from "~/components/Select/Select";
 import { setFlag, useFlagValueSelector } from "~/state/flagSlice";
 import { selectShowFlags } from "~/state/settingsSlice";
+import {
+  LEGACY_REC_FLAGS,
+  parseExcluded,
+} from "~/utils/excludedCommands";
 
 export const CommandsProbability = () => {
   const dispatch = useDispatch();
@@ -26,6 +32,12 @@ export const CommandsProbability = () => {
   const compr = useFlagValueSelector<[string, string] | string>("-compr");
   const compru = useFlagValueSelector<[string, string] | string>("-compru");
   const recRaw = useFlagValueSelector<string>("-rec");
+  const rec1 = useFlagValueSelector("-rec1");
+  const rec2 = useFlagValueSelector("-rec2");
+  const rec3 = useFlagValueSelector("-rec3");
+  const rec4 = useFlagValueSelector("-rec4");
+  const rec5 = useFlagValueSelector("-rec5");
+  const rec6 = useFlagValueSelector("-rec6");
 
   // Determine active states
   const isCommonUnique = comfru !== undefined && comfru !== null;
@@ -39,14 +51,16 @@ export const CommandsProbability = () => {
   const customRaw = compru ?? compr;
 
   const excludedCommandIds = useMemo(() => {
-    if (!recRaw) return new Set<number>();
-    return new Set(
-      recRaw
-        .split(".")
-        .map(Number)
-        .filter((n) => !isNaN(n) && n !== NONE),
-    );
-  }, [recRaw]);
+    const list = parseExcluded(recRaw, [
+      rec1,
+      rec2,
+      rec3,
+      rec4,
+      rec5,
+      rec6,
+    ]);
+    return new Set(list);
+  }, [recRaw, rec1, rec2, rec3, rec4, rec5, rec6]);
 
   // Common Probabilities State (Fight, Magic, Item)
   const [commonFight, commonMagic, commonItem] = useMemo(() => {
@@ -118,29 +132,33 @@ export const CommandsProbability = () => {
           .map((e) => e.commandId),
       );
 
-      if (recRaw) {
-        const currentExcluded = recRaw
-          .split(".")
-          .map(Number)
-          .filter((n) => !isNaN(n) && n !== NONE);
-        const filtered = currentExcluded.filter(
-          (id) => !activeProbabilityIds.has(id),
-        );
-        if (filtered.length !== currentExcluded.length) {
-          ["-rec1", "-rec2", "-rec3", "-rec4", "-rec5", "-rec6"].forEach(
-            (flag) => {
-              dispatch(setFlag({ flag, value: null }));
-            },
-          );
-          const newRecVal =
-            filtered.length > 0
-              ? filtered.map((id) => id.toString().padStart(2, "0")).join(".")
-              : null;
-          dispatch(setFlag({ flag: "-rec", value: newRecVal }));
-        }
+      const currentExcluded = parseExcluded(recRaw, [
+        rec1,
+        rec2,
+        rec3,
+        rec4,
+        rec5,
+        rec6,
+      ]);
+      const filtered = currentExcluded.filter(
+        (id) => !activeProbabilityIds.has(id),
+      );
+      const hadLegacy = [rec1, rec2, rec3, rec4, rec5, rec6].some(
+        (v) => v !== undefined && v !== null,
+      );
+
+      if (filtered.length !== currentExcluded.length || hadLegacy) {
+        LEGACY_REC_FLAGS.forEach((flag) => {
+          dispatch(setFlag({ flag, value: null }));
+        });
+        const newRecVal =
+          filtered.length > 0
+            ? filtered.map((id) => id.toString().padStart(2, "0")).join(".")
+            : null;
+        dispatch(setFlag({ flag: "-rec", value: newRecVal }));
       }
     },
-    [recRaw, dispatch],
+    [recRaw, rec1, rec2, rec3, rec4, rec5, rec6, dispatch],
   );
 
   // Update Custom
@@ -176,7 +194,7 @@ export const CommandsProbability = () => {
     (enable: boolean) => {
       if (enable) {
         const declaredInCommon = isCommonEnabled
-          ? new Set([FIGHT, MAGIC, ITEM])
+          ? new Set(COMMON_COMMANDS)
           : new Set<number>();
         const defaultCmd =
           PROBABILITY_COMMAND_IDS.find(
@@ -218,17 +236,19 @@ export const CommandsProbability = () => {
     // Pick the first available command not already in custom list
     const existingIds = new Set(customProbabilities.map((e) => e.commandId));
     const declaredInCommon = isCommonEnabled
-      ? new Set([FIGHT, MAGIC, ITEM])
+      ? new Set(COMMON_COMMANDS)
       : new Set<number>();
 
-    const nextCmd = PROBABILITY_COMMAND_IDS.find(
-      (id) =>
-        !existingIds.has(id) &&
-        !declaredInCommon.has(id) &&
-        !excludedCommandIds.has(id),
-    ) ?? PROBABILITY_COMMAND_IDS.find(
-      (id) => !existingIds.has(id) && !declaredInCommon.has(id),
-    );
+    const nextCmd =
+      PROBABILITY_COMMAND_IDS.find(
+        (id) =>
+          !existingIds.has(id) &&
+          !declaredInCommon.has(id) &&
+          !excludedCommandIds.has(id),
+      ) ??
+      PROBABILITY_COMMAND_IDS.find(
+        (id) => !existingIds.has(id) && !declaredInCommon.has(id),
+      );
 
     if (nextCmd !== undefined) {
       updateCustom(
@@ -281,7 +301,7 @@ export const CommandsProbability = () => {
           .filter((id) => id !== currentRowCommandId),
       );
       const declaredInCommon = isCommonEnabled
-        ? new Set([FIGHT, MAGIC, ITEM])
+        ? new Set(COMMON_COMMANDS)
         : new Set<number>();
 
       const available = PROBABILITY_COMMAND_IDS.filter((id) => {
@@ -331,7 +351,10 @@ export const CommandsProbability = () => {
                 {/* Fight */}
                 <div className="flex flex-col gap-2">
                   <div className="flex justify-between items-center">
-                    <InputLabel className="!mb-0 font-semibold text-sm">
+                    <InputLabel
+                      htmlFor="comfr-fight"
+                      className="!mb-0 font-semibold text-sm"
+                    >
                       Fight
                     </InputLabel>
                     <span className="font-mono text-sm font-bold text-blue-500">
@@ -355,7 +378,10 @@ export const CommandsProbability = () => {
                 {/* Magic */}
                 <div className="flex flex-col gap-2">
                   <div className="flex justify-between items-center">
-                    <InputLabel className="!mb-0 font-semibold text-sm">
+                    <InputLabel
+                      htmlFor="comfr-magic"
+                      className="!mb-0 font-semibold text-sm"
+                    >
                       Magic
                     </InputLabel>
                     <span className="font-mono text-sm font-bold text-blue-500">
@@ -380,7 +406,10 @@ export const CommandsProbability = () => {
                 {/* Item */}
                 <div className="flex flex-col gap-2">
                   <div className="flex justify-between items-center">
-                    <InputLabel className="!mb-0 font-semibold text-sm">
+                    <InputLabel
+                      htmlFor="comfr-item"
+                      className="!mb-0 font-semibold text-sm"
+                    >
                       Item
                     </InputLabel>
                     <span className="font-mono text-sm font-bold text-blue-500">

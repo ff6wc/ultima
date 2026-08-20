@@ -5,12 +5,16 @@ import {
   POSSESS,
   SHOCK,
 } from "@ff6wc/ff6-types";
-import { Button, Card } from "@ff6wc/ui";
+import { Card } from "@ff6wc/ui";
 import orderBy from "lodash/orderBy";
 import { useMemo } from "react";
 import { useDispatch } from "react-redux";
 import { FlagLabel } from "~/components/FlagLabel/FlagLabel";
 import { setFlag, useFlagValueSelector } from "~/state/flagSlice";
+import {
+  LEGACY_REC_FLAGS,
+  parseExcluded,
+} from "~/utils/excludedCommands";
 
 export const CommandsExcluded = () => {
   const dispatch = useDispatch();
@@ -28,7 +32,7 @@ export const CommandsExcluded = () => {
   const compru = useFlagValueSelector<[string, string] | string>("-compru");
 
   const probabilityCommandIds = useMemo(() => {
-    const prValue = compr ?? compru;
+    const prValue = compru ?? compr;
     if (!prValue) return new Set<number>();
     const idsStr = Array.isArray(prValue) ? prValue[0] : prValue.split(" ")[0];
     const percentsStr = Array.isArray(prValue)
@@ -41,25 +45,24 @@ export const CommandsExcluded = () => {
     const active = new Set<number>();
 
     ids.forEach((id, idx) => {
-      if (percents[idx] > 0 && id !== NONE) {
+      const pct = percents[idx] ?? 100;
+      if (pct > 0 && id !== NONE) {
         active.add(id);
       }
     });
     return active;
-  }, [compr, compru]);
+  }, [compru, compr]);
 
   // Combine -rec and legacy -rec1..-rec6
   const excludedCommands = useMemo(() => {
-    if (recRaw !== undefined && recRaw !== null) {
-      if (!recRaw) return [];
-      return recRaw
-        .split(".")
-        .map(Number)
-        .filter((val) => !isNaN(val) && val !== NONE);
-    }
-    return [rec1, rec2, rec3, rec4, rec5, rec6]
-      .map(Number)
-      .filter((val) => !isNaN(val) && val !== NONE);
+    return parseExcluded(recRaw, [
+      rec1,
+      rec2,
+      rec3,
+      rec4,
+      rec5,
+      rec6,
+    ]);
   }, [recRaw, rec1, rec2, rec3, rec4, rec5, rec6]);
 
   const sortedExcludables = useMemo(() => {
@@ -88,7 +91,7 @@ export const CommandsExcluded = () => {
         const percents = percentsStr.split(".").map(Number);
 
         const remainingEntries = ids
-          .map((id, idx) => ({ id, percent: percents[idx] }))
+          .map((id, idx) => ({ id, percent: percents[idx] ?? 100 }))
           .filter(({ id }) => !excludedSet.has(id));
 
         if (remainingEntries.length === 0) {
@@ -111,7 +114,7 @@ export const CommandsExcluded = () => {
 
   const updateExclusions = (newExcluded: number[]) => {
     // Clear legacy flags if any exist
-    ["-rec1", "-rec2", "-rec3", "-rec4", "-rec5", "-rec6"].forEach((flag) => {
+    LEGACY_REC_FLAGS.forEach((flag) => {
       dispatch(setFlag({ flag, value: null }));
     });
 
