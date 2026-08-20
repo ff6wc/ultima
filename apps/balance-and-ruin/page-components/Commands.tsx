@@ -1,6 +1,7 @@
 import { Blitzes } from "~/card-components/Blitzes";
 import { CommandsExcluded } from "~/card-components/CommandsExcluded";
 import { CommandsList } from "~/card-components/CommandsList";
+import { CommandsProbability } from "~/card-components/CommandsProbability";
 import { Dances } from "~/card-components/Dances";
 import { Lores } from "~/card-components/Lores";
 import { OtherCommands } from "~/card-components/OtherCommands";
@@ -21,7 +22,12 @@ export const Commands = () => {
         <CommandsList />
       </GridItem>
 
-      {/* Row 2: Excluded Commands (Dense - Full Width!) */}
+      {/* Row 2: Command Probabilities (Full Width!) */}
+      <GridItem size="full" className="h-full [&>*]:h-full">
+        <CommandsProbability />
+      </GridItem>
+
+      {/* Row 3: Excluded Commands (Dense - Full Width!) */}
       <GridItem size="full" className="h-full [&>*]:h-full">
         <CommandsExcluded />
       </GridItem>

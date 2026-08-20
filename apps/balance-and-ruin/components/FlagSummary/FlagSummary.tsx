@@ -256,20 +256,74 @@ function buildInfoRows(
     });
   }
 
-  // Excluded Commands — only show if different from standard (Possess=28, Shock=27, Steal=5)
-  const recFlags = ["-rec1", "-rec2", "-rec3", "-rec4", "-rec5", "-rec6"];
-  const excludedCmds = recFlags
-    .map((f) => flagNum(fv, f))
-    .filter((v) => v !== null && v !== 97)
-    .map((v) => COMMAND_NAMES[v as number] ?? `#${v}`);
+  // Excluded Commands — check -rec (dot-separated) as well as legacy -rec1..-rec6
+  const recRaw = flagStr(fv, "-rec");
+  let excludedIds: number[] = [];
+  if (recRaw) {
+    excludedIds = recRaw
+      .split(".")
+      .map(Number)
+      .filter((n) => !isNaN(n) && n !== 97);
+  } else {
+    const recFlags = ["-rec1", "-rec2", "-rec3", "-rec4", "-rec5", "-rec6"];
+    excludedIds = recFlags
+      .map((f) => flagNum(fv, f))
+      .filter((v): v is number => v !== null && v !== 97);
+  }
+  const excludedCmds = excludedIds.map((v) => COMMAND_NAMES[v] ?? `#${v}`);
   const sortedExcluded = [...excludedCmds].sort().join(", ");
-  const stdExcluded = ["Possess", "Shock", "Steal"].sort().join(", "); // rec1=28, rec2=27, rec3=5
+  const stdExcluded = ["Possess", "Shock"].sort().join(", "); // rec1=28, rec2=27
   if (sortedExcluded !== stdExcluded) {
     rows.push({
       label: "Excluded Commands",
       value: excludedCmds.length > 0 ? excludedCmds.join(", ") : "None",
       highlight: excludedCmds.length > 3,
     });
+  }
+
+  // Command Probabilities (-comfr, -comfru, -compr, -compru)
+  const comfr = flagStr(fv, "-comfr");
+  const comfru = flagStr(fv, "-comfru");
+  const comprVal = fv["-compr"];
+  const compruVal = fv["-compru"];
+
+  if (comfr || comfru) {
+    const raw = comfr ?? comfru;
+    const isUnique = !!comfru;
+    const parts = (raw ?? "").split(".");
+    rows.push({
+      label: "Common Commands",
+      value: `Fight ${parts[0] ?? 100}%, Magic ${parts[1] ?? 100}%, Item ${parts[2] ?? 100}% (${isUnique ? "Unique Draft" : "Random"})`,
+      highlight: parts[1] === "0" || Number(parts[0]) < 50,
+    });
+  }
+
+  if (comprVal || compruVal) {
+    const val = comprVal ?? compruVal;
+    const isUnique = !!compruVal;
+    let idsStr = "";
+    let percentsStr = "";
+    if (Array.isArray(val)) {
+      idsStr = String(val[0]);
+      percentsStr = String(val[1]);
+    } else if (typeof val === "string") {
+      const parts = val.split(" ");
+      idsStr = parts[0] ?? "";
+      percentsStr = parts[1] ?? "";
+    }
+    if (idsStr && percentsStr) {
+      const ids = idsStr.split(".").map(Number);
+      const percents = percentsStr.split(".");
+      const summaryList = ids.map((id, idx) => {
+        const name = COMMAND_NAMES[id] ?? `#${id}`;
+        return `${name} ${percents[idx]}%`;
+      });
+      rows.push({
+        label: "Command Probabilities",
+        value: `${summaryList.join(", ")} (${isUnique ? "Unique Draft" : "Random"})`,
+        highlight: ids.includes(97),
+      });
+    }
   }
 
   // Scaling — always show; highlight if non-standard

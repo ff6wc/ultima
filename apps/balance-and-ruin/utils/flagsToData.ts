@@ -1,15 +1,14 @@
 import { FlagValue } from "~/state/schemaSlice";
 
-const SPECIAL_FLAG_REGEX = /^-(com|cspr|cpal|cpor|cspp|name|rls|ir|si|steve|oops)$/;
+const SPECIAL_FLAG_REGEX =
+  /^-(com|cspr|cpal|cpor|cspp|name|rls|ir|si|rec|comfr|comfru|steve|oops)$/;
+const MULTI_ARG_STRING_FLAG_REGEX = /^-(compr|compru)$/;
 const OBJECTIVE_REGEX = /^(-o[a-z])$/;
 const STARTING_ITEMS_REGEX = /^(-si)$/;
 /** Flags whose value is a space-separated list of strings (e.g. `-rc terra locke`) */
 const STRING_LIST_REGEX = /^(-rc)$/;
 
-var foo = "-oa 45.-61.45.2.2.2.7.7.4.10.10 -ob 30.8.8.1.1.11.8";
 var FLAG_START_REGEX = /-(?=[a-z])/g;
-
-foo.split(FLAG_START_REGEX);
 
 export const flagsToData = (rawFlags: string): Record<string, FlagValue> => {
   const flags = rawFlags
@@ -20,11 +19,18 @@ export const flagsToData = (rawFlags: string): Record<string, FlagValue> => {
   return flags.reduce(
     (acc, flagWithValue) => {
       const [key, val1, val2] = flagWithValue.split(" ");
+      const isMultiArgString = MULTI_ARG_STRING_FLAG_REGEX.test(key);
       const isCommands = SPECIAL_FLAG_REGEX.test(key);
       const isObjective = OBJECTIVE_REGEX.test(key);
 
       if (STRING_LIST_REGEX.test(key)) {
         acc[key] = flagWithValue.split(" ").slice(1).filter(Boolean);
+      } else if (isMultiArgString) {
+        if (val1 && val2) {
+          acc[key] = [val1, val2];
+        } else if (val1) {
+          acc[key] = val1;
+        }
       } else if (val1 && val2) {
         // is number array
         const min = Number.parseFloat(val1);

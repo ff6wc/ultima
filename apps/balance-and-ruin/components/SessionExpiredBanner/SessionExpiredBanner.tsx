@@ -50,7 +50,6 @@ export const SessionExpiredBanner = () => {
           }
         }
       `}</style>
-
       <div
         style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem" }}
       >

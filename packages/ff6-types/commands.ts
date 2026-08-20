@@ -111,61 +111,29 @@ export const ALL_COMMANDS: Record<
     value: FIGHT,
     label: "Fight",
   },
-  [GP_RAIN]: {
-    value: GP_RAIN,
-    label: "GP Rain",
+  [ITEM]: {
+    value: ITEM,
+    label: "Item",
   },
-  [HEALTH]: {
-    value: HEALTH,
-    label: "Health",
-  },
-  [JUMP]: {
-    value: JUMP,
-    label: "Jump",
-  },
-  [LEAP]: {
-    value: LEAP,
-    label: "Leap",
-  },
-  [LORE]: {
-    value: LORE,
-    label: "Lore",
-  },
-  [MAGITEK]: {
-    value: MAGITEK,
-    label: "Magitek",
+  [MAGIC]: {
+    value: MAGIC,
+    label: "Magic",
   },
   [MORPH]: {
     value: MORPH,
     label: "Morph",
   },
-  [POSSESS]: {
-    value: POSSESS,
-    label: "Possess",
-  },
-  [RAGE]: {
-    value: RAGE,
-    label: "Rage",
-  },
-  [RUNIC]: {
-    value: RUNIC,
-    label: "Runic",
-  },
-  [SKETCH]: {
-    value: SKETCH,
-    label: "Sketch",
-  },
-  [SHOCK]: {
-    value: SHOCK,
-    label: "Shock",
-  },
-  [SLOT]: {
-    value: SLOT,
-    label: "Slot",
+  [REVERT]: {
+    value: REVERT,
+    label: "Revert",
   },
   [STEAL]: {
     value: STEAL,
     label: "Steal",
+  },
+  [CAPTURE]: {
+    value: CAPTURE,
+    label: "Capture",
   },
   [SWD_TECH]: {
     value: SWD_TECH,
@@ -179,8 +147,184 @@ export const ALL_COMMANDS: Record<
     value: TOOLS,
     label: "Tools",
   },
+  [BLITZ]: {
+    value: BLITZ,
+    label: "Blitz",
+  },
+  [RUNIC]: {
+    value: RUNIC,
+    label: "Runic",
+  },
+  [LORE]: {
+    value: LORE,
+    label: "Lore",
+  },
+  [SKETCH]: {
+    value: SKETCH,
+    label: "Sketch",
+  },
+  [CONTROL]: {
+    value: CONTROL,
+    label: "Control",
+  },
+  [SLOT]: {
+    value: SLOT,
+    label: "Slot",
+  },
+  [RAGE]: {
+    value: RAGE,
+    label: "Rage",
+  },
+  [LEAP]: {
+    value: LEAP,
+    label: "Leap",
+  },
+  [MIMIC]: {
+    value: MIMIC,
+    label: "Mimic",
+  },
+  [DANCE]: {
+    value: DANCE,
+    label: "Dance",
+  },
+  [ROW]: {
+    value: ROW,
+    label: "Row",
+  },
+  [DEF]: {
+    value: DEF,
+    label: "Def",
+  },
+  [JUMP]: {
+    value: JUMP,
+    label: "Jump",
+  },
   [X_MAGIC]: {
     value: X_MAGIC,
     label: "X Magic",
   },
+  [GP_RAIN]: {
+    value: GP_RAIN,
+    label: "GP Rain",
+  },
+  [SUMMON]: {
+    value: SUMMON,
+    label: "Summon",
+  },
+  [HEALTH]: {
+    value: HEALTH,
+    label: "Health",
+  },
+  [SHOCK]: {
+    value: SHOCK,
+    label: "Shock",
+  },
+  [POSSESS]: {
+    value: POSSESS,
+    label: "Possess",
+  },
+  [MAGITEK]: {
+    value: MAGITEK,
+    label: "Magitek",
+  },
+};
+
+export const COMMON_COMMANDS = [FIGHT, MAGIC, ITEM] as const;
+
+export const PROBABILITY_EXCLUDED_IDS = [
+  REVERT,
+  LEAP,
+  MIMIC,
+  ROW,
+  DEF,
+  SUMMON,
+] as const;
+
+export const PROBABILITY_COMMAND_IDS: number[] = [
+  MORPH,
+  STEAL,
+  CAPTURE,
+  SWD_TECH,
+  THROW,
+  TOOLS,
+  BLITZ,
+  RUNIC,
+  LORE,
+  SKETCH,
+  CONTROL,
+  SLOT,
+  RAGE,
+  DANCE,
+  JUMP,
+  X_MAGIC,
+  GP_RAIN,
+  HEALTH,
+  SHOCK,
+  POSSESS,
+  MAGITEK,
+  FIGHT,
+  MAGIC,
+  ITEM,
+];
+
+export const ASSIGNABLE_COMMAND_IDS: number[] = [
+  FIGHT,
+  MORPH,
+  STEAL,
+  CAPTURE,
+  SWD_TECH,
+  THROW,
+  TOOLS,
+  BLITZ,
+  RUNIC,
+  LORE,
+  SKETCH,
+  CONTROL,
+  SLOT,
+  RAGE,
+  LEAP,
+  DANCE,
+  JUMP,
+  X_MAGIC,
+  GP_RAIN,
+  HEALTH,
+  SHOCK,
+  POSSESS,
+  MAGITEK,
+];
+
+export const EXCLUDABLE_COMMAND_IDS: number[] = [
+  MORPH,
+  STEAL,
+  CAPTURE,
+  SWD_TECH,
+  THROW,
+  TOOLS,
+  BLITZ,
+  RUNIC,
+  LORE,
+  SKETCH,
+  CONTROL,
+  SLOT,
+  RAGE,
+  DANCE,
+  JUMP,
+  X_MAGIC,
+  GP_RAIN,
+  HEALTH,
+  SHOCK,
+  POSSESS,
+  MAGITEK,
+];
+
+export type CommonCommandProbabilities = {
+  fight: number;
+  magic: number;
+  item: number;
+  uniqueBackfill: boolean;
+};
+
+export type CustomCommandProbability = {
+  commandId: number;
+  percent: number;
 };

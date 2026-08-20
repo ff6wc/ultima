@@ -12,7 +12,6 @@ export const useAuthFetch = () => {
 
       // Ensure path starts with /
       const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-
       // If path already starts with /api/v1, don't duplicate it
       const urlPath = normalizedPath.startsWith("/api/v1")
         ? normalizedPath
