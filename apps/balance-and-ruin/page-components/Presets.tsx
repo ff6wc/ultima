@@ -2,8 +2,6 @@ import { useCallback, useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useAppSession } from "~/hooks/useAppSession";
 import { useAuthFetch } from "~/hooks/useAuthFetch";
-
-
 import {
   FaCalendarAlt,
   FaUsers,
