@@ -11,6 +11,11 @@
  * Every seed link rendered on this site must go through `resolveSeedShareUrl`,
  * which resolves relative paths against the origin that wrote the row and
  * returns null when the link cannot be trusted or reconstructed.
+ *
+ * This module owns the write side too: `getSeedlistWriteTarget` decides whether
+ * the current page may record a roll at all, and what origin its `share_url` is
+ * built from. Rows outlive the browser that wrote them, so a stored `share_url`
+ * must never be derived from `window.location` directly.
  */
 
 const SEEDBOT_ORIGIN = "https://seedbot.net";
@@ -36,6 +41,50 @@ export type SeedHistoryEntry = {
 };
 
 const KNOWN_SOURCES: string[] = Object.values(SEED_SOURCE);
+
+/**
+ * Hosts this site is actually deployed at. Nothing else may write to
+ * `seedlist`: the collection is shared production data read back on this site's
+ * and seedbot.net's profile pages, so a row is only worth storing when its link
+ * resolves for someone other than whoever rolled the seed.
+ */
+const DEPLOYED_HOSTS = ["ff6worldscollide.com", "dev.ff6worldscollide.com"];
+
+export type SeedlistWriteTarget = {
+  /** Absolute origin every stored `share_url` is built from. */
+  origin: string;
+  /** Value stored in `server_name`, always matching `origin`. */
+  serverName: string;
+};
+
+/**
+ * The deployed site the current page is, or null when it is not one — local
+ * development, a LAN address, or a preview build.
+ *
+ * Local development is served from `http://dev.ff6worldscollide.com:3000` (a
+ * hosts-file alias, needed to satisfy the backend's domain whitelist), so the
+ * hostname alone does not tell a deployed site from a developer's machine.
+ * https on the default port is what separates them.
+ */
+export const getSeedlistWriteTarget = (): SeedlistWriteTarget | null => {
+  if (typeof window === "undefined") {
+    return null;
+  }
+  const { hostname, port, protocol } = window.location;
+  if (protocol !== "https:" || port) {
+    return null;
+  }
+  if (!DEPLOYED_HOSTS.includes(hostname)) {
+    return null;
+  }
+  return { origin: `https://${hostname}`, serverName: hostname };
+};
+
+/** Absolute link to a seed on `target`, for storage in `share_url`. */
+export const buildSeedShareUrl = (
+  target: SeedlistWriteTarget,
+  seedId: string,
+) => `${target.origin}/seed/?id=${encodeURIComponent(seedId)}`;
 
 /** A row's `source`, normalized. Empty string when the field is absent. */
 const getSource = (seed: SeedHistoryEntry) =>

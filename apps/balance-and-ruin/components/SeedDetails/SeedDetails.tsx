@@ -11,7 +11,11 @@ import { useAppSession } from "~/hooks/useAppSession";
 import { useAuthFetch } from "~/hooks/useAuthFetch";
 import { ArchipelagoYamlModal } from "~/components/ArchipelagoYamlModal/ArchipelagoYamlModal";
 import { getGeneratingHtml } from "~/utils/generatingHtml";
-import { SEED_SOURCE } from "~/utils/seedHistory";
+import {
+  buildSeedShareUrl,
+  getSeedlistWriteTarget,
+  SEED_SOURCE,
+} from "~/utils/seedHistory";
 
 export type SeedDetailsProps = {
   seedId: string;
@@ -192,31 +196,29 @@ export const SeedDetails = ({ seedId }: SeedDetailsProps) => {
         link.click();
       });
 
-      // Record seed in seedlist database
+      // Record seed in seedlist database. `seedlist` is shared production data,
+      // so only a deployed origin may write to it — a roll from localhost or a
+      // preview build would store a link nobody else can open.
       try {
-        const host =
-          typeof window !== "undefined" ? window.location.hostname : "";
-        const serverName =
-          host === "ff6worldscollide.com"
-            ? "ff6worldscollide.com"
-            : "dev.ff6worldscollide.com";
-        const shareUrl =
-          typeof window !== "undefined"
-            ? `${window.location.origin}/seed/?id=${seed_id}`
-            : "";
-
-        authFetch("/seedlist", {
-          method: "POST",
-          body: JSON.stringify({
-            seed_type: seed?.seed_type || "ff6wc",
-            share_url: shareUrl,
-            server_name: serverName,
-            source: SEED_SOURCE.FF6WC_WEB,
-            flagstring: seed.flags,
-          }),
-        }).catch((err) =>
-          console.error("Failed to record seed to seedlist database:", err),
-        );
+        const writeTarget = getSeedlistWriteTarget();
+        if (!writeTarget) {
+          console.info(
+            "Skipping seedlist record: this origin is not a deployed ff6wc site.",
+          );
+        } else {
+          authFetch("/seedlist", {
+            method: "POST",
+            body: JSON.stringify({
+              seed_type: seed?.seed_type || "ff6wc",
+              share_url: buildSeedShareUrl(writeTarget, seed_id),
+              server_name: writeTarget.serverName,
+              source: SEED_SOURCE.FF6WC_WEB,
+              flagstring: seed.flags,
+            }),
+          }).catch((err) =>
+            console.error("Failed to record seed to seedlist database:", err),
+          );
+        }
       } catch (e) {
         console.error("Failed to record seed to seedlist:", e);
       }
