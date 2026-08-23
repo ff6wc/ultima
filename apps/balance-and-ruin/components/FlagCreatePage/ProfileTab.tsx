@@ -17,6 +17,11 @@ import { useDispatch } from "react-redux";
 import { setRawFlags } from "~/state/flagSlice";
 import { setRawObjectives } from "~/state/objectiveSlice";
 import { setRawStartingItems } from "~/state/itemSlice";
+import {
+  formatSeedSource,
+  resolveSeedShareUrl,
+  SEED_SOURCE,
+} from "~/utils/seedHistory";
 
 const getCleanPresetName = (seedType: string) => {
   if (!seedType) return "custom";
@@ -296,6 +301,20 @@ export const ProfileTab = () => {
             seed: "554433221",
             hash: "Cyan, Gau, Mog, Umaro",
             flagstring: "-cg -cont -open -sbn -sbs -sbt -sd1 -sd2",
+          },
+          {
+            // Legacy seedbot.net row: relative share_url, no `source` field.
+            // Should render as "seedbot.net" and link to seedbot.net/media/...
+            id: "7f1c3e95",
+            seed_type: "preset_ultros_league",
+            timestamp: new Date(
+              Date.now() - 6 * 24 * 60 * 60 * 1000,
+            ).toISOString(),
+            share_url: "/media/preset_ultros_league_7f1c3e95.zip",
+            server_name: "WebApp",
+            seed: "112233445",
+            hash: "Setzer, Strago, Gogo, Terra",
+            flagstring: "-cg -cont -open -sbn -sbs -sbt -sd1 -sd2 -sd3",
           },
         ]);
         return;
@@ -1487,6 +1506,9 @@ export const ProfileTab = () => {
                     );
                   } catch (e) {}
                 }
+                // share_url may be foreign-origin or relative; see utils/seedHistory
+                const shareUrl = resolveSeedShareUrl(seed);
+                const sourceLabel = formatSeedSource(seed);
                 return (
                   <div
                     key={seedId}
@@ -1605,14 +1627,14 @@ export const ProfileTab = () => {
                           gap: "0.75rem",
                         }}
                       >
-                        {seed.server_name && (
+                        {sourceLabel && (
                           <div
                             className="hidden md:block"
                             style={{ fontSize: "0.8rem", color: "#cbd5e1" }}
                           >
                             <strong>Server/Host:</strong>{" "}
                             <span style={{ fontFamily: "monospace" }}>
-                              {seed.server_name}
+                              {sourceLabel}
                             </span>
                           </div>
                         )}
@@ -1729,9 +1751,9 @@ export const ProfileTab = () => {
                           >
                             Load Flags
                           </button>
-                          {seed.share_url && (
+                          {shareUrl && (
                             <a
-                              href={seed.share_url}
+                              href={shareUrl}
                               target="_blank"
                               rel="noopener noreferrer"
                               style={{
