@@ -35,15 +35,30 @@ export type SeedHistoryEntry = {
   source?: string | null;
 };
 
+const KNOWN_SOURCES: string[] = Object.values(SEED_SOURCE);
+
+/** A row's `source`, normalized. Empty string when the field is absent. */
+const getSource = (seed: SeedHistoryEntry) =>
+  (seed.source || "").trim().toLowerCase();
+
 /**
  * Legacy rows have no `source`, so fall back to the magic `server_name` value
  * seedbot.net wrote for every web roll. Real Discord guild names also land in
  * `server_name`, but those rows always stored absolute URLs, so failing to
  * classify them costs nothing.
+ *
+ * Only a *recognized* `source` is trusted to rule seedbot.net out. An
+ * unrecognized value means a producer shipped a string this file has not
+ * learned yet — treating that as "definitely not seedbot" would skip the
+ * fallback and silently drop links that work today, so fall through instead.
  */
 const isSeedbotWebRow = (seed: SeedHistoryEntry) => {
-  if (seed.source) {
-    return seed.source === SEED_SOURCE.SEEDBOT_WEB;
+  const source = getSource(seed);
+  if (source === SEED_SOURCE.SEEDBOT_WEB) {
+    return true;
+  }
+  if (source && KNOWN_SOURCES.includes(source)) {
+    return false;
   }
   return (seed.server_name || "").trim().toLowerCase() === "webapp";
 };
@@ -56,8 +71,11 @@ const getWriterOrigin = (seed: SeedHistoryEntry): string | null => {
   if (isSeedbotWebRow(seed)) {
     return SEEDBOT_ORIGIN;
   }
-  // Rows this site wrote are relative to this site.
-  if (seed.source === SEED_SOURCE.FF6WC_WEB) {
+  // Rows this site wrote are relative to this site. This assumes the viewing
+  // origin matches the writing one, which is not true for a row written on dev
+  // and read on prod — but both write sites store absolute URLs, so nothing
+  // relative ever reaches this branch. Revisit if that changes.
+  if (getSource(seed) === SEED_SOURCE.FF6WC_WEB) {
     return typeof window !== "undefined" ? window.location.origin : null;
   }
   return null;
@@ -108,7 +126,7 @@ export const formatSeedSource = (seed: SeedHistoryEntry): string | null => {
   if (isSeedbotWebRow(seed)) {
     return "seedbot.net";
   }
-  if (seed.source === SEED_SOURCE.DISCORD) {
+  if (getSource(seed) === SEED_SOURCE.DISCORD) {
     return seed.server_name || "Discord";
   }
   return seed.server_name || null;

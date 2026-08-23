@@ -273,6 +273,7 @@ export const ProfileTab = () => {
             timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
             share_url: "http://localhost:3000/seed/?id=8a7f92b4",
             server_name: "dev.ff6worldscollide.com",
+            source: SEED_SOURCE.FF6WC_WEB,
             seed: "192837465",
             hash: "Locke, Celes, Sabin, Edgar",
             flagstring:
