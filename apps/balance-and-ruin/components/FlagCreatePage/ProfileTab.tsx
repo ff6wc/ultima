@@ -17,6 +17,7 @@ import { useDispatch } from "react-redux";
 import { setRawFlags } from "~/state/flagSlice";
 import { setRawObjectives } from "~/state/objectiveSlice";
 import { setRawStartingItems } from "~/state/itemSlice";
+import { isSeedListResponse, type SeedListResponse } from "~/types/seedList";
 
 const getCleanPresetName = (seedType: string) => {
   if (!seedType) return "custom";
@@ -93,7 +94,7 @@ export const ProfileTab = () => {
   const [isDeleting, setIsDeleting] = useState<Record<string, boolean>>({});
   const [showConfirm, setShowConfirm] = useState<Record<string, boolean>>({});
 
-  const [userSeeds, setUserSeeds] = useState<any[]>([]);
+  const [userSeeds, setUserSeeds] = useState<SeedListResponse>([]);
   const [loadingSeeds, setLoadingSeeds] = useState(true);
   const [expandedSeeds, setExpandedSeeds] = useState<Record<string, boolean>>(
     {},
@@ -263,6 +264,13 @@ export const ProfileTab = () => {
         setTotalSeedsCount(42);
         setUserSeeds([
           {
+            args_list: null,
+            channel_id: null,
+            channel_name: null,
+            creator_id: 1,
+            creator_name: "creator_name",
+            random_sprites: false,
+            server_id: null,
             id: "8a7f92b4",
             seed_type: "standard",
             timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
@@ -274,6 +282,13 @@ export const ProfileTab = () => {
               "-cg -cont -open -sbn -sbs -sbt -sd1 -sd2 -sd3 -sd4 -sd5 -sd6 -sd7 -sd8 -sd9 -sd10",
           },
           {
+            args_list: null,
+            channel_id: null,
+            channel_name: null,
+            creator_id: 2,
+            creator_name: "creator_name",
+            random_sprites: false,
+            server_id: null,
             id: "5c8d2f10",
             seed_type: "true_chaos",
             timestamp: new Date(
@@ -286,6 +301,13 @@ export const ProfileTab = () => {
             flagstring: "-cg -cont -open -sbn -rc -nm -s -tc",
           },
           {
+            args_list: null,
+            channel_id: null,
+            channel_name: null,
+            creator_id: 3,
+            creator_name: "creator_name",
+            random_sprites: false,
+            server_id: null,
             id: "2e4b6d8a",
             seed_type: "custom",
             timestamp: new Date(
@@ -334,8 +356,8 @@ export const ProfileTab = () => {
         // 1. Fetch latest 100 seeds for the history section
         authFetch(`/seedlist?creator_id=${userDiscordId}&limit=100`)
           .then((res) => res.json())
-          .then((data) => {
-            if (Array.isArray(data)) {
+          .then((data: unknown) => {
+            if (isSeedListResponse(data)) {
               setUserSeeds(data);
             }
           })
@@ -1605,17 +1627,6 @@ export const ProfileTab = () => {
                           gap: "0.75rem",
                         }}
                       >
-                        {seed.server_name && (
-                          <div
-                            className="hidden md:block"
-                            style={{ fontSize: "0.8rem", color: "#cbd5e1" }}
-                          >
-                            <strong>Server/Host:</strong>{" "}
-                            <span style={{ fontFamily: "monospace" }}>
-                              {seed.server_name}
-                            </span>
-                          </div>
-                        )}
                         {seed.seed && (
                           <div
                             className="hidden md:block"
@@ -1655,7 +1666,9 @@ export const ProfileTab = () => {
                               </strong>
                               <button
                                 onClick={() => {
-                                  if (navigator.clipboard) {
+                                  if (!seed.flagstring) {
+                                    alert("Flags are empty.");
+                                  } else if (navigator.clipboard) {
                                     navigator.clipboard.writeText(
                                       seed.flagstring,
                                     );
@@ -1698,60 +1711,65 @@ export const ProfileTab = () => {
                             </div>
                           </div>
                         )}
-                        <div
-                          style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                            marginTop: "0.5rem",
-                            flexWrap: "wrap",
-                            gap: "1rem",
-                          }}
-                        >
-                          <button
-                            onClick={() => {
-                              dispatch(setRawFlags(seed.flagstring));
-                              dispatch(setRawObjectives(seed.flagstring));
-                              dispatch(setRawStartingItems(seed.flagstring));
-                              router.push("/create?tab=generate");
-                            }}
+                        {seed.flagstring && (
+                          <div
                             style={{
-                              backgroundColor: "#3b82f6",
-                              border: "none",
-                              color: "#ffffff",
-                              padding: "0.4rem 1rem",
-                              borderRadius: "4px",
-                              fontSize: "0.8rem",
-                              cursor: "pointer",
-                              fontWeight: "bold",
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                              marginTop: "0.5rem",
+                              flexWrap: "wrap",
+                              gap: "1rem",
                             }}
-                            className="hover:bg-blue-600 transition-colors"
                           >
-                            Load Flags
-                          </button>
-                          {seed.share_url && (
-                            <a
-                              href={seed.share_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
+                            <button
+                              onClick={() => {
+                                if (!seed.flagstring) {
+                                  return;
+                                }
+                                dispatch(setRawFlags(seed.flagstring));
+                                dispatch(setRawObjectives(seed.flagstring));
+                                dispatch(setRawStartingItems(seed.flagstring));
+                                router.push("/create?tab=generate");
+                              }}
                               style={{
-                                backgroundColor: "rgba(59, 130, 246, 0.1)",
-                                border: "1px solid #3b82f6",
-                                color: "#60a5fa",
+                                backgroundColor: "#3b82f6",
+                                border: "none",
+                                color: "#ffffff",
                                 padding: "0.4rem 1rem",
                                 borderRadius: "4px",
                                 fontSize: "0.8rem",
                                 cursor: "pointer",
                                 fontWeight: "bold",
-                                textDecoration: "none",
-                                display: "inline-block",
                               }}
-                              className="hover:bg-blue-500 hover:text-white transition-colors"
+                              className="hover:bg-blue-600 transition-colors"
                             >
-                              View Seed ↗
-                            </a>
-                          )}
-                        </div>
+                              Load Flags
+                            </button>
+                            {seed.share_url && (
+                              <a
+                                href={seed.share_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{
+                                  backgroundColor: "rgba(59, 130, 246, 0.1)",
+                                  border: "1px solid #3b82f6",
+                                  color: "#60a5fa",
+                                  padding: "0.4rem 1rem",
+                                  borderRadius: "4px",
+                                  fontSize: "0.8rem",
+                                  cursor: "pointer",
+                                  fontWeight: "bold",
+                                  textDecoration: "none",
+                                  display: "inline-block",
+                                }}
+                                className="hover:bg-blue-500 hover:text-white transition-colors"
+                              >
+                                View Seed ↗
+                              </a>
+                            )}
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
