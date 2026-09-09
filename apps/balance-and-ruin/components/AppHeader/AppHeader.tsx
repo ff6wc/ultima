@@ -1,5 +1,4 @@
 import { ButtonLink, DiscordButton, Header } from "@ff6wc/ui";
-import { useRouter } from "next/router";
 import { HiPencil } from "react-icons/hi";
 import { WIKI_URL } from "~/../../packages/utils/constants";
 import { EventsButton } from "~/components/EventsButton/EventsButton";
@@ -9,11 +8,6 @@ export type AppHeaderProps = {
 };
 
 export const AppHeader = ({ hideNav }: AppHeaderProps) => {
-  const router = useRouter();
-
-  // Conditionally render the create button instead of the button for the current page
-  const showCreateForEvents = router.pathname.startsWith("/events");
-
   return (
     <div>
       <Header className={"flex"}>

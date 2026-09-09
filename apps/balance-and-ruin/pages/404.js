@@ -6,8 +6,10 @@ export default function Custom404() {
   const SEED = "seed"
 
   useEffect( () => {
-    // Seed of the Week has been retired; redirect any legacy /sotw traffic to home
-    if (window.location.pathname.startsWith('/sotw')) {
+    // Seed of the Week has been retired; redirect any legacy /sotw traffic to home.
+    // public/_redirects handles this at the edge with a real 301 -- this is the fallback.
+    const path = window.location.pathname
+    if (path === '/sotw' || path.startsWith('/sotw/')) {
       setRedirectPath('/')
       window.location.replace('/')
       return
