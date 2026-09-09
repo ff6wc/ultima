@@ -68,7 +68,7 @@ When looking for files or trying to understand where to place your edits, follow
 │   │   ├── card-components/          # Interactive cards representing groups of FF6WC flags
 │   │   ├── page-components/          # Tabs for the Flag Creator (e.g. Graphics, Presets)
 │   │   ├── components/               # App-specific UI components
-│   │   ├── pages/                    # Main Next.js routing files (create.tsx, sotw/index.tsx)
+│   │   ├── pages/                    # Main Next.js routing files (create.tsx, events/index.tsx)
 │   │   ├── state/                    # Redux Toolkit slices (flagSlice, itemSlice, objectiveSlice)
 │   │   └── styles/                   # Custom Next.js global and utility CSS styles
 │   └── tempest/                      # Next.js Pages UI for the FF6 Worlds Collide Tracker

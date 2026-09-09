@@ -215,15 +215,6 @@ export const AppLayout = ({ children, title }: AppLayoutProps) => {
 
           <div className={styles.topBarLinks}>
             <a
-              href="https://ff6worldscollide.com/sotw/"
-              target="_blank"
-              rel="noreferrer"
-              className={styles.topBarLink}
-            >
-              <span style={{ fontSize: "20px" }}>🌱</span>
-              <span>SEED OF THE WEEK</span>
-            </a>
-            <a
               href="https://wiki.ff6worldscollide.com/wiki/Main_Page"
               target="_blank"
               rel="noreferrer"
