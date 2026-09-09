@@ -13,6 +13,7 @@ import { selectSchema } from "~/state/schemaSlice";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { useAppSession } from "~/hooks/useAppSession";
 import { useAuthFetch } from "~/hooks/useAuthFetch";
+import { SEED_SOURCE } from "~/utils/seedHistory";
 const AUTH_ENABLED = process.env.NEXT_PUBLIC_AUTH_ENABLED !== "false";
 import { GenerateUpload } from "~/components/GenerateUpload/GenerateUpload";
 import { FlagTextInput } from "~/components/FlagInput/FlagInput";
@@ -378,6 +379,7 @@ export const GenerateCard = ({
             seed_type: lastSelectedPresetName || "ff6wc",
             share_url: shareUrl,
             server_name: serverName,
+            source: SEED_SOURCE.FF6WC_WEB,
             flagstring: flags,
           }),
         }).catch((err) =>

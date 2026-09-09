@@ -11,6 +11,7 @@ import { useAppSession } from "~/hooks/useAppSession";
 import { useAuthFetch } from "~/hooks/useAuthFetch";
 import { ArchipelagoYamlModal } from "~/components/ArchipelagoYamlModal/ArchipelagoYamlModal";
 import { getGeneratingHtml } from "~/utils/generatingHtml";
+import { SEED_SOURCE } from "~/utils/seedHistory";
 
 export type SeedDetailsProps = {
   seedId: string;
@@ -210,6 +211,7 @@ export const SeedDetails = ({ seedId }: SeedDetailsProps) => {
             seed_type: seed?.seed_type || "ff6wc",
             share_url: shareUrl,
             server_name: serverName,
+            source: SEED_SOURCE.FF6WC_WEB,
             flagstring: seed.flags,
           }),
         }).catch((err) =>
