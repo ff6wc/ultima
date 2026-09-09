@@ -36,23 +36,6 @@ export const PresetsCard = ({ presets }: PresetsCardProps) => {
         />
         <HelperText>Presets used for recent tournaments</HelperText>
       </div>
-
-      {/* <div className="flex flex-col gap-1">
-        <InputLabel htmlFor="tournament-preset-select">
-          Seed of the week
-        </InputLabel>
-        <Select
-          options={presets}
-          onChange={(option) => {
-            if (option) {
-              setSelected(option);
-              dispatch(setRawFlags(option.value));
-            }
-          }}
-          value={selected}
-        />
-        <HelperText>Presets used for ongoing tournaments</HelperText>
-      </div> */}
     </Card>
   );
 };
