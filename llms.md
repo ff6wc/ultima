@@ -137,7 +137,7 @@ import { Button, Switch, Slider, Card, CodeBlock } from "@ff6wc/ui";
 
 1. **Randomizer Flag Management**:
    - Flag configurations are stored in Redux slices (`flagSlice.ts`).
-   - On seed creation, properties compile into flag strings (e.g. `-cgp -sotw`) to dispatch to the backing backend API.
+   - On seed creation, properties compile into flag strings (e.g. `-cgp -open`) to dispatch to the backing backend API.
 2. **Tracker Sync Cycles**:
    - Current tracker state is persisted to the local storage using key `"ff6wc-trackerdata"`.
    - On startup, `apps/tempest/components/EmoTracker/EmoTracker.tsx` reads `"ff6wc-trackerdata"` and initializes the UI grid values.
