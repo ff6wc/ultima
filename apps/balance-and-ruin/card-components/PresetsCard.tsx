@@ -1,7 +1,6 @@
 import { Card, HelperText } from "@ff6wc/ui";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { components, GroupProps } from "react-select";
 import { InputLabel } from "~/components/InputLabel/InputLabel";
 import { Select, SelectOption } from "~/components/Select/Select";
 import { setRawFlags } from "~/state/flagSlice";
