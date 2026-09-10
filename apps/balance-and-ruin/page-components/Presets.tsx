@@ -792,8 +792,10 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
           hidden: false,
           created_at: createdAt,
           last_downloaded: p.download_timestamp || undefined,
-          id: p.id || presetName,
+          id: p.id || undefined,
           tags: p.tags || [],
+          downloads: p.downloads ?? p.download_count ?? 0,
+          download_count: p.download_count ?? p.downloads ?? 0,
         };
       });
   }, [dbPresets, currentUserId]);
@@ -927,6 +929,10 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
           official: officialVal,
           tags: tagsVal,
           hidden: isDeleted,
+          // Counts live only on the database record, so carry them over from
+          // the override the same way AdminTab does.
+          downloads: override?.downloads ?? override?.download_count ?? 0,
+          download_count: override?.download_count ?? override?.downloads ?? 0,
           last_downloaded: currentUserId
             ? getLastDownloaded(currentUserId, p.name)
             : undefined,
@@ -1011,7 +1017,7 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
     // Dispatch setActivePreset BEFORE setRawFlags so the preset name is set
     // when setRawFlags fires. presetSlice deliberately does NOT listen on
     // setRawFlags, so this order is safe.
-    dispatch(setActivePreset(preset.name));
+    dispatch(setActivePreset({ name: preset.name, id: preset.id }));
     dispatch(setRawFlags(preset.flags));
     dispatch(setRawObjectives(preset.flags));
     dispatch(setRawStartingItems(preset.flags));

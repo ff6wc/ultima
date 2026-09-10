@@ -1,7 +1,8 @@
 import type { NextPage } from "next";
 import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch, useSelector, useStore } from "react-redux";
 import { selectVersion, setVersion } from "~/state/settingsSlice";
+import type { AppState } from "~/state/store";
 import dynamic from "next/dynamic";
 
 const FlagCreatePage = dynamic<any>(
@@ -43,6 +44,7 @@ const DecodeB64QueryStringParam = (param: string) => {
 
 const Create = () => {
   const dispatch = useDispatch();
+  const store = useStore<AppState>();
   const [isMounted, setIsMounted] = useState(false);
   const [objectives, setObjectives] = useState<ObjectiveMetadata>(
     fallbackObjective as any,
@@ -79,7 +81,10 @@ const Create = () => {
           if (normalized && Object.keys(normalized).length > 0) {
             setPresets(normalized);
             const preset = normalized["ultros league"];
-            if (preset) {
+            // Never overwrite a preset the user already selected. The selection
+            // survives client-side navigation and in-flight requests, and
+            // clobbering it would credit the wrong preset on generation.
+            if (preset && !store.getState().preset.lastSelectedPresetName) {
               dispatch(setRawFlags(preset.flags));
               dispatch(setRawObjectives(preset.flags));
               dispatch(setRawStartingItems(preset.flags));
@@ -120,7 +125,10 @@ const Create = () => {
         setPresets(normalized);
         localStorage.setItem("cached_presets", JSON.stringify(normalized));
         const preset = normalized["ultros league"];
-        if (preset) {
+        // Never overwrite a preset the user already selected. The selection
+        // survives client-side navigation and in-flight requests, and
+        // clobbering it would credit the wrong preset on generation.
+        if (preset && !store.getState().preset.lastSelectedPresetName) {
           dispatch(setRawFlags(preset.flags));
           dispatch(setRawObjectives(preset.flags));
           dispatch(setRawStartingItems(preset.flags));
@@ -139,7 +147,10 @@ const Create = () => {
             setPresets(normalized);
             localStorage.setItem("cached_presets", JSON.stringify(normalized));
             const preset = normalized["ultros league"];
-            if (preset) {
+            // Never overwrite a preset the user already selected. The selection
+            // survives client-side navigation and in-flight requests, and
+            // clobbering it would credit the wrong preset on generation.
+            if (preset && !store.getState().preset.lastSelectedPresetName) {
               dispatch(setRawFlags(preset.flags));
               dispatch(setRawObjectives(preset.flags));
               dispatch(setRawStartingItems(preset.flags));
@@ -259,7 +270,7 @@ const Create = () => {
             );
           });
       });
-  }, [dispatch]);
+  }, [dispatch, store]);
 
   if (isMounted && objectives && presets && schema && version) {
     return (
