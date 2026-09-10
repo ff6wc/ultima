@@ -792,7 +792,7 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
           hidden: false,
           created_at: createdAt,
           last_downloaded: p.download_timestamp || undefined,
-          id: p.id || presetName,
+          id: p.id || undefined,
           tags: p.tags || [],
           downloads: p.downloads ?? p.download_count ?? 0,
           download_count: p.download_count ?? p.downloads ?? 0,
