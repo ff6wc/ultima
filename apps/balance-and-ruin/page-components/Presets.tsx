@@ -1013,7 +1013,7 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
     // Dispatch setActivePreset BEFORE setRawFlags so the preset name is set
     // when setRawFlags fires. presetSlice deliberately does NOT listen on
     // setRawFlags, so this order is safe.
-    dispatch(setActivePreset(preset.name));
+    dispatch(setActivePreset({ name: preset.name, id: preset.id }));
     dispatch(setRawFlags(preset.flags));
     dispatch(setRawObjectives(preset.flags));
     dispatch(setRawStartingItems(preset.flags));

@@ -23,6 +23,7 @@ import { ArchipelagoYamlModal } from "~/components/ArchipelagoYamlModal/Archipel
 import { getGeneratingHtml } from "~/utils/generatingHtml";
 import {
   selectActivePresetName,
+  selectLastSelectedPresetId,
   selectLastSelectedPresetName,
 } from "~/state/presetSlice";
 import { FlagSummary } from "~/components/FlagSummary/FlagSummary";
@@ -134,6 +135,7 @@ export const GenerateCard = ({
   const { data: session } = useAppSession();
   const activePresetName = useSelector(selectActivePresetName);
   const lastSelectedPresetName = useSelector(selectLastSelectedPresetName);
+  const lastSelectedPresetId = useSelector(selectLastSelectedPresetId);
   const authFetch = useAuthFetch();
 
   const [copied, setCopied] = useState(false);
@@ -394,19 +396,25 @@ export const GenerateCard = ({
         authFetch("/presets/download", {
           method: "POST",
           body: JSON.stringify({
+            id: lastSelectedPresetId || undefined,
             preset_name: lastSelectedPresetName,
-            flags,
+            is_download: true,
           }),
         })
-          .catch(() => {
-            // Fallback for older backend versions
-            return authFetch("/user-presets", {
-              method: "PUT",
-              body: JSON.stringify({
-                flags,
-                presetName: lastSelectedPresetName,
-              }),
-            });
+          .then((res) => {
+            // Only fallback to legacy PUT if the dedicated endpoint is not found (404/405)
+            // to avoid duplicate increments on network or transient 5xx errors
+            if (res && (res.status === 404 || res.status === 405)) {
+              return authFetch("/user-presets", {
+                method: "PUT",
+                body: JSON.stringify({
+                  id: lastSelectedPresetId || undefined,
+                  flags,
+                  presetName: lastSelectedPresetName,
+                  is_download: true,
+                }),
+              });
+            }
           })
           .catch(console.error);
 
