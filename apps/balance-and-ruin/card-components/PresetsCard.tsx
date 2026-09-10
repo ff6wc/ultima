@@ -6,6 +6,7 @@ import { Select, SelectOption } from "~/components/Select/Select";
 import { setRawFlags } from "~/state/flagSlice";
 import { setRawObjectives } from "~/state/objectiveSlice";
 import { setRawStartingItems } from "~/state/itemSlice";
+import { setActivePreset, clearActivePreset } from "~/state/presetSlice";
 
 export type PresetsCardProps = {
   presets: SelectOption[];
@@ -26,9 +27,13 @@ export const PresetsCard = ({ presets }: PresetsCardProps) => {
           onChange={(option) => {
             if (option) {
               setSelected(option);
+              dispatch(setActivePreset(option.label));
               dispatch(setRawFlags(option.value));
               dispatch(setRawObjectives(option.value));
               dispatch(setRawStartingItems(option.value));
+            } else {
+              setSelected(null);
+              dispatch(clearActivePreset());
             }
           }}
           value={selected}

@@ -389,12 +389,26 @@ export const GenerateCard = ({
         console.error("Failed to record seed to seedlist:", e);
       }
 
-      // Update preset download timestamp when generating a seed using a selected preset
+      // Update preset download count and timestamp when generating a seed using a selected preset
       if (lastSelectedPresetName) {
-        authFetch("/user-presets", {
-          method: "PUT",
-          body: JSON.stringify({ flags, presetName: lastSelectedPresetName }),
-        }).catch(console.error);
+        authFetch("/presets/download", {
+          method: "POST",
+          body: JSON.stringify({
+            preset_name: lastSelectedPresetName,
+            flags,
+          }),
+        })
+          .catch(() => {
+            // Fallback for older backend versions
+            return authFetch("/user-presets", {
+              method: "PUT",
+              body: JSON.stringify({
+                flags,
+                presetName: lastSelectedPresetName,
+              }),
+            });
+          })
+          .catch(console.error);
 
         // Record download time for official/custom presets in local storage
         if (session?.user) {

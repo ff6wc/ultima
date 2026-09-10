@@ -794,6 +794,8 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
           last_downloaded: p.download_timestamp || undefined,
           id: p.id || presetName,
           tags: p.tags || [],
+          downloads: p.downloads ?? p.download_count ?? 0,
+          download_count: p.download_count ?? p.downloads ?? 0,
         };
       });
   }, [dbPresets, currentUserId]);
