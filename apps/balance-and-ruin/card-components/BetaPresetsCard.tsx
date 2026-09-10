@@ -6,6 +6,7 @@ import { Select, SelectOption } from "~/components/Select/Select";
 import { setRawFlags } from "~/state/flagSlice";
 import { setRawObjectives } from "~/state/objectiveSlice";
 import { setRawStartingItems } from "~/state/itemSlice";
+import { setActivePreset, clearActivePreset } from "~/state/presetSlice";
 
 export type BetaPresetsProps = Record<string, unknown>;
 
@@ -32,9 +33,15 @@ export const BetaPresets = () => {
           onChange={(option) => {
             if (option) {
               setSelected(option);
+              // Beta presets are hardcoded here and have no database record, so
+              // they are tracked by name only.
+              dispatch(setActivePreset(option.label));
               dispatch(setRawFlags(option.value));
               dispatch(setRawObjectives(option.value));
               dispatch(setRawStartingItems(option.value));
+            } else {
+              setSelected(null);
+              dispatch(clearActivePreset());
             }
           }}
           value={selected}

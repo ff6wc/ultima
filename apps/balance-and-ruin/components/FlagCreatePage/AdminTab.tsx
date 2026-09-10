@@ -467,6 +467,11 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
       if (lowercaseName && !processedDbNames.has(lowercaseName)) {
         // Skip if marked deleted
         if (dbPreset.deleted) return;
+        // Skip the placeholder records the download endpoint auto-creates for
+        // API presets that have no database record. They carry counts only and
+        // have no flags, so they must not surface as standalone presets. Loop 1
+        // above still picks them up as the override for their matching preset.
+        if (dbPreset.auto_created || dbPreset.hidden) return;
 
         combined.push({
           id: dbPreset.id || name || `db-preset-${index}`,

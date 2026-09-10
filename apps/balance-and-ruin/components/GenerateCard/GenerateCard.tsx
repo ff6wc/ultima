@@ -22,6 +22,7 @@ import styles from "./GenerateCard.module.css";
 import { ArchipelagoYamlModal } from "~/components/ArchipelagoYamlModal/ArchipelagoYamlModal";
 import { getGeneratingHtml } from "~/utils/generatingHtml";
 import {
+  clearActivePreset,
   selectActivePresetName,
   selectLastSelectedPresetId,
   selectLastSelectedPresetName,
@@ -393,6 +394,19 @@ export const GenerateCard = ({
 
       // Update preset download count and timestamp when generating a seed using a selected preset
       if (lastSelectedPresetName) {
+        // Legacy payload must stay at three keys. Backends that predate the
+        // dedicated endpoint gate download tracking on `len(data) <= 3`, so
+        // including `id` here makes them answer 403 instead of counting.
+        const trackViaLegacyEndpoint = () =>
+          authFetch("/user-presets", {
+            method: "PUT",
+            body: JSON.stringify({
+              flags,
+              presetName: lastSelectedPresetName,
+              is_download: true,
+            }),
+          });
+
         authFetch("/presets/download", {
           method: "POST",
           body: JSON.stringify({
@@ -402,21 +416,18 @@ export const GenerateCard = ({
           }),
         })
           .then((res) => {
-            // Only fallback to legacy PUT if the dedicated endpoint is not found (404/405)
-            // to avoid duplicate increments on network or transient 5xx errors
+            // Same-origin: a backend without the dedicated route answers 404/405.
+            // Only fall back on those, so transient 5xx errors do not double count.
             if (res && (res.status === 404 || res.status === 405)) {
-              return authFetch("/user-presets", {
-                method: "PUT",
-                body: JSON.stringify({
-                  id: lastSelectedPresetId || undefined,
-                  flags,
-                  presetName: lastSelectedPresetName,
-                  is_download: true,
-                }),
-              });
+              return trackViaLegacyEndpoint();
             }
           })
-          .catch(console.error);
+          .catch(() => {
+            // Cross-origin: a backend without the dedicated route fails the CORS
+            // preflight, so fetch rejects before any Response exists. The request
+            // never reached a handler, so the legacy retry cannot double count.
+            return trackViaLegacyEndpoint().catch(console.error);
+          });
 
         // Record download time for official/custom presets in local storage
         if (session?.user) {
@@ -516,6 +527,14 @@ export const GenerateCard = ({
           className={styles.textarea}
           onBlur={(e) => {
             const val = e.target.value;
+            // Blur fires on every focus loss and `inputFlags` is kept in sync
+            // with `flags`, so only treat an actual edit as a manual override.
+            if (val === flags) {
+              return;
+            }
+            // The flagstring no longer belongs to the selected preset, so stop
+            // attributing generated seeds (and download counts) to it.
+            dispatch(clearActivePreset());
             dispatch(setRawFlags(val));
             dispatch(setRawObjectives(val));
             dispatch(setRawStartingItems(val));
@@ -524,6 +543,7 @@ export const GenerateCard = ({
           onPaste={(e) => {
             e.preventDefault();
             const pastedText = e.clipboardData.getData("text");
+            dispatch(clearActivePreset());
             dispatch(setRawFlags(pastedText));
             dispatch(setRawObjectives(pastedText));
             dispatch(setRawStartingItems(pastedText));

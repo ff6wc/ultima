@@ -929,6 +929,10 @@ export const Presets = ({ presets: rawPresets }: PresetsPageProps) => {
           official: officialVal,
           tags: tagsVal,
           hidden: isDeleted,
+          // Counts live only on the database record, so carry them over from
+          // the override the same way AdminTab does.
+          downloads: override?.downloads ?? override?.download_count ?? 0,
+          download_count: override?.download_count ?? override?.downloads ?? 0,
           last_downloaded: currentUserId
             ? getLastDownloaded(currentUserId, p.name)
             : undefined,
