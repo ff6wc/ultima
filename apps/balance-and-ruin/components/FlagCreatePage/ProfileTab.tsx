@@ -17,7 +17,7 @@ import { useDispatch } from "react-redux";
 import { setRawFlags } from "~/state/flagSlice";
 import { setRawObjectives } from "~/state/objectiveSlice";
 import { setRawStartingItems } from "~/state/itemSlice";
-import { isSeedListResponse, type SeedListResponse } from "~/types/seedList";
+import { parseSeedListResponse, type SeedListResponse } from "~/types/seedList";
 
 const getCleanPresetName = (seedType: string) => {
   if (!seedType) return "custom";
@@ -262,12 +262,13 @@ export const ProfileTab = () => {
         setLoadingSeeds(false);
         setLoadingCount(false);
         setTotalSeedsCount(42);
-        setUserSeeds([
+
+        const parsedSeeds = parseSeedListResponse([
           {
             args_list: null,
             channel_id: null,
             channel_name: null,
-            creator_id: 1,
+            creator_id: "482731905642184673",
             creator_name: "creator_name",
             random_sprites: false,
             server_id: null,
@@ -285,7 +286,7 @@ export const ProfileTab = () => {
             args_list: null,
             channel_id: null,
             channel_name: null,
-            creator_id: 2,
+            creator_id: "916284305718469250",
             creator_name: "creator_name",
             random_sprites: false,
             server_id: null,
@@ -304,7 +305,7 @@ export const ProfileTab = () => {
             args_list: null,
             channel_id: null,
             channel_name: null,
-            creator_id: 3,
+            creator_id: "204856739182654317",
             creator_name: "creator_name",
             random_sprites: false,
             server_id: null,
@@ -320,6 +321,8 @@ export const ProfileTab = () => {
             flagstring: "-cg -cont -open -sbn -sbs -sbt -sd1 -sd2",
           },
         ]);
+        setUserSeeds(parsedSeeds ?? []);
+
         return;
       }
 
@@ -357,9 +360,17 @@ export const ProfileTab = () => {
         authFetch(`/seedlist?creator_id=${userDiscordId}&limit=100`)
           .then((res) => res.json())
           .then((data: unknown) => {
-            if (isSeedListResponse(data)) {
-              setUserSeeds(data);
+            const seeds = parseSeedListResponse(data);
+            if (!seeds) {
+              console.error("Unexpected /seedlist response shape:", data);
+              return;
             }
+            if (Array.isArray(data) && seeds.length !== data.length) {
+              console.warn(
+                `Dropped ${data.length - seeds.length} malformed seed record(s)`,
+              );
+            }
+            setUserSeeds(seeds);
           })
           .catch((err) => console.error("Error fetching user seeds:", err))
           .finally(() => setLoadingSeeds(false));
@@ -1666,9 +1677,9 @@ export const ProfileTab = () => {
                               </strong>
                               <button
                                 onClick={() => {
-                                  if (!seed.flagstring) {
-                                    alert("Flags are empty.");
-                                  } else if (navigator.clipboard) {
+                                  if (!seed.flagstring) return;
+
+                                  if (navigator.clipboard) {
                                     navigator.clipboard.writeText(
                                       seed.flagstring,
                                     );

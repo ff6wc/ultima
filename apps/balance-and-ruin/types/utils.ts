@@ -12,10 +12,10 @@ import isString from "lodash/isString";
 export type NullableProperties<T> = { [K in keyof T]: T[K] | null };
 
 export function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-export function isNullableString(value: unknown): value is string | null {
+export function isOptionalString(value: unknown): value is string | null {
   return value === null || isString(value);
 }
 
