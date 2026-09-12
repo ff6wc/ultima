@@ -13,6 +13,7 @@ import { selectSchema } from "~/state/schemaSlice";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { useAppSession } from "~/hooks/useAppSession";
 import { useAuthFetch } from "~/hooks/useAuthFetch";
+import { SEED_SOURCE } from "~/utils/seedHistory";
 const AUTH_ENABLED = process.env.NEXT_PUBLIC_AUTH_ENABLED !== "false";
 import { GenerateUpload } from "~/components/GenerateUpload/GenerateUpload";
 import { FlagTextInput } from "~/components/FlagInput/FlagInput";
@@ -21,7 +22,9 @@ import styles from "./GenerateCard.module.css";
 import { ArchipelagoYamlModal } from "~/components/ArchipelagoYamlModal/ArchipelagoYamlModal";
 import { getGeneratingHtml } from "~/utils/generatingHtml";
 import {
+  clearActivePreset,
   selectActivePresetName,
+  selectLastSelectedPresetId,
   selectLastSelectedPresetName,
 } from "~/state/presetSlice";
 import { FlagSummary } from "~/components/FlagSummary/FlagSummary";
@@ -133,6 +136,7 @@ export const GenerateCard = ({
   const { data: session } = useAppSession();
   const activePresetName = useSelector(selectActivePresetName);
   const lastSelectedPresetName = useSelector(selectLastSelectedPresetName);
+  const lastSelectedPresetId = useSelector(selectLastSelectedPresetId);
   const authFetch = useAuthFetch();
 
   const [copied, setCopied] = useState(false);
@@ -378,6 +382,7 @@ export const GenerateCard = ({
             seed_type: lastSelectedPresetName || "ff6wc",
             share_url: shareUrl,
             server_name: serverName,
+            source: SEED_SOURCE.FF6WC_WEB,
             flagstring: flags,
           }),
         }).catch((err) =>
@@ -387,12 +392,42 @@ export const GenerateCard = ({
         console.error("Failed to record seed to seedlist:", e);
       }
 
-      // Update preset download timestamp when generating a seed using a selected preset
+      // Update preset download count and timestamp when generating a seed using a selected preset
       if (lastSelectedPresetName) {
-        authFetch("/user-presets", {
-          method: "PUT",
-          body: JSON.stringify({ flags, presetName: lastSelectedPresetName }),
-        }).catch(console.error);
+        // Legacy payload must stay at three keys. Backends that predate the
+        // dedicated endpoint gate download tracking on `len(data) <= 3`, so
+        // including `id` here makes them answer 403 instead of counting.
+        const trackViaLegacyEndpoint = () =>
+          authFetch("/user-presets", {
+            method: "PUT",
+            body: JSON.stringify({
+              flags,
+              presetName: lastSelectedPresetName,
+              is_download: true,
+            }),
+          });
+
+        authFetch("/presets/download", {
+          method: "POST",
+          body: JSON.stringify({
+            id: lastSelectedPresetId || undefined,
+            preset_name: lastSelectedPresetName,
+            is_download: true,
+          }),
+        })
+          .then((res) => {
+            // Same-origin: a backend without the dedicated route answers 404/405.
+            // Only fall back on those, so transient 5xx errors do not double count.
+            if (res && (res.status === 404 || res.status === 405)) {
+              return trackViaLegacyEndpoint();
+            }
+          })
+          .catch(() => {
+            // Cross-origin: a backend without the dedicated route fails the CORS
+            // preflight, so fetch rejects before any Response exists. The request
+            // never reached a handler, so the legacy retry cannot double count.
+            return trackViaLegacyEndpoint().catch(console.error);
+          });
 
         // Record download time for official/custom presets in local storage
         if (session?.user) {
@@ -492,6 +527,14 @@ export const GenerateCard = ({
           className={styles.textarea}
           onBlur={(e) => {
             const val = e.target.value;
+            // Blur fires on every focus loss and `inputFlags` is kept in sync
+            // with `flags`, so only treat an actual edit as a manual override.
+            if (val === flags) {
+              return;
+            }
+            // The flagstring no longer belongs to the selected preset, so stop
+            // attributing generated seeds (and download counts) to it.
+            dispatch(clearActivePreset());
             dispatch(setRawFlags(val));
             dispatch(setRawObjectives(val));
             dispatch(setRawStartingItems(val));
@@ -500,6 +543,7 @@ export const GenerateCard = ({
           onPaste={(e) => {
             e.preventDefault();
             const pastedText = e.clipboardData.getData("text");
+            dispatch(clearActivePreset());
             dispatch(setRawFlags(pastedText));
             dispatch(setRawObjectives(pastedText));
             dispatch(setRawStartingItems(pastedText));

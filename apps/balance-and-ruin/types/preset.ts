@@ -14,11 +14,11 @@ export type FlagPreset = {
   official: boolean;
   /** ISO date string from the API */
   created_at?: string;
-  /**
-  /** ISO date string — tracked client-side in localStorage, keyed per user. */
   last_downloaded?: string;
   id?: string;
   tags?: string[];
   owner_id?: string;
   is_official?: boolean;
+  downloads?: number;
+  download_count?: number;
 };

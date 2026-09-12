@@ -18,6 +18,11 @@ import { setRawFlags } from "~/state/flagSlice";
 import { setRawObjectives } from "~/state/objectiveSlice";
 import { setRawStartingItems } from "~/state/itemSlice";
 import { parseSeedListResponse, type SeedListResponse } from "~/types/seedList";
+import {
+  formatSeedSource,
+  resolveSeedShareUrl,
+  SEED_SOURCE,
+} from "~/utils/seedHistory";
 
 const getCleanPresetName = (seedType: string) => {
   if (!seedType) return "custom";
@@ -277,6 +282,7 @@ export const ProfileTab = () => {
             timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
             share_url: "http://localhost:3000/seed/?id=8a7f92b4",
             server_name: "dev.ff6worldscollide.com",
+            source: SEED_SOURCE.FF6WC_WEB,
             seed: "192837465",
             hash: "Locke, Celes, Sabin, Edgar",
             flagstring:
@@ -319,6 +325,20 @@ export const ProfileTab = () => {
             seed: "554433221",
             hash: "Cyan, Gau, Mog, Umaro",
             flagstring: "-cg -cont -open -sbn -sbs -sbt -sd1 -sd2",
+          },
+          {
+            // Legacy seedbot.net row: relative share_url, no `source` field.
+            // Should render as "seedbot.net" and link to seedbot.net/media/...
+            id: "7f1c3e95",
+            seed_type: "preset_ultros_league",
+            timestamp: new Date(
+              Date.now() - 6 * 24 * 60 * 60 * 1000,
+            ).toISOString(),
+            share_url: "/media/preset_ultros_league_7f1c3e95.zip",
+            server_name: "WebApp",
+            seed: "112233445",
+            hash: "Setzer, Strago, Gogo, Terra",
+            flagstring: "-cg -cont -open -sbn -sbs -sbt -sd1 -sd2 -sd3",
           },
         ]);
         setUserSeeds(parsedSeeds ?? []);
@@ -1520,6 +1540,9 @@ export const ProfileTab = () => {
                     );
                   } catch (e) {}
                 }
+                // share_url may be foreign-origin or relative; see utils/seedHistory
+                const shareUrl = resolveSeedShareUrl(seed);
+                const sourceLabel = formatSeedSource(seed);
                 return (
                   <div
                     key={seedId}
@@ -1743,38 +1766,25 @@ export const ProfileTab = () => {
                                 dispatch(setRawStartingItems(seed.flagstring));
                                 router.push("/create?tab=generate");
                               }}
-                              style={{
-                                backgroundColor: "#3b82f6",
-                                border: "none",
-                                color: "#ffffff",
-                                padding: "0.4rem 1rem",
-                                borderRadius: "4px",
-                                fontSize: "0.8rem",
-                                cursor: "pointer",
-                                fontWeight: "bold",
-                              }}
-                              className="hover:bg-blue-600 transition-colors"
                             >
                               Load Flags
                             </button>
-                            {seed.share_url && (
+                            {shareUrl && (
                               <a
-                                href={seed.share_url}
+                                href={shareUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 style={{
-                                  backgroundColor: "rgba(59, 130, 246, 0.1)",
-                                  border: "1px solid #3b82f6",
-                                  color: "#60a5fa",
+                                  backgroundColor: "#3b82f6",
+                                  border: "none",
+                                  color: "#ffffff",
                                   padding: "0.4rem 1rem",
                                   borderRadius: "4px",
                                   fontSize: "0.8rem",
                                   cursor: "pointer",
                                   fontWeight: "bold",
-                                  textDecoration: "none",
-                                  display: "inline-block",
                                 }}
-                                className="hover:bg-blue-500 hover:text-white transition-colors"
+                                className="hover:bg-blue-600 transition-colors"
                               >
                                 View Seed ↗
                               </a>

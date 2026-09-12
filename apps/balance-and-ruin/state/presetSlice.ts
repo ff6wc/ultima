@@ -8,24 +8,38 @@ export interface PresetState {
   activePresetName: string | null;
   /** Name of the last selected preset, persists even when flags are manually changed, cleared on manual clear */
   lastSelectedPresetName: string | null;
+  /** ID of the last selected preset, if known */
+  lastSelectedPresetId: string | null;
 }
 
 const initialState: PresetState = {
   activePresetName: null,
   lastSelectedPresetName: null,
+  lastSelectedPresetId: null,
 };
 
 export const presetSlice = createSlice({
   name: "preset",
   initialState,
   reducers: {
-    setActivePreset(state, action: PayloadAction<string>) {
-      state.activePresetName = action.payload;
-      state.lastSelectedPresetName = action.payload;
+    setActivePreset(
+      state,
+      action: PayloadAction<string | { name: string; id?: string }>,
+    ) {
+      if (typeof action.payload === "string") {
+        state.activePresetName = action.payload;
+        state.lastSelectedPresetName = action.payload;
+        state.lastSelectedPresetId = null;
+      } else {
+        state.activePresetName = action.payload.name;
+        state.lastSelectedPresetName = action.payload.name;
+        state.lastSelectedPresetId = action.payload.id || null;
+      }
     },
     clearActivePreset(state) {
       state.activePresetName = null;
       state.lastSelectedPresetName = null;
+      state.lastSelectedPresetId = null;
     },
   },
   extraReducers: (builder) => {
@@ -55,5 +69,8 @@ export const selectActivePresetName = (state: AppState) =>
 
 export const selectLastSelectedPresetName = (state: AppState) =>
   state.preset.lastSelectedPresetName;
+
+export const selectLastSelectedPresetId = (state: AppState) =>
+  state.preset.lastSelectedPresetId;
 
 export default presetSlice.reducer;

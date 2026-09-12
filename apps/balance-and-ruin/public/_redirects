@@ -1,0 +1,3 @@
+# Seed of the Week was retired; send legacy inbound links to the home page.
+/sotw     /  301
+/sotw/*   /  301

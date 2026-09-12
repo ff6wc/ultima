@@ -6,11 +6,15 @@ import { FlagLabel } from "~/components/FlagLabel/FlagLabel";
 import { setRawFlags } from "~/state/flagSlice";
 import { setRawObjectives } from "~/state/objectiveSlice";
 import { setRawStartingItems } from "~/state/itemSlice";
+import { clearActivePreset } from "~/state/presetSlice";
 
 export const FlagsCard = () => {
   const [flags, setFlags] = useState("");
   const dispatch = useDispatch();
   const onClick = () => {
+    // A hand-entered flagstring replaces whatever preset was selected, so drop
+    // the selection rather than crediting it with the resulting downloads.
+    dispatch(clearActivePreset());
     dispatch(setRawFlags(flags));
     dispatch(setRawObjectives(flags));
     dispatch(setRawStartingItems(flags));

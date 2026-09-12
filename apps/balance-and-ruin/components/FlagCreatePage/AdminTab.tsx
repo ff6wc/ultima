@@ -437,8 +437,9 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
           creator_id: apiPreset.creator_id || "community",
           created_timestamp: apiPreset.created_at || new Date().toISOString(),
           download_timestamp: dbOverride.download_timestamp,
-          downloads: dbOverride.downloads,
-          download_count: dbOverride.download_count,
+          downloads: dbOverride.downloads ?? dbOverride.download_count ?? 0,
+          download_count:
+            dbOverride.download_count ?? dbOverride.downloads ?? 0,
           isApiPreset: true,
           dbRecord: dbOverride,
         });
@@ -452,6 +453,8 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
             apiPreset.creator_name || apiPreset.creator || "Community",
           creator_id: apiPreset.creator_id || "community",
           created_timestamp: apiPreset.created_at || new Date().toISOString(),
+          downloads: 0,
+          download_count: 0,
           isApiPreset: true,
         });
       }
@@ -464,6 +467,11 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
       if (lowercaseName && !processedDbNames.has(lowercaseName)) {
         // Skip if marked deleted
         if (dbPreset.deleted) return;
+        // Skip the placeholder records the download endpoint auto-creates for
+        // API presets that have no database record. They carry counts only and
+        // have no flags, so they must not surface as standalone presets. Loop 1
+        // above still picks them up as the override for their matching preset.
+        if (dbPreset.auto_created || dbPreset.hidden) return;
 
         combined.push({
           id: dbPreset.id || name || `db-preset-${index}`,
@@ -484,8 +492,8 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
             dbPreset.created_timestamp ||
             new Date().toISOString(),
           download_timestamp: dbPreset.download_timestamp,
-          downloads: dbPreset.downloads,
-          download_count: dbPreset.download_count,
+          downloads: dbPreset.downloads ?? dbPreset.download_count ?? 0,
+          download_count: dbPreset.download_count ?? dbPreset.downloads ?? 0,
           isApiPreset: false,
         });
       }
@@ -1385,11 +1393,13 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                           title="Total downloads on site"
                         >
                           📥{" "}
-                          {preset.downloads ??
+                          {(
+                            preset.downloads ??
                             preset.download_count ??
                             preset.dbRecord?.downloads ??
                             preset.dbRecord?.download_count ??
-                            0}
+                            0
+                          ).toLocaleString()}
                         </span>
                         <button
                           onClick={() => toggleAdminPreset(preset.id)}
@@ -1661,11 +1671,13 @@ export const AdminTab = ({ apiPresets }: AdminTabProps) => {
                               </span>
                               <span>
                                 Total Downloads:{" "}
-                                {preset.downloads ??
+                                {(
+                                  preset.downloads ??
                                   preset.download_count ??
                                   preset.dbRecord?.downloads ??
                                   preset.dbRecord?.download_count ??
-                                  0}
+                                  0
+                                ).toLocaleString()}
                               </span>
                               {preset.download_timestamp && (
                                 <span>

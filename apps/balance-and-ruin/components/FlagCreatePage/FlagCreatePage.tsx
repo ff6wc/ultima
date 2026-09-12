@@ -74,7 +74,6 @@ import {
   GiPaintBrush,
   GiRetroController,
   GiWizardStaff,
-  GiSprout,
   GiCrossedSwords,
 } from "react-icons/gi";
 import {
@@ -105,7 +104,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { selectShowFlags, setShowFlags } from "~/state/settingsSlice";
 import { CardColumn } from "~/components/CardColumn/CardColumn";
 import { EventsTab } from "~/page-components/EventsTab";
-import { SotwTab } from "~/page-components/SotwTab";
 import { GenerateCard } from "~/components/GenerateCard/GenerateCard";
 import { PageContainer } from "~/components/PageContainer/PageContainer";
 import { Battle } from "~/page-components/Battle";
@@ -497,12 +495,6 @@ export const FlagCreatePage = ({
           id: "events",
           Icon: HiFlag,
           content: <EventsTab />,
-        },
-        {
-          label: "Seed of the Week",
-          id: "sotw",
-          Icon: GiSprout,
-          content: <SotwTab />,
         },
       ].filter((z) => !!z) as TabItem[],
     [presets, isAdmin, logoSrc],
@@ -991,7 +983,7 @@ export const FlagCreatePage = ({
                 </>
               )}
               {tabs.map((tab) => {
-                const isSideNavHidden = ["events", "sotw"].includes(tab.id);
+                const isSideNavHidden = tab.id === "events";
                 const isHighlighted = matchesSearch(tab.id);
                 const isHidden = ["home", "profile"].includes(tab.id);
 
@@ -1092,16 +1084,6 @@ export const FlagCreatePage = ({
                 >
                   <HiFlag size={20} />
                   <span>EVENTS</span>
-                </button>
-                <button
-                  onClick={() => {
-                    const idx = tabs.findIndex((t) => t.id === "sotw");
-                    if (idx !== -1) setSelectedIndex(idx);
-                  }}
-                  className={`${styles.topBarLink} ${activeTabId === "sotw" ? styles.topBarLinkActive : ""}`}
-                >
-                  <GiSprout size={20} />
-                  <span>SEED OF THE WEEK</span>
                 </button>
                 <a
                   href="https://wiki.ff6worldscollide.com/wiki/Main_Page"
