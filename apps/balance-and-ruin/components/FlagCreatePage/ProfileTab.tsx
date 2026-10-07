@@ -17,11 +17,8 @@ import { useDispatch } from "react-redux";
 import { setRawFlags } from "~/state/flagSlice";
 import { setRawObjectives } from "~/state/objectiveSlice";
 import { setRawStartingItems } from "~/state/itemSlice";
-import {
-  formatSeedSource,
-  resolveSeedShareUrl,
-  SEED_SOURCE,
-} from "~/utils/seedHistory";
+import { parseSeedListResponse, type SeedListResponse } from "~/types/seedList";
+import { resolveSeedShareUrl, SEED_SOURCE } from "~/utils/seedHistory";
 
 const getCleanPresetName = (seedType: string) => {
   if (!seedType) return "custom";
@@ -98,7 +95,7 @@ export const ProfileTab = () => {
   const [isDeleting, setIsDeleting] = useState<Record<string, boolean>>({});
   const [showConfirm, setShowConfirm] = useState<Record<string, boolean>>({});
 
-  const [userSeeds, setUserSeeds] = useState<any[]>([]);
+  const [userSeeds, setUserSeeds] = useState<SeedListResponse>([]);
   const [loadingSeeds, setLoadingSeeds] = useState(true);
   const [expandedSeeds, setExpandedSeeds] = useState<Record<string, boolean>>(
     {},
@@ -266,8 +263,16 @@ export const ProfileTab = () => {
         setLoadingSeeds(false);
         setLoadingCount(false);
         setTotalSeedsCount(42);
-        setUserSeeds([
+
+        const parsedSeeds = parseSeedListResponse([
           {
+            args_list: null,
+            channel_id: null,
+            channel_name: null,
+            creator_id: "482731905642184673",
+            creator_name: "creator_name",
+            random_sprites: false,
+            server_id: null,
             id: "8a7f92b4",
             seed_type: "standard",
             timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
@@ -280,6 +285,13 @@ export const ProfileTab = () => {
               "-cg -cont -open -sbn -sbs -sbt -sd1 -sd2 -sd3 -sd4 -sd5 -sd6 -sd7 -sd8 -sd9 -sd10",
           },
           {
+            args_list: null,
+            channel_id: null,
+            channel_name: null,
+            creator_id: "916284305718469250",
+            creator_name: "creator_name",
+            random_sprites: false,
+            server_id: null,
             id: "5c8d2f10",
             seed_type: "true_chaos",
             timestamp: new Date(
@@ -292,6 +304,13 @@ export const ProfileTab = () => {
             flagstring: "-cg -cont -open -sbn -rc -nm -s -tc",
           },
           {
+            args_list: null,
+            channel_id: null,
+            channel_name: null,
+            creator_id: "204856739182654317",
+            creator_name: "creator_name",
+            random_sprites: false,
+            server_id: null,
             id: "2e4b6d8a",
             seed_type: "custom",
             timestamp: new Date(
@@ -317,7 +336,24 @@ export const ProfileTab = () => {
             hash: "Setzer, Strago, Gogo, Terra",
             flagstring: "-cg -cont -open -sbn -sbs -sbt -sd1 -sd2 -sd3",
           },
+          {
+            // Legacy seedbot2000 row: only the nine migrated columns are present.
+            id: "legacy-seedbot-2000",
+            creator_id: "123456789012345678",
+            creator_name: "legacy_creator",
+            seed_type: "preset_legacy",
+            share_url: "/media/preset_legacy_legacy-seedbot-2000.zip",
+            timestamp: new Date(
+              Date.now() - 8 * 24 * 60 * 60 * 1000,
+            ).toISOString(),
+            server_name: "seedbot2000",
+            server_id: "legacy-server",
+            channel_name: "legacy-channel",
+            channel_id: "legacy-channel-id",
+          },
         ]);
+        setUserSeeds(parsedSeeds ?? []);
+
         return;
       }
 
@@ -354,10 +390,18 @@ export const ProfileTab = () => {
         // 1. Fetch latest 100 seeds for the history section
         authFetch(`/seedlist?creator_id=${userDiscordId}&limit=100`)
           .then((res) => res.json())
-          .then((data) => {
-            if (Array.isArray(data)) {
-              setUserSeeds(data);
+          .then((data: unknown) => {
+            const seeds = parseSeedListResponse(data);
+            if (!seeds) {
+              console.error("Unexpected /seedlist response shape:", data);
+              return;
             }
+            if (Array.isArray(data) && seeds.length !== data.length) {
+              console.warn(
+                `Dropped ${data.length - seeds.length} malformed seed record(s)`,
+              );
+            }
+            setUserSeeds(seeds);
           })
           .catch((err) => console.error("Error fetching user seeds:", err))
           .finally(() => setLoadingSeeds(false));
@@ -1509,7 +1553,6 @@ export const ProfileTab = () => {
                 }
                 // share_url may be foreign-origin or relative; see utils/seedHistory
                 const shareUrl = resolveSeedShareUrl(seed);
-                const sourceLabel = formatSeedSource(seed);
                 return (
                   <div
                     key={seedId}
@@ -1628,17 +1671,6 @@ export const ProfileTab = () => {
                           gap: "0.75rem",
                         }}
                       >
-                        {sourceLabel && (
-                          <div
-                            className="hidden md:block"
-                            style={{ fontSize: "0.8rem", color: "#cbd5e1" }}
-                          >
-                            <strong>Server/Host:</strong>{" "}
-                            <span style={{ fontFamily: "monospace" }}>
-                              {sourceLabel}
-                            </span>
-                          </div>
-                        )}
                         {seed.seed && (
                           <div
                             className="hidden md:block"
@@ -1678,6 +1710,8 @@ export const ProfileTab = () => {
                               </strong>
                               <button
                                 onClick={() => {
+                                  if (!seed.flagstring) return;
+
                                   if (navigator.clipboard) {
                                     navigator.clipboard.writeText(
                                       seed.flagstring,
@@ -1731,27 +1765,30 @@ export const ProfileTab = () => {
                             gap: "1rem",
                           }}
                         >
-                          <button
-                            onClick={() => {
-                              dispatch(setRawFlags(seed.flagstring));
-                              dispatch(setRawObjectives(seed.flagstring));
-                              dispatch(setRawStartingItems(seed.flagstring));
-                              router.push("/create?tab=generate");
-                            }}
-                            style={{
-                              backgroundColor: "#3b82f6",
-                              border: "none",
-                              color: "#ffffff",
-                              padding: "0.4rem 1rem",
-                              borderRadius: "4px",
-                              fontSize: "0.8rem",
-                              cursor: "pointer",
-                              fontWeight: "bold",
-                            }}
-                            className="hover:bg-blue-600 transition-colors"
-                          >
-                            Load Flags
-                          </button>
+                          {seed.flagstring && (
+                            <button
+                              onClick={() => {
+                                if (!seed.flagstring) return;
+                                dispatch(setRawFlags(seed.flagstring));
+                                dispatch(setRawObjectives(seed.flagstring));
+                                dispatch(setRawStartingItems(seed.flagstring));
+                                router.push("/create?tab=generate");
+                              }}
+                              style={{
+                                backgroundColor: "#3b82f6",
+                                border: "none",
+                                color: "#ffffff",
+                                padding: "0.4rem 1rem",
+                                borderRadius: "4px",
+                                fontSize: "0.8rem",
+                                cursor: "pointer",
+                                fontWeight: "bold",
+                              }}
+                              className="hover:bg-blue-600 transition-colors"
+                            >
+                              Load Flags
+                            </button>
+                          )}
                           {shareUrl && (
                             <a
                               href={shareUrl}

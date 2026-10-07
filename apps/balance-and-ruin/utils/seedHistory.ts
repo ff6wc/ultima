@@ -117,17 +117,3 @@ export const resolveSeedShareUrl = (seed: SeedHistoryEntry): string | null => {
 
   return parsed.toString();
 };
-
-/**
- * Human-readable host for the seed card. `WebApp` is the legacy marker
- * seedbot.net wrote; show the actual site instead.
- */
-export const formatSeedSource = (seed: SeedHistoryEntry): string | null => {
-  if (isSeedbotWebRow(seed)) {
-    return "seedbot.net";
-  }
-  if (getSource(seed) === SEED_SOURCE.DISCORD) {
-    return seed.server_name || "Discord";
-  }
-  return seed.server_name || null;
-};
