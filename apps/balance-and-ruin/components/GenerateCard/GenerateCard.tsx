@@ -104,6 +104,13 @@ const useOrderedFlags = () => {
       keys.splice(rcIndex, 1);
       keys.splice(keys.indexOf("-sc1"), 0, "-rc");
     }
+    // keep set flags the schema doesn't list (e.g. a stale cached or fallback
+    // schema) instead of silently dropping them from the flagstring
+    Object.keys(flagValues).forEach((key) => {
+      if (!(key in schema)) {
+        keys.push(key);
+      }
+    });
     return keys.reduce((acc, key) => {
       const additional = getFlagValue(key, flagValues[key]);
       return `${acc} ${additional}`.trim();
