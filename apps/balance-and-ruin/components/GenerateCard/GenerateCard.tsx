@@ -104,10 +104,17 @@ const useOrderedFlags = () => {
       keys.splice(rcIndex, 1);
       keys.splice(keys.indexOf("-sc1"), 0, "-rc");
     }
-    return keys.reduce((acc, key) => {
+    const flags = keys.reduce((acc, key) => {
       const additional = getFlagValue(key, flagValues[key]);
       return `${acc} ${additional}`.trim();
     }, "");
+    // set flags the loaded schema doesn't list are left out of the flagstring
+    // (old presets carry removed flags like -rt that the generator rejects);
+    // report them so the drop is visible instead of silent
+    const unrecognized = Object.keys(flagValues).filter(
+      (key) => !(key in schema) && getFlagValue(key, flagValues[key]) !== "",
+    );
+    return { flags, unrecognized };
   }, [flagValues, schema]);
 };
 
@@ -131,7 +138,7 @@ export const GenerateCard = ({
       ? romName.slice(0, 8).concat("...", ext)
       : romName;
 
-  const flags = useOrderedFlags();
+  const { flags, unrecognized } = useOrderedFlags();
   const router = useRouter();
   const { data: session } = useAppSession();
   const activePresetName = useSelector(selectActivePresetName);
@@ -551,6 +558,12 @@ export const GenerateCard = ({
           value={inputFlags}
           placeholder="Your selected flags will appear here..."
         />
+        {unrecognized.length > 0 && (
+          <p className="mt-2 text-sm text-amber-400">
+            Not recognised by this version and left out:{" "}
+            {unrecognized.join(" ")}
+          </p>
+        )}
 
         <div className="mt-3 flex justify-between items-center w-full">
           <div>

@@ -1453,9 +1453,9 @@ export function generateTrueChaos(): string {
   const nmc = choice(["", " -nmc"]);
   const nee = choice(["", " -nee"]);
   const nil = choice(["", " -nil"]);
-  const nfps = choice(["", " -nfce"]);
+  const nfps = choice(["", " -nfps"]);
   const nu = choice(["", " -nu"]);
-  const nfp = choice(["", " -nfp"]);
+  const nfp = choice(["", " -nfce"]);
   const pd = choice(["", " -pd"]);
   const challenges = nmc + nee + nil + nfps + nu + nfp + pd;
 

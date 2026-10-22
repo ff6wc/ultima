@@ -4,28 +4,28 @@
     "type": "str",
     "flag": "-url",
     "description": "Url to the shareable link for the seed",
-    "group": "optional arguments"
+    "group": "options"
   },
   "-hf": {
     "key": "hide_flags",
     "type": "bool",
     "flag": "-hf",
     "description": "Hide Flags (no log, no flags menu)",
-    "group": "Challenges"
+    "group": "options"
   },
   "-open": {
     "key": "open_world",
     "type": "bool",
     "flag": "-open",
     "description": "Unrestricted event access",
-    "group": "optional arguments"
+    "group": "options"
   },
   "-cg": {
     "key": "character_gating",
     "type": "bool",
     "flag": "-cg",
     "description": "Events locked until required characters recruited",
-    "group": "optional arguments"
+    "group": "options"
   },
   "-s": {
     "key": "seed",
@@ -215,31 +215,6 @@
     "flag": "-oy",
     "description": "Objective Y",
     "group": "Objectives"
-  },
-  "-rc": {
-    "key": "require_characters",
-    "type": "lower",
-    "flag": "-rc",
-    "description": "Force the listed character(s) (1-4) to be in the party at all times. Accepts random/randomngu. Compatible with the starting character flags: a required character that is not already a starting character is added as an additional one.",
-    "allowed_values": [
-      "terra",
-      "locke",
-      "cyan",
-      "shadow",
-      "edgar",
-      "sabin",
-      "celes",
-      "strago",
-      "relm",
-      "setzer",
-      "mog",
-      "gau",
-      "gogo",
-      "umaro",
-      "random",
-      "randomngu"
-    ],
-    "group": "Starting Party"
   },
   "-sc1": {
     "key": "start_char1",
@@ -650,28 +625,31 @@
     "key": "commands",
     "type": "str",
     "flag": "-com",
-    "description": "Character commands",
+    "description": "Character commands: one 2 digit command id per slot (13 ids; 99 random, 98 random unique, 97 none). Composable with -comfr/-compr: explicit picks claim slots first, 99/98 mark random/unique backfill slots, 97 holds a slot empty",
+    "nargs": "*",
     "group": "Commands"
   },
   "-comfr": {
     "key": "commands_fr",
     "type": "str",
     "flag": "-comfr",
-    "description": "Give every character the common commands by chance: 'FIGHT.MAGIC.ITEM' percent chances (e.g. -comfr 10.50.90)",
+    "description": "Give every character the common commands by chance: 'FIGHT.MAGIC.ITEM' percent chances (e.g. -comfr 10.50.90); unfilled slots are backfilled randomly, respecting -rec",
+    "args": "F.M.I",
     "group": "Commands"
   },
   "-comfru": {
     "key": "commands_fru",
     "type": "str",
     "flag": "-comfru",
-    "description": "Like -comfr, but unfilled slots draft unique commands",
+    "description": "Like -comfr, but skills are unique: none is dealt twice until every legal skill has been dealt",
+    "args": "F.M.I",
     "group": "Commands"
   },
   "-compr": {
     "key": "commands_pr",
     "type": "str",
     "flag": "-compr",
-    "description": "Give commands by chance: dot-separated command ids and matching percent chances (e.g. -compr 0.1.2.28 50.50.50.100)",
+    "description": "Give commands by chance: dot-separated command ids and matching percent chances (e.g. -compr 0.1.2.28 50.50.50.100; 97 = a chance at an empty slot); unfilled slots are backfilled randomly, respecting -rec",
     "nargs": 2,
     "args": [
       "IDS",
@@ -683,19 +661,12 @@
     "key": "commands_pru",
     "type": "str",
     "flag": "-compru",
-    "description": "Like -compr, but unfilled slots draft unique commands",
+    "description": "Like -compr, but skills are unique: a skill rolled or drafted for one character is not dealt again until every legal skill has been dealt",
     "nargs": 2,
     "args": [
       "IDS",
       "PERCENTS"
     ],
-    "group": "Commands"
-  },
-  "-rec": {
-    "key": "random_exclude_command_ids",
-    "type": "str",
-    "flag": "-rec",
-    "description": "Exclude commands from random possibilities, as dot-separated command ids (e.g. -rec 05.07.10)",
     "group": "Commands"
   },
   "-scc": {
@@ -705,12 +676,20 @@
     "description": "Shuffle selected/randomized commands",
     "group": "Commands"
   },
+  "-rec": {
+    "key": "random_exclude_command_ids",
+    "type": "str",
+    "flag": "-rec",
+    "description": "Exclude commands from random possibilities, as dot-separated command ids with an arbitrary number of entries (e.g. '-rec 05.07.10')",
+    "args": "VALUE",
+    "group": "Commands"
+  },
   "-rec1": {
     "key": "random_exclude_command1",
     "type": "int",
     "flag": "-rec1",
     "default": 97,
-    "description": "Exclude selected command from random possibilities",
+    "description": "Exclude selected command from random possibilities (legacy form of -rec)",
     "args": "VALUE",
     "allowed_values": [
       97,
@@ -743,7 +722,7 @@
     "type": "int",
     "flag": "-rec2",
     "default": 97,
-    "description": "Exclude selected command from random possibilities",
+    "description": "Exclude selected command from random possibilities (legacy form of -rec)",
     "args": "VALUE",
     "allowed_values": [
       97,
@@ -776,7 +755,7 @@
     "type": "int",
     "flag": "-rec3",
     "default": 97,
-    "description": "Exclude selected command from random possibilities",
+    "description": "Exclude selected command from random possibilities (legacy form of -rec)",
     "args": "VALUE",
     "allowed_values": [
       97,
@@ -809,7 +788,7 @@
     "type": "int",
     "flag": "-rec4",
     "default": 97,
-    "description": "Exclude selected command from random possibilities",
+    "description": "Exclude selected command from random possibilities (legacy form of -rec)",
     "args": "VALUE",
     "allowed_values": [
       97,
@@ -842,7 +821,7 @@
     "type": "int",
     "flag": "-rec5",
     "default": 97,
-    "description": "Exclude selected command from random possibilities",
+    "description": "Exclude selected command from random possibilities (legacy form of -rec)",
     "args": "VALUE",
     "allowed_values": [
       97,
@@ -875,7 +854,7 @@
     "type": "int",
     "flag": "-rec6",
     "default": 97,
-    "description": "Exclude selected command from random possibilities",
+    "description": "Exclude selected command from random possibilities (legacy form of -rec)",
     "args": "VALUE",
     "allowed_values": [
       97,
@@ -947,6 +926,18 @@
     "type": "bool",
     "flag": "-nxppd",
     "description": "Do not divide experience by number of surviving party members",
+    "group": "Experience, Magic Points, Gold"
+  },
+  "-lc": {
+    "key": "level_cap",
+    "type": "str",
+    "flag": "-lc",
+    "description": "Level cap. One value LEVEL: hard cap, characters stop gaining experience once they reach LEVEL (the status menu shows 0 to the next level, as at 99); LEVEL must be at least the starting level (-stl, or -stlr's MAX). Two values MEAN WIDTH: soft cap, experience to next level is multiplied by 1 + 10^((level - MEAN) / WIDTH): double from MEAN to MEAN + 1, and every WIDTH levels past that multiply the extra cost by 10. LEVEL and MEAN are whole numbers; WIDTH may have one decimal place (e.g. 2.5)",
+    "nargs": "+",
+    "args": [
+      "LEVEL|MEAN",
+      "WIDTH"
+    ],
     "group": "Experience, Magic Points, Gold"
   },
   "-lsa": {
@@ -1103,7 +1094,7 @@
     "key": "hp_mp_scaling_average",
     "type": "float",
     "flag": "-hma",
-    "description": "Enemy and boss hp/mp scales %(metavar)s * party averaage level",
+    "description": "Enemy and boss hp/mp scales %(metavar)s * party average level",
     "args": "VALUE",
     "allowed_values": [
       0.5,
@@ -1253,7 +1244,7 @@
     "key": "xp_gp_scaling_average",
     "type": "float",
     "flag": "-xga",
-    "description": "Enemy and boss exp/gp scales %(metavar)s * party averaage level",
+    "description": "Enemy and boss exp/gp scales %(metavar)s * party average level",
     "args": "VALUE",
     "allowed_values": [
       0.5,
@@ -1497,7 +1488,7 @@
     "key": "mix_bosses_dragons",
     "type": "bool",
     "flag": "-bmbd",
-    "description": "(LEGACY) Shuffle/randomize bosses and dragons together",
+    "description": "Shuffle/randomize bosses and dragons together",
     "group": "Bosses"
   },
   "-stloc": {
@@ -1546,6 +1537,14 @@
     "type": "bool",
     "flag": "-bmkl",
     "description": "Don't replace the Marshal's Lobos with randomized enemies",
+    "group": "Bosses"
+  },
+  "-oops": {
+    "key": "oops",
+    "type": "str",
+    "flag": "-oops",
+    "description": "Oops, all <boss>! Replace all bosses with the specified boss enemy ID or name, or \"random\".",
+    "nargs": "?",
     "group": "Bosses"
   },
   "-res": {
@@ -1625,26 +1624,6 @@
     "flag": "-cmd",
     "description": "Chadarnook demon form appears for longer and does not immediately switch back to painting",
     "group": "Bosses"
-  },
-  "-rt": {
-    "key": "rizopas_timer",
-    "type": "int",
-    "flag": "-rt",
-    "default": [
-      5,
-      55
-    ],
-    "description": "(LEGACY) Custom range for seconds before Rizopas will appear",
-    "nargs": 2,
-    "args": [
-      "MIN",
-      "MAX"
-    ],
-    "group": "Bosses",
-    "options": {
-      "min_val": 5,
-      "max_val": 200
-    }
   },
   "-stesp": {
     "key": "starting_espers",
@@ -2335,6 +2314,13 @@
     "description": "Super Balls base price increase",
     "group": "Shops"
   },
+  "-seri": {
+    "key": "shops_expensive_restorative_items",
+    "type": "bool",
+    "flag": "-seri",
+    "description": "Increase base price of most restorative items (Potions, Ethers, Tents, etc.)",
+    "group": "Shops"
+  },
   "-snee": {
     "key": "shops_no_exp_eggs",
     "type": "bool",
@@ -2347,6 +2333,13 @@
     "type": "bool",
     "flag": "-snil",
     "description": "Illuminas not sold in shops",
+    "group": "Shops"
+  },
+  "-sli": {
+    "key": "shop_limited_inventory",
+    "type": "bool",
+    "flag": "-sli",
+    "description": "Shops sell items in limited packs. Each item slot can only be bought once",
     "group": "Shops"
   },
   "-ccsr": {
@@ -2470,6 +2463,21 @@
     "type": "bool",
     "flag": "-ahtc",
     "description": "Makes healing text blue, to be able to distinguish from damage.",
+    "group": "Graphics"
+  },
+  "-who": {
+    "key": "who_there",
+    "type": "bool",
+    "flag": "-who",
+    "description": "Who's There? Bosses look like Imps and have the name '??????'",
+    "group": "Graphics"
+  },
+  "-steve": {
+    "key": "steveify",
+    "type": "str",
+    "flag": "-steve",
+    "description": "Steveify the seed: rename all characters, items, espers, magic, enemies, etc. to a given name (default: Steve)",
+    "nargs": "?",
     "group": "Graphics"
   },
   "-cor": {
@@ -2670,6 +2678,32 @@
     "description": "Ironmog Mode: You cannot save (but save points still work for Tents/Sleeping Bags)",
     "group": "Challenges"
   },
+  "-rc": {
+    "key": "require_characters",
+    "type": "lower",
+    "flag": "-rc",
+    "description": "Force the listed character(s) (1-4) to be in the party at all times. Accepts random/randomngu. Compatible with the starting character flags: a required character that is not already a starting character is added as an additional one.",
+    "nargs": "+",
+    "allowed_values": [
+      "terra",
+      "locke",
+      "cyan",
+      "shadow",
+      "edgar",
+      "sabin",
+      "celes",
+      "strago",
+      "relm",
+      "setzer",
+      "mog",
+      "gau",
+      "gogo",
+      "umaro",
+      "random",
+      "randomngu"
+    ],
+    "group": "Challenges"
+  },
   "-fs": {
     "key": "fix_sketch",
     "type": "bool",
@@ -2740,6 +2774,13 @@
     "description": "(DEPRECATED -- Always On) Randomize in-game RNG table. Affects Setzer's Slots, Auction House, Ebot's Rock, ...",
     "group": "Misc."
   },
+  "--random-clock": {
+    "key": "random_clock",
+    "type": "bool",
+    "flag": "--random-clock",
+    "description": "(DEPRECATED -- Always On) Randomize clock's correct time and NPC clues in Zozo",
+    "group": "Misc."
+  },
   "-scan": {
     "key": "scan_all",
     "type": "bool",
@@ -2759,6 +2800,13 @@
     "type": "bool",
     "flag": "-npctips",
     "description": "NPC provide general game tips",
+    "group": "Misc."
+  },
+  "-nfh": {
+    "key": "no_free_heals",
+    "type": "bool",
+    "flag": "-nfh",
+    "description": "Reduce or remove free party heals: inns cost more (and free inns become paid), recovery springs and Phantom Train restaurant get random effects, free beds may trigger ambush, and scripted full heals (Doma WoB Leader, Magitek 3 pre-crane, Vector heal hut, Narshe school pot) are removed or limited.",
     "group": "Misc."
   },
   "-move": {
@@ -2864,47 +2912,5 @@
     "flag": "-yremove",
     "description": "Remove NPC",
     "group": "Misc."
-  },
-  "-nfh": {
-    "key": "no_free_heals",
-    "type": "bool",
-    "flag": "-nfh",
-    "description": "Reduce or remove free party heals: inns cost more, recovery springs get random effects, free beds may trigger ambush, and scripted full heals are removed",
-    "group": "Misc."
-  },
-  "-seri": {
-    "key": "shops_expensive_restorative_items",
-    "type": "bool",
-    "flag": "-seri",
-    "description": "Increase base price of most restorative items (Potions, Ethers, Tents, etc.)",
-    "group": "Shops"
-  },
-  "-sli": {
-    "key": "shop_limited_inventory",
-    "type": "bool",
-    "flag": "-sli",
-    "description": "Shops sell items in limited packs. Each item slot can only be bought once",
-    "group": "Shops"
-  },
-  "-oops": {
-    "key": "oops",
-    "type": "str",
-    "flag": "-oops",
-    "description": "Oops, all boss! Replace all bosses with the specified boss enemy ID or name, or random.",
-    "group": "Bosses"
-  },
-  "-who": {
-    "key": "who_there",
-    "type": "bool",
-    "flag": "-who",
-    "description": "Whos There? Bosses look like Imps and have the name ??????",
-    "group": "Graphics"
-  },
-  "-steve": {
-    "key": "steveify",
-    "type": "str",
-    "flag": "-steve",
-    "description": "Steveify the seed: rename all characters, items, espers, magic, enemies, etc. to a given name (default: Steve)",
-    "group": "Graphics"
   }
 }

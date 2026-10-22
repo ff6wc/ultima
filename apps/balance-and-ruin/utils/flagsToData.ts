@@ -7,6 +7,11 @@ const OBJECTIVE_REGEX = /^(-o[a-z])$/;
 const STARTING_ITEMS_REGEX = /^(-si)$/;
 /** Flags whose value is a space-separated list of strings (e.g. `-rc terra locke`) */
 const STRING_LIST_REGEX = /^(-rc)$/;
+/** Values the generator uses when these flags are given without one (argparse `const`) */
+const OPTIONAL_VALUE_DEFAULTS: Record<string, string> = {
+  "-oops": "random",
+  "-steve": "Steve",
+};
 
 var FLAG_START_REGEX = /-(?=[a-z])/g;
 
@@ -31,13 +36,15 @@ export const flagsToData = (rawFlags: string): Record<string, FlagValue> => {
         } else if (val1) {
           acc[key] = val1;
         }
+      } else if (isObjective || isCommands) {
+        // checked before the number-array branch: these take one string value,
+        // so a second token must not turn the value into [NaN, NaN]
+        acc[key] = val1 ?? OPTIONAL_VALUE_DEFAULTS[key];
       } else if (val1 && val2) {
         // is number array
         const min = Number.parseFloat(val1);
         const max = Number.parseFloat(val2);
         acc[key] = [min, max];
-      } else if (isObjective || isCommands) {
-        acc[key] = val1;
       } else if (Number.isFinite(Number.parseFloat(val1))) {
         acc[key] = Number.parseFloat(val1);
       } else if (val1) {

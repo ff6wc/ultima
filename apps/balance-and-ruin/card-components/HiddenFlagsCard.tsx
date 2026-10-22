@@ -282,7 +282,8 @@ export const HiddenFlagsCard = () => {
     let rawGroup = metadata?.group || "Other Settings";
 
     // Map legacy tags to gorgeous UI subheadings
-    if (rawGroup === "optional arguments") rawGroup = "General Configuration";
+    if (rawGroup === "optional arguments" || rawGroup === "options")
+      rawGroup = "General Configuration";
     if (rawGroup === "Misc.") rawGroup = "Miscellaneous Settings";
     if (rawGroup === "Steal") rawGroup = "Stealing and Item Drops";
 
