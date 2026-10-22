@@ -152,7 +152,12 @@ const oopsOptions = [
   { value: "Whelk", label: "Whelk" },
   { value: "White Drgn", label: "White Drgn" },
   { value: "Wrexsoul", label: "Wrexsoul" },
-];
+  // the backend splits the flagstring on whitespace, so "-oops Air Force"
+  // would fail; the generator matches names on letters and digits only
+].map((option) => ({
+  ...option,
+  value: option.value.replace(/[^A-Za-z0-9]/g, ""),
+}));
 
 export const Bosses = () => {
   return (

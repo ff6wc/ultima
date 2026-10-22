@@ -89,6 +89,9 @@ export const schemaSlice = createSlice({
       state,
       action: PayloadAction<Record<string, RawFlagMetadata>>,
     ) => {
+      // replace rather than merge, so flags dropped from a newer schema (e.g.
+      // the API response after a cached one) don't linger
+      const schema: Schema = {};
       Object.values(action.payload).forEach((item) => {
         const allowedValues = item.allowed_values || [];
         let step: number = item.options?.step ?? 0;
@@ -98,7 +101,7 @@ export const schemaSlice = createSlice({
           );
           step = interpreted ? interpreted % 1 : 1;
         }
-        state.schema[item.flag] = {
+        schema[item.flag] = {
           allowedValues: item.allowed_values || [],
           defaultValue: item.default ?? null,
           description: item.description ?? null,
@@ -111,6 +114,7 @@ export const schemaSlice = createSlice({
           type: item.type ?? null,
         };
       });
+      state.schema = schema;
     },
   },
   // Special reducer for hydrating the state. Special case for next-redux-wrapper
