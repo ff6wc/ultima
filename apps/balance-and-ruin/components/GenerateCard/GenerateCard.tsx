@@ -248,6 +248,9 @@ export const GenerateCard = ({
         let errMsg = `Error creating seed: ${text || result.statusText}`;
         let stderr = undefined;
         let originalFlags = undefined;
+        // narshe logs every request under this ID; it lets a bug report be
+        // matched to the server logs
+        let requestId = result.headers.get("X-Request-ID") || undefined;
         try {
           const parsed = JSON.parse(text);
           if (parsed && typeof parsed === "object") {
@@ -258,6 +261,7 @@ export const GenerateCard = ({
             }
             stderr = parsed.stderr;
             originalFlags = parsed.flags;
+            requestId = parsed.request_id || requestId;
           }
         } catch (e) {
           // ignore parsing error, use generic fallback text
@@ -266,6 +270,7 @@ export const GenerateCard = ({
         const customErr = new Error(errMsg) as any;
         customErr.stderr = stderr;
         customErr.flags = originalFlags;
+        customErr.requestId = requestId;
         throw customErr;
       }
 
@@ -519,6 +524,10 @@ export const GenerateCard = ({
   const activeErrorMessage = activeError?.message || activeError?.toString();
   const activeErrorStderr = activeError?.stderr;
   const activeErrorFlags = activeError?.flags || flags || "Unknown";
+  const activeErrorRequestId = activeError?.requestId;
+  const errorReportText = `[Seed Generation Error Report]\nFlags: ${activeErrorFlags}\n${
+    activeErrorRequestId ? `Request ID: ${activeErrorRequestId}\n` : ""
+  }Error Detail:\n${activeErrorStderr}`;
 
   useEffect(() => {
     setInputFlags(flags);
@@ -722,22 +731,20 @@ export const GenerateCard = ({
 
                 <div className="relative">
                   <pre className="p-3 bg-slate-950 border border-slate-800 rounded font-mono text-xs overflow-x-auto text-red-300 max-h-60 leading-normal select-all">
-                    {`[Seed Generation Error Report]
-Flags: ${activeErrorFlags}
-Error Detail:
-${activeErrorStderr}`}
+                    {errorReportText}
                   </pre>
                   <button
                     onClick={() => {
-                      const reportText = `[Seed Generation Error Report]\nFlags: ${activeErrorFlags}\nError Detail:\n${activeErrorStderr}`;
                       if (
                         typeof window !== "undefined" &&
                         navigator.clipboard
                       ) {
-                        navigator.clipboard.writeText(reportText).then(() => {
-                          setCopiedReport(true);
-                          setTimeout(() => setCopiedReport(false), 2000);
-                        });
+                        navigator.clipboard
+                          .writeText(errorReportText)
+                          .then(() => {
+                            setCopiedReport(true);
+                            setTimeout(() => setCopiedReport(false), 2000);
+                          });
                       }
                     }}
                     className="absolute top-2 right-2 text-xs font-bold py-1 px-2.5 rounded shadow bg-slate-800 hover:bg-slate-700 text-white transition-colors"
